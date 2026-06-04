@@ -1,30 +1,49 @@
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async (event) => {
-  const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-  );
+  const corsHeaders = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*'
+  };
 
-  const { data, error } = await supabase
-    .from('tenders')
-    .select('*')
-    .order('created_at', { ascending: false });
+  try {
+    const supabaseUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-  if (error) {
+    if (!supabaseKey) {
+      return {
+        statusCode: 500,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Missing SUPABASE_ANON_KEY environment variable' })
+      };
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data, error } = await supabase
+      .from('tenders')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      return {
+        statusCode: 500,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: error.message })
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: JSON.stringify(data || [])
+    };
+
+  } catch (err) {
     return {
       statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: error.message })
+      headers: corsHeaders,
+      body: JSON.stringify({ error: err.message || 'Unknown error' })
     };
   }
-
-  return {
-    statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    },
-    body: JSON.stringify(data)
-  };
 };
