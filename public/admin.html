@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CareTenders UK — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+:root{--green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;--green-mid:#9FE1CB;--purple:#534AB7;--purple-dark:#26215C;--purple-light:#EEEDFE;--red:#dc2626;--red-light:#fee2e2;--text:#111827;--text-muted:#6b7280;--text-light:#9ca3af;--border:#e5e7eb;--border-light:#f3f4f6;--bg:#f9fafb;--sidebar-bg:#0a2a1e;--radius:8px;--radius-lg:12px;--radius-xl:16px;--shadow:0 1px 3px rgba(0,0,0,0.06);--shadow-md:0 4px 12px rgba(0,0,0,0.08);--shadow-lg:0 12px 32px rgba(0,0,0,0.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased}
+#loginScreen{position:fixed;inset:0;background:linear-gradient(160deg,#064e3b,#065f46 50%,#047857);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-card{background:#fff;border-radius:var(--radius-xl);padding:2.5rem;width:100%;max-width:400px;box-shadow:var(--shadow-lg)}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
+.login-logo-mark{width:42px;height:42px;background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.login-logo-text{font-family:'DM Serif Display',serif;font-size:22px}
+.login-logo-text span{color:var(--green)}
+.login-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px}
+.login-input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius);padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;margin-bottom:14px}
+.login-input:focus{border-color:var(--green)}
+.login-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:13px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.login-btn:hover{background:var(--green-dark)}
+.login-error{background:var(--red-light);color:var(--red);font-size:13px;padding:10px 14px;border-radius:var(--radius);margin-bottom:14px;display:none;align-items:center;gap:8px}
+.login-hint{font-size:12px;color:var(--text-light);text-align:center;margin-top:16px}
+#appScreen{display:none}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:40}
+.sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sidebar-logo-inner{display:flex;align-items:center;gap:9px}
+.sidebar-logo-mark{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.sidebar-logo-text{font-family:'DM Serif Display',serif;font-size:17px;color:#fff}
+.sidebar-logo-text span{color:#6ee7b7}
+.sidebar-section{padding:1.25rem 1rem 0.5rem;font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em}
+.sidebar-nav{padding:0 0.75rem}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);color:rgba(255,255,255,0.65);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:#fff}
+.nav-item.active{background:var(--green);color:#fff}
+.nav-item i{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,0.15);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.nav-item.active .nav-badge{background:rgba(255,255,255,0.25)}
+.sidebar-footer{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,0.06)}
+.sidebar-user{display:flex;align-items:center;gap:10px}
+.user-avatar{width:34px;height:34px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500;color:#fff}
+.user-role{font-size:11px;color:rgba(255,255,255,0.45)}
+.logout-btn{background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;padding:4px;margin-left:auto}
+.logout-btn:hover{color:#fff}
+.main-content{margin-left:240px;flex:1;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30;box-shadow:var(--shadow)}
+.topbar-title{font-size:16px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-btn{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover{background:var(--green-dark)}
+.btn-ghost{background:none;border:1.5px solid var(--border);color:var(--text-muted)}
+.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.btn-ai{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.page{display:none;padding:2rem;animation:fadeIn 0.2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;box-shadow:var(--shadow)}
+.stat-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.stat-value{font-family:'DM Serif Display',serif;font-size:32px;letter-spacing:-0.02em;margin-bottom:4px}
+.stat-sub{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.stat-sub.up{color:#16a34a}
+.stat-sub.warn{color:var(--amber,#BA7517)}
+.table-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden}
+.table-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.table-header h2{font-size:15px;font-weight:600}
+.table-search{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:7px 12px;min-width:220px}
+.table-search input{border:none;background:transparent;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--bg)}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:14px 16px;border-bottom:1px solid var(--border-light);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+.td-title{font-weight:600;color:var(--text)}
+.td-org{color:var(--text-muted);font-size:12px;margin-top:2px}
+.td-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-open{background:#dcfce7;color:#166534}
+.badge-closing{background:#fef3c7;color:#92400e}
+.badge-urgent{background:#fee2e2;color:#991b1b}
+.badge-new{background:var(--purple-light);color:var(--purple-dark)}
+.badge-draft{background:var(--bg);color:var(--text-muted);border:1px solid var(--border)}
+.action-btns{display:flex;align-items:center;gap:6px}
+.action-btn{border:none;background:none;cursor:pointer;padding:6px;border-radius:6px;color:var(--text-muted);font-size:16px;transition:all 0.15s;display:flex;align-items:center}
+.action-btn.edit:hover{color:var(--green);background:var(--green-light)}
+.action-btn.del:hover{color:var(--red);background:var(--red-light)}
+.empty-state{padding:3rem;text-align:center;color:var(--text-muted)}
+.empty-state i{font-size:36px;display:block;margin-bottom:10px;opacity:0.4}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:150;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)}
+.overlay.open{display:flex}
+.ai-modal{background:#fff;border-radius:var(--radius-xl);width:100%;max-width:580px;box-shadow:var(--shadow-lg);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+.ai-modal-header{padding:1.5rem 1.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ai-modal-title{display:flex;align-items:center;gap:10px}
+.ai-title-icon{width:38px;height:38px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;flex-shrink:0}
+.ai-modal-title h3{font-size:16px;font-weight:600;margin-bottom:2px}
+.ai-modal-title p{font-size:12px;color:var(--text-muted)}
+.modal-x{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);font-size:15px;flex-shrink:0}
+.ai-modal-body{padding:1.75rem;overflow-y:auto;flex:1}
+.ai-modal-footer{padding:1.25rem 1.75rem;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;background:#fff}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--bg)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--green);background:var(--green-light)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{width:52px;height:52px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:24px;color:var(--text-muted)}
+.upload-zone h4{font-size:15px;font-weight:600;margin-bottom:6px}
+.upload-zone p{font-size:13px;color:var(--text-muted);line-height:1.6}
+.file-types{font-size:11px;color:var(--text-light);margin-top:8px;background:#fff;border:1px solid var(--border);border-radius:20px;display:inline-block;padding:3px 12px}
+.file-selected-bar{display:none;align-items:center;gap:12px;background:var(--green-light);border:1.5px solid var(--green-mid);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.25rem}
+.file-icon{width:40px;height:40px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0}
+.file-name{font-size:14px;font-weight:600;color:#085041}
+.file-size{font-size:12px;color:var(--green-dark);margin-top:2px}
+.file-remove{margin-left:auto;background:none;border:none;color:var(--green-dark);cursor:pointer;font-size:18px;padding:2px;display:flex}
+.processing-state{display:none;text-align:center;padding:1rem 0}
+.spinner{width:52px;height:52px;border:3px solid var(--border);border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-steps{display:flex;flex-direction:column;gap:6px;margin-top:1.25rem;text-align:left}
+.proc-step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted);padding:8px 12px;border-radius:var(--radius);background:var(--bg)}
+.proc-step.done{color:var(--green-dark);background:var(--green-light)}
+.proc-step.active{color:#4f46e5;background:#ede9fe;font-weight:500}
+.proc-step i{font-size:15px;width:18px;flex-shrink:0}
+.preview-pane{display:none}
+.preview-banner{background:linear-gradient(135deg,#ede9fe,#e0e7ff);border:1px solid #c4b5fd;border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:10px}
+.preview-banner-text{font-size:13px;color:#3730a3;line-height:1.5}
+.preview-banner-text strong{display:block;font-weight:600;margin-bottom:2px}
+.preview-fields{display:flex;flex-direction:column;gap:8px}
+.pf{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
+.pf-label{font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.ai-tag{background:#ede9fe;color:#7c3aed;font-size:9px;padding:1px 6px;border-radius:20px;font-weight:700}
+.conf{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;margin-left:auto}
+.conf-high{background:#dcfce7;color:#166534}
+.pf-value{font-size:13px;color:var(--text);line-height:1.5;font-weight:500}
+.pf-value.multi{white-space:pre-line;font-weight:400;font-size:12px}
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;backdrop-filter:blur(2px)}
+.drawer-overlay.open{display:flex;align-items:flex-start;justify-content:flex-end}
+.drawer{background:#fff;width:100%;max-width:580px;height:100vh;overflow-y:auto;box-shadow:var(--shadow-lg);display:flex;flex-direction:column}
+.drawer-header{padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.drawer-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.ai-badge{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;display:none;align-items:center;gap:4px}
+.drawer-close{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text-muted)}
+.drawer-body{padding:1.5rem;flex:1}
+.drawer-footer{padding:1.25rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:10px;position:sticky;bottom:0;background:#fff}
+.form-section{margin-bottom:1.5rem}
+.fsect-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid var(--border-light)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-row.single{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:600;color:var(--text)}
+.form-label .req{color:var(--red)}
+.form-input,.form-select,.form-textarea{border:1.5px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;background:#fff;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green)}
+.form-textarea{resize:vertical;min-height:100px;line-height:1.6}
+.form-hint{font-size:11px;color:var(--text-light);margin-top:2px}
+.ai-filled{border-color:#7c3aed !important;background:#faf5ff !important}
+.ai-filled-note{font-size:11px;color:#7c3aed;margin-top:3px;display:none;align-items:center;gap:4px}
+.pricing-builder{border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:4px}
+.price-row{display:grid;grid-template-columns:1fr 100px auto;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border-light);align-items:center}
+.price-row:last-child{border-bottom:none}
+.price-row input{border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.price-row input:focus{border-color:var(--green)}
+.rm-price{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:16px;padding:2px;border-radius:4px;display:flex}
+.rm-price:hover{color:var(--red)}
+.add-price-row{border:none;background:var(--bg);width:100%;padding:9px;font-size:13px;color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;border-top:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;gap:5px}
+.add-price-row:hover{background:var(--green-light)}
+.price-total{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.price-total span:first-child{font-size:12px;font-weight:500;color:var(--text-muted)}
+.price-total span:last-child{font-size:15px;font-weight:600;color:var(--green)}
+.elig-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.elig-item{display:flex;align-items:center;gap:8px}
+.elig-item input{flex:1;border:1.5px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.elig-item input:focus{border-color:var(--green)}
+.rm-elig{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:16px;padding:4px;border-radius:4px;display:flex}
+.rm-elig:hover{color:var(--red)}
+.add-elig{border:1.5px dashed var(--border);background:transparent;border-radius:var(--radius);padding:8px 14px;font-size:13px;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;width:100%;justify-content:center;transition:all 0.15s}
+.add-elig:hover{border-color:var(--green);color:var(--green);background:var(--green-light)}
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+.confirm-overlay.open{display:flex}
+.confirm-card{background:#fff;border-radius:var(--radius-xl);padding:2rem;width:100%;max-width:380px;box-shadow:var(--shadow-lg);text-align:center}
+.confirm-icon{width:52px;height:52px;background:var(--red-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:24px;color:var(--red)}
+.confirm-title{font-size:17px;font-weight:600;margin-bottom:8px}
+.confirm-text{font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6}
+.confirm-btns{display:flex;gap:10px;justify-content:center}
+.btn-danger{background:var(--red);color:#fff;border:none;padding:10px 24px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-cancel{background:var(--bg);color:var(--text);border:1.5px solid var(--border);padding:10px 24px;border-radius:var(--radius);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.toast{position:fixed;bottom:2rem;right:2rem;color:#fff;padding:12px 20px;border-radius:var(--radius-lg);font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;display:none;align-items:center;gap:10px}
+.toast.show{display:flex}
+.toast.success{background:#166534}
+.toast.error{background:var(--red)}
+.toast.ai{background:linear-gradient(135deg,#7c3aed,#4f46e5)}
+.saving-spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-mark"><i class="ti ti-heart-handshake"></i></div>
+      <span class="login-logo-text">Care<span>Tenders</span> UK</span>
+    </div>
+    <div style="margin-bottom:1.5rem"><div style="font-size:20px;font-weight:600;margin-bottom:4px">Admin panel</div><div style="font-size:13px;color:var(--text-muted)">Sign in to manage your tender listings</div></div>
+    <div id="loginError" class="login-error"><i class="ti ti-alert-circle" style="font-size:15px"></i> Incorrect password</div>
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Sign in to admin panel</button>
+    <div class="login-hint">Use the password you set up</div>
+  </div>
+</div>
+
+<div id="appScreen">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-inner"><div class="sidebar-logo-mark"><i class="ti ti-heart-handshake"></i></div><span class="sidebar-logo-text">Care<span>Tenders</span></span></div></div>
+    <div class="sidebar-section">Main</div>
+    <div class="sidebar-nav">
+      <button class="nav-item active" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+      <button class="nav-item" onclick="showPage('tenders',this)"><i class="ti ti-file-text"></i> All tenders <span class="nav-badge" id="sbTenders">0</span></button>
+      <button class="nav-item" onclick="showPage('noncqc',this)"><i class="ti ti-certificate"></i> Non-CQC listings <span class="nav-badge" id="sbNonCqc">0</span></button>
+    </div>
+    <div class="sidebar-section">System</div>
+    <div class="sidebar-nav">
+      <button class="nav-item" onclick="window.open('index.html','_blank')"><i class="ti ti-external-link"></i> View live site</button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">AD</div>
+        <div style="flex:1;min-width:0"><div class="user-name">Admin User</div><div class="user-role">Administrator</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="ti ti-logout"></i></button>
+      </div>
+    </div>
+  </aside>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <button class="topbar-btn btn-ai" id="aiUploadBtn" style="display:none" onclick="openAiModal(false)"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload & auto-fill</button>
+        <button class="topbar-btn btn-primary" id="addTenderBtn" style="display:none" onclick="openDrawer(null,false)"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
+        <button class="topbar-btn btn-ai" id="aiNonCqcBtn" style="display:none" onclick="openAiModal(true)"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload & auto-fill</button>
+        <button class="topbar-btn btn-primary" id="addNonCqcBtn" style="display:none" onclick="openDrawer(null,true)"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
+      </div>
+    </div>
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total listings</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub up"><i class="ti ti-trending-up" style="font-size:13px"></i> Live from database</div></div>
+        <div class="stat-card"><div class="stat-label">Live & open</div><div class="stat-value" id="statOpen">—</div><div class="stat-sub up"><i class="ti ti-circle-check" style="font-size:13px"></i> Accepting applications</div></div>
+        <div class="stat-card"><div class="stat-label">Closing soon</div><div class="stat-value" id="statClosing">—</div><div class="stat-sub warn"><i class="ti ti-alert-triangle" style="font-size:13px"></i> Within 14 days</div></div>
+        <div class="stat-card"><div class="stat-label">Non-CQC listings</div><div class="stat-value" id="statNonCqc">—</div><div class="stat-sub" style="color:var(--purple)"><i class="ti ti-certificate" style="font-size:13px"></i> Pre-registration</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h2>All listings</h2></div>
+        <table><thead><tr><th>Tender</th><th>Value</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="dashboardTable"><tr><td colspan="5"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Loading…</div></td></tr></tbody></table>
+      </div>
+    </div>
+    <div class="page" id="page-tenders">
+      <div class="table-card">
+        <div class="table-header"><h2>All tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="tenderCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="tenderSearch" placeholder="Search…" oninput="renderTenderTable()"></div></div>
+        <table><thead><tr><th>Tender</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="tenderTable"></tbody></table>
+      </div>
+    </div>
+    <div class="page" id="page-noncqc">
+      <div class="table-card">
+        <div class="table-header"><h2>Non-CQC listings <span style="color:var(--text-light);font-weight:400;font-size:13px" id="nonCqcCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="nonCqcSearch" placeholder="Search…" oninput="renderNonCqcTable()"></div></div>
+        <table><thead><tr><th>Listing</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="nonCqcTable"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- AI MODAL -->
+<div class="overlay" id="aiOverlay" onclick="maybeCloseAi(event)">
+  <div class="ai-modal">
+    <div class="ai-modal-header">
+      <div class="ai-modal-title"><div class="ai-title-icon"><i class="ti ti-sparkles"></i></div><div><h3>AI document upload</h3><p>Upload a tender document — we'll read it and fill all fields</p></div></div>
+      <div class="modal-x" onclick="closeAiModal()"><i class="ti ti-x"></i></div>
+    </div>
+    <div class="ai-modal-body">
+      <div id="aiStep1">
+        <div class="upload-zone" id="uploadZone" ondragover="handleDrag(event)" ondragleave="handleDragLeave()" ondrop="handleDrop(event)">
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)">
+          <div class="upload-icon"><i class="ti ti-cloud-upload"></i></div>
+          <h4>Drop your tender document here</h4>
+          <p>or click to browse your files</p>
+          <div class="file-types">PDF · Word (.docx) · Text (.txt)</div>
+        </div>
+        <div class="file-selected-bar" id="fileSelectedBar">
+          <div class="file-icon"><i class="ti ti-file-text"></i></div>
+          <div><div class="file-name" id="selectedFileName"></div><div class="file-size" id="selectedFileSize"></div></div>
+          <button class="file-remove" onclick="clearFile()"><i class="ti ti-x"></i></button>
+        </div>
+        <div style="margin-top:1rem;background:#faf5ff;border:1px solid #ddd6fe;border-radius:var(--radius);padding:12px 14px;font-size:13px;color:#4c1d95;display:flex;gap:8px;align-items:flex-start">
+          <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0;margin-top:1px"></i>
+          <span>The AI reads your document via our secure server and extracts all tender details automatically. Review everything before publishing.</span>
+        </div>
+      </div>
+      <div class="processing-state" id="aiStep2">
+        <div class="spinner"></div>
+        <div style="font-size:15px;font-weight:600;color:#4f46e5">Analysing your document…</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">This usually takes 5–15 seconds</div>
+        <div class="proc-steps">
+          <div class="proc-step" id="ps1"><i class="ti ti-file-text"></i> Reading document content</div>
+          <div class="proc-step" id="ps2"><i class="ti ti-brain"></i> Extracting key tender details</div>
+          <div class="proc-step" id="ps3"><i class="ti ti-list-check"></i> Identifying eligibility requirements</div>
+          <div class="proc-step" id="ps4"><i class="ti ti-check"></i> Preparing form fields</div>
+        </div>
+      </div>
+      <div class="preview-pane" id="aiStep3">
+        <div class="preview-banner">
+          <i class="ti ti-sparkles" style="font-size:20px;color:#7c3aed;flex-shrink:0"></i>
+          <div class="preview-banner-text"><strong>Extraction complete — all fields ready</strong>Click "Open in form" to load everything into the editor. Fields highlighted in purple were auto-filled — check before publishing.</div>
+        </div>
+        <div class="preview-fields" id="previewFields"></div>
+      </div>
+    </div>
+    <div class="ai-modal-footer">
+      <button class="topbar-btn btn-ai" id="aiAnalyseBtn" style="display:none" onclick="runAiExtraction()"><i class="ti ti-sparkles" style="font-size:14px"></i> Analyse document</button>
+      <button class="topbar-btn btn-primary" id="aiOpenFormBtn" style="display:none" onclick="openInForm()"><i class="ti ti-arrow-right" style="font-size:14px"></i> Open in form & review</button>
+      <button class="topbar-btn btn-ghost" onclick="closeAiModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="maybeCloseDrawer(event)">
+  <div class="drawer">
+    <div class="drawer-header">
+      <div class="drawer-title" id="drawerTitleText">Add tender <span class="ai-badge" id="aiBadge"><i class="ti ti-sparkles" style="font-size:10px"></i> AI filled</span></div>
+      <div class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></div>
+    </div>
+    <div class="drawer-body">
+      <input type="hidden" id="editId">
+      <input type="hidden" id="editIsNonCqc">
+      <div class="form-section">
+        <div class="fsect-title">Tender details</div>
+        <div class="form-row single"><div class="form-group"><label class="form-label">Title <span class="req">*</span></label><input class="form-input" type="text" id="fTitle" placeholder="e.g. Housing, Health & Wellbeing Hospital Discharge Support Service"><div class="ai-filled-note" id="hintTitle"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Organisation <span class="req">*</span></label><input class="form-input" type="text" id="fOrg" placeholder="e.g. Durham County Council"><div class="ai-filled-note" id="hintOrg"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+          <div class="form-group"><label class="form-label">Region <span class="req">*</span></label><input class="form-input" type="text" id="fRegion" placeholder="e.g. North East"><div class="ai-filled-note" id="hintRegion"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Contract value <span class="req">*</span></label><input class="form-input" type="text" id="fValue" placeholder="e.g. £3,100,000"><div class="ai-filled-note" id="hintValue"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+          <div class="form-group"><label class="form-label">Duration <span class="req">*</span></label><input class="form-input" type="text" id="fDuration" placeholder="e.g. 3 years"><div class="ai-filled-note" id="hintDuration"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Deadline <span class="req">*</span></label><input class="form-input" type="date" id="fDeadline"><div class="ai-filled-note" id="hintDeadline"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+          <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="open">Open</option><option value="closing">Closing soon</option><option value="urgent">Urgent</option><option value="new">New opportunity</option><option value="draft">Draft</option></select></div>
+        </div>
+        <div class="form-row" id="categoryRow">
+          <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="fCategory"><option value="domiciliary">Domiciliary care</option><option value="residential">Residential</option><option value="nursing">Nursing</option><option value="supported">Supported living</option><option value="mental">Mental health</option><option value="discharge">Hospital discharge</option></select></div>
+          <div class="form-group"><label class="form-label">Submission link</label><input class="form-input" type="url" id="fLink" placeholder="https://…"><div class="ai-filled-note" id="hintLink"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+        </div>
+        <div class="form-row single" id="whyCqcRow" style="display:none"><div class="form-group"><label class="form-label">Why this works for new providers</label><textarea class="form-textarea" id="fWhyCqc" style="min-height:80px" placeholder="Explain why this is suitable for unregistered providers…"></textarea></div></div>
+        <div class="form-row single"><div class="form-group"><label class="form-label">Description <span class="req">*</span></label><textarea class="form-textarea" id="fDesc" placeholder="Describe the tender scope…"></textarea><div class="ai-filled-note" id="hintDesc"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div></div>
+      </div>
+      <div class="form-section">
+        <div class="fsect-title">Our pricing breakdown</div>
+        <div class="pricing-builder" id="pricingBuilder"></div>
+        <button class="add-price-row" onclick="addPriceRow()"><i class="ti ti-plus" style="font-size:14px"></i> Add line item</button>
+        <div class="price-total"><span>Total fee</span><span id="priceTotalPreview">£0</span></div>
+        <div class="form-row single" style="margin-top:1rem"><div class="form-group"><label class="form-label">Fee note</label><input class="form-input" type="text" id="fPricingNote" value="One-off fee. No hidden charges. Payable on engagement."></div></div>
+      </div>
+      <div class="form-section">
+        <div class="fsect-title">Eligibility requirements</div>
+        <div class="elig-list" id="eligList"></div>
+        <button class="add-elig" onclick="addEligRow()"><i class="ti ti-plus" style="font-size:14px"></i> Add requirement</button>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="topbar-btn btn-primary" id="publishBtn" onclick="saveTender()"><div class="saving-spinner" id="savingSpinner"></div><i class="ti ti-check" style="font-size:14px" id="saveIcon"></i> <span id="saveLabel">Publish tender</span></button>
+      <button class="topbar-btn btn-ghost" onclick="closeDrawer()">Cancel</button>
+      <button style="background:none;border:1.5px solid var(--border);color:var(--text-muted);font-size:13px;padding:8px 14px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px" onclick="saveDraft()"><i class="ti ti-device-floppy" style="font-size:14px"></i> Save draft</button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-card">
+    <div class="confirm-icon"><i class="ti ti-trash"></i></div>
+    <div class="confirm-title">Delete this listing?</div>
+    <div class="confirm-text">This will permanently remove it from the live site and database. This cannot be undone.</div>
+    <div class="confirm-btns"><button class="btn-danger" onclick="confirmDelete()">Yes, delete it</button><button class="btn-cancel" onclick="document.getElementById('confirmOverlay').classList.remove('open')">Cancel</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-check" style="font-size:16px" id="toastIcon"></i><span id="toastMsg"></span></div>
+
+<script>
+const API = '/api';
+const ADMIN_PASSWORD = 'CareTenders2024!';
+let allTenders = [];
+let deleteTarget = { id: null };
+let currentAiIsNonCqc = false;
+let extractedData = null;
+let selectedFile = null;
+let nextId = 1;
+
+function doLogin() {
+  const p = document.getElementById('loginPass').value;
+  if (p === ADMIN_PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    loadTenders();
+  } else {
+    document.getElementById('loginError').style.display = 'flex';
+  }
+}
+function doLogout() { document.getElementById('appScreen').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; }
+
+async function loadTenders() {
+  try {
+    const res = await fetch(`${API}/get-tenders`);
+    allTenders = await res.json() || [];
+    nextId = allTenders.length + 1;
+    renderAll();
+  } catch (err) {
+    showToast('Could not load tenders from database', 'error');
+  }
+}
+
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  btn.classList.add('active');
+  const titles = { dashboard: 'Dashboard', tenders: 'All tenders', noncqc: 'Non-CQC listings' };
+  document.getElementById('topbarTitle').textContent = titles[page] || page;
+  ['aiUploadBtn', 'addTenderBtn', 'aiNonCqcBtn', 'addNonCqcBtn'].forEach(id => document.getElementById(id).style.display = 'none');
+  if (page === 'tenders') { document.getElementById('aiUploadBtn').style.display = 'flex'; document.getElementById('addTenderBtn').style.display = 'flex'; renderTenderTable(); }
+  if (page === 'noncqc') { document.getElementById('aiNonCqcBtn').style.display = 'flex'; document.getElementById('addNonCqcBtn').style.display = 'flex'; renderNonCqcTable(); }
+}
+
+function calcTotal(items) { return (items || []).reduce((s, i) => s + (parseFloat(i.price) || 0), 0); }
+function fmtDate(d) { if (!d) return '—'; try { return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d; } }
+function badgeHtml(s) {
+  const map = { open: 'badge-open', closing: 'badge-closing', urgent: 'badge-urgent', new: 'badge-new', draft: 'badge-draft' };
+  const lbl = { open: 'Open', closing: 'Closing soon', urgent: 'Urgent', new: 'New opportunity', draft: 'Draft' };
+  return `<span class="td-badge ${map[s] || 'badge-draft'}">${lbl[s] || s}</span>`;
+}
+function updateCounts() {
+  const reg = allTenders.filter(t => !t.is_non_cqc);
+  const nc = allTenders.filter(t => t.is_non_cqc);
+  document.getElementById('sbTenders').textContent = reg.length;
+  document.getElementById('sbNonCqc').textContent = nc.length;
+  document.getElementById('statTotal').textContent = allTenders.length;
+  document.getElementById('statOpen').textContent = allTenders.filter(t => t.status === 'open').length;
+  document.getElementById('statClosing').textContent = allTenders.filter(t => t.status === 'closing' || t.status === 'urgent').length;
+  document.getElementById('statNonCqc').textContent = nc.length;
+}
+function renderAll() { updateCounts(); renderDashboard(); renderTenderTable(); renderNonCqcTable(); }
+
+function renderDashboard() {
+  const rows = allTenders.slice(0, 10);
+  document.getElementById('dashboardTable').innerHTML = rows.length ? rows.map(t => `<tr>
+    <td><div class="td-title">${t.title}</div><div class="td-org">${t.org}</div></td>
+    <td style="font-weight:600;color:${t.is_non_cqc ? 'var(--purple)' : 'var(--green)'}">${t.value}</td>
+    <td>${badgeHtml(t.status)}</td>
+    <td style="color:var(--text-muted)">${fmtDate(t.deadline)}</td>
+    <td><div class="action-btns">
+      <button class="action-btn edit" onclick="openDrawer('${t.id}',${!!t.is_non_cqc})" title="Edit"><i class="ti ti-edit"></i></button>
+      <button class="action-btn del" onclick="askDelete('${t.id}')" title="Delete"><i class="ti ti-trash"></i></button>
+    </div></td>
+  </tr>`).join('') : `<tr><td colspan="5"><div class="empty-state"><i class="ti ti-file-off"></i>No listings yet — add your first tender</div></td></tr>`;
+}
+
+function renderTenderTable() {
+  const q = (document.getElementById('tenderSearch').value || '').toLowerCase();
+  const f = allTenders.filter(t => !t.is_non_cqc && (!q || [t.title, t.org, t.region].some(v => (v || '').toLowerCase().includes(q))));
+  document.getElementById('tenderCountLabel').textContent = '(' + f.length + ')';
+  document.getElementById('tenderTable').innerHTML = f.length ? f.map(t => `<tr>
+    <td><div class="td-title">${t.title}</div></td>
+    <td style="color:var(--text-muted);font-size:13px">${t.org}</td>
+    <td style="font-weight:600;color:var(--green)">${t.value}</td>
+    <td style="font-weight:600;color:var(--green-dark)">£${calcTotal((t.pricing || {}).items).toLocaleString()}+VAT</td>
+    <td>${badgeHtml(t.status)}</td>
+    <td style="color:var(--text-muted);white-space:nowrap">${fmtDate(t.deadline)}</td>
+    <td><div class="action-btns">
+      <button class="action-btn edit" onclick="openDrawer('${t.id}',false)"><i class="ti ti-edit"></i></button>
+      <button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button>
+    </div></td>
+  </tr>`).join('') : `<tr><td colspan="7"><div class="empty-state"><i class="ti ti-search"></i>No tenders found</div></td></tr>`;
+}
+
+function renderNonCqcTable() {
+  const q = (document.getElementById('nonCqcSearch').value || '').toLowerCase();
+  const f = allTenders.filter(t => t.is_non_cqc && (!q || [t.title, t.org, t.region].some(v => (v || '').toLowerCase().includes(q))));
+  document.getElementById('nonCqcCountLabel').textContent = '(' + f.length + ')';
+  document.getElementById('nonCqcTable').innerHTML = f.length ? f.map(t => `<tr>
+    <td><div class="td-title">${t.title}</div></td>
+    <td style="color:var(--text-muted);font-size:13px">${t.org}</td>
+    <td style="font-weight:600;color:var(--purple)">${t.value}</td>
+    <td style="font-weight:600;color:var(--purple)">£${calcTotal((t.pricing || {}).items).toLocaleString()}+VAT</td>
+    <td>${badgeHtml(t.status)}</td>
+    <td style="color:var(--text-muted);white-space:nowrap">${fmtDate(t.deadline)}</td>
+    <td><div class="action-btns">
+      <button class="action-btn edit" onclick="openDrawer('${t.id}',true)"><i class="ti ti-edit"></i></button>
+      <button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button>
+    </div></td>
+  </tr>`).join('') : `<tr><td colspan="7"><div class="empty-state"><i class="ti ti-certificate"></i>No non-CQC listings yet</div></td></tr>`;
+}
+
+// AI UPLOAD
+function openAiModal(isNonCqc) {
+  currentAiIsNonCqc = isNonCqc; extractedData = null; selectedFile = null;
+  document.getElementById('aiStep1').style.display = 'block';
+  document.getElementById('aiStep2').style.display = 'none';
+  document.getElementById('aiStep3').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileSelectedBar').style.display = 'none';
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('aiAnalyseBtn').style.display = 'none';
+  document.getElementById('aiOpenFormBtn').style.display = 'none';
+  document.getElementById('aiOverlay').classList.add('open');
+}
+function closeAiModal() { document.getElementById('aiOverlay').classList.remove('open'); }
+function maybeCloseAi(e) { if (e.target === document.getElementById('aiOverlay')) closeAiModal(); }
+function handleDrag(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); }
+function handleDragLeave() { document.getElementById('uploadZone').classList.remove('dragover'); }
+function handleDrop(e) { e.preventDefault(); document.getElementById('uploadZone').classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) setFile(f); }
+function handleFileSelect(e) { const f = e.target.files[0]; if (f) setFile(f); }
+function setFile(file) {
+  selectedFile = file;
+  document.getElementById('selectedFileName').textContent = file.name;
+  document.getElementById('selectedFileSize').textContent = (file.size / 1024).toFixed(1) + ' KB · Ready to analyse';
+  document.getElementById('fileSelectedBar').style.display = 'flex';
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('aiAnalyseBtn').style.display = 'flex';
+}
+function clearFile() {
+  selectedFile = null; document.getElementById('fileInput').value = '';
+  document.getElementById('fileSelectedBar').style.display = 'none';
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('aiAnalyseBtn').style.display = 'none';
+}
+
+async function runAiExtraction() {
+  if (!selectedFile) return;
+  document.getElementById('aiStep1').style.display = 'none';
+  document.getElementById('aiStep2').style.display = 'block';
+  document.getElementById('aiAnalyseBtn').style.display = 'none';
+  const steps = ['ps1', 'ps2', 'ps3', 'ps4'];
+  for (let i = 0; i < steps.length; i++) {
+    await delay(700);
+    if (i > 0) document.getElementById(steps[i - 1]).className = 'proc-step done';
+    document.getElementById(steps[i]).className = 'proc-step active';
+  }
+  try {
+    const text = await readFile(selectedFile);
+    const res = await fetch(`${API}/extract-tender`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, filename: selectedFile.name })
+    });
+    if (!res.ok) throw new Error('Server error ' + res.status);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    extractedData = data;
+    document.getElementById('ps4').className = 'proc-step done';
+    await delay(400);
+    document.getElementById('aiStep2').style.display = 'none';
+    document.getElementById('aiStep3').style.display = 'block';
+    renderPreview(data);
+    document.getElementById('aiOpenFormBtn').style.display = 'flex';
+  } catch (err) {
+    document.getElementById('aiStep2').style.display = 'none';
+    document.getElementById('aiStep1').style.display = 'block';
+    document.getElementById('fileSelectedBar').style.display = 'flex';
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('aiAnalyseBtn').style.display = 'flex';
+    showToast('Extraction failed: ' + err.message, 'error');
+  }
+}
+
+function readFile(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result);
+    reader.onerror = rej;
+    reader.readAsText(file);
+  });
+}
+
+function renderPreview(data) {
+  const ch = '<span class="conf conf-high"><i class="ti ti-check" style="font-size:10px"></i> Extracted</span>';
+  const fields = [
+    { l: 'Tender title', v: data.title || 'Not found' },
+    { l: 'Organisation', v: data.org || 'Not found' },
+    { l: 'Region', v: data.region || 'Not found' },
+    { l: 'Contract value', v: data.value || 'Not found' },
+    { l: 'Duration', v: data.duration || 'Not found' },
+    { l: 'Deadline', v: data.deadline || 'Not found' },
+    { l: 'Our price (from doc)', v: data.our_price || 'Not stated' },
+    { l: 'Description', v: data.description || 'Not found', multi: true },
+    { l: 'Eligibility', v: (data.eligibility || []).join('\n'), multi: true },
+  ];
+  document.getElementById('previewFields').innerHTML = fields.map(f => `
+    <div class="pf">
+      <div class="pf-label"><span class="ai-tag">AI</span>${f.l}${ch}</div>
+      <div class="pf-value ${f.multi ? 'multi' : ''}">${f.v || '—'}</div>
+    </div>`).join('');
+}
+
+function openInForm() { closeAiModal(); openDrawer(null, currentAiIsNonCqc, extractedData); }
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// DRAWER
+function openDrawer(id, isNonCqc, aiData = null) {
+  document.getElementById('editIsNonCqc').value = isNonCqc ? '1' : '0';
+  document.getElementById('categoryRow').style.display = isNonCqc ? 'none' : 'grid';
+  document.getElementById('whyCqcRow').style.display = isNonCqc ? 'flex' : 'none';
+  document.getElementById('aiBadge').style.display = aiData ? 'inline-flex' : 'none';
+  ['Title', 'Org', 'Region', 'Value', 'Duration', 'Deadline', 'Desc', 'Link'].forEach(f => {
+    const el = document.getElementById('f' + f); if (el) el.classList.remove('ai-filled');
+    const hint = document.getElementById('hint' + f); if (hint) hint.style.display = 'none';
+  });
+
+  if (id) {
+    const t = allTenders.find(x => x.id === id);
+    if (!t) return;
+    document.getElementById('editId').value = id;
+    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Edit tender ';
+    document.getElementById('saveLabel').textContent = 'Save changes';
+    document.getElementById('fTitle').value = t.title || '';
+    document.getElementById('fOrg').value = t.org || '';
+    document.getElementById('fRegion').value = t.region || '';
+    document.getElementById('fValue').value = t.value || '';
+    document.getElementById('fDuration').value = t.duration || '';
+    document.getElementById('fDeadline').value = t.deadline || '';
+    document.getElementById('fStatus').value = t.status || 'open';
+    document.getElementById('fDesc').value = t.description || '';
+    document.getElementById('fLink').value = t.link || '';
+    document.getElementById('fPricingNote').value = (t.pricing || {}).note || '';
+    if (!isNonCqc) document.getElementById('fCategory').value = t.category || 'domiciliary';
+    if (isNonCqc) document.getElementById('fWhyCqc').value = t.why_cqc || '';
+    const items = (t.pricing || {}).items || [];
+    buildPriceRows(items);
+    const elig = Array.isArray(t.eligibility) ? t.eligibility : (t.eligibility ? JSON.parse(t.eligibility) : []);
+    buildEligRows(elig);
+  } else if (aiData) {
+    document.getElementById('editId').value = '';
+    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Review AI-extracted tender ';
+    document.getElementById('saveLabel').textContent = 'Publish tender';
+    const fields = [
+      { id: 'fTitle', val: aiData.title, hint: 'hintTitle' },
+      { id: 'fOrg', val: aiData.org, hint: 'hintOrg' },
+      { id: 'fRegion', val: aiData.region, hint: 'hintRegion' },
+      { id: 'fValue', val: aiData.value, hint: 'hintValue' },
+      { id: 'fDuration', val: aiData.duration, hint: 'hintDuration' },
+      { id: 'fDeadline', val: aiData.deadline, hint: 'hintDeadline' },
+      { id: 'fDesc', val: aiData.description, hint: 'hintDesc' },
+      { id: 'fLink', val: aiData.link, hint: 'hintLink' },
+    ];
+    fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      el.value = f.val || '';
+      if (f.val) { el.classList.add('ai-filled'); const hint = document.getElementById(f.hint); if (hint) hint.style.display = 'flex'; }
+    });
+    document.getElementById('fStatus').value = 'open';
+    document.getElementById('fPricingNote').value = 'One-off fee. No hidden charges. Payable on engagement.';
+    if (!isNonCqc && aiData.category) document.getElementById('fCategory').value = aiData.category;
+    const priceItems = aiData.our_price
+      ? [{ label: 'Bid writing & strategy (from document)', price: aiData.our_price.replace(/[^0-9.]/g, '') }]
+      : [{ label: 'Bid writing & strategy', price: '' }, { label: 'Compliance review', price: '' }, { label: 'Submission support', price: '' }];
+    buildPriceRows(priceItems);
+    buildEligRows(aiData.eligibility && aiData.eligibility.length ? aiData.eligibility : ['']);
+  } else {
+    document.getElementById('editId').value = '';
+    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Add ' + (isNonCqc ? 'listing ' : 'tender ');
+    document.getElementById('saveLabel').textContent = isNonCqc ? 'Publish listing' : 'Publish tender';
+    ['fTitle', 'fOrg', 'fRegion', 'fValue', 'fDuration', 'fDesc', 'fWhyCqc', 'fLink'].forEach(f => { const el = document.getElementById(f); if (el) { el.value = ''; el.classList.remove('ai-filled'); } });
+    document.getElementById('fDeadline').value = '';
+    document.getElementById('fStatus').value = 'open';
+    document.getElementById('fPricingNote').value = 'One-off fee. No hidden charges. Payable on engagement.';
+    buildPriceRows([{ label: 'Bid writing & strategy', price: '' }, { label: 'Compliance review', price: '' }, { label: 'Submission support', price: '' }]);
+    buildEligRows(['']);
+  }
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+function closeDrawer() { document.getElementById('drawerOverlay').classList.remove('open'); }
+function maybeCloseDrawer(e) { if (e.target === document.getElementById('drawerOverlay')) closeDrawer(); }
+
+// PRICING
+let prc = 0;
+function buildPriceRows(items) { prc = 0; document.getElementById('pricingBuilder').innerHTML = ''; items.forEach(i => _addPR(i.label, i.price)); updatePriceTotal(); }
+function _addPR(label, price) {
+  const b = document.getElementById('pricingBuilder');
+  const d = document.createElement('div'); d.className = 'price-row'; d.id = 'pr' + prc;
+  d.innerHTML = `<input type="text" placeholder="e.g. Bid writing & strategy" value="${label || ''}" oninput="updatePriceTotal()"><input type="number" placeholder="Amount" value="${price || ''}" oninput="updatePriceTotal()"><button class="rm-price" onclick="document.getElementById('pr${prc}').remove();updatePriceTotal()"><i class="ti ti-x"></i></button>`;
+  b.appendChild(d); prc++;
+}
+function addPriceRow() { _addPR('', ''); updatePriceTotal(); }
+function updatePriceTotal() { const t = Array.from(document.querySelectorAll('#pricingBuilder input[type=number]')).reduce((s, i) => s + (parseFloat(i.value) || 0), 0); document.getElementById('priceTotalPreview').textContent = t > 0 ? '£' + t.toLocaleString() + '+VAT' : '£0'; }
+function getPriceItems() { return Array.from(document.querySelectorAll('#pricingBuilder .price-row')).map(r => { const ins = r.querySelectorAll('input'); return { label: ins[0].value, price: ins[1].value }; }).filter(i => i.label || i.price); }
+
+// ELIGIBILITY
+let ec = 0;
+function buildEligRows(items) { ec = 0; document.getElementById('eligList').innerHTML = ''; items.forEach(v => addEligRow(v)); }
+function addEligRow(val = '') {
+  const list = document.getElementById('eligList');
+  const d = document.createElement('div'); d.className = 'elig-item'; d.id = 'el' + ec;
+  d.innerHTML = `<input type="text" placeholder="e.g. CQC registration required" value="${val}"><button class="rm-elig" onclick="this.parentElement.remove()"><i class="ti ti-x"></i></button>`;
+  list.appendChild(d); ec++;
+}
+function getEligItems() { return Array.from(document.querySelectorAll('#eligList input')).map(i => i.value).filter(v => v.trim()); }
+
+// SAVE TO SUPABASE
+async function saveTender(draft = false) {
+  const isNonCqc = document.getElementById('editIsNonCqc').value === '1';
+  const id = document.getElementById('editId').value;
+  const pItems = getPriceItems();
+  const total = pItems.reduce((s, i) => s + (parseFloat(i.price) || 0), 0);
+  const deadline = document.getElementById('fDeadline').value;
+
+  const tender = {
+    id: id || (isNonCqc ? 'NC' : 'T') + '-2026-' + String(nextId++).padStart(3, '0'),
+    status: draft ? 'draft' : document.getElementById('fStatus').value,
+    title: document.getElementById('fTitle').value,
+    org: document.getElementById('fOrg').value,
+    region: document.getElementById('fRegion').value,
+    value: document.getElementById('fValue').value,
+    duration: document.getElementById('fDuration').value,
+    deadline: deadline || null,
+    days_left: deadline ? Math.max(0, Math.round((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24))) : 0,
+    link: document.getElementById('fLink').value,
+    description: document.getElementById('fDesc').value,
+    pricing: { items: pItems, total: '£' + total.toLocaleString() + '+VAT', note: document.getElementById('fPricingNote').value },
+    eligibility: getEligItems(),
+    is_non_cqc: isNonCqc,
+    why_cqc: isNonCqc ? document.getElementById('fWhyCqc').value : null,
+    category: !isNonCqc ? document.getElementById('fCategory').value : null,
+  };
+
+  // Show saving state
+  document.getElementById('savingSpinner').style.display = 'block';
+  document.getElementById('saveIcon').style.display = 'none';
+  document.getElementById('publishBtn').disabled = true;
+
+  try {
+    const res = await fetch(`${API}/save-tender`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'upsert', tender })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Update local data
+    const idx = allTenders.findIndex(x => x.id === tender.id);
+    if (idx > -1) allTenders[idx] = tender;
+    else allTenders.unshift(tender);
+
+    closeDrawer();
+    renderAll();
+    showToast(draft ? 'Draft saved' : 'Tender published to live site ✓', 'success');
+  } catch (err) {
+    showToast('Save failed: ' + err.message, 'error');
+  } finally {
+    document.getElementById('savingSpinner').style.display = 'none';
+    document.getElementById('saveIcon').style.display = 'inline';
+    document.getElementById('publishBtn').disabled = false;
+  }
+}
+function saveDraft() { saveTender(true); }
+
+// DELETE
+function askDelete(id) { deleteTarget = { id }; document.getElementById('confirmOverlay').classList.add('open'); }
+async function confirmDelete() {
+  const { id } = deleteTarget;
+  const tender = allTenders.find(x => x.id === id);
+  document.getElementById('confirmOverlay').classList.remove('open');
+  try {
+    const res = await fetch(`${API}/save-tender`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', tender: { id } })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    allTenders = allTenders.filter(x => x.id !== id);
+    renderAll();
+    showToast('Listing deleted', 'error');
+  } catch (err) {
+    showToast('Delete failed: ' + err.message, 'error');
+  }
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  const icons = { success: 'ti-check', error: 'ti-alert-circle', ai: 'ti-sparkles' };
+  document.getElementById('toastIcon').className = 'ti ' + (icons[type] || 'ti-check');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+</script>
+</body>
+</html>
