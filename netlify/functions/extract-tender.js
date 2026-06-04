@@ -1,5 +1,4 @@
 exports.handler = async (event) => {
-  // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
@@ -18,7 +17,6 @@ exports.handler = async (event) => {
   };
 
   try {
-    // Check API key exists
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       return {
@@ -33,7 +31,6 @@ exports.handler = async (event) => {
 
     let messageContent;
 
-    // If we have base64 PDF data, send as document to Claude
     if (base64 && mimetype === 'application/pdf') {
       messageContent = [
         {
@@ -65,7 +62,6 @@ exports.handler = async (event) => {
         }
       ];
     } else {
-      // Plain text fallback
       const content = text || 'No content provided';
       messageContent = [
         {
@@ -101,7 +97,7 @@ ${content.substring(0, 8000)}`
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: 2000,
         messages: [{ role: 'user', content: messageContent }]
       })
@@ -126,7 +122,7 @@ ${content.substring(0, 8000)}`
       return {
         statusCode: 500,
         headers: corsHeaders,
-        body: JSON.stringify({ error: 'Could not parse AI response as JSON: ' + raw.substring(0, 200) })
+        body: JSON.stringify({ error: 'Could not parse AI response: ' + raw.substring(0, 200) })
       };
     }
 
