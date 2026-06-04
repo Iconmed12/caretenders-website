@@ -13,35 +13,64 @@ exports.handler = async (event) => {
     };
   }
 
-  const supabase = createClient(
-    process.env.SUPABASE_URL,
-    process.env.SUPABASE_ANON_KEY
-  );
+  const corsHeaders = {
+    'Content-Type': 'application/json',
+    'Access-Control-Allow-Origin': '*'
+  };
 
-  const { action, tender } = JSON.parse(event.body);
+  try {
+    const supabaseUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-  let result;
+    if (!supabaseKey) {
+      return {
+        statusCode: 500,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Missing SUPABASE_ANON_KEY environment variable' })
+      };
+    }
 
-  if (action === 'upsert') {
-    result = await supabase.from('tenders').upsert(tender);
-  } else if (action === 'delete') {
-    result = await supabase.from('tenders').delete().eq('id', tender.id);
-  }
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { action, tender } = JSON.parse(event.body);
 
-  if (result.error) {
+    let result;
+
+    if (action === 'upsert') {
+      const tenderData = {
+        ...tender,
+        eligibility: Array.isArray(tender.eligibility) ? tender.eligibility : [],
+        pricing: typeof tender.pricing === 'object' ? tender.pricing : {}
+      };
+      result = await supabase.from('tenders').upsert(tenderData);
+    } else if (action === 'delete') {
+      result = await supabase.from('tenders').delete().eq('id', tender.id);
+    } else {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Invalid action: ' + action })
+      };
+    }
+
+    if (result.error) {
+      return {
+        statusCode: 500,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: result.error.message })
+      };
+    }
+
+    return {
+      statusCode: 200,
+      headers: corsHeaders,
+      body: JSON.stringify({ success: true })
+    };
+
+  } catch (err) {
     return {
       statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: result.error.message })
+      headers: corsHeaders,
+      body: JSON.stringify({ error: err.message || 'Unknown error' })
     };
   }
-
-  return {
-    statusCode: 200,
-    headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*'
-    },
-    body: JSON.stringify({ success: true })
-  };
 };
