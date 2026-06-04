@@ -548,15 +548,28 @@ async function runAiExtraction() {
     document.getElementById(steps[i]).className = 'proc-step active';
   }
   try {
-    const text = await readFile(selectedFile);
+    const isPdf = selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf');
+    let payload;
+
+    if (isPdf) {
+      // Send PDF as base64 so Claude can read it natively
+      const base64 = await readFileAsBase64(selectedFile);
+      payload = { base64, mimetype: 'application/pdf', filename: selectedFile.name };
+    } else {
+      // Send text files as plain text
+      const text = await readFileAsText(selectedFile);
+      payload = { text, filename: selectedFile.name };
+    }
+
     const res = await fetch(`${API}/extract-tender`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, filename: selectedFile.name })
+      body: JSON.stringify(payload)
     });
-    if (!res.ok) throw new Error('Server error ' + res.status);
+
     const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    if (!res.ok || data.error) throw new Error(data.error || 'Server error ' + res.status);
+
     extractedData = data;
     document.getElementById('ps4').className = 'proc-step done';
     await delay(400);
@@ -574,7 +587,20 @@ async function runAiExtraction() {
   }
 }
 
-function readFile(file) {
+function readFileAsBase64(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      // Strip the data URL prefix (e.g. "data:application/pdf;base64,")
+      const base64 = e.target.result.split(',')[1];
+      res(base64);
+    };
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+}
+
+function readFileAsText(file) {
   return new Promise((res, rej) => {
     const reader = new FileReader();
     reader.onload = e => res(e.target.result);
