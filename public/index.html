@@ -552,9 +552,18 @@
   let commercialFilter     = 'all';
 
   const CARE_CATEGORIES = ['domiciliary care','residential','nursing','supported living','mental health','hospital discharge'];
+  const COMMERCIAL_CATEGORIES = ['construction','facilities','cleaning','consultancy','it & digital','logistics','other'];
 
   function isCare(t) {
-    return CARE_CATEGORIES.includes((t.category||'').toLowerCase());
+    const cat = (t.category||'').toLowerCase().trim();
+    // Explicitly commercial = not care
+    if (COMMERCIAL_CATEGORIES.includes(cat)) return false;
+    // Explicitly care = care
+    if (CARE_CATEGORIES.includes(cat)) return true;
+    // If no category set, check if it was saved as non_cqc (care side)
+    if (t.is_non_cqc) return true;
+    // Default: if category is blank treat as care (legacy)
+    return false;
   }
 
   /* ── NAVIGATION ── */
