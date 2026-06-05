@@ -481,32 +481,55 @@
           <span class="pricing-total-amount" id="modal-total-fee"></span>
         </div>
         <div class="pricing-note" id="modal-fee-note"></div>
+        <a id="modal-pay-btn" href="https://buy.stripe.com/yourlink" target="_blank"
+           style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.1rem;background:var(--teal);color:var(--navy);border-radius:10px;padding:13px 18px;text-decoration:none;font-weight:700;font-size:0.9rem;transition:background 0.2s;">
+          <span>💳 Pay now — we handle everything</span>
+          <span id="modal-pay-amount" style="background:rgba(11,25,41,0.15);border-radius:6px;padding:3px 10px;font-size:0.85rem;white-space:nowrap;flex-shrink:0;"></span>
+        </a>
+        <div style="text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.3);margin-top:8px;">Secure payment via Stripe · Invoice provided on receipt</div>
+      </div>
+
+      <!-- DIVIDER -->
+      <div style="display:flex;align-items:center;gap:12px;margin:1.5rem 0;">
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+        <span style="font-size:0.75rem;color:var(--muted);font-weight:500;">OR use our AI writing tool</span>
+        <div style="flex:1;height:1px;background:var(--border);"></div>
+      </div>
+
+      <!-- CANA AI OPTION -->
+      <div style="background:#F4F6F9;border:1.5px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin-bottom:0.75rem;">
+          <div>
+            <div style="font-size:0.92rem;font-weight:700;color:var(--navy);margin-bottom:3px;">⚡ Write with Cana AI</div>
+            <div style="font-size:0.78rem;color:var(--muted);line-height:1.55;">Cana AI writes your tender responses only — tailored to this specific tender using your company information. No SQ support, no submission. Writing only.</div>
+          </div>
+          <div style="background:rgba(0,201,224,0.1);border:1px solid rgba(0,201,224,0.25);border-radius:8px;padding:6px 12px;text-align:center;flex-shrink:0;">
+            <div style="font-size:1rem;font-weight:700;color:var(--teal-dk);">From £600</div>
+            <div style="font-size:0.65rem;color:var(--muted);margin-top:1px;">+VAT</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;gap:7px;font-size:0.76rem;color:var(--muted);"><span style="color:var(--teal-dk);font-weight:700;">✓</span> Tender questions already loaded — nothing to copy</div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:0.76rem;color:var(--muted);"><span style="color:var(--teal-dk);font-weight:700;">✓</span> Answers tailored to your company and this tender</div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:0.76rem;color:#c07d10;"><span style="font-weight:700;">✗</span> Does not include SQ, review or submission</div>
+        </div>
+        <a id="modal-apply-btn" href="https://cana.icongrp.co.uk" target="_blank"
+           style="display:flex;align-items:center;justify-content:space-between;background:var(--navy);color:white;border-radius:8px;padding:11px 16px;text-decoration:none;font-weight:600;font-size:0.88rem;">
+          <span>⚡ Write with Cana AI</span>
+          <span style="background:rgba(0,201,224,0.18);border-radius:5px;padding:2px 10px;font-size:0.8rem;color:var(--teal);">From £600 +VAT</span>
+        </a>
       </div>
 
       <!-- CTA -->
-      <div class="modal-cta-heading">Ready to win this tender?</div>
-      <div class="modal-cta-sub">Choose how you'd like to get started — our team and technology are here to support you at every step.</div>
-
       <div class="modal-cta">
-
-        <a id="modal-apply-btn" href="#" target="_blank" class="btn-cta btn-cta--ai">
-          <div class="btn-cta-icon">⚡</div>
-          <div class="btn-cta-text">
-            <span class="btn-cta-label">Write with Cana AI</span>
-            <span class="btn-cta-desc">Let our AI system draft your full tender response instantly</span>
-          </div>
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-
         <a href="https://calendly.com/icongrp-consulting" target="_blank" class="btn-cta btn-cta--teal">
           <div class="btn-cta-icon">📅</div>
           <div class="btn-cta-text">
             <span class="btn-cta-label">Book a consultant call</span>
-            <span class="btn-cta-desc">Speak with an expert who'll guide you through the full submission</span>
+            <span class="btn-cta-desc">Speak with an expert who'll walk you through your options</span>
           </div>
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
-
         <a href="mailto:consulting@icongrp.co.uk?subject=Callback request" class="btn-cta btn-cta--outline">
           <div class="btn-cta-icon">📞</div>
           <div class="btn-cta-text">
@@ -515,7 +538,6 @@
           </div>
           <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
-
       </div>
       <div class="cta-reassurance">
         Part of ICONGRP Consulting Solutions &nbsp;·&nbsp; <strong>01268 20 30 10</strong> &nbsp;·&nbsp; <strong>consulting@icongrp.co.uk</strong>
@@ -712,16 +734,17 @@
     const descEl=document.getElementById('modal-desc');
     const descSec=document.getElementById('modal-desc-section');
     if(t.description){ descEl.textContent=t.description; descSec.style.display=''; }
-    else { descSec.style.display='none'; }
+    else { descEl.textContent='Full tender details available on request. Contact our team for more information.'; descSec.style.display=''; }
 
-    // Eligibility — stored as "eligibility" in Supabase (array)
+    // Eligibility — check both field names used across sample data and Supabase
     const reqSec=document.getElementById('modal-req-section');
     const reqList=document.getElementById('modal-req-list');
-    const reqs=Array.isArray(t.eligibility) ? t.eligibility : [];
+    const reqs=Array.isArray(t.eligibility) ? t.eligibility :
+               Array.isArray(t.eligibility_requirements) ? t.eligibility_requirements : [];
     if(reqs.length){
       reqList.innerHTML=reqs.map(r=>`<li>${r}</li>`).join('');
       reqSec.style.display='';
-    } else { reqSec.style.display='none'; }
+    } else { reqSec.style.display=''; reqList.innerHTML='<li>Please contact us for full eligibility details</li>'; }
 
     // Pricing — stored as object in Supabase e.g. { items:[{label,amount}], total, note }
     const pricingEl=document.getElementById('modal-pricing-items');
@@ -755,6 +778,9 @@
     const total=pricing.total||t.total_fee||t.fee||sumPricing(pricingItems);
     document.getElementById('modal-total-fee').textContent=total?formatFee(total):'POA';
     document.getElementById('modal-fee-note').textContent=pricing.note||pricing.fee_note||t.fee_note||'All fees are exclusive of VAT. Payment required before submission.';
+    // Set pay button amount to match total
+    const payAmountEl=document.getElementById('modal-pay-amount');
+    if(payAmountEl) payAmountEl.textContent=total?formatFee(total)+' +VAT':'';
 
     // Cana AI button — always shows the same regardless of submission link
     const applyBtn=document.getElementById('modal-apply-btn');
@@ -806,7 +832,7 @@
       deadline:'31 July 2026',
       status:'Open',
       description:'Birmingham City Council is seeking experienced domiciliary care providers to deliver person-centred home care services to older adults aged 65 and above. Services include personal care, medication support, and reablement. Providers must demonstrate strong CQC ratings and experience managing complex care packages.',
-      eligibility_requirements:[
+      eligibility:[
         'CQC registered with a rating of Good or Outstanding',
         'Minimum 2 years experience delivering domiciliary care',
         'Valid public liability insurance of at least £5 million',
@@ -834,7 +860,7 @@
       deadline:'15 August 2026',
       status:'Closing soon',
       description:'Lancashire County Council requires providers to deliver supported living services for adults with learning disabilities and autism. Providers will support individuals in their own tenancies with 24/7 support packages, promoting independence and community integration.',
-      eligibility_requirements:[
+      eligibility:[
         'CQC registered for Supported Living',
         'Experience supporting adults with learning disabilities or autism',
         'Ability to provide 24/7 waking or sleeping night support',
@@ -861,7 +887,7 @@
       deadline:'20 July 2026',
       status:'New opportunity',
       description:'An ideal opportunity for new and emerging care providers to gain their first local authority contract. This framework is open to providers who are CQC registered but not yet rated, allowing you to build a track record while delivering quality care in the community.',
-      eligibility_requirements:[
+      eligibility:[
         'CQC registered (rating not required)',
         'Minimum 3 months trading history',
         'Basic DBS checks for all care staff',
@@ -889,7 +915,7 @@
       deadline:'5 July 2026',
       status:'Urgent',
       description:'Thurrock Council requires a commercial cleaning contractor to deliver daily cleaning services across its corporate office estate, including council chambers, public-facing offices, and depot facilities. The contract includes window cleaning, deep cleans, and reactive cleaning following incidents.',
-      eligibility_requirements:[
+      eligibility:[
         'Minimum 3 years commercial cleaning experience',
         'COSHH trained operatives',
         'Valid public liability insurance of at least £5 million',
@@ -916,7 +942,7 @@
       deadline:'5 July 2026',
       status:'Open',
       description:'STAR Procurement on behalf of Stockport Metropolitan Borough Council is seeking contractors to deliver a range of construction, refurbishment, and maintenance works across council-owned assets. Works include planned refurbishment, reactive repairs, and minor new-build projects.',
-      eligibility_requirements:[
+      eligibility:[
         'Registered on the Construction Hub and CDP',
         'Real Living Wage employer',
         'Minimum £2M employers liability insurance',
