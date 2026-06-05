@@ -657,7 +657,7 @@
     document.getElementById('modal-title').textContent=t.title||'';
 
     // Meta pills
-    setpill('modal-value-pill',   t.value,    'Value');
+    setpill('modal-value-pill',   t.value,    'Contract value');
     setpill('modal-region-pill',  t.region,   'Region');
     setpill('modal-deadline-pill',t.deadline, 'Deadline');
     setpill('modal-duration-pill',t.duration, 'Duration');
@@ -668,33 +668,47 @@
     if(t.description){ descEl.textContent=t.description; descSec.style.display=''; }
     else { descSec.style.display='none'; }
 
-    // Requirements
+    // Eligibility — stored as "eligibility" in Supabase (array)
     const reqSec=document.getElementById('modal-req-section');
     const reqList=document.getElementById('modal-req-list');
-    const reqs=t.eligibility_requirements||t.requirements||[];
+    const reqs=Array.isArray(t.eligibility) ? t.eligibility : [];
     if(reqs.length){
       reqList.innerHTML=reqs.map(r=>`<li>${r}</li>`).join('');
       reqSec.style.display='';
     } else { reqSec.style.display='none'; }
 
-    // Pricing
-    const pricingItems=t.pricing||t.fee_breakdown||[];
+    // Pricing — stored as object in Supabase e.g. { items:[{label,amount}], total, note }
     const pricingEl=document.getElementById('modal-pricing-items');
+    const pricing=t.pricing||{};
+
+    // Support both object format {items,total,note} and array format
+    let pricingItems=[];
+    if(Array.isArray(pricing)){
+      pricingItems=pricing;
+    } else if(pricing.items && Array.isArray(pricing.items)){
+      pricingItems=pricing.items;
+    } else if(typeof pricing==='object' && Object.keys(pricing).length){
+      // flat object: treat each key/value pair as a line item
+      pricingItems=Object.entries(pricing)
+        .filter(([k])=>k!=='total'&&k!=='note'&&k!=='fee_note')
+        .map(([k,v])=>({label:k,amount:v}));
+    }
+
     if(pricingItems.length){
       pricingEl.innerHTML=pricingItems.map(p=>`
         <div class="pricing-row">
-          <span class="pricing-label">${p.label||p.name||''}</span>
-          <span class="pricing-amount">${formatFee(p.amount||p.price||0)}</span>
+          <span class="pricing-label">${p.label||p.name||p.description||''}</span>
+          <span class="pricing-amount">${formatFee(p.amount||p.price||p.value||0)}</span>
         </div>
       `).join('');
     } else {
-      pricingEl.innerHTML='<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">—</span></div>';
+      pricingEl.innerHTML='<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">See below</span></div>';
     }
 
-    // Total
-    const total=t.total_fee||t.fee||sumPricing(pricingItems);
-    document.getElementById('modal-total-fee').textContent=total?formatFee(total):'Contact us';
-    document.getElementById('modal-fee-note').textContent=t.fee_note||'All fees are exclusive of VAT. Payment required before submission.';
+    // Total — check multiple possible field names
+    const total=pricing.total||t.total_fee||t.fee||sumPricing(pricingItems);
+    document.getElementById('modal-total-fee').textContent=total?formatFee(total):'POA';
+    document.getElementById('modal-fee-note').textContent=pricing.note||pricing.fee_note||t.fee_note||'All fees are exclusive of VAT. Payment required before submission.';
 
     // Cana AI button — always shows the same regardless of submission link
     const applyBtn=document.getElementById('modal-apply-btn');
