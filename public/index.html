@@ -23,219 +23,47 @@
   }
 
   html { scroll-behavior: smooth; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--offwhite); color: var(--navy); min-height: 100vh; }
 
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--offwhite);
-    color: var(--navy);
-    min-height: 100vh;
-  }
-
-  /* ── TOP BAR (ICONGRP) ── */
-  .topbar {
-    background: #07111C;
-    padding: 0 2rem;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .topbar-left {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.45);
-    letter-spacing: 0.04em;
-  }
-  .topbar-left a {
-    color: var(--teal);
-    text-decoration: none;
-    font-weight: 500;
-  }
+  .topbar { background: #07111C; padding: 0 2rem; height: 36px; display: flex; align-items: center; justify-content: space-between; }
+  .topbar-left { font-size: 0.72rem; color: rgba(255,255,255,0.45); letter-spacing: 0.04em; }
+  .topbar-left a { color: var(--teal); text-decoration: none; font-weight: 500; }
   .topbar-left a:hover { text-decoration: underline; }
-  .topbar-right {
-    font-size: 0.72rem;
-    color: rgba(255,255,255,0.35);
-  }
+  .topbar-right { font-size: 0.72rem; color: rgba(255,255,255,0.35); }
 
-  /* ── NAV ── */
-  nav {
-    background: var(--navy);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 62px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
-
-  .nav-logo {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    text-decoration: none;
-  }
-  .nav-logo-main {
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: var(--white);
-    letter-spacing: -0.02em;
-  }
+  nav { background: var(--navy); padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; height: 62px; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .nav-logo { display: flex; align-items: baseline; gap: 8px; text-decoration: none; }
+  .nav-logo-main { font-size: 1.15rem; font-weight: 600; color: var(--white); letter-spacing: -0.02em; }
   .nav-logo-main span { color: var(--teal); }
-  .nav-logo-by {
-    font-size: 0.7rem;
-    color: rgba(255,255,255,0.35);
-    letter-spacing: 0.04em;
-    font-weight: 400;
-  }
-
-  nav ul {
-    list-style: none;
-    display: flex;
-    gap: 1.75rem;
-    align-items: center;
-  }
-  nav ul a {
-    color: rgba(255,255,255,0.65);
-    text-decoration: none;
-    font-size: 0.88rem;
-    font-weight: 400;
-    transition: color 0.2s;
-  }
+  .nav-logo-by { font-size: 0.7rem; color: rgba(255,255,255,0.35); letter-spacing: 0.04em; font-weight: 400; }
+  nav ul { list-style: none; display: flex; gap: 1.75rem; align-items: center; }
+  nav ul a { color: rgba(255,255,255,0.65); text-decoration: none; font-size: 0.88rem; font-weight: 400; transition: color 0.2s; }
   nav ul a:hover { color: var(--white); }
-
-  .nav-admin {
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.13);
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 0.82rem !important;
-    color: rgba(255,255,255,0.75) !important;
-    transition: background 0.2s !important;
-  }
+  .nav-admin { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.13); border-radius: 6px; padding: 6px 14px; font-size: 0.82rem !important; color: rgba(255,255,255,0.75) !important; transition: background 0.2s !important; }
   .nav-admin:hover { background: rgba(255,255,255,0.13) !important; color: var(--white) !important; }
 
-  /* ── HERO ── */
-  .hero {
-    background: var(--navy);
-    padding: 5.5rem 2rem 4.5rem;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-  }
-  .hero::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse 70% 55% at 50% -10%, rgba(0,201,224,0.1) 0%, transparent 65%);
-    pointer-events: none;
-  }
-  .hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0,201,224,0.1);
-    border: 1px solid rgba(0,201,224,0.22);
-    border-radius: 999px;
-    padding: 5px 16px;
-    font-size: 0.75rem;
-    color: var(--teal);
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    font-weight: 500;
-    margin-bottom: 1.75rem;
-  }
-  .hero h1 {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(2.1rem, 5vw, 3.4rem);
-    color: var(--white);
-    line-height: 1.18;
-    margin-bottom: 1.1rem;
-    max-width: 660px;
-    margin-left: auto;
-    margin-right: auto;
-  }
+  .hero { background: var(--navy); padding: 5.5rem 2rem 4.5rem; text-align: center; position: relative; overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 55% at 50% -10%, rgba(0,201,224,0.1) 0%, transparent 65%); pointer-events: none; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,201,224,0.1); border: 1px solid rgba(0,201,224,0.22); border-radius: 999px; padding: 5px 16px; font-size: 0.75rem; color: var(--teal); letter-spacing: 0.07em; text-transform: uppercase; font-weight: 500; margin-bottom: 1.75rem; }
+  .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.1rem, 5vw, 3.4rem); color: var(--white); line-height: 1.18; margin-bottom: 1.1rem; max-width: 660px; margin-left: auto; margin-right: auto; }
   .hero h1 em { font-style: italic; color: var(--teal); }
-  .hero p {
-    font-size: 1rem;
-    color: rgba(255,255,255,0.55);
-    max-width: 480px;
-    margin: 0 auto 2rem;
-    line-height: 1.75;
-  }
-  .hero-icongrp {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.8rem;
-    color: rgba(255,255,255,0.35);
-    margin-top: 0.5rem;
-  }
+  .hero p { font-size: 1rem; color: rgba(255,255,255,0.55); max-width: 480px; margin: 0 auto 2rem; line-height: 1.75; }
+  .hero-icongrp { display: inline-flex; align-items: center; gap: 6px; font-size: 0.8rem; color: rgba(255,255,255,0.35); margin-top: 0.5rem; }
   .hero-icongrp a { color: rgba(255,255,255,0.5); text-decoration: none; }
   .hero-icongrp a:hover { color: var(--teal); }
 
-  /* ── STATS STRIP ── */
-  .stats-strip {
-    background: var(--navy-mid);
-    border-top: 1px solid rgba(255,255,255,0.05);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding: 1.4rem 2rem;
-    display: flex;
-    justify-content: center;
-    gap: 3.5rem;
-    flex-wrap: wrap;
-  }
+  .stats-strip { background: var(--navy-mid); border-top: 1px solid rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 1.4rem 2rem; display: flex; justify-content: center; gap: 3.5rem; flex-wrap: wrap; }
   .stat { text-align: center; }
   .stat-num { font-size: 1.45rem; font-weight: 600; color: var(--white); display: block; }
   .stat-label { font-size: 0.75rem; color: rgba(255,255,255,0.42); margin-top: 2px; letter-spacing: 0.04em; }
 
-  /* ── PORTAL SECTION (home) ── */
-  .portal-section {
-    padding: 3.5rem 2rem 5rem;
-    max-width: 880px;
-    margin: 0 auto;
-  }
-  .portal-heading {
-    text-align: center;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 2rem;
-  }
-  .portal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-  }
+  .portal-section { padding: 3.5rem 2rem 5rem; max-width: 880px; margin: 0 auto; }
+  .portal-heading { text-align: center; font-size: 0.75rem; font-weight: 600; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 2rem; }
+  .portal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
   @media (max-width: 620px) { .portal-grid { grid-template-columns: 1fr; } }
 
-  .portal-card {
-    background: var(--white);
-    border-radius: 16px;
-    border: 1.5px solid var(--border);
-    padding: 2.5rem 2rem 2rem;
-    cursor: pointer;
-    text-decoration: none;
-    color: inherit;
-    display: flex;
-    flex-direction: column;
-    gap: 0.85rem;
-    transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
-    position: relative;
-    overflow: hidden;
-  }
-  .portal-card::after {
-    content: '';
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    opacity: 0;
-    transition: opacity 0.2s;
-    border-radius: 0 0 2px 2px;
-  }
+  .portal-card { background: var(--white); border-radius: 16px; border: 1.5px solid var(--border); padding: 2.5rem 2rem 2rem; cursor: pointer; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 0.85rem; transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s; position: relative; overflow: hidden; }
+  .portal-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; opacity: 0; transition: opacity 0.2s; border-radius: 0 0 2px 2px; }
   .portal-card.care::after   { background: var(--teal); }
   .portal-card.commercial::after { background: var(--amber); }
   .portal-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(0,0,0,0.1); }
@@ -243,135 +71,50 @@
   .portal-card.care:hover       { border-color: rgba(0,201,224,0.28); }
   .portal-card.commercial:hover { border-color: rgba(245,166,35,0.28); }
 
-  .card-icon {
-    width: 50px; height: 50px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.35rem;
-  }
+  .card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.35rem; }
   .care .card-icon       { background: rgba(0,201,224,0.09); }
   .commercial .card-icon { background: rgba(245,166,35,0.1); }
-
-  .card-label {
-    font-size: 0.68rem; font-weight: 600;
-    letter-spacing: 0.1em; text-transform: uppercase;
-  }
+  .card-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
   .care .card-label       { color: var(--teal-dk); }
   .commercial .card-label { color: var(--amber-dk); }
-
-  .portal-card h3 {
-    font-size: 1.4rem; font-weight: 600;
-    color: var(--navy); letter-spacing: -0.02em;
-    line-height: 1.2;
-  }
-  .portal-card > p {
-    font-size: 0.9rem; color: var(--muted);
-    line-height: 1.65; flex: 1;
-  }
+  .portal-card h3 { font-size: 1.4rem; font-weight: 600; color: var(--navy); letter-spacing: -0.02em; line-height: 1.2; }
+  .portal-card > p { font-size: 0.9rem; color: var(--muted); line-height: 1.65; flex: 1; }
   .card-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.2rem; }
-  .tag {
-    font-size: 0.72rem; padding: 3px 10px;
-    border-radius: 999px; font-weight: 500;
-  }
+  .tag { font-size: 0.72rem; padding: 3px 10px; border-radius: 999px; font-weight: 500; }
   .care .tag       { background: rgba(0,201,224,0.08); color: var(--teal-dk); }
   .commercial .tag { background: rgba(245,166,35,0.1);  color: #9a6410; }
-
-  .card-cta {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 0.86rem; font-weight: 600; margin-top: 0.4rem;
-    transition: gap 0.2s;
-  }
+  .card-cta { display: flex; align-items: center; gap: 6px; font-size: 0.86rem; font-weight: 600; margin-top: 0.4rem; transition: gap 0.2s; }
   .care .card-cta       { color: var(--teal-dk); }
   .commercial .card-cta { color: var(--amber-dk); }
   .portal-card:hover .card-cta { gap: 10px; }
 
-  /* ── INNER SECTIONS ── */
   .section { display: none; padding: 2.5rem 2rem 5rem; max-width: 1060px; margin: 0 auto; animation: fadeUp 0.28s ease; }
   .section.active { display: block; }
   @keyframes fadeUp { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:none; } }
 
-  .section-header {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1.75rem;
-    flex-wrap: wrap; gap: 1rem;
-  }
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem; }
   .section-title { display: flex; align-items: center; gap: 10px; }
   .section-title h2 { font-size: 1.45rem; font-weight: 600; color: var(--navy); }
 
-  .back-btn {
-    background: none;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 16px;
-    font-size: 0.83rem;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--muted);
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    transition: all 0.2s;
-  }
+  .back-btn { background: none; border: 1.5px solid var(--border); border-radius: 8px; padding: 8px 16px; font-size: 0.83rem; font-family: 'DM Sans', sans-serif; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
   .back-btn:hover { border-color: var(--navy); color: var(--navy); }
 
   .search-bar { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; }
-  .search-bar input {
-    flex: 1; padding: 10px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-family: 'DM Sans', sans-serif;
-    outline: none;
-    transition: border-color 0.2s;
-    color: var(--navy);
-    background: var(--white);
-  }
+  .search-bar input { flex: 1; padding: 10px 16px; border: 1.5px solid var(--border); border-radius: 8px; font-size: 0.9rem; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; color: var(--navy); background: var(--white); }
   .search-bar input:focus { border-color: var(--teal); }
 
   .filter-strip { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
-  .filter-btn {
-    padding: 6px 14px;
-    border-radius: 999px;
-    border: 1.5px solid var(--border);
-    background: var(--white);
-    font-size: 0.8rem;
-    font-family: 'DM Sans', sans-serif;
-    color: var(--muted);
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .care-section .filter-btn.active,
-  .care-section .filter-btn:hover {
-    border-color: var(--teal); color: var(--teal-dk);
-    background: rgba(0,201,224,0.06);
-  }
-  .commercial-section .filter-btn.active,
-  .commercial-section .filter-btn:hover {
-    border-color: var(--amber); color: #9a6410;
-    background: rgba(245,166,35,0.06);
-  }
+  .filter-btn { padding: 6px 14px; border-radius: 999px; border: 1.5px solid var(--border); background: var(--white); font-size: 0.8rem; font-family: 'DM Sans', sans-serif; color: var(--muted); cursor: pointer; transition: all 0.2s; }
+  .care-section .filter-btn.active, .care-section .filter-btn:hover { border-color: var(--teal); color: var(--teal-dk); background: rgba(0,201,224,0.06); }
+  .commercial-section .filter-btn.active, .commercial-section .filter-btn:hover { border-color: var(--amber); color: #9a6410; background: rgba(245,166,35,0.06); }
 
-  /* Tender cards */
   .tenders-grid { display: grid; gap: 0.85rem; }
-  .tender-card {
-    background: var(--white);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 1.4rem 1.5rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 0.4rem 2rem;
-    align-items: start;
-    transition: box-shadow 0.2s;
-  }
+  .tender-card { background: var(--white); border: 1.5px solid var(--border); border-radius: 12px; padding: 1.4rem 1.5rem; display: grid; grid-template-columns: 1fr auto; gap: 0.4rem 2rem; align-items: start; transition: box-shadow 0.2s; }
   .tender-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
   .tender-org { font-size: 0.75rem; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 3px; }
   .tender-title { font-size: 1rem; font-weight: 600; color: var(--navy); margin-bottom: 6px; }
   .tender-meta { display: flex; gap: 0.75rem; flex-wrap: wrap; font-size: 0.8rem; color: var(--muted); align-items: center; }
-  .tender-badge {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 0.7rem; font-weight: 600;
-    padding: 3px 10px; border-radius: 999px; white-space: nowrap;
-  }
+  .tender-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
   .badge-open    { background: #e8f7ee; color: #1a7a3f; }
   .badge-closing { background: #fff4e0; color: #9a6410; }
   .badge-urgent  { background: #fee8e8; color: #a32d2d; }
@@ -383,72 +126,28 @@
   .empty-state h3 { font-size: 1.05rem; margin-bottom: 0.5rem; color: var(--navy); }
   .loading-msg { text-align: center; padding: 3rem; color: var(--muted); font-size: 0.88rem; }
 
-  /* Pre-CQC block */
-  .precqc-block {
-    margin-top: 3rem;
-    background: rgba(0,201,224,0.04);
-    border: 1.5px solid rgba(0,201,224,0.14);
-    border-radius: 12px;
-    padding: 2rem;
-  }
+  .precqc-block { margin-top: 3rem; background: rgba(0,201,224,0.04); border: 1.5px solid rgba(0,201,224,0.14); border-radius: 12px; padding: 2rem; }
   .precqc-block h3 { font-size: 1.05rem; font-weight: 600; color: var(--navy); margin-bottom: 0.4rem; }
   .precqc-block p  { font-size: 0.88rem; color: var(--muted); line-height: 1.65; margin-bottom: 1.25rem; }
 
-  /* ── FOOTER ── */
-  footer {
-    background: var(--navy);
-    padding: 2.5rem 2rem 1.5rem;
-    margin-top: 2rem;
-  }
-  .footer-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 2rem;
-    flex-wrap: wrap;
-  }
-  .footer-brand p {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.1rem;
-    color: var(--white);
-    margin-bottom: 4px;
-  }
-  .footer-brand span {
-    font-size: 0.78rem;
-    color: rgba(255,255,255,0.35);
-  }
+  footer { background: var(--navy); padding: 2.5rem 2rem 1.5rem; margin-top: 2rem; }
+  .footer-inner { max-width: 900px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; flex-wrap: wrap; }
+  .footer-brand p { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--white); margin-bottom: 4px; }
+  .footer-brand span { font-size: 0.78rem; color: rgba(255,255,255,0.35); }
   .footer-brand a { color: var(--teal); text-decoration: none; }
-  .footer-contact {
-    text-align: right;
-    font-size: 0.82rem;
-    color: rgba(255,255,255,0.4);
-    line-height: 1.9;
-  }
+  .footer-contact { text-align: right; font-size: 0.82rem; color: rgba(255,255,255,0.4); line-height: 1.9; }
   .footer-contact a { color: rgba(255,255,255,0.55); text-decoration: none; }
   .footer-contact a:hover { color: var(--teal); }
-  .footer-bottom {
-    max-width: 900px; margin: 1.5rem auto 0;
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding-top: 1rem;
-    font-size: 0.75rem;
-    color: rgba(255,255,255,0.25);
-    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;
-  }
+  .footer-bottom { max-width: 900px; margin: 1.5rem auto 0; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 1rem; font-size: 0.75rem; color: rgba(255,255,255,0.25); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
 </style>
 </head>
 <body>
 
-<!-- ICONGRP top bar -->
 <div class="topbar">
-  <div class="topbar-left">
-    Part of <a href="https://icongrp.co.uk/" target="_blank">ICONGRP</a> — Integrated Care, Workforce &amp; Business Solutions
-  </div>
+  <div class="topbar-left">Part of <a href="https://icongrp.co.uk/" target="_blank">ICONGRP</a> — Integrated Care, Workforce &amp; Business Solutions</div>
   <div class="topbar-right">01268 20 30 10</div>
 </div>
 
-<!-- Main nav -->
 <nav>
   <a href="#" class="nav-logo" onclick="showHome(); return false;">
     <span class="nav-logo-main">Tender <span>Experts</span></span>
@@ -463,44 +162,26 @@
   </ul>
 </nav>
 
-<!-- ══════════════════════════════════════════
-     HOME VIEW
-══════════════════════════════════════════ -->
+<!-- HOME -->
 <div id="home-view">
-
   <div class="hero">
     <div class="hero-eyebrow">UK Tender Portal · Part of ICONGRP</div>
     <h1>Your <em>expert</em> route to winning tenders</h1>
     <p>Browse live opportunities across care services and commercial contracts — all in one place, powered by the ICONGRP Consulting team.</p>
-    <div class="hero-icongrp">
-      A division of <a href="https://icongrp.co.uk/" target="_blank">icongrp.co.uk</a>&nbsp;·&nbsp;Newport Pagnell, Milton Keynes
-    </div>
+    <div class="hero-icongrp">A division of <a href="https://icongrp.co.uk/" target="_blank">icongrp.co.uk</a>&nbsp;·&nbsp;Newport Pagnell, Milton Keynes</div>
   </div>
 
   <div class="stats-strip">
-    <div class="stat">
-      <span class="stat-num" id="stat-care-count">—</span>
-      <span class="stat-label">Care tenders</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num" id="stat-commercial-count">—</span>
-      <span class="stat-label">Commercial tenders</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">UK wide</span>
-      <span class="stat-label">Coverage</span>
-    </div>
-    <div class="stat">
-      <span class="stat-num">£2M+</span>
-      <span class="stat-label">Contracts supported</span>
-    </div>
+    <div class="stat"><span class="stat-num" id="stat-care-count">—</span><span class="stat-label">Care tenders</span></div>
+    <div class="stat"><span class="stat-num" id="stat-commercial-count">—</span><span class="stat-label">Commercial tenders</span></div>
+    <div class="stat"><span class="stat-num">UK wide</span><span class="stat-label">Coverage</span></div>
+    <div class="stat"><span class="stat-num">£2M+</span><span class="stat-label">Contracts supported</span></div>
   </div>
 
   <div class="portal-section">
     <div class="portal-heading">Choose your portal</div>
     <div class="portal-grid">
 
-      <!-- Care -->
       <a class="portal-card care" href="#" onclick="showSection('care'); return false;">
         <div class="card-icon">🏥</div>
         <div class="card-label">Care sector</div>
@@ -512,13 +193,9 @@
           <span class="tag">Supported living</span>
           <span class="tag">Pre-CQC</span>
         </div>
-        <div class="card-cta">
-          Browse care tenders
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+        <div class="card-cta">Browse care tenders <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </a>
 
-      <!-- Commercial -->
       <a class="portal-card commercial" href="#" onclick="showSection('commercial'); return false;">
         <div class="card-icon">🏗️</div>
         <div class="card-label">Commercial sector</div>
@@ -530,33 +207,22 @@
           <span class="tag">Consultancy</span>
           <span class="tag">IT &amp; Services</span>
         </div>
-        <div class="card-cta">
-          Browse commercial tenders
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
+        <div class="card-cta">Browse commercial tenders <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </a>
 
     </div>
   </div>
+</div>
 
-</div><!-- /home-view -->
-
-<!-- ══════════════════════════════════════════
-     CARE SECTION
-══════════════════════════════════════════ -->
+<!-- CARE SECTION -->
 <div id="care-section" class="section care-section">
   <div class="section-header">
-    <div class="section-title">
-      <span style="font-size:1.35rem;">🏥</span>
-      <h2>Care Tenders</h2>
-    </div>
+    <div class="section-title"><span style="font-size:1.35rem;">🏥</span><h2>Care Tenders</h2></div>
     <button class="back-btn" onclick="showHome()">← Back to portal</button>
   </div>
-
   <div class="search-bar">
     <input type="text" id="care-search" placeholder="Search by title, region or organisation…" oninput="renderTenders('care')">
   </div>
-
   <div class="filter-strip" id="care-filters">
     <button class="filter-btn active" onclick="setFilter('care','all',this)">All</button>
     <button class="filter-btn" onclick="setFilter('care','Domiciliary care',this)">Domiciliary care</button>
@@ -566,11 +232,7 @@
     <button class="filter-btn" onclick="setFilter('care','Mental health',this)">Mental health</button>
     <button class="filter-btn" onclick="setFilter('care','Hospital discharge',this)">Hospital discharge</button>
   </div>
-
-  <div class="tenders-grid" id="care-tenders-list">
-    <div class="loading-msg">Loading care tenders…</div>
-  </div>
-
+  <div class="tenders-grid" id="care-tenders-list"><div class="loading-msg">Loading care tenders…</div></div>
   <div class="precqc-block">
     <h3>Not yet CQC rated or registered?</h3>
     <p>We've handpicked opportunities ideal for new and emerging care providers — lower-barrier contracts to help you build your track record and prepare for full CQC registration.</p>
@@ -578,22 +240,15 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     COMMERCIAL SECTION
-══════════════════════════════════════════ -->
+<!-- COMMERCIAL SECTION -->
 <div id="commercial-section" class="section commercial-section">
   <div class="section-header">
-    <div class="section-title">
-      <span style="font-size:1.35rem;">🏗️</span>
-      <h2>Commercial Tenders</h2>
-    </div>
+    <div class="section-title"><span style="font-size:1.35rem;">🏗️</span><h2>Commercial Tenders</h2></div>
     <button class="back-btn" onclick="showHome()">← Back to portal</button>
   </div>
-
   <div class="search-bar">
     <input type="text" id="commercial-search" placeholder="Search by title, region or organisation…" oninput="renderTenders('commercial')">
   </div>
-
   <div class="filter-strip" id="commercial-filters">
     <button class="filter-btn active" onclick="setFilter('commercial','all',this)">All</button>
     <button class="filter-btn" onclick="setFilter('commercial','Construction',this)">Construction</button>
@@ -604,15 +259,10 @@
     <button class="filter-btn" onclick="setFilter('commercial','Logistics',this)">Logistics</button>
     <button class="filter-btn" onclick="setFilter('commercial','Other',this)">Other</button>
   </div>
-
-  <div class="tenders-grid" id="commercial-tenders-list">
-    <div class="loading-msg">Loading commercial tenders…</div>
-  </div>
+  <div class="tenders-grid" id="commercial-tenders-list"><div class="loading-msg">Loading commercial tenders…</div></div>
 </div>
 
-<!-- ══════════════════════════════════════════
-     FOOTER
-══════════════════════════════════════════ -->
+<!-- FOOTER -->
 <footer>
   <div class="footer-inner">
     <div class="footer-brand">
@@ -633,15 +283,14 @@
 </footer>
 
 <script>
-  const CARE_KEY       = 'ct_tenders_v3';
-  const COMMERCIAL_KEY = 'ct_commercial_v1';
-
   let allCareTenders       = [];
   let allCommercialTenders = [];
   let careFilter           = 'all';
   let commercialFilter     = 'all';
 
-  /* ── NAVIGATION ── */
+  // Care categories from your existing Supabase data
+  const CARE_CATEGORIES = ['Domiciliary care','Residential','Nursing','Supported living','Mental health','Hospital discharge'];
+
   function showHome() {
     document.getElementById('home-view').style.display = '';
     document.getElementById('care-section').classList.remove('active');
@@ -657,7 +306,6 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  /* ── FILTERS ── */
   function setFilter(type, value, btn) {
     if (type === 'care') careFilter = value;
     else commercialFilter = value;
@@ -668,13 +316,15 @@
     renderTenders(type);
   }
 
-  /* ── BADGE ── */
   function statusBadge(s) {
     const map = { 'Open':'badge-open','Closing soon':'badge-closing','Urgent':'badge-urgent','New opportunity':'badge-new' };
-    return `<span class="tender-badge ${map[s]||'badge-new'}">${s}</span>`;
+    return `<span class="tender-badge ${map[s]||'badge-new'}">${s||'Open'}</span>`;
   }
 
-  /* ── RENDER TENDERS ── */
+  function isCare(t) {
+    return CARE_CATEGORIES.map(c => c.toLowerCase()).includes((t.category||'').toLowerCase());
+  }
+
   function renderTenders(type) {
     const list   = type === 'care' ? allCareTenders : allCommercialTenders;
     const filter = type === 'care' ? careFilter     : commercialFilter;
@@ -703,7 +353,7 @@
             ${statusBadge(t.status)}
             ${t.category ? `<span>${t.category}</span>` : ''}
             ${t.duration  ? `<span>${t.duration}</span>`  : ''}
-            ${t.submissionLink ? `<a href="${t.submissionLink}" target="_blank" style="color:var(--teal-dk);font-weight:500;">Apply →</a>` : ''}
+            ${t.submission_link ? `<a href="${t.submission_link}" target="_blank" style="color:var(--teal-dk);font-weight:500;">Apply →</a>` : ''}
           </div>
         </div>
         <div class="tender-right">
@@ -714,9 +364,8 @@
     `).join('');
   }
 
-  /* ── RENDER NON-CQC ── */
   function renderNonCQC() {
-    const list = allCareTenders.filter(t => t.nonCqc && t.status !== 'Draft');
+    const list = allCareTenders.filter(t => t.non_cqc && t.status !== 'Draft');
     const el   = document.getElementById('non-cqc-list');
     if (!list.length) {
       el.innerHTML = `<p style="color:var(--muted);font-size:0.88rem;padding:0.5rem 0;">No pre-CQC listings at the moment — check back soon.</p>`;
@@ -727,7 +376,7 @@
         <div>
           <div class="tender-org">${t.organisation||''} · ${t.region||''}</div>
           <div class="tender-title">${t.title}</div>
-          <div class="tender-meta">${statusBadge(t.status)}${t.whyNewProviders?`<span style="color:var(--muted);font-size:0.8rem;">${t.whyNewProviders}</span>`:''}</div>
+          <div class="tender-meta">${statusBadge(t.status)}${t.why_new_providers?`<span style="color:var(--muted);font-size:0.8rem;">${t.why_new_providers}</span>`:''}</div>
         </div>
         <div class="tender-right">
           <div class="tender-value">${t.value||'—'}</div>
@@ -737,26 +386,31 @@
     `).join('');
   }
 
-  /* ── LOAD DATA ── */
   async function loadData() {
     try {
-      const r = await window.storage?.get(CARE_KEY);
-      if (r?.value) allCareTenders = JSON.parse(r.value).tenders || [];
-    } catch(e) { allCareTenders = []; }
+      // Fetch from your Netlify function — same as admin uses
+      const res = await fetch('/.netlify/functions/get-tenders');
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
 
-    try {
-      const r2 = await window.storage?.get(COMMERCIAL_KEY);
-      if (r2?.value) allCommercialTenders = JSON.parse(r2.value).tenders || [];
-    } catch(e) { allCommercialTenders = []; }
+      // Split into care vs commercial based on category
+      allCareTenders       = data.filter(t => isCare(t));
+      allCommercialTenders = data.filter(t => !isCare(t));
 
-    const lc = allCareTenders.filter(t => t.status !== 'Draft').length;
-    const lm = allCommercialTenders.filter(t => t.status !== 'Draft').length;
-    document.getElementById('stat-care-count').textContent       = lc || '—';
-    document.getElementById('stat-commercial-count').textContent = lm || '—';
+      // Update stat counts
+      const lc = allCareTenders.filter(t => t.status !== 'Draft').length;
+      const lm = allCommercialTenders.filter(t => t.status !== 'Draft').length;
+      document.getElementById('stat-care-count').textContent       = lc || '0';
+      document.getElementById('stat-commercial-count').textContent = lm || '0';
 
-    renderTenders('care');
-    renderTenders('commercial');
-    renderNonCQC();
+      renderTenders('care');
+      renderTenders('commercial');
+      renderNonCQC();
+
+    } catch(e) {
+      document.getElementById('care-tenders-list').innerHTML       = `<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>`;
+      document.getElementById('commercial-tenders-list').innerHTML = `<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>`;
+    }
   }
 
   loadData();
