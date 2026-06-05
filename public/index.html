@@ -626,7 +626,7 @@
     if(filter!=='all') items=items.filter(t=>(t.category||'').toLowerCase()===filter.toLowerCase());
     if(search) items=items.filter(t=>
       (t.title||'').toLowerCase().includes(search)||
-      (t.organisation||'').toLowerCase().includes(search)||
+      (t.org||t.organisation||'').toLowerCase().includes(search)||
       (t.region||'').toLowerCase().includes(search)
     );
 
@@ -638,7 +638,7 @@
     el.innerHTML=items.map(t=>`
       <div class="tender-card" onclick='openModal(${JSON.stringify(t).replace(/'/g,"&#39;")})'>
         <div>
-          <div class="tender-org">${t.organisation||'Unknown'} · ${t.region||''}</div>
+          <div class="tender-org">${t.org||t.organisation||'Unknown'} · ${t.region||''}</div>
           <div class="tender-title">${t.title}</div>
           <div class="tender-meta">
             ${statusBadge(t.status)}
@@ -681,7 +681,7 @@
     el.innerHTML=list.map(t=>`
       <div class="tender-card" style="margin-bottom:0.75rem;" onclick='openModal(${JSON.stringify(t).replace(/'/g,"&#39;")})'>
         <div>
-          <div class="tender-org">${t.organisation||''} · ${t.region||''}</div>
+          <div class="tender-org">${t.org||t.organisation||''} · ${t.region||''}</div>
           <div class="tender-title">${t.title}</div>
           <div class="tender-meta">${statusBadge(t.status)}${t.why_new_providers?`<span style="color:var(--muted);font-size:0.8rem;">${t.why_new_providers}</span>`:''}</div>
           <span class="tender-view-btn">View details &amp; pricing →</span>
@@ -699,7 +699,7 @@
     // Header
     document.getElementById('modal-status-badge').outerHTML=`<span id="modal-status-badge">${statusBadge(t.status)}</span>`;
     document.getElementById('modal-category-badge').textContent=t.category||'';
-    document.getElementById('modal-org').textContent=t.organisation||'';
+    document.getElementById('modal-org').textContent=t.org||t.org||t.organisation||'';
     document.getElementById('modal-title').textContent=t.title||'';
 
     // Meta pills
