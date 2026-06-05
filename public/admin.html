@@ -371,7 +371,7 @@ tr:hover td{background:#fafafa}
           <div class="form-group"><label class="form-label">Submission link</label><input class="form-input" type="url" id="fLink" placeholder="https://…"><div class="ai-filled-note" id="hintLink"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
         </div>
         <div class="form-row single" id="whyCqcRow" style="display:none"><div class="form-group"><label class="form-label">Why this works for new providers</label><textarea class="form-textarea" id="fWhyCqc" style="min-height:80px" placeholder="Explain why this is suitable for unregistered providers…"></textarea></div></div>
-        <div class="form-row single"><div class="form-group"><label class="form-label">Description <span class="req">*</span></label><textarea class="form-textarea" id="fDesc" placeholder="Describe the tender scope…"></textarea><div class="ai-filled-note" id="hintDesc"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div></div>
+        <div class="form-row single"><div class="form-group"><label class="form-label">Description <span class="req">*</span></label><textarea class="form-textarea" id="fDesc" placeholder="Describe the tender scope…" oninput="tryAutoCategory()"></textarea><div class="ai-filled-note" id="hintDesc"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div></div>
       </div>
       <div class="form-section">
         <div class="fsect-title">Our pricing breakdown</div>
@@ -455,6 +455,26 @@ function requiresCqcRating(t) {
   return reqs.includes('cqc rating') || reqs.includes('good or outstanding') || reqs.includes('cqc rated') || reqs.includes('cqc inspection') || reqs.includes('rated by cqc');
 }
 function isNonCqcEligible(t) { return isCare(t) && !requiresCqcRating(t); }
+
+// Auto-detect category from title + description text
+function autoDetectCategory(text) {
+  const t = (text||'').toLowerCase();
+  // Commercial signals
+  if (/construction|refurb|build|contractor|civil engineer|structural/.test(t)) return 'Construction';
+  if (/facilit|estate management|hard fm|soft fm|building management/.test(t)) return 'Facilities';
+  if (/clean|janitorial|hygiene service|washroom/.test(t)) return 'Cleaning';
+  if (/consult|advisory|professional service|strategy|business support/.test(t)) return 'Consultancy';
+  if (/it service|digital|software|cyber|data|technology|ict|infrastructure/.test(t)) return 'IT & Digital';
+  if (/logistic|transport|courier|supply chain|delivery|haulage/.test(t)) return 'Logistics';
+  // Care signals
+  if (/domiciliary|home care|homecare|personal care|home-based/.test(t)) return 'Domiciliary care';
+  if (/residential|care home|nursing home|care facility/.test(t)) return 'Residential';
+  if (/nursing|clinical care|registered nurse/.test(t)) return 'Nursing';
+  if (/supported living|supported accommodation|independent living/.test(t)) return 'Supported living';
+  if (/mental health|psychiatric|wellbeing|psychological|talking therap/.test(t)) return 'Mental health';
+  if (/hospital discharge|step.?down|discharge to assess|reablement|intermediate care/.test(t)) return 'Hospital discharge';
+  return null; // can't detect
+}
 
 function showPage(page, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -775,8 +795,10 @@ function openDrawer(tOrId, sectionType, aiData = null) {
     document.getElementById('fStatus').value = 'open';
     document.getElementById('fPricingNote').value = 'One-off fee. No hidden charges. Payable on engagement.';
     if (!isNc) {
-      // Use AI-detected category, or default based on section
-      const aiCat = aiData.category || (isCommercial ? 'Construction' : 'Domiciliary care');
+      // Try AI category first, then auto-detect from title+desc, then section default
+      const aiCat = aiData.category
+        || autoDetectCategory((aiData.title||'') + ' ' + (aiData.description||''))
+        || (isCommercial ? 'Construction' : 'Domiciliary care');
       document.getElementById('fCategory').value = aiCat;
     }
     const priceItems = aiData.our_price
@@ -829,6 +851,17 @@ function addEligRow(val = '') {
   list.appendChild(d); ec++;
 }
 function getEligItems() { return Array.from(document.querySelectorAll('#eligList input')).map(i => i.value).filter(v => v.trim()); }
+
+// AUTO CATEGORY DETECTION
+function tryAutoCategory() {
+  const title = document.getElementById('fTitle').value;
+  const desc  = document.getElementById('fDesc').value;
+  const detected = autoDetectCategory(title + ' ' + desc);
+  if (detected) {
+    const sel = document.getElementById('fCategory');
+    if (sel) sel.value = detected;
+  }
+}
 
 // SAVE TO SUPABASE
 async function saveTender(draft = false) {
