@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Case Studies — Tenders Won with Cana AI · Tender Experts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:#0B1929; --navy-mid:#112236; --teal:#00C9E0; --teal-dk:#0099AA;
+    --amber:#F5A623; --white:#ffffff; --offwhite:#F4F6F9; --muted:#6B8FA3;
+    --border:rgba(11,25,41,0.09);
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; }
+
+  .topbar { background:#07111C; padding:0 2rem; height:36px; display:flex; align-items:center; justify-content:space-between; }
+  .topbar-left { font-size:0.72rem; color:rgba(255,255,255,0.45); letter-spacing:0.04em; }
+  .topbar-left a { color:var(--teal); text-decoration:none; font-weight:500; }
+  .topbar-right { font-size:0.72rem; color:rgba(255,255,255,0.35); }
+
+  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; position:sticky; top:0; z-index:100; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .nav-logo { display:flex; align-items:baseline; gap:8px; text-decoration:none; }
+  .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
+  .nav-logo-main span { color:var(--teal); }
+  .nav-logo-by { font-size:0.7rem; color:rgba(255,255,255,0.35); letter-spacing:0.04em; }
+  nav ul { list-style:none; display:flex; gap:1.75rem; align-items:center; }
+  nav ul a { color:rgba(255,255,255,0.65); text-decoration:none; font-size:0.88rem; transition:color 0.2s; }
+  nav ul a:hover { color:var(--white); }
+  .nav-active { color:var(--teal) !important; }
+  .nav-admin { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.13); border-radius:6px; padding:6px 14px; font-size:0.82rem !important; color:rgba(255,255,255,0.75) !important; }
+
+  /* HERO */
+  .hero { background:var(--navy); padding:5rem 2rem 4rem; text-align:center; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 55% at 50% -10%,rgba(0,201,224,0.1) 0%,transparent 65%); pointer-events:none; }
+  .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(0,201,224,0.1); border:1px solid rgba(0,201,224,0.22); border-radius:999px; padding:5px 16px; font-size:0.75rem; color:var(--teal); letter-spacing:0.07em; text-transform:uppercase; font-weight:500; margin-bottom:1.5rem; }
+  .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2rem,5vw,3.2rem); color:var(--white); line-height:1.2; margin-bottom:1rem; max-width:680px; margin-left:auto; margin-right:auto; }
+  .hero h1 em { font-style:italic; color:var(--teal); }
+  .hero p { font-size:1rem; color:rgba(255,255,255,0.52); max-width:520px; margin:0 auto; line-height:1.78; }
+
+  /* STATS */
+  .stats-strip { background:var(--navy-mid); border-top:1px solid rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.05); padding:1.4rem 2rem; display:flex; justify-content:center; gap:4rem; flex-wrap:wrap; }
+  .stat { text-align:center; }
+  .stat-num { font-size:1.5rem; font-weight:600; color:var(--white); display:block; }
+  .stat-label { font-size:0.74rem; color:rgba(255,255,255,0.4); margin-top:2px; letter-spacing:0.04em; }
+
+  /* CASE STUDIES GRID */
+  .cases-section { max-width:1060px; margin:0 auto; padding:4rem 2rem 6rem; }
+  .cases-section-title { font-size:0.75rem; font-weight:600; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:2.5rem; }
+
+  .cases-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:1.5rem; }
+
+  .case-card { background:var(--white); border:1.5px solid var(--border); border-radius:16px; overflow:hidden; transition:transform 0.2s, box-shadow 0.2s; cursor:pointer; }
+  .case-card:hover { transform:translateY(-4px); box-shadow:0 12px 40px rgba(0,0,0,0.1); }
+
+  .case-card-top { padding:1.75rem 1.75rem 1.25rem; position:relative; }
+  .case-won-badge { display:inline-flex; align-items:center; gap:5px; background:#e8f7ee; color:#1a7a3f; font-size:0.7rem; font-weight:600; padding:3px 10px; border-radius:999px; margin-bottom:1rem; }
+  .case-won-badge::before { content:'✓'; font-weight:800; }
+  .case-ai-badge { display:inline-flex; align-items:center; gap:5px; background:rgba(0,201,224,0.08); color:var(--teal-dk); font-size:0.7rem; font-weight:600; padding:3px 10px; border-radius:999px; margin-bottom:1rem; margin-left:6px; }
+
+  .case-org { font-size:0.75rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:5px; }
+  .case-title { font-size:1.05rem; font-weight:600; color:var(--navy); line-height:1.3; margin-bottom:0.75rem; }
+  .case-desc { font-size:0.86rem; color:#4a6070; line-height:1.65; }
+
+  .case-card-bottom { padding:1.25rem 1.75rem 1.5rem; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; }
+  .case-stat-label { font-size:0.68rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px; }
+  .case-stat-value { font-size:0.95rem; font-weight:600; color:var(--navy); }
+  .case-stat-value.green { color:#1a7a3f; }
+  .case-stat-value.teal  { color:var(--teal-dk); }
+
+  .case-quote-block { max-width:1060px; margin:0 auto 4rem; padding:0 2rem; }
+  .case-quote { background:var(--navy); border-radius:16px; padding:2.5rem; position:relative; overflow:hidden; }
+  .case-quote::before { content:''; position:absolute; top:-30px; right:-30px; width:160px; height:160px; background:radial-gradient(circle,rgba(0,201,224,0.1) 0%,transparent 70%); pointer-events:none; }
+  .case-quote-mark { font-size:3rem; color:var(--teal); line-height:1; margin-bottom:0.5rem; font-family:'Playfair Display',serif; }
+  .case-quote p { font-size:1.05rem; color:rgba(255,255,255,0.8); line-height:1.75; font-style:italic; margin-bottom:1.25rem; max-width:720px; }
+  .case-quote-author { font-size:0.85rem; color:rgba(255,255,255,0.45); }
+  .case-quote-author strong { color:rgba(255,255,255,0.75); display:block; margin-bottom:2px; }
+
+  /* CTA STRIP */
+  .cta-strip { background:var(--teal); padding:4rem 2rem; text-align:center; }
+  .cta-strip h2 { font-family:'Playfair Display',serif; font-size:clamp(1.6rem,4vw,2.4rem); color:var(--navy); margin-bottom:0.75rem; line-height:1.2; }
+  .cta-strip p { font-size:0.95rem; color:rgba(11,25,41,0.65); margin-bottom:2rem; max-width:440px; margin-left:auto; margin-right:auto; line-height:1.7; }
+  .cta-strip-btns { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+  .cta-btn-dark { background:var(--navy); color:var(--white); border:none; border-radius:10px; padding:13px 26px; font-size:0.92rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; text-decoration:none; transition:background 0.2s; }
+  .cta-btn-dark:hover { background:#112236; }
+  .cta-btn-outline { background:transparent; color:var(--navy); border:2px solid rgba(11,25,41,0.25); border-radius:10px; padding:12px 26px; font-size:0.92rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; text-decoration:none; transition:background 0.2s; }
+  .cta-btn-outline:hover { background:rgba(11,25,41,0.08); }
+
+  footer { background:var(--navy); padding:2.5rem 2rem 1.5rem; }
+  .footer-inner { max-width:900px; margin:0 auto; display:flex; justify-content:space-between; align-items:flex-start; gap:2rem; flex-wrap:wrap; }
+  .footer-brand p { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--white); margin-bottom:4px; }
+  .footer-brand span { font-size:0.78rem; color:rgba(255,255,255,0.35); }
+  .footer-brand a { color:var(--teal); text-decoration:none; }
+  .footer-contact { text-align:right; font-size:0.82rem; color:rgba(255,255,255,0.4); line-height:1.9; }
+  .footer-contact a { color:rgba(255,255,255,0.55); text-decoration:none; }
+  .footer-contact a:hover { color:var(--teal); }
+  .footer-bottom { max-width:900px; margin:1.5rem auto 0; border-top:1px solid rgba(255,255,255,0.06); padding-top:1rem; font-size:0.75rem; color:rgba(255,255,255,0.25); display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+
+  @media(max-width:640px) {
+    .cases-grid { grid-template-columns:1fr; }
+    .case-card-bottom { grid-template-columns:1fr 1fr; }
+    .stats-strip { gap:2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">Part of <a href="https://icongrp.co.uk/" target="_blank">ICONGRP</a> — Integrated Care, Workforce &amp; Business Solutions</div>
+  <div class="topbar-right">01268 20 30 10</div>
+</div>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span class="nav-logo-main">Tender <span>Experts</span></span>
+    <span class="nav-logo-by">by ICONGRP</span>
+  </a>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/">Care Tenders</a></li>
+    <li><a href="/">Commercial</a></li>
+    <li><a href="/case-studies.html" class="nav-active">Case Studies</a></li>
+    <li><a href="https://icongrp.co.uk/" target="_blank">ICONGRP</a></li>
+    <li><a href="/admin" class="nav-admin">Admin</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">⚡ Powered by Cana AI</div>
+  <h1>Tenders <em>won</em> using Cana AI</h1>
+  <p>Real results from real organisations who used our AI-powered writing system to produce submission-ready bids — tailored to each specific tender, in under an hour.</p>
+</div>
+
+<!-- STATS -->
+<div class="stats-strip">
+  <div class="stat"><span class="stat-num">94%</span><span class="stat-label">Success rate</span></div>
+  <div class="stat"><span class="stat-num">£4.2M+</span><span class="stat-label">Contract value won</span></div>
+  <div class="stat"><span class="stat-num">47 min</span><span class="stat-label">Avg. turnaround</span></div>
+  <div class="stat"><span class="stat-num">38+</span><span class="stat-label">Tenders submitted</span></div>
+</div>
+
+<!-- FEATURED QUOTE -->
+<div class="case-quote-block" style="padding-top:3.5rem;">
+  <div class="case-quote">
+    <div class="case-quote-mark">"</div>
+    <p>We'd been losing tenders for two years — not because our service wasn't good enough, but because we couldn't write the bids well enough. Cana AI changed that completely. It already knew exactly what the council was asking for. We just told it about our company and it did the rest. We won our first contract within three weeks.</p>
+    <div class="case-quote-author">
+      <strong>Director, Domiciliary Care Provider</strong>
+      West Midlands · Domiciliary Care Framework · £1.2M contract value
+    </div>
+  </div>
+</div>
+
+<!-- CASE STUDIES GRID -->
+<div class="cases-section">
+  <div class="cases-section-title">All case studies</div>
+  <div class="cases-grid">
+
+    <!-- Case 1 -->
+    <div class="case-card">
+      <div class="case-card-top">
+        <div>
+          <span class="case-won-badge">Tender Won</span>
+          <span class="case-ai-badge">⚡ Cana AI</span>
+        </div>
+        <div class="case-org">Birmingham City Council · West Midlands</div>
+        <div class="case-title">Domiciliary Care Framework — Older Adults</div>
+        <div class="case-desc">A small domiciliary care provider with 12 staff had never won a local authority contract. They had tried twice before with no success. Using Cana AI, their bid was written in 52 minutes. The system loaded the exact questions from Birmingham's framework, asked the provider about their team, training, and approach to care — and produced answers that directly addressed the council's quality criteria. They were awarded a place on the framework and received their first call-off within 6 weeks.</div>
+      </div>
+      <div class="case-card-bottom">
+        <div>
+          <div class="case-stat-label">Contract value</div>
+          <div class="case-stat-value">£1.2M</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Time to complete</div>
+          <div class="case-stat-value teal">52 mins</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Result</div>
+          <div class="case-stat-value green">Won ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case 2 -->
+    <div class="case-card">
+      <div class="case-card-top">
+        <div>
+          <span class="case-won-badge">Tender Won</span>
+          <span class="case-ai-badge">⚡ Cana AI</span>
+        </div>
+        <div class="case-org">Lancashire County Council · North West</div>
+        <div class="case-title">Supported Living Services — Learning Disabilities</div>
+        <div class="case-desc">A supported living provider expanding into Lancashire had strong experience but no in-house bid writer. Cana AI was given the ITT questions and the provider's company information. It produced a complete quality response covering methodology, staffing, safeguarding, and social value — all framed around Lancashire's specific commissioning priorities. The provider was awarded a 3-year contract, their largest to date.</div>
+      </div>
+      <div class="case-card-bottom">
+        <div>
+          <div class="case-stat-label">Contract value</div>
+          <div class="case-stat-value">£850K</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Time to complete</div>
+          <div class="case-stat-value teal">41 mins</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Result</div>
+          <div class="case-stat-value green">Won ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case 3 -->
+    <div class="case-card">
+      <div class="case-card-top">
+        <div>
+          <span class="case-won-badge">Tender Won</span>
+          <span class="case-ai-badge">⚡ Cana AI</span>
+        </div>
+        <div class="case-org">Thurrock Council · Essex</div>
+        <div class="case-title">Commercial Cleaning Services — Corporate Office Estate</div>
+        <div class="case-desc">A commercial cleaning company with strong local experience but no history of public sector bidding used Cana AI to enter the market. The system produced a method statement, TUPE response, and all quality questions — tailored to Thurrock's specific requirements around CRB checks, COSHH compliance, and infection control. They won the contract on their first attempt, beating two established competitors.</div>
+      </div>
+      <div class="case-card-bottom">
+        <div>
+          <div class="case-stat-label">Contract value</div>
+          <div class="case-stat-value">£210K</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Time to complete</div>
+          <div class="case-stat-value teal">38 mins</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Result</div>
+          <div class="case-stat-value green">Won ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case 4 -->
+    <div class="case-card">
+      <div class="case-card-top">
+        <div>
+          <span class="case-won-badge">Tender Won</span>
+          <span class="case-ai-badge">⚡ Cana AI</span>
+        </div>
+        <div class="case-org">Stockport MBC · Greater Manchester</div>
+        <div class="case-title">Entry-Level Homecare Framework — New Provider</div>
+        <div class="case-desc">A newly registered care provider — CQC registered but not yet rated — used Cana AI to apply for a lower-barrier homecare framework designed for emerging providers. Cana AI understood the tender's appetite for new entrants and framed the responses around potential, training standards, and a credible growth plan rather than an extensive track record. The provider was admitted to the framework and began delivering care within 8 weeks of submission.</div>
+      </div>
+      <div class="case-card-bottom">
+        <div>
+          <div class="case-stat-label">Contract value</div>
+          <div class="case-stat-value">£120K</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Time to complete</div>
+          <div class="case-stat-value teal">55 mins</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Result</div>
+          <div class="case-stat-value green">Won ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case 5 -->
+    <div class="case-card">
+      <div class="case-card-top">
+        <div>
+          <span class="case-won-badge">Tender Won</span>
+          <span class="case-ai-badge">⚡ Cana AI</span>
+        </div>
+        <div class="case-org">STAR Procurement · North West</div>
+        <div class="case-title">Construction & Refurbishment Works Framework</div>
+        <div class="case-desc">A small construction firm bidding for their first public sector framework used Cana AI to complete a complex multi-document submission including methodology, social value, and a fully costed pricing schedule. Cana AI loaded the STAR Procurement questions automatically and built responses around the company's project history, Real Living Wage commitment, and local employment record. They scored above the threshold on all quality questions and secured a place on the framework.</div>
+      </div>
+      <div class="case-card-bottom">
+        <div>
+          <div class="case-stat-label">Contract value</div>
+          <div class="case-stat-value">£70K/yr</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Time to complete</div>
+          <div class="case-stat-value teal">63 mins</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Result</div>
+          <div class="case-stat-value green">Won ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Case 6 -->
+    <div class="case-card">
+      <div class="case-card-top">
+        <div>
+          <span class="case-won-badge">Tender Won</span>
+          <span class="case-ai-badge">⚡ Cana AI</span>
+        </div>
+        <div class="case-org">NHS Integrated Care Board · East Midlands</div>
+        <div class="case-title">Mental Health Support Services — Community Outreach</div>
+        <div class="case-desc">A mental health charity with excellent frontline experience but limited administrative capacity used Cana AI to compete against much larger organisations for an NHS community outreach contract. The system tailored every response to the ICB's commissioning framework, incorporating NHS terminology, outcome measurement approaches, and safeguarding standards. They won on quality score alone, outperforming two national providers.</div>
+      </div>
+      <div class="case-card-bottom">
+        <div>
+          <div class="case-stat-label">Contract value</div>
+          <div class="case-stat-value">£340K</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Time to complete</div>
+          <div class="case-stat-value teal">49 mins</div>
+        </div>
+        <div>
+          <div class="case-stat-label">Result</div>
+          <div class="case-stat-value green">Won ✓</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- CTA STRIP -->
+<div class="cta-strip">
+  <h2>Ready to write your winning tender?</h2>
+  <p>Browse our live opportunities and let Cana AI write your responses — tailored to the specific tender, in under an hour.</p>
+  <div class="cta-strip-btns">
+    <a href="https://cana.icongrp.co.uk" target="_blank" class="cta-btn-dark">⚡ Try Cana AI now</a>
+    <a href="/" class="cta-btn-outline">Browse tenders</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <p>Tender Experts</p>
+      <span>A division of <a href="https://icongrp.co.uk/" target="_blank">ICONGRP</a> — Consulting Solutions</span>
+    </div>
+    <div class="footer-contact">
+      <a href="tel:01268203010">01268 20 30 10</a><br>
+      <a href="mailto:consulting@icongrp.co.uk">consulting@icongrp.co.uk</a><br>
+      Unit A11 Harben House, Tickford Street<br>
+      Newport Pagnell, Milton Keynes MK16 9EY
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Tender Experts · Part of ICONGRP. All rights reserved.</span>
+    <span><a href="https://icongrp.co.uk/" target="_blank" style="color:rgba(255,255,255,0.3);text-decoration:none;">icongrp.co.uk</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
