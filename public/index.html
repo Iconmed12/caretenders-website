@@ -657,7 +657,22 @@
 
   /* ── RENDER NON-CQC ── */
   function renderNonCQC() {
-    const list=allCareTenders.filter(t=>t.non_cqc&&t.status!=='Draft');
+    // Check both field names (is_non_cqc from Supabase, non_cqc from sample data)
+    // Also include care tenders where no CQC rating is required in eligibility
+    const CQC_KEYWORDS = ['cqc rating','good or outstanding','cqc rated','cqc inspection','rated by cqc','cqc registered and rated'];
+    function requiresCqcRating(t) {
+      return (t.eligibility||[]).join(' ').toLowerCase().split(' ').some(w =>
+        CQC_KEYWORDS.some(k => (t.eligibility||[]).join(' ').toLowerCase().includes(k))
+      );
+    }
+    const list = allCareTenders.filter(t => {
+      if (t.status === 'Draft') return false;
+      // Explicitly flagged as non-CQC
+      if (t.is_non_cqc || t.non_cqc) return true;
+      // Auto-detect: care tender with no CQC rating requirement in eligibility
+      if (!requiresCqcRating(t)) return true;
+      return false;
+    });
     const el=document.getElementById('non-cqc-list');
     if(!list.length){
       el.innerHTML=`<p style="color:var(--muted);font-size:0.88rem;padding:0.5rem 0;">No pre-CQC listings at the moment — check back soon.</p>`;
