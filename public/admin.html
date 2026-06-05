@@ -3,957 +3,927 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tender Experts — Part of ICONGRP</title>
+<title>Tender Experts — Admin · ICONGRP</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --navy:#0B1929; --navy-mid:#112236; --teal:#00C9E0; --teal-dk:#0099AA;
-    --amber:#F5A623; --amber-dk:#c07d10; --white:#ffffff;
-    --offwhite:#F4F6F9; --muted:#6B8FA3; --border:rgba(11,25,41,0.09);
-  }
-  html { scroll-behavior: smooth; }
-  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; }
-
-  /* TOPBAR */
-  .topbar { background:#07111C; padding:0 2rem; height:36px; display:flex; align-items:center; justify-content:space-between; }
-  .topbar-left { font-size:0.72rem; color:rgba(255,255,255,0.45); letter-spacing:0.04em; }
-  .topbar-left a { color:var(--teal); text-decoration:none; font-weight:500; }
-  .topbar-right { font-size:0.72rem; color:rgba(255,255,255,0.35); }
-
-  /* NAV */
-  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; position:sticky; top:0; z-index:200; border-bottom:1px solid rgba(255,255,255,0.06); }
-  .nav-logo { display:flex; align-items:baseline; gap:8px; text-decoration:none; }
-  .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
-  .nav-logo-main span { color:var(--teal); }
-  .nav-logo-by { font-size:0.7rem; color:rgba(255,255,255,0.35); letter-spacing:0.04em; font-weight:400; }
-  nav ul { list-style:none; display:flex; gap:1.75rem; align-items:center; }
-  nav ul a { color:rgba(255,255,255,0.65); text-decoration:none; font-size:0.88rem; transition:color 0.2s; }
-  nav ul a:hover { color:var(--white); }
-  .nav-admin { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.13); border-radius:6px; padding:6px 14px; font-size:0.82rem !important; color:rgba(255,255,255,0.75) !important; }
-  .nav-admin:hover { background:rgba(255,255,255,0.13) !important; color:var(--white) !important; }
-
-  /* HERO */
-  .hero { background:var(--navy); padding:5.5rem 2rem 4.5rem; text-align:center; position:relative; overflow:hidden; }
-  .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 55% at 50% -10%,rgba(0,201,224,0.1) 0%,transparent 65%); pointer-events:none; }
-  .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(0,201,224,0.1); border:1px solid rgba(0,201,224,0.22); border-radius:999px; padding:5px 16px; font-size:0.75rem; color:var(--teal); letter-spacing:0.07em; text-transform:uppercase; font-weight:500; margin-bottom:1.75rem; }
-  .hero h1 { font-family:'Playfair Display',serif; font-size:clamp(2.1rem,5vw,3.4rem); color:var(--white); line-height:1.18; margin-bottom:1.1rem; max-width:660px; margin-left:auto; margin-right:auto; }
-  .hero h1 em { font-style:italic; color:var(--teal); }
-  .hero p { font-size:1rem; color:rgba(255,255,255,0.55); max-width:480px; margin:0 auto 2rem; line-height:1.75; }
-  .hero-icongrp { display:inline-flex; align-items:center; gap:6px; font-size:0.8rem; color:rgba(255,255,255,0.35); margin-top:0.5rem; }
-  .hero-icongrp a { color:rgba(255,255,255,0.5); text-decoration:none; }
-  .hero-icongrp a:hover { color:var(--teal); }
-
-  /* STATS */
-  .stats-strip { background:var(--navy-mid); border-top:1px solid rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.05); padding:1.4rem 2rem; display:flex; justify-content:center; gap:3.5rem; flex-wrap:wrap; }
-  .stat { text-align:center; }
-  .stat-num { font-size:1.45rem; font-weight:600; color:var(--white); display:block; }
-  .stat-label { font-size:0.75rem; color:rgba(255,255,255,0.42); margin-top:2px; letter-spacing:0.04em; }
-
-  /* PORTAL HOME */
-  .portal-section { padding:3.5rem 2rem 5rem; max-width:880px; margin:0 auto; }
-  .portal-heading { text-align:center; font-size:0.75rem; font-weight:600; color:var(--muted); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:2rem; }
-  .portal-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; }
-  @media(max-width:620px){ .portal-grid{ grid-template-columns:1fr; } }
-
-  .portal-card { background:var(--white); border-radius:16px; border:1.5px solid var(--border); padding:2.5rem 2rem 2rem; cursor:pointer; text-decoration:none; color:inherit; display:flex; flex-direction:column; gap:0.85rem; transition:transform 0.22s,box-shadow 0.22s,border-color 0.22s; position:relative; overflow:hidden; }
-  .portal-card::after { content:''; position:absolute; bottom:0; left:0; right:0; height:3px; opacity:0; transition:opacity 0.2s; border-radius:0 0 2px 2px; }
-  .portal-card.care::after { background:var(--teal); }
-  .portal-card.commercial::after { background:var(--amber); }
-  .portal-card:hover { transform:translateY(-5px); box-shadow:0 16px 48px rgba(0,0,0,0.1); }
-  .portal-card:hover::after { opacity:1; }
-  .portal-card.care:hover { border-color:rgba(0,201,224,0.28); }
-  .portal-card.commercial:hover { border-color:rgba(245,166,35,0.28); }
-  .card-icon { width:50px; height:50px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.35rem; }
-  .care .card-icon { background:rgba(0,201,224,0.09); }
-  .commercial .card-icon { background:rgba(245,166,35,0.1); }
-  .card-label { font-size:0.68rem; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; }
-  .care .card-label { color:var(--teal-dk); }
-  .commercial .card-label { color:var(--amber-dk); }
-  .portal-card h3 { font-size:1.4rem; font-weight:600; color:var(--navy); letter-spacing:-0.02em; line-height:1.2; }
-  .portal-card > p { font-size:0.9rem; color:var(--muted); line-height:1.65; flex:1; }
-  .card-tags { display:flex; flex-wrap:wrap; gap:6px; margin-top:0.2rem; }
-  .tag { font-size:0.72rem; padding:3px 10px; border-radius:999px; font-weight:500; }
-  .care .tag { background:rgba(0,201,224,0.08); color:var(--teal-dk); }
-  .commercial .tag { background:rgba(245,166,35,0.1); color:#9a6410; }
-  .card-cta { display:flex; align-items:center; gap:6px; font-size:0.86rem; font-weight:600; margin-top:0.4rem; transition:gap 0.2s; }
-  .care .card-cta { color:var(--teal-dk); }
-  .commercial .card-cta { color:var(--amber-dk); }
-  .portal-card:hover .card-cta { gap:10px; }
-
-  /* INNER SECTIONS */
-  .section { display:none; padding:2.5rem 2rem 5rem; max-width:1060px; margin:0 auto; animation:fadeUp 0.28s ease; }
-  .section.active { display:block; }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
-
-  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1.75rem; flex-wrap:wrap; gap:1rem; }
-  .section-title { display:flex; align-items:center; gap:10px; }
-  .section-title h2 { font-size:1.45rem; font-weight:600; color:var(--navy); }
-  .back-btn { background:none; border:1.5px solid var(--border); border-radius:8px; padding:8px 16px; font-size:0.83rem; font-family:'DM Sans',sans-serif; color:var(--muted); cursor:pointer; display:flex; align-items:center; gap:6px; transition:all 0.2s; }
-  .back-btn:hover { border-color:var(--navy); color:var(--navy); }
-
-  .search-bar { display:flex; gap:0.75rem; margin-bottom:1.25rem; }
-  .search-bar input { flex:1; padding:10px 16px; border:1.5px solid var(--border); border-radius:8px; font-size:0.9rem; font-family:'DM Sans',sans-serif; outline:none; transition:border-color 0.2s; color:var(--navy); background:var(--white); }
-  .search-bar input:focus { border-color:var(--teal); }
-
-  .filter-strip { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.75rem; }
-  .filter-btn { padding:6px 14px; border-radius:999px; border:1.5px solid var(--border); background:var(--white); font-size:0.8rem; font-family:'DM Sans',sans-serif; color:var(--muted); cursor:pointer; transition:all 0.2s; }
-  .care-section .filter-btn.active,.care-section .filter-btn:hover { border-color:var(--teal); color:var(--teal-dk); background:rgba(0,201,224,0.06); }
-  .commercial-section .filter-btn.active,.commercial-section .filter-btn:hover { border-color:var(--amber); color:#9a6410; background:rgba(245,166,35,0.06); }
-
-  /* TENDER CARDS (list) */
-  .tenders-grid { display:grid; gap:0.85rem; }
-  .tender-card { background:var(--white); border:1.5px solid var(--border); border-radius:12px; padding:1.4rem 1.5rem; display:grid; grid-template-columns:1fr auto; gap:0.4rem 2rem; align-items:start; transition:box-shadow 0.2s,border-color 0.2s; cursor:pointer; }
-  .tender-card:hover { box-shadow:0 4px 20px rgba(0,0,0,0.09); border-color:rgba(0,201,224,0.25); }
-  .tender-org { font-size:0.75rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px; }
-  .tender-title { font-size:1rem; font-weight:600; color:var(--navy); margin-bottom:6px; }
-  .tender-meta { display:flex; gap:0.75rem; flex-wrap:wrap; font-size:0.8rem; color:var(--muted); align-items:center; }
-  .tender-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:600; padding:3px 10px; border-radius:999px; white-space:nowrap; }
-  .badge-open { background:#e8f7ee; color:#1a7a3f; }
-  .badge-closing { background:#fff4e0; color:#9a6410; }
-  .badge-urgent { background:#fee8e8; color:#a32d2d; }
-  .badge-new { background:#e6f1fb; color:#185FA5; }
-  .tender-right { text-align:right; }
-  .tender-value { font-size:1.05rem; font-weight:600; color:var(--navy); white-space:nowrap; }
-  .tender-deadline { font-size:0.75rem; color:var(--muted); margin-top:3px; }
-  .tender-view-btn { font-size:0.75rem; color:var(--teal-dk); font-weight:600; margin-top:6px; display:block; }
-  .empty-state { text-align:center; padding:4rem 2rem; color:var(--muted); }
-  .empty-state h3 { font-size:1.05rem; margin-bottom:0.5rem; color:var(--navy); }
-  .loading-msg { text-align:center; padding:3rem; color:var(--muted); font-size:0.88rem; }
-
-  .precqc-block { margin-top:3rem; background:rgba(0,201,224,0.04); border:1.5px solid rgba(0,201,224,0.14); border-radius:12px; padding:2rem; }
-  .precqc-block h3 { font-size:1.05rem; font-weight:600; color:var(--navy); margin-bottom:0.4rem; }
-  .precqc-block p { font-size:0.88rem; color:var(--muted); line-height:1.65; margin-bottom:1.25rem; }
-
-  /* ══ MODAL OVERLAY ══ */
-  .modal-overlay {
-    display:none; position:fixed; inset:0; background:rgba(7,17,28,0.7);
-    z-index:1000; align-items:center; justify-content:center; padding:1rem;
-    backdrop-filter:blur(3px);
-  }
-  .modal-overlay.open { display:flex; }
-
-  .modal {
-    background:var(--white); border-radius:20px; width:100%; max-width:680px;
-    max-height:90vh; overflow-y:auto; position:relative;
-    animation:modalIn 0.25s ease;
-  }
-  @keyframes modalIn { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
-
-  .modal-close {
-    position:absolute; top:1.25rem; right:1.25rem;
-    background:var(--offwhite); border:none; border-radius:50%;
-    width:36px; height:36px; font-size:1.1rem; cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    color:var(--muted); transition:background 0.2s;
-    z-index:10;
-  }
-  .modal-close:hover { background:#e2e6ea; color:var(--navy); }
-
-  .modal-header {
-    background:var(--navy); padding:2rem 2rem 1.5rem;
-    border-radius:20px 20px 0 0; position:relative;
-  }
-  .modal-header::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 80% 60% at 0% 50%,rgba(0,201,224,0.08) 0%,transparent 70%); border-radius:20px 20px 0 0; pointer-events:none; }
-  .modal-badge { display:inline-flex; align-items:center; gap:6px; margin-bottom:0.75rem; }
-  .modal-org { font-size:0.72rem; font-weight:600; color:rgba(255,255,255,0.45); text-transform:uppercase; letter-spacing:0.07em; }
-  .modal-title { font-family:'Playfair Display',serif; font-size:1.5rem; color:var(--white); line-height:1.25; margin-bottom:1rem; }
-  .modal-meta-row { display:flex; flex-wrap:wrap; gap:0.75rem; }
-  .modal-meta-pill { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:999px; padding:4px 12px; font-size:0.78rem; color:rgba(255,255,255,0.7); }
-  .modal-meta-pill strong { color:var(--white); }
-
-  .modal-body { padding:1.75rem 2rem; }
-
-  .modal-section { margin-bottom:1.5rem; }
-  .modal-section-title { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:var(--muted); margin-bottom:0.6rem; }
-  .modal-section p { font-size:0.9rem; color:#334155; line-height:1.7; }
-
-  /* Requirements list */
-  .req-list { list-style:none; display:flex; flex-direction:column; gap:6px; }
-  .req-list li { display:flex; align-items:flex-start; gap:8px; font-size:0.88rem; color:#334155; line-height:1.5; }
-  .req-list li::before { content:'✓'; color:var(--teal-dk); font-weight:700; font-size:0.85rem; margin-top:1px; flex-shrink:0; }
-
-  /* Pricing table */
-  .pricing-box {
-    background:linear-gradient(135deg,#0B1929 0%,#112236 100%);
-    border-radius:14px; padding:1.5rem; margin-bottom:1.5rem;
-  }
-  .pricing-box-title { font-size:0.7rem; font-weight:600; text-transform:uppercase; letter-spacing:0.1em; color:var(--teal); margin-bottom:1rem; }
-  .pricing-items { display:flex; flex-direction:column; gap:8px; margin-bottom:1rem; }
-  .pricing-row { display:flex; justify-content:space-between; align-items:center; }
-  .pricing-label { font-size:0.85rem; color:rgba(255,255,255,0.65); }
-  .pricing-amount { font-size:0.95rem; font-weight:600; color:var(--white); }
-  .pricing-divider { border:none; border-top:1px solid rgba(255,255,255,0.1); margin:0.75rem 0; }
-  .pricing-total-row { display:flex; justify-content:space-between; align-items:center; }
-  .pricing-total-label { font-size:0.88rem; font-weight:600; color:rgba(255,255,255,0.8); }
-  .pricing-total-amount { font-size:1.25rem; font-weight:700; color:var(--teal); }
-  .pricing-note { font-size:0.75rem; color:rgba(255,255,255,0.35); margin-top:0.5rem; line-height:1.5; }
-
-  /* CTA section */
-  .modal-cta-heading { font-size:1.05rem; font-weight:600; color:var(--navy); margin-bottom:0.3rem; }
-  .modal-cta-sub { font-size:0.85rem; color:var(--muted); line-height:1.6; margin-bottom:1.1rem; }
-  .modal-cta { display:flex; flex-direction:column; gap:0.65rem; }
-
-  .btn-cta {
-    display:flex; align-items:center; gap:14px;
-    border-radius:12px; padding:15px 18px;
-    text-decoration:none; width:100%; cursor:pointer;
-    border:1.5px solid transparent;
-    transition:transform 0.18s, box-shadow 0.18s;
-  }
-  .btn-cta:hover { transform:translateY(-2px); }
-
-  .btn-cta--ai   { background:#0B1929; border-color:rgba(0,201,224,0.35); }
-  .btn-cta--teal { background:#0099AA; border-color:#0099AA; }
-  .btn-cta--outline { background:#EEF1F5; border-color:rgba(11,25,41,0.12); }
-
-  .btn-cta--ai .btn-cta-label    { color:#ffffff; }
-  .btn-cta--ai .btn-cta-desc     { color:rgba(255,255,255,0.48); }
-  .btn-cta--ai svg               { stroke:rgba(0,201,224,0.8); }
-
-  .btn-cta--teal .btn-cta-label  { color:#ffffff; }
-  .btn-cta--teal .btn-cta-desc   { color:rgba(255,255,255,0.65); }
-  .btn-cta--teal svg             { stroke:rgba(255,255,255,0.75); }
-
-  .btn-cta--outline .btn-cta-label { color:#0B1929; }
-  .btn-cta--outline .btn-cta-desc  { color:#6B8FA3; }
-  .btn-cta--outline svg            { stroke:#6B8FA3; }
-
-  .btn-cta--ai:hover    { box-shadow:0 8px 24px rgba(0,201,224,0.2); }
-  .btn-cta--teal:hover  { background:#007f8f; box-shadow:0 8px 24px rgba(0,153,170,0.3); }
-  .btn-cta--outline:hover { background:#e2e7ed; }
-
-  .btn-cta-icon  { font-size:1.25rem; width:34px; text-align:center; flex-shrink:0; }
-  .btn-cta-text  { display:flex; flex-direction:column; gap:3px; flex:1; min-width:0; }
-  .btn-cta-label { font-size:0.9rem; font-weight:600; font-family:'DM Sans',sans-serif; line-height:1.2; }
-  .btn-cta-desc  { font-size:0.76rem; line-height:1.4; }
-  .btn-cta svg   { flex-shrink:0; }
-
-  .cta-reassurance { text-align:center; font-size:0.76rem; color:var(--muted); margin-top:1rem; line-height:1.65; }
-
-  /* FOOTER */
-  footer { background:var(--navy); padding:2.5rem 2rem 1.5rem; margin-top:2rem; }
-  .footer-inner { max-width:900px; margin:0 auto; display:flex; justify-content:space-between; align-items:flex-start; gap:2rem; flex-wrap:wrap; }
-  .footer-brand p { font-family:'Playfair Display',serif; font-size:1.1rem; color:var(--white); margin-bottom:4px; }
-  .footer-brand span { font-size:0.78rem; color:rgba(255,255,255,0.35); }
-  .footer-brand a { color:var(--teal); text-decoration:none; }
-  .footer-contact { text-align:right; font-size:0.82rem; color:rgba(255,255,255,0.4); line-height:1.9; }
-  .footer-contact a { color:rgba(255,255,255,0.55); text-decoration:none; }
-  .footer-contact a:hover { color:var(--teal); }
-  @media(max-width:700px){.cana-grid{grid-template-columns:1fr !important;}}
-  .footer-bottom { max-width:900px; margin:1.5rem auto 0; border-top:1px solid rgba(255,255,255,0.06); padding-top:1rem; font-size:0.75rem; color:rgba(255,255,255,0.25); display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.5rem; }
+:root{--green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;--green-mid:#9FE1CB;--purple:#534AB7;--purple-dark:#26215C;--purple-light:#EEEDFE;--red:#dc2626;--red-light:#fee2e2;--text:#111827;--text-muted:#6b7280;--text-light:#9ca3af;--border:#e5e7eb;--border-light:#f3f4f6;--bg:#f9fafb;--sidebar-bg:#0a2a1e;--radius:8px;--radius-lg:12px;--radius-xl:16px;--shadow:0 1px 3px rgba(0,0,0,0.06);--shadow-md:0 4px 12px rgba(0,0,0,0.08);--shadow-lg:0 12px 32px rgba(0,0,0,0.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased}
+#loginScreen{position:fixed;inset:0;background:linear-gradient(160deg,#064e3b,#065f46 50%,#047857);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-card{background:#fff;border-radius:var(--radius-xl);padding:2.5rem;width:100%;max-width:400px;box-shadow:var(--shadow-lg)}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
+.login-logo-mark{width:42px;height:42px;background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.login-logo-text{font-family:'DM Serif Display',serif;font-size:22px}
+.login-logo-text span{color:var(--green)}
+.login-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px}
+.login-input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius);padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;margin-bottom:14px}
+.login-input:focus{border-color:var(--green)}
+.login-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:13px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.login-btn:hover{background:var(--green-dark)}
+.login-error{background:var(--red-light);color:var(--red);font-size:13px;padding:10px 14px;border-radius:var(--radius);margin-bottom:14px;display:none;align-items:center;gap:8px}
+.login-hint{font-size:12px;color:var(--text-light);text-align:center;margin-top:16px}
+#appScreen{display:none}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:40}
+.sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sidebar-logo-inner{display:flex;align-items:center;gap:9px}
+.sidebar-logo-mark{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.sidebar-logo-text{font-family:'DM Serif Display',serif;font-size:17px;color:#fff}
+.sidebar-logo-text span{color:#6ee7b7}
+.sidebar-section{padding:1.25rem 1rem 0.5rem;font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em}
+.sidebar-nav{padding:0 0.75rem}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);color:rgba(255,255,255,0.65);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:#fff}
+.nav-item.active{background:var(--green);color:#fff}
+.nav-item i{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,0.15);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.nav-item.active .nav-badge{background:rgba(255,255,255,0.25)}
+.sidebar-footer{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,0.06)}
+.sidebar-user{display:flex;align-items:center;gap:10px}
+.user-avatar{width:34px;height:34px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500;color:#fff}
+.user-role{font-size:11px;color:rgba(255,255,255,0.45)}
+.logout-btn{background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;padding:4px;margin-left:auto}
+.logout-btn:hover{color:#fff}
+.main-content{margin-left:240px;flex:1;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30;box-shadow:var(--shadow)}
+.topbar-title{font-size:16px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-btn{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover{background:var(--green-dark)}
+.btn-ghost{background:none;border:1.5px solid var(--border);color:var(--text-muted)}
+.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.btn-ai{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.page{display:none;padding:2rem;animation:fadeIn 0.2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;box-shadow:var(--shadow)}
+.stat-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.stat-value{font-family:'DM Serif Display',serif;font-size:32px;letter-spacing:-0.02em;margin-bottom:4px}
+.stat-sub{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.stat-sub.up{color:#16a34a}
+.stat-sub.warn{color:var(--amber,#BA7517)}
+.table-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden}
+.table-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.table-header h2{font-size:15px;font-weight:600}
+.table-search{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:7px 12px;min-width:220px}
+.table-search input{border:none;background:transparent;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--bg)}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:14px 16px;border-bottom:1px solid var(--border-light);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+.td-title{font-weight:600;color:var(--text)}
+.td-org{color:var(--text-muted);font-size:12px;margin-top:2px}
+.td-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-open{background:#dcfce7;color:#166534}
+.badge-closing{background:#fef3c7;color:#92400e}
+.badge-urgent{background:#fee2e2;color:#991b1b}
+.badge-new{background:var(--purple-light);color:var(--purple-dark)}
+.badge-draft{background:var(--bg);color:var(--text-muted);border:1px solid var(--border)}
+.action-btns{display:flex;align-items:center;gap:6px}
+.action-btn{border:none;background:none;cursor:pointer;padding:6px;border-radius:6px;color:var(--text-muted);font-size:16px;transition:all 0.15s;display:flex;align-items:center}
+.action-btn.edit:hover{color:var(--green);background:var(--green-light)}
+.action-btn.del:hover{color:var(--red);background:var(--red-light)}
+.empty-state{padding:3rem;text-align:center;color:var(--text-muted)}
+.empty-state i{font-size:36px;display:block;margin-bottom:10px;opacity:0.4}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:150;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)}
+.overlay.open{display:flex}
+.ai-modal{background:#fff;border-radius:var(--radius-xl);width:100%;max-width:580px;box-shadow:var(--shadow-lg);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+.ai-modal-header{padding:1.5rem 1.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ai-modal-title{display:flex;align-items:center;gap:10px}
+.ai-title-icon{width:38px;height:38px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;flex-shrink:0}
+.ai-modal-title h3{font-size:16px;font-weight:600;margin-bottom:2px}
+.ai-modal-title p{font-size:12px;color:var(--text-muted)}
+.modal-x{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);font-size:15px;flex-shrink:0}
+.ai-modal-body{padding:1.75rem;overflow-y:auto;flex:1}
+.ai-modal-footer{padding:1.25rem 1.75rem;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;background:#fff}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--bg)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--green);background:var(--green-light)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{width:52px;height:52px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:24px;color:var(--text-muted)}
+.upload-zone h4{font-size:15px;font-weight:600;margin-bottom:6px}
+.upload-zone p{font-size:13px;color:var(--text-muted);line-height:1.6}
+.file-types{font-size:11px;color:var(--text-light);margin-top:8px;background:#fff;border:1px solid var(--border);border-radius:20px;display:inline-block;padding:3px 12px}
+.file-selected-bar{display:none;align-items:center;gap:12px;background:var(--green-light);border:1.5px solid var(--green-mid);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.25rem}
+.file-icon{width:40px;height:40px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0}
+.file-name{font-size:14px;font-weight:600;color:#085041}
+.file-size{font-size:12px;color:var(--green-dark);margin-top:2px}
+.file-remove{margin-left:auto;background:none;border:none;color:var(--green-dark);cursor:pointer;font-size:18px;padding:2px;display:flex}
+.processing-state{display:none;text-align:center;padding:1rem 0}
+.spinner{width:52px;height:52px;border:3px solid var(--border);border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-steps{display:flex;flex-direction:column;gap:6px;margin-top:1.25rem;text-align:left}
+.proc-step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted);padding:8px 12px;border-radius:var(--radius);background:var(--bg)}
+.proc-step.done{color:var(--green-dark);background:var(--green-light)}
+.proc-step.active{color:#4f46e5;background:#ede9fe;font-weight:500}
+.proc-step i{font-size:15px;width:18px;flex-shrink:0}
+.preview-pane{display:none}
+.preview-banner{background:linear-gradient(135deg,#ede9fe,#e0e7ff);border:1px solid #c4b5fd;border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:10px}
+.preview-banner-text{font-size:13px;color:#3730a3;line-height:1.5}
+.preview-banner-text strong{display:block;font-weight:600;margin-bottom:2px}
+.preview-fields{display:flex;flex-direction:column;gap:8px}
+.pf{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
+.pf-label{font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.ai-tag{background:#ede9fe;color:#7c3aed;font-size:9px;padding:1px 6px;border-radius:20px;font-weight:700}
+.conf{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;margin-left:auto}
+.conf-high{background:#dcfce7;color:#166534}
+.pf-value{font-size:13px;color:var(--text);line-height:1.5;font-weight:500}
+.pf-value.multi{white-space:pre-line;font-weight:400;font-size:12px}
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;backdrop-filter:blur(2px)}
+.drawer-overlay.open{display:flex;align-items:flex-start;justify-content:flex-end}
+.drawer{background:#fff;width:100%;max-width:580px;height:100vh;overflow-y:auto;box-shadow:var(--shadow-lg);display:flex;flex-direction:column}
+.drawer-header{padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.drawer-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.ai-badge{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;display:none;align-items:center;gap:4px}
+.drawer-close{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text-muted)}
+.drawer-body{padding:1.5rem;flex:1}
+.drawer-footer{padding:1.25rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:10px;position:sticky;bottom:0;background:#fff}
+.form-section{margin-bottom:1.5rem}
+.fsect-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid var(--border-light)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-row.single{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:600;color:var(--text)}
+.form-label .req{color:var(--red)}
+.form-input,.form-select,.form-textarea{border:1.5px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;background:#fff;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green)}
+.form-textarea{resize:vertical;min-height:100px;line-height:1.6}
+.form-hint{font-size:11px;color:var(--text-light);margin-top:2px}
+.ai-filled{border-color:#7c3aed !important;background:#faf5ff !important}
+.ai-filled-note{font-size:11px;color:#7c3aed;margin-top:3px;display:none;align-items:center;gap:4px}
+.pricing-builder{border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:4px}
+.price-row{display:grid;grid-template-columns:1fr 100px auto;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border-light);align-items:center}
+.price-row:last-child{border-bottom:none}
+.price-row input{border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.price-row input:focus{border-color:var(--green)}
+.rm-price{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:16px;padding:2px;border-radius:4px;display:flex}
+.rm-price:hover{color:var(--red)}
+.add-price-row{border:none;background:var(--bg);width:100%;padding:9px;font-size:13px;color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;border-top:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;gap:5px}
+.add-price-row:hover{background:var(--green-light)}
+.price-total{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.price-total span:first-child{font-size:12px;font-weight:500;color:var(--text-muted)}
+.price-total span:last-child{font-size:15px;font-weight:600;color:var(--green)}
+.elig-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.elig-item{display:flex;align-items:center;gap:8px}
+.elig-item input{flex:1;border:1.5px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.elig-item input:focus{border-color:var(--green)}
+.rm-elig{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:16px;padding:4px;border-radius:4px;display:flex}
+.rm-elig:hover{color:var(--red)}
+.add-elig{border:1.5px dashed var(--border);background:transparent;border-radius:var(--radius);padding:8px 14px;font-size:13px;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;width:100%;justify-content:center;transition:all 0.15s}
+.add-elig:hover{border-color:var(--green);color:var(--green);background:var(--green-light)}
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+.confirm-overlay.open{display:flex}
+.confirm-card{background:#fff;border-radius:var(--radius-xl);padding:2rem;width:100%;max-width:380px;box-shadow:var(--shadow-lg);text-align:center}
+.confirm-icon{width:52px;height:52px;background:var(--red-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:24px;color:var(--red)}
+.confirm-title{font-size:17px;font-weight:600;margin-bottom:8px}
+.confirm-text{font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6}
+.confirm-btns{display:flex;gap:10px;justify-content:center}
+.btn-danger{background:var(--red);color:#fff;border:none;padding:10px 24px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-cancel{background:var(--bg);color:var(--text);border:1.5px solid var(--border);padding:10px 24px;border-radius:var(--radius);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.toast{position:fixed;bottom:2rem;right:2rem;color:#fff;padding:12px 20px;border-radius:var(--radius-lg);font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;display:none;align-items:center;gap:10px}
+.toast.show{display:flex}
+.toast.success{background:#166534}
+.toast.error{background:var(--red)}
+.toast.ai{background:linear-gradient(135deg,#7c3aed,#4f46e5)}
+.saving-spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-left">Part of <a href="https://icongrp.co.uk/" target="_blank">ICONGRP</a> — Integrated Care, Workforce &amp; Business Solutions</div>
-  <div class="topbar-right">01268 20 30 10</div>
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-mark"><i class="ti ti-heart-handshake"></i></div>
+      <span class="login-logo-text">Tender <span>Experts</span></span>
+    </div>
+    <div style="margin-bottom:1.5rem"><div style="font-size:20px;font-weight:600;margin-bottom:4px">Admin panel</div><div style="font-size:13px;color:var(--text-muted)">Sign in to manage your tender listings</div></div>
+    <div id="loginError" class="login-error"><i class="ti ti-alert-circle" style="font-size:15px"></i> Incorrect password</div>
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Sign in to admin panel</button>
+    <div class="login-hint">Use the password you set up</div>
+  </div>
 </div>
 
-<nav>
-  <a href="#" class="nav-logo" onclick="showHome(); return false;">
-    <span class="nav-logo-main">Tender <span>Experts</span></span>
-    <span class="nav-logo-by">by ICONGRP</span>
-  </a>
-  <ul>
-    <li><a href="#" onclick="showHome(); return false;">Home</a></li>
-    <li><a href="#" onclick="showSection('care'); return false;">Care Tenders</a></li>
-    <li><a href="#" onclick="showSection('commercial'); return false;">Commercial</a></li>
-    <li><a href="/case-studies.html">Case Studies</a></li>
-    <li><a href="https://icongrp.co.uk/" target="_blank">ICONGRP</a></li>
-    <li><a href="/admin" class="nav-admin">Admin</a></li>
-  </ul>
-</nav>
-
-<!-- ══ HOME ══ -->
-<div id="home-view">
-  <div class="hero">
-    <div class="hero-eyebrow">UK Tender Portal · Part of ICONGRP</div>
-    <h1>Your <em>expert</em> route to winning tenders</h1>
-    <p>Browse live opportunities across care services and commercial contracts — all in one place, powered by the ICONGRP Consulting team.</p>
-    <div class="hero-icongrp">A division of <a href="https://icongrp.co.uk/" target="_blank">icongrp.co.uk</a>&nbsp;·&nbsp;Newport Pagnell, Milton Keynes</div>
-  </div>
-  <div class="stats-strip">
-    <div class="stat"><span class="stat-num" id="stat-care-count">—</span><span class="stat-label">Care tenders</span></div>
-    <div class="stat"><span class="stat-num" id="stat-commercial-count">—</span><span class="stat-label">Commercial tenders</span></div>
-    <div class="stat"><span class="stat-num">UK wide</span><span class="stat-label">Coverage</span></div>
-    <div class="stat"><span class="stat-num">£2M+</span><span class="stat-label">Contracts supported</span></div>
-  </div>
-  <div class="portal-section">
-    <div class="portal-heading">Choose your portal</div>
-    <div class="portal-grid">
-      <a class="portal-card care" href="#" onclick="showSection('care'); return false;">
-        <div class="card-icon">🏥</div>
-        <div class="card-label">Care sector</div>
-        <h3>Care Tenders</h3>
-        <p>Domiciliary care, residential, nursing, supported living, mental health and hospital discharge — including specialist routes for new and pre-CQC providers.</p>
-        <div class="card-tags"><span class="tag">Domiciliary</span><span class="tag">Residential</span><span class="tag">Supported living</span><span class="tag">Pre-CQC</span></div>
-        <div class="card-cta">Browse care tenders <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </a>
-      <a class="portal-card commercial" href="#" onclick="showSection('commercial'); return false;">
-        <div class="card-icon">🏗️</div>
-        <div class="card-label">Commercial sector</div>
-        <h3>Commercial Tenders</h3>
-        <p>Construction, facilities management, cleaning, consultancy, logistics, IT services and all other non-care public and private sector contracts across the UK.</p>
-        <div class="card-tags"><span class="tag">Construction</span><span class="tag">Facilities</span><span class="tag">Consultancy</span><span class="tag">IT &amp; Services</span></div>
-        <div class="card-cta">Browse commercial tenders <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      </a>
+<div id="appScreen">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-inner"><div class="sidebar-logo-mark"><i class="ti ti-heart-handshake"></i></div><span class="sidebar-logo-text">Tender <span>Experts</span></span></div></div>
+    <div class="sidebar-section">Main</div>
+    <div class="sidebar-nav">
+      <button class="nav-item active" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+      <button class="nav-item" onclick="showPage('care',this)"><i class="ti ti-heart-handshake"></i> Care tenders <span class="nav-badge" id="sbCare">0</span></button>
+      <button class="nav-item" onclick="showPage('commercial',this)"><i class="ti ti-building"></i> Commercial <span class="nav-badge" id="sbCommercial">0</span></button>
+      <button class="nav-item" onclick="showPage('noncqc',this)"><i class="ti ti-certificate"></i> Non-CQC listings <span class="nav-badge" id="sbNonCqc">0</span></button>
+    </div>
+    <div class="sidebar-section">System</div>
+    <div class="sidebar-nav">
+      <button class="nav-item" onclick="window.open('index.html','_blank')"><i class="ti ti-external-link"></i> View live site</button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">AD</div>
+        <div style="flex:1;min-width:0"><div class="user-name">Admin User</div><div class="user-role">Administrator</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="ti ti-logout"></i></button>
+      </div>
+    </div>
+  </aside>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <button class="topbar-btn btn-ai" id="aiUploadBtn" style="display:none" onclick="openAiModal('care')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload & auto-fill</button>
+        <button class="topbar-btn btn-primary" id="addTenderBtn" style="display:none" onclick="openDrawer(null,'care')"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
+        <button class="topbar-btn btn-ai" id="aiCommercialBtn" style="display:none" onclick="openAiModal('commercial')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload & auto-fill</button>
+        <button class="topbar-btn btn-primary" id="addCommercialBtn" style="display:none" onclick="openDrawer(null,'commercial')"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
+        <button class="topbar-btn btn-ai" id="aiNonCqcBtn" style="display:none" onclick="openAiModal('noncqc')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload & auto-fill</button>
+        <button class="topbar-btn btn-primary" id="addNonCqcBtn" style="display:none" onclick="openDrawer(null,'noncqc')"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
+      </div>
+    </div>
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total listings</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub up"><i class="ti ti-trending-up" style="font-size:13px"></i> Live from database</div></div>
+        <div class="stat-card"><div class="stat-label">Live & open</div><div class="stat-value" id="statOpen">—</div><div class="stat-sub up"><i class="ti ti-circle-check" style="font-size:13px"></i> Accepting applications</div></div>
+        <div class="stat-card"><div class="stat-label">Closing soon</div><div class="stat-value" id="statClosing">—</div><div class="stat-sub warn"><i class="ti ti-alert-triangle" style="font-size:13px"></i> Within 14 days</div></div>
+        <div class="stat-card"><div class="stat-label">Non-CQC listings</div><div class="stat-value" id="statNonCqc">—</div><div class="stat-sub" style="color:var(--purple)"><i class="ti ti-certificate" style="font-size:13px"></i> Pre-registration</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h2>All listings</h2></div>
+        <table><thead><tr><th>Tender</th><th>Value</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="dashboardTable"><tr><td colspan="5"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Loading…</div></td></tr></tbody></table>
+      </div>
+    </div>
+    <div class="page" id="page-care">
+      <div style="background:#e8f7ee;border:1px solid #9FE1CB;border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:13px;color:#085041;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
+        <span>If a care tender has <strong>no CQC rating requirement</strong> in its eligibility, it will automatically also appear under <strong>Non-CQC listings</strong> for new providers.</span>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h2>Care tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="careCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="careSearch" placeholder="Search…" oninput="renderCareTable()"></div></div>
+        <table><thead><tr><th>Tender</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Non-CQC?</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="careTable"></tbody></table>
+      </div>
+    </div>
+    <div class="page" id="page-commercial">
+      <div class="table-card">
+        <div class="table-header"><h2>Commercial tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="commercialCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="commercialSearch" placeholder="Search…" oninput="renderCommercialTable()"></div></div>
+        <table><thead><tr><th>Tender</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="commercialTable"></tbody></table>
+      </div>
+    </div>
+    <div class="page" id="page-noncqc">
+      <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:13px;color:#4c1d95;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
+        <span>This list is <strong>auto-populated</strong> from care tenders where no CQC rating is required in the eligibility. You can also add them manually.</span>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h2>Non-CQC listings <span style="color:var(--text-light);font-weight:400;font-size:13px" id="nonCqcCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="nonCqcSearch" placeholder="Search…" oninput="renderNonCqcTable()"></div></div>
+        <table><thead><tr><th>Listing</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Auto-detected</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="nonCqcTable"></tbody></table>
+      </div>
     </div>
   </div>
+</div>
+</div>
 
-  <!-- ══ CANA AI SECTION ══ -->
-  <div style="background:var(--navy);padding:5rem 2rem;">
-    <div style="max-width:900px;margin:0 auto;">
-
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:2rem;">
-        <div style="background:rgba(0,201,224,0.12);border:1px solid rgba(0,201,224,0.25);border-radius:999px;padding:5px 16px;font-size:0.72rem;color:var(--teal);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;">New · Powered by ICONGRP</div>
-        <div style="height:1px;flex:1;background:rgba(255,255,255,0.07);"></div>
-      </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
-
-        <!-- Left -->
-        <div>
-          <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3.5vw,2.5rem);color:#fff;line-height:1.2;margin-bottom:1rem;">
-            Meet <em style="color:var(--teal);font-style:italic;">Cana AI</em> — tender responses written specifically for you, in under an hour
-          </h2>
-          <p style="font-size:0.93rem;color:rgba(255,255,255,0.52);line-height:1.8;margin-bottom:1.2rem;">
-            Cana AI already knows the tender. When you select an opportunity on our portal, Cana AI loads the actual questions from that specific tender automatically — so you never have to paste or upload anything.
-          </p>
-          <p style="font-size:0.93rem;color:rgba(255,255,255,0.52);line-height:1.8;margin-bottom:2rem;">
-            All we ask you is a few questions about your company. Cana AI then writes fully tailored responses that answer each question using your organisation's own information — not generic text, not a template. A real, submission-ready bid written for that tender, about your business, in under 60 minutes.
-          </p>
-          <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:2rem;">
-            <div style="display:flex;align-items:center;gap:10px;font-size:0.87rem;color:rgba(255,255,255,0.68);"><span style="color:var(--teal);font-weight:700;">✓</span> Tender questions loaded automatically — nothing to copy or paste</div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:0.87rem;color:rgba(255,255,255,0.68);"><span style="color:var(--teal);font-weight:700;">✓</span> Answers written specifically for your company, not a generic template</div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:0.87rem;color:rgba(255,255,255,0.68);"><span style="color:var(--teal);font-weight:700;">✓</span> Every response tailored to the exact tender you are bidding for</div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:0.87rem;color:rgba(255,255,255,0.68);"><span style="color:var(--teal);font-weight:700;">✓</span> Full submission ready in under 1 hour, reviewed by our consultants</div>
-          </div>
-          <a href="https://cana.icongrp.co.uk" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:var(--teal);color:var(--navy);border-radius:10px;padding:13px 26px;font-size:0.92rem;font-weight:700;text-decoration:none;">
-            ⚡ Try Cana AI now →
-          </a>
-          <a href="/case-studies.html" style="display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,0.5);font-size:0.85rem;text-decoration:none;margin-left:1.25rem;margin-top:0.25rem;">
-            See tenders won with Cana AI →
-          </a>
+<!-- AI MODAL -->
+<div class="overlay" id="aiOverlay" onclick="maybeCloseAi(event)">
+  <div class="ai-modal">
+    <div class="ai-modal-header">
+      <div class="ai-modal-title"><div class="ai-title-icon"><i class="ti ti-sparkles"></i></div><div><h3>AI document upload</h3><p>Upload a tender document — we'll read it and fill all fields</p></div></div>
+      <div class="modal-x" onclick="closeAiModal()"><i class="ti ti-x"></i></div>
+    </div>
+    <div class="ai-modal-body">
+      <div id="aiStep1">
+        <div class="upload-zone" id="uploadZone" ondragover="handleDrag(event)" ondragleave="handleDragLeave()" ondrop="handleDrop(event)">
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)">
+          <div class="upload-icon"><i class="ti ti-cloud-upload"></i></div>
+          <h4>Drop your tender document here</h4>
+          <p>or click to browse your files</p>
+          <div class="file-types">PDF · Word (.docx) · Text (.txt)</div>
         </div>
-
-        <!-- Right: how it works card -->
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:2rem;position:relative;overflow:hidden;">
-          <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(0,201,224,0.1) 0%,transparent 70%);pointer-events:none;"></div>
-
-          <div style="font-size:0.7rem;font-weight:600;color:var(--teal);letter-spacing:0.09em;text-transform:uppercase;margin-bottom:1.5rem;">How it works</div>
-
-          <div style="display:flex;flex-direction:column;gap:0;">
-
-            <div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:1rem;">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,201,224,0.12);border:1px solid rgba(0,201,224,0.28);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:var(--teal);flex-shrink:0;">1</div>
-              <div style="padding-top:4px;">
-                <div style="font-size:0.88rem;font-weight:600;color:#fff;margin-bottom:3px;">Choose your tender</div>
-                <div style="font-size:0.79rem;color:rgba(255,255,255,0.42);line-height:1.55;">Browse the portal and select the opportunity you want to bid for</div>
-              </div>
-            </div>
-
-            <div style="width:1px;height:14px;background:rgba(255,255,255,0.07);margin-left:15px;margin-bottom:1rem;"></div>
-
-            <div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:1rem;">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,201,224,0.12);border:1px solid rgba(0,201,224,0.28);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:var(--teal);flex-shrink:0;">2</div>
-              <div style="padding-top:4px;">
-                <div style="font-size:0.88rem;font-weight:600;color:#fff;margin-bottom:3px;">Tell Cana AI about your company</div>
-                <div style="font-size:0.79rem;color:rgba(255,255,255,0.42);line-height:1.55;">Answer a few simple questions about your organisation — Cana AI already has the tender questions loaded</div>
-              </div>
-            </div>
-
-            <div style="width:1px;height:14px;background:rgba(255,255,255,0.07);margin-left:15px;margin-bottom:1rem;"></div>
-
-            <div style="display:flex;gap:14px;align-items:flex-start;">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,201,224,0.12);border:1px solid rgba(0,201,224,0.28);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:var(--teal);flex-shrink:0;">3</div>
-              <div style="padding-top:4px;">
-                <div style="font-size:0.88rem;font-weight:600;color:#fff;margin-bottom:3px;">Receive your completed bid in under 1 hour</div>
-                <div style="font-size:0.79rem;color:rgba(255,255,255,0.42);line-height:1.55;">Every question answered using your company's information, tailored to that specific tender, reviewed and ready to submit</div>
-              </div>
-            </div>
-
-          </div>
-
-          <div style="margin-top:1.75rem;background:rgba(0,201,224,0.07);border:1px solid rgba(0,201,224,0.18);border-radius:10px;padding:1rem 1.1rem;display:flex;align-items:center;gap:10px;">
-            <span style="font-size:1.1rem;">⚡</span>
-            <div>
-              <div style="font-size:0.82rem;font-weight:600;color:#fff;">Average turnaround: under 1 hour</div>
-              <div style="font-size:0.74rem;color:rgba(255,255,255,0.38);margin-top:2px;">Across all tender types and categories</div>
-            </div>
-          </div>
-
+        <div class="file-selected-bar" id="fileSelectedBar">
+          <div class="file-icon"><i class="ti ti-file-text"></i></div>
+          <div><div class="file-name" id="selectedFileName"></div><div class="file-size" id="selectedFileSize"></div></div>
+          <button class="file-remove" onclick="clearFile()"><i class="ti ti-x"></i></button>
+        </div>
+        <div style="margin-top:1rem;background:#faf5ff;border:1px solid #ddd6fe;border-radius:var(--radius);padding:12px 14px;font-size:13px;color:#4c1d95;display:flex;gap:8px;align-items:flex-start">
+          <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0;margin-top:1px"></i>
+          <span>The AI reads your document via our secure server and extracts all tender details automatically. Review everything before publishing.</span>
         </div>
       </div>
-    </div>
-  </div>
-  <!-- ══ END CANA AI ══ -->
-
-</div>
-
-<!-- ══ CARE SECTION ══ -->
-<div id="care-section" class="section care-section">
-  <div class="section-header">
-    <div class="section-title"><span style="font-size:1.35rem;">🏥</span><h2>Care Tenders</h2></div>
-    <button class="back-btn" onclick="showHome()">← Back to portal</button>
-  </div>
-  <div class="search-bar"><input type="text" id="care-search" placeholder="Search by title, region or organisation…" oninput="renderTenders('care')"></div>
-  <div class="filter-strip" id="care-filters">
-    <button class="filter-btn active" onclick="setFilter('care','all',this)">All</button>
-    <button class="filter-btn" onclick="setFilter('care','Domiciliary care',this)">Domiciliary care</button>
-    <button class="filter-btn" onclick="setFilter('care','Residential',this)">Residential</button>
-    <button class="filter-btn" onclick="setFilter('care','Nursing',this)">Nursing</button>
-    <button class="filter-btn" onclick="setFilter('care','Supported living',this)">Supported living</button>
-    <button class="filter-btn" onclick="setFilter('care','Mental health',this)">Mental health</button>
-    <button class="filter-btn" onclick="setFilter('care','Hospital discharge',this)">Hospital discharge</button>
-  </div>
-  <div class="tenders-grid" id="care-tenders-list"><div class="loading-msg">Loading care tenders…</div></div>
-  <div class="precqc-block">
-    <h3>Not yet CQC rated or registered?</h3>
-    <p>We've handpicked opportunities ideal for new and emerging care providers — lower-barrier contracts to help you build your track record and prepare for full CQC registration.</p>
-    <div id="non-cqc-list"><div class="loading-msg">Loading opportunities…</div></div>
-  </div>
-</div>
-
-<!-- ══ COMMERCIAL SECTION ══ -->
-<div id="commercial-section" class="section commercial-section">
-  <div class="section-header">
-    <div class="section-title"><span style="font-size:1.35rem;">🏗️</span><h2>Commercial Tenders</h2></div>
-    <button class="back-btn" onclick="showHome()">← Back to portal</button>
-  </div>
-  <div class="search-bar"><input type="text" id="commercial-search" placeholder="Search by title, region or organisation…" oninput="renderTenders('commercial')"></div>
-  <div class="filter-strip" id="commercial-filters">
-    <button class="filter-btn active" onclick="setFilter('commercial','all',this)">All</button>
-    <button class="filter-btn" onclick="setFilter('commercial','Construction',this)">Construction</button>
-    <button class="filter-btn" onclick="setFilter('commercial','Facilities',this)">Facilities</button>
-    <button class="filter-btn" onclick="setFilter('commercial','Cleaning',this)">Cleaning</button>
-    <button class="filter-btn" onclick="setFilter('commercial','Consultancy',this)">Consultancy</button>
-    <button class="filter-btn" onclick="setFilter('commercial','IT & Digital',this)">IT &amp; Digital</button>
-    <button class="filter-btn" onclick="setFilter('commercial','Logistics',this)">Logistics</button>
-    <button class="filter-btn" onclick="setFilter('commercial','Other',this)">Other</button>
-  </div>
-  <div class="tenders-grid" id="commercial-tenders-list"><div class="loading-msg">Loading commercial tenders…</div></div>
-</div>
-
-<!-- ══ TENDER DETAIL MODAL ══ -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnBg(event)">
-  <div class="modal" id="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
-
-    <div class="modal-header">
-      <div class="modal-badge">
-        <span id="modal-status-badge"></span>
-        <span id="modal-category-badge" style="background:rgba(0,201,224,0.15);border:1px solid rgba(0,201,224,0.25);border-radius:999px;padding:3px 10px;font-size:0.72rem;color:var(--teal);font-weight:500;"></span>
-      </div>
-      <div class="modal-org" id="modal-org"></div>
-      <div class="modal-title" id="modal-title"></div>
-      <div class="modal-meta-row">
-        <div class="modal-meta-pill" id="modal-value-pill"></div>
-        <div class="modal-meta-pill" id="modal-region-pill"></div>
-        <div class="modal-meta-pill" id="modal-deadline-pill"></div>
-        <div class="modal-meta-pill" id="modal-duration-pill"></div>
-      </div>
-    </div>
-
-    <div class="modal-body">
-
-      <!-- Description -->
-      <div class="modal-section" id="modal-desc-section">
-        <div class="modal-section-title">About this tender</div>
-        <p id="modal-desc"></p>
-      </div>
-
-      <!-- Eligibility -->
-      <div class="modal-section" id="modal-req-section">
-        <div class="modal-section-title">Eligibility requirements</div>
-        <ul class="req-list" id="modal-req-list"></ul>
-      </div>
-
-      <!-- Pricing -->
-      <div class="pricing-box">
-        <div class="pricing-box-title">Our fee to complete this tender</div>
-        <div class="pricing-items" id="modal-pricing-items"></div>
-        <hr class="pricing-divider">
-        <div class="pricing-total-row">
-          <span class="pricing-total-label">Total fee</span>
-          <span class="pricing-total-amount" id="modal-total-fee"></span>
+      <div class="processing-state" id="aiStep2">
+        <div class="spinner"></div>
+        <div style="font-size:15px;font-weight:600;color:#4f46e5">Analysing your document…</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">This usually takes 5–15 seconds</div>
+        <div class="proc-steps">
+          <div class="proc-step" id="ps1"><i class="ti ti-file-text"></i> Reading document content</div>
+          <div class="proc-step" id="ps2"><i class="ti ti-brain"></i> Extracting key tender details</div>
+          <div class="proc-step" id="ps3"><i class="ti ti-list-check"></i> Identifying eligibility requirements</div>
+          <div class="proc-step" id="ps4"><i class="ti ti-check"></i> Preparing form fields</div>
         </div>
-        <div class="pricing-note" id="modal-fee-note"></div>
       </div>
-
-      <!-- CTA -->
-      <div class="modal-cta-heading">Ready to win this tender?</div>
-      <div class="modal-cta-sub">Choose how you'd like to get started — our team and technology are here to support you at every step.</div>
-
-      <div class="modal-cta">
-
-        <a id="modal-apply-btn" href="#" target="_blank" class="btn-cta btn-cta--ai">
-          <div class="btn-cta-icon">⚡</div>
-          <div class="btn-cta-text">
-            <span class="btn-cta-label">Write with Cana AI</span>
-            <span class="btn-cta-desc">Let our AI system draft your full tender response instantly</span>
-          </div>
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-
-        <a href="https://calendly.com/icongrp-consulting" target="_blank" class="btn-cta btn-cta--teal">
-          <div class="btn-cta-icon">📅</div>
-          <div class="btn-cta-text">
-            <span class="btn-cta-label">Book a consultant call</span>
-            <span class="btn-cta-desc">Speak with an expert who'll guide you through the full submission</span>
-          </div>
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-
-        <a href="mailto:consulting@icongrp.co.uk?subject=Callback request" class="btn-cta btn-cta--outline">
-          <div class="btn-cta-icon">📞</div>
-          <div class="btn-cta-text">
-            <span class="btn-cta-label">Request a callback</span>
-            <span class="btn-cta-desc">Leave your details and we'll call you back within 2 hours</span>
-          </div>
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-
+      <div class="preview-pane" id="aiStep3">
+        <div class="preview-banner">
+          <i class="ti ti-sparkles" style="font-size:20px;color:#7c3aed;flex-shrink:0"></i>
+          <div class="preview-banner-text"><strong>Extraction complete — all fields ready</strong>Click "Open in form" to load everything into the editor. Fields highlighted in purple were auto-filled — check before publishing.</div>
+        </div>
+        <div class="preview-fields" id="previewFields"></div>
       </div>
-      <div class="cta-reassurance">
-        Part of ICONGRP Consulting Solutions &nbsp;·&nbsp; <strong>01268 20 30 10</strong> &nbsp;·&nbsp; <strong>consulting@icongrp.co.uk</strong>
-      </div>
-
+    </div>
+    <div class="ai-modal-footer">
+      <button class="topbar-btn btn-ai" id="aiAnalyseBtn" style="display:none" onclick="runAiExtraction()"><i class="ti ti-sparkles" style="font-size:14px"></i> Analyse document</button>
+      <button class="topbar-btn btn-primary" id="aiOpenFormBtn" style="display:none" onclick="openInForm()"><i class="ti ti-arrow-right" style="font-size:14px"></i> Open in form & review</button>
+      <button class="topbar-btn btn-ghost" onclick="closeAiModal()">Cancel</button>
     </div>
   </div>
 </div>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <p>Tender Experts</p>
-      <span>A division of <a href="https://icongrp.co.uk/" target="_blank">ICONGRP</a> — Consulting Solutions</span>
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="maybeCloseDrawer(event)">
+  <div class="drawer">
+    <div class="drawer-header">
+      <div class="drawer-title" id="drawerTitleText">Add tender <span class="ai-badge" id="aiBadge"><i class="ti ti-sparkles" style="font-size:10px"></i> AI filled</span></div>
+      <div class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></div>
     </div>
-    <div class="footer-contact">
-      <a href="tel:01268203010">01268 20 30 10</a><br>
-      <a href="mailto:consulting@icongrp.co.uk">consulting@icongrp.co.uk</a><br>
-      Unit A11 Harben House, Tickford Street<br>
-      Newport Pagnell, Milton Keynes MK16 9EY
+    <div class="drawer-body">
+      <input type="hidden" id="editId">
+      <input type="hidden" id="editIsNonCqc">
+      <div class="form-section">
+        <div class="fsect-title">Tender details</div>
+        <div class="form-row single"><div class="form-group"><label class="form-label">Title <span class="req">*</span></label><input class="form-input" type="text" id="fTitle" placeholder="e.g. Housing, Health & Wellbeing Hospital Discharge Support Service"><div class="ai-filled-note" id="hintTitle"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Organisation <span class="req">*</span></label><input class="form-input" type="text" id="fOrg" placeholder="e.g. Durham County Council"><div class="ai-filled-note" id="hintOrg"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+          <div class="form-group"><label class="form-label">Region <span class="req">*</span></label><input class="form-input" type="text" id="fRegion" placeholder="e.g. North East"><div class="ai-filled-note" id="hintRegion"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Contract value <span class="req">*</span></label><input class="form-input" type="text" id="fValue" placeholder="e.g. £3,100,000"><div class="ai-filled-note" id="hintValue"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+          <div class="form-group"><label class="form-label">Duration <span class="req">*</span></label><input class="form-input" type="text" id="fDuration" placeholder="e.g. 3 years"><div class="ai-filled-note" id="hintDuration"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Deadline <span class="req">*</span></label><input class="form-input" type="date" id="fDeadline"><div class="ai-filled-note" id="hintDeadline"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+          <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="open">Open</option><option value="closing">Closing soon</option><option value="urgent">Urgent</option><option value="new">New opportunity</option><option value="draft">Draft</option></select></div>
+        </div>
+        <div class="form-row" id="categoryRow">
+          <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="fCategory"><optgroup label="── Care ──"><option value="Domiciliary care">Domiciliary care</option><option value="Residential">Residential</option><option value="Nursing">Nursing</option><option value="Supported living">Supported living</option><option value="Mental health">Mental health</option><option value="Hospital discharge">Hospital discharge</option></optgroup><optgroup label="── Commercial ──"><option value="Construction">Construction</option><option value="Facilities">Facilities</option><option value="Cleaning">Cleaning</option><option value="Consultancy">Consultancy</option><option value="IT & Digital">IT & Digital</option><option value="Logistics">Logistics</option><option value="Other">Other</option></optgroup></select></div>
+          <div class="form-group"><label class="form-label">Submission link</label><input class="form-input" type="url" id="fLink" placeholder="https://…"><div class="ai-filled-note" id="hintLink"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+        </div>
+        <div class="form-row single" id="whyCqcRow" style="display:none"><div class="form-group"><label class="form-label">Why this works for new providers</label><textarea class="form-textarea" id="fWhyCqc" style="min-height:80px" placeholder="Explain why this is suitable for unregistered providers…"></textarea></div></div>
+        <div class="form-row single"><div class="form-group"><label class="form-label">Description <span class="req">*</span></label><textarea class="form-textarea" id="fDesc" placeholder="Describe the tender scope…"></textarea><div class="ai-filled-note" id="hintDesc"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div></div>
+      </div>
+      <div class="form-section">
+        <div class="fsect-title">Our pricing breakdown</div>
+        <div class="pricing-builder" id="pricingBuilder"></div>
+        <button class="add-price-row" onclick="addPriceRow()"><i class="ti ti-plus" style="font-size:14px"></i> Add line item</button>
+        <div class="price-total"><span>Total fee</span><span id="priceTotalPreview">£0</span></div>
+        <div class="form-row single" style="margin-top:1rem"><div class="form-group"><label class="form-label">Fee note</label><input class="form-input" type="text" id="fPricingNote" value="One-off fee. No hidden charges. Payable on engagement."></div></div>
+      </div>
+      <div class="form-section">
+        <div class="fsect-title">Eligibility requirements</div>
+        <div class="elig-list" id="eligList"></div>
+        <button class="add-elig" onclick="addEligRow()"><i class="ti ti-plus" style="font-size:14px"></i> Add requirement</button>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="topbar-btn btn-primary" id="publishBtn" onclick="saveTender()"><div class="saving-spinner" id="savingSpinner"></div><i class="ti ti-check" style="font-size:14px" id="saveIcon"></i> <span id="saveLabel">Publish tender</span></button>
+      <button class="topbar-btn btn-ghost" onclick="closeDrawer()">Cancel</button>
+      <button style="background:none;border:1.5px solid var(--border);color:var(--text-muted);font-size:13px;padding:8px 14px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px" onclick="saveDraft()"><i class="ti ti-device-floppy" style="font-size:14px"></i> Save draft</button>
     </div>
   </div>
-  <div class="footer-bottom">
-    <span>© 2026 Tender Experts · Part of ICONGRP. All rights reserved.</span>
-    <span><a href="https://icongrp.co.uk/" target="_blank" style="color:rgba(255,255,255,0.3);text-decoration:none;">icongrp.co.uk</a></span>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-card">
+    <div class="confirm-icon"><i class="ti ti-trash"></i></div>
+    <div class="confirm-title">Delete this listing?</div>
+    <div class="confirm-text">This will permanently remove it from the live site and database. This cannot be undone.</div>
+    <div class="confirm-btns"><button class="btn-danger" onclick="confirmDelete()">Yes, delete it</button><button class="btn-cancel" onclick="document.getElementById('confirmOverlay').classList.remove('open')">Cancel</button></div>
   </div>
-</footer>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-check" style="font-size:16px" id="toastIcon"></i><span id="toastMsg"></span></div>
 
 <script>
-  let allCareTenders       = [];
-  let allCommercialTenders = [];
-  let careFilter           = 'all';
-  let commercialFilter     = 'all';
+const API = '/api';
+const ADMIN_PASSWORD = 'CareTenders2024!';
+let allTenders = [];
+let deleteTarget = { id: null };
+let currentAiIsNonCqc = false;
+let currentSection = "care";
+let extractedData = null;
+let selectedFile = null;
+let nextId = 1;
 
-  // All possible care category values (full names, short names, legacy values)
-  const CARE_CATS = [
-    'domiciliary care','domiciliary',
-    'residential',
-    'nursing',
-    'supported living','supported',
-    'mental health','mental',
-    'hospital discharge','discharge'
-  ];
-  // All possible commercial category values
-  const COMMERCIAL_CATS = [
-    'construction',
-    'facilities','facilities management',
-    'cleaning',
-    'consultancy',
-    'it & digital','it','digital','it & services',
-    'logistics',
-    'other'
-  ];
-
-  function isCare(t) {
-    const cat = (t.category||'').toLowerCase().trim();
-    if (!cat) {
-      // No category — fall back to is_non_cqc flag (care side) or treat as unknown
-      return !!t.is_non_cqc;
-    }
-    // If it matches commercial list → commercial
-    if (COMMERCIAL_CATS.includes(cat)) return false;
-    // If it matches care list → care
-    if (CARE_CATS.includes(cat)) return true;
-    // Partial match fallback — if it contains a commercial keyword
-    const commercialKeywords = ['construction','facilit','cleaning','consultanc','logistic'];
-    if (commercialKeywords.some(k => cat.includes(k))) return false;
-    // Default to care for anything unrecognised on the care side
-    return true;
+function doLogin() {
+  const p = document.getElementById('loginPass').value;
+  if (p === ADMIN_PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    loadTenders();
+  } else {
+    document.getElementById('loginError').style.display = 'flex';
   }
+}
+function doLogout() { document.getElementById('appScreen').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; }
 
-  /* ── NAVIGATION ── */
-  function showHome() {
-    document.getElementById('home-view').style.display = '';
-    document.getElementById('care-section').classList.remove('active');
-    document.getElementById('commercial-section').classList.remove('active');
-    window.scrollTo({top:0,behavior:'smooth'});
+async function loadTenders() {
+  try {
+    const res = await fetch(`${API}/get-tenders`);
+    allTenders = await res.json() || [];
+    nextId = allTenders.length + 1;
+    renderAll();
+  } catch (err) {
+    showToast('Could not load tenders from database', 'error');
   }
-  function showSection(type) {
-    document.getElementById('home-view').style.display = 'none';
-    document.getElementById('care-section').classList.remove('active');
-    document.getElementById('commercial-section').classList.remove('active');
-    document.getElementById(type+'-section').classList.add('active');
-    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// CQC detection — if no eligibility item mentions CQC rating/registration requirement, it's non-CQC eligible
+const CARE_CATS = ['domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
+const COMMERCIAL_CATS = ['construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','logistics','other','it & services'];
+function isCare(t) {
+  const cat = (t.category||'').toLowerCase().trim();
+  if (!cat) return !!t.is_non_cqc;
+  if (COMMERCIAL_CATS.includes(cat)) return false;
+  if (CARE_CATS.includes(cat)) return true;
+  if (['construction','facilit','cleaning','consultanc','logistic'].some(k=>cat.includes(k))) return false;
+  return true;
+}
+function requiresCqcRating(t) {
+  const reqs = (t.eligibility||[]).join(' ').toLowerCase();
+  return reqs.includes('cqc rating') || reqs.includes('good or outstanding') || reqs.includes('cqc rated') || reqs.includes('cqc inspection') || reqs.includes('rated by cqc');
+}
+function isNonCqcEligible(t) { return isCare(t) && !requiresCqcRating(t); }
+
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  btn.classList.add('active');
+  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings' };
+  document.getElementById('topbarTitle').textContent = titles[page] || page;
+  ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(id => document.getElementById(id).style.display = 'none');
+  if (page === 'care')       { document.getElementById('aiUploadBtn').style.display='flex'; document.getElementById('addTenderBtn').style.display='flex'; renderCareTable(); }
+  if (page === 'commercial') { document.getElementById('aiCommercialBtn').style.display='flex'; document.getElementById('addCommercialBtn').style.display='flex'; renderCommercialTable(); }
+  if (page === 'noncqc')     { document.getElementById('aiNonCqcBtn').style.display='flex'; document.getElementById('addNonCqcBtn').style.display='flex'; renderNonCqcTable(); }
+}
+
+function calcTotal(items) { return (items || []).reduce((s, i) => s + (parseFloat(i.price) || 0), 0); }
+function fmtDate(d) { if (!d) return '—'; try { return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d; } }
+function badgeHtml(s) {
+  const map = { open: 'badge-open', closing: 'badge-closing', urgent: 'badge-urgent', new: 'badge-new', draft: 'badge-draft' };
+  const lbl = { open: 'Open', closing: 'Closing soon', urgent: 'Urgent', new: 'New opportunity', draft: 'Draft' };
+  return `<span class="td-badge ${map[s] || 'badge-draft'}">${lbl[s] || s}</span>`;
+}
+function updateCounts() {
+  const care = allTenders.filter(t => isCare(t));
+  const commercial = allTenders.filter(t => !isCare(t));
+  const nc = allTenders.filter(t => isNonCqcEligible(t) || t.is_non_cqc);
+  document.getElementById('sbCare').textContent = care.length;
+  document.getElementById('sbCommercial').textContent = commercial.length;
+  document.getElementById('sbNonCqc').textContent = nc.length;
+  document.getElementById('statTotal').textContent = allTenders.length;
+  document.getElementById('statOpen').textContent = allTenders.filter(t => t.status === 'open').length;
+  document.getElementById('statClosing').textContent = allTenders.filter(t => t.status === 'closing' || t.status === 'urgent').length;
+  document.getElementById('statNonCqc').textContent = nc.length;
+}
+function renderAll() { updateCounts(); renderDashboard(); renderCareTable(); renderCommercialTable(); renderNonCqcTable(); }
+
+function renderDashboard() {
+  const rows = allTenders.slice(0, 10);
+  document.getElementById('dashboardTable').innerHTML = rows.length ? rows.map(t => `<tr>
+    <td><div class="td-title">${t.title}</div><div class="td-org">${t.org}</div></td>
+    <td style="font-weight:600;color:${t.is_non_cqc ? 'var(--purple)' : 'var(--green)'}">${t.value}</td>
+    <td>${badgeHtml(t.status)}</td>
+    <td style="color:var(--text-muted)">${fmtDate(t.deadline)}</td>
+    <td><div class="action-btns">
+      <button class="action-btn edit" onclick="openDrawer('${t.id}',${!!t.is_non_cqc})" title="Edit"><i class="ti ti-edit"></i></button>
+      <button class="action-btn del" onclick="askDelete('${t.id}')" title="Delete"><i class="ti ti-trash"></i></button>
+    </div></td>
+  </tr>`).join('') : `<tr><td colspan="5"><div class="empty-state"><i class="ti ti-file-off"></i>No listings yet — add your first tender</div></td></tr>`;
+}
+
+function feeStr(t) {
+  const p = t.pricing || {};
+  if (p.total) return p.total;
+  if (Array.isArray(p.items) && p.items.length) {
+    const sum = p.items.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
+    return sum > 0 ? '£'+sum.toLocaleString()+'+VAT' : '—';
   }
-  function setFilter(type,value,btn) {
-    if(type==='care') careFilter=value; else commercialFilter=value;
-    document.getElementById(type+'-filters').querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-    renderTenders(type);
+  return '—';
+}
+
+function renderCareTable() {
+  const q = (document.getElementById('careSearch').value||'').toLowerCase();
+  const rows = allTenders.filter(t => isCare(t) && (!q || (t.title||'').toLowerCase().includes(q) || (t.org||'').toLowerCase().includes(q)));
+  document.getElementById('careCountLabel').textContent = '(' + rows.length + ')';
+  const tb = document.getElementById('careTable');
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="ti ti-file-off"></i>No care tenders yet</div></td></tr>'; return; }
+  tb.innerHTML = rows.map(t => {
+    const autoNc = isNonCqcEligible(t);
+    const ncBadge = autoNc ? '<span class="td-badge" style="background:#e8f7ee;color:#085041;font-size:10px">Auto ✓</span>' : '<span style="color:var(--text-light);font-size:12px">—</span>';
+    return `<tr>
+      <td><div class="td-title">${t.title||'Untitled'}</div><div class="td-org">${t.org||''}</div></td>
+      <td>${t.organisation||t.org||'—'}</td>
+      <td>${t.value||'—'}</td>
+      <td style="color:var(--green);font-weight:600">${feeStr(t)}</td>
+      <td>${ncBadge}</td>
+      <td>${badgeHtml(t.status)}</td>
+      <td style="color:var(--text-muted);font-size:12px">${fmtDate(t.deadline)}</td>
+      <td><div class="action-btns"><button class="action-btn edit" onclick='openDrawer(${JSON.stringify(t).replace(/'/g,"&#39;")},"care")'><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCommercialTable() {
+  const q = (document.getElementById('commercialSearch').value||'').toLowerCase();
+  const rows = allTenders.filter(t => !isCare(t) && (!q || (t.title||'').toLowerCase().includes(q) || (t.org||'').toLowerCase().includes(q)));
+  document.getElementById('commercialCountLabel').textContent = '(' + rows.length + ')';
+  const tb = document.getElementById('commercialTable');
+  if (!rows.length) { tb.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="ti ti-building-off"></i>No commercial tenders yet</div></td></tr>'; return; }
+  tb.innerHTML = rows.map(t => `<tr>
+    <td><div class="td-title">${t.title||'Untitled'}</div><div class="td-org">${t.org||''}</div></td>
+    <td>${t.organisation||t.org||'—'}</td>
+    <td>${t.value||'—'}</td>
+    <td style="color:var(--green);font-weight:600">${feeStr(t)}</td>
+    <td>${badgeHtml(t.status)}</td>
+    <td style="color:var(--text-muted);font-size:12px">${fmtDate(t.deadline)}</td>
+    <td><div class="action-btns"><button class="action-btn edit" onclick='openDrawer(${JSON.stringify(t).replace(/'/g,"&#39;")},"commercial")'><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button></div></td>
+  </tr>`).join('');
+}
+
+function renderTenderTable() {
+  const q = (document.getElementById('tenderSearch').value || '').toLowerCase();
+  const f = allTenders.filter(t => !t.is_non_cqc && (!q || [t.title, t.org, t.region].some(v => (v || '').toLowerCase().includes(q))));
+  document.getElementById('tenderCountLabel').textContent = '(' + f.length + ')';
+  document.getElementById('tenderTable').innerHTML = f.length ? f.map(t => `<tr>
+    <td><div class="td-title">${t.title}</div></td>
+    <td style="color:var(--text-muted);font-size:13px">${t.org}</td>
+    <td style="font-weight:600;color:var(--green)">${t.value}</td>
+    <td style="font-weight:600;color:var(--green-dark)">£${calcTotal((t.pricing || {}).items).toLocaleString()}+VAT</td>
+    <td>${badgeHtml(t.status)}</td>
+    <td style="color:var(--text-muted);white-space:nowrap">${fmtDate(t.deadline)}</td>
+    <td><div class="action-btns">
+      <button class="action-btn edit" onclick="openDrawer('${t.id}',false)"><i class="ti ti-edit"></i></button>
+      <button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button>
+    </div></td>
+  </tr>`).join('') : `<tr><td colspan="7"><div class="empty-state"><i class="ti ti-search"></i>No tenders found</div></td></tr>`;
+}
+
+function renderNonCqcTable() {
+  const q = (document.getElementById('nonCqcSearch').value || '').toLowerCase();
+  const f = allTenders.filter(t => t.is_non_cqc && (!q || [t.title, t.org, t.region].some(v => (v || '').toLowerCase().includes(q))));
+  document.getElementById('nonCqcCountLabel').textContent = '(' + f.length + ')';
+  document.getElementById('nonCqcTable').innerHTML = f.length ? f.map(t => `<tr>
+    <td><div class="td-title">${t.title}</div></td>
+    <td style="color:var(--text-muted);font-size:13px">${t.org}</td>
+    <td style="font-weight:600;color:var(--purple)">${t.value}</td>
+    <td style="font-weight:600;color:var(--purple)">£${calcTotal((t.pricing || {}).items).toLocaleString()}+VAT</td>
+    <td>${badgeHtml(t.status)}</td>
+    <td style="color:var(--text-muted);white-space:nowrap">${fmtDate(t.deadline)}</td>
+    <td><div class="action-btns">
+      <button class="action-btn edit" onclick="openDrawer('${t.id}',true)"><i class="ti ti-edit"></i></button>
+      <button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button>
+    </div></td>
+  </tr>`).join('') : `<tr><td colspan="7"><div class="empty-state"><i class="ti ti-certificate"></i>No non-CQC listings yet</div></td></tr>`;
+}
+
+// AI UPLOAD
+function openAiModal(sectionType) {
+  currentAiIsNonCqc = sectionType === "noncqc"; currentSection = sectionType; extractedData = null; selectedFile = null;
+  document.getElementById('aiStep1').style.display = 'block';
+  document.getElementById('aiStep2').style.display = 'none';
+  document.getElementById('aiStep3').style.display = 'none';
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileSelectedBar').style.display = 'none';
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('aiAnalyseBtn').style.display = 'none';
+  document.getElementById('aiOpenFormBtn').style.display = 'none';
+  document.getElementById('aiOverlay').classList.add('open');
+}
+function closeAiModal() { document.getElementById('aiOverlay').classList.remove('open'); }
+function maybeCloseAi(e) { if (e.target === document.getElementById('aiOverlay')) closeAiModal(); }
+function handleDrag(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); }
+function handleDragLeave() { document.getElementById('uploadZone').classList.remove('dragover'); }
+function handleDrop(e) { e.preventDefault(); document.getElementById('uploadZone').classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) setFile(f); }
+function handleFileSelect(e) { const f = e.target.files[0]; if (f) setFile(f); }
+function setFile(file) {
+  selectedFile = file;
+  document.getElementById('selectedFileName').textContent = file.name;
+  document.getElementById('selectedFileSize').textContent = (file.size / 1024).toFixed(1) + ' KB · Ready to analyse';
+  document.getElementById('fileSelectedBar').style.display = 'flex';
+  document.getElementById('uploadZone').style.display = 'none';
+  document.getElementById('aiAnalyseBtn').style.display = 'flex';
+}
+function clearFile() {
+  selectedFile = null; document.getElementById('fileInput').value = '';
+  document.getElementById('fileSelectedBar').style.display = 'none';
+  document.getElementById('uploadZone').style.display = 'block';
+  document.getElementById('aiAnalyseBtn').style.display = 'none';
+}
+
+async function runAiExtraction() {
+  if (!selectedFile) return;
+  document.getElementById('aiStep1').style.display = 'none';
+  document.getElementById('aiStep2').style.display = 'block';
+  document.getElementById('aiAnalyseBtn').style.display = 'none';
+  const steps = ['ps1', 'ps2', 'ps3', 'ps4'];
+  for (let i = 0; i < steps.length; i++) {
+    await delay(700);
+    if (i > 0) document.getElementById(steps[i - 1]).className = 'proc-step done';
+    document.getElementById(steps[i]).className = 'proc-step active';
   }
+  try {
+    const isPdf = selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf');
+    let payload;
 
-  /* ── BADGE ── */
-  function statusBadge(s) {
-    const map={'Open':'badge-open','Closing soon':'badge-closing','Urgent':'badge-urgent','New opportunity':'badge-new'};
-    return `<span class="tender-badge ${map[s]||'badge-new'}">${s||'Open'}</span>`;
-  }
-
-  /* ── RENDER LIST ── */
-  function renderTenders(type) {
-    const list   = type==='care' ? allCareTenders : allCommercialTenders;
-    const filter = type==='care' ? careFilter     : commercialFilter;
-    const search = (document.getElementById(type+'-search').value||'').toLowerCase();
-    const el     = document.getElementById(type+'-tenders-list');
-
-    let items = list.filter(t=>t.status!=='Draft');
-    if(filter!=='all') items=items.filter(t=>(t.category||'').toLowerCase()===filter.toLowerCase());
-    if(search) items=items.filter(t=>
-      (t.title||'').toLowerCase().includes(search)||
-      (t.organisation||'').toLowerCase().includes(search)||
-      (t.region||'').toLowerCase().includes(search)
-    );
-
-    if(!items.length){
-      el.innerHTML=`<div class="empty-state"><h3>No tenders found</h3><p>Try adjusting your search or filter.</p></div>`;
-      return;
-    }
-
-    el.innerHTML=items.map(t=>`
-      <div class="tender-card" onclick='openModal(${JSON.stringify(t).replace(/'/g,"&#39;")})'>
-        <div>
-          <div class="tender-org">${t.organisation||'Unknown'} · ${t.region||''}</div>
-          <div class="tender-title">${t.title}</div>
-          <div class="tender-meta">
-            ${statusBadge(t.status)}
-            ${t.category?`<span>${t.category}</span>`:''}
-            ${t.duration?`<span>${t.duration}</span>`:''}
-          </div>
-          <span class="tender-view-btn">View details &amp; pricing →</span>
-        </div>
-        <div class="tender-right">
-          <div class="tender-value">${t.value||'—'}</div>
-          <div class="tender-deadline">${t.deadline?'Closes '+t.deadline:''}</div>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  /* ── RENDER NON-CQC ── */
-  function renderNonCQC() {
-    const list=allCareTenders.filter(t=>t.non_cqc&&t.status!=='Draft');
-    const el=document.getElementById('non-cqc-list');
-    if(!list.length){
-      el.innerHTML=`<p style="color:var(--muted);font-size:0.88rem;padding:0.5rem 0;">No pre-CQC listings at the moment — check back soon.</p>`;
-      return;
-    }
-    el.innerHTML=list.map(t=>`
-      <div class="tender-card" style="margin-bottom:0.75rem;" onclick='openModal(${JSON.stringify(t).replace(/'/g,"&#39;")})'>
-        <div>
-          <div class="tender-org">${t.organisation||''} · ${t.region||''}</div>
-          <div class="tender-title">${t.title}</div>
-          <div class="tender-meta">${statusBadge(t.status)}${t.why_new_providers?`<span style="color:var(--muted);font-size:0.8rem;">${t.why_new_providers}</span>`:''}</div>
-          <span class="tender-view-btn">View details &amp; pricing →</span>
-        </div>
-        <div class="tender-right">
-          <div class="tender-value">${t.value||'—'}</div>
-          <div class="tender-deadline">${t.deadline?'Closes '+t.deadline:''}</div>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  /* ── MODAL ── */
-  function openModal(t) {
-    // Header
-    document.getElementById('modal-status-badge').outerHTML=`<span id="modal-status-badge">${statusBadge(t.status)}</span>`;
-    document.getElementById('modal-category-badge').textContent=t.category||'';
-    document.getElementById('modal-org').textContent=t.organisation||'';
-    document.getElementById('modal-title').textContent=t.title||'';
-
-    // Meta pills
-    setpill('modal-value-pill',   t.value,    'Contract value');
-    setpill('modal-region-pill',  t.region,   'Region');
-    setpill('modal-deadline-pill',t.deadline, 'Deadline');
-    setpill('modal-duration-pill',t.duration, 'Duration');
-
-    // Description
-    const descEl=document.getElementById('modal-desc');
-    const descSec=document.getElementById('modal-desc-section');
-    if(t.description){ descEl.textContent=t.description; descSec.style.display=''; }
-    else { descSec.style.display='none'; }
-
-    // Eligibility — stored as "eligibility" in Supabase (array)
-    const reqSec=document.getElementById('modal-req-section');
-    const reqList=document.getElementById('modal-req-list');
-    const reqs=Array.isArray(t.eligibility) ? t.eligibility : [];
-    if(reqs.length){
-      reqList.innerHTML=reqs.map(r=>`<li>${r}</li>`).join('');
-      reqSec.style.display='';
-    } else { reqSec.style.display='none'; }
-
-    // Pricing — stored as object in Supabase e.g. { items:[{label,amount}], total, note }
-    const pricingEl=document.getElementById('modal-pricing-items');
-    const pricing=t.pricing||{};
-
-    // Support both object format {items,total,note} and array format
-    let pricingItems=[];
-    if(Array.isArray(pricing)){
-      pricingItems=pricing;
-    } else if(pricing.items && Array.isArray(pricing.items)){
-      pricingItems=pricing.items;
-    } else if(typeof pricing==='object' && Object.keys(pricing).length){
-      // flat object: treat each key/value pair as a line item
-      pricingItems=Object.entries(pricing)
-        .filter(([k])=>k!=='total'&&k!=='note'&&k!=='fee_note')
-        .map(([k,v])=>({label:k,amount:v}));
-    }
-
-    if(pricingItems.length){
-      pricingEl.innerHTML=pricingItems.map(p=>`
-        <div class="pricing-row">
-          <span class="pricing-label">${p.label||p.name||p.description||''}</span>
-          <span class="pricing-amount">${formatFee(p.amount||p.price||p.value||0)}</span>
-        </div>
-      `).join('');
+    if (isPdf) {
+      // Send PDF as base64 so Claude can read it natively
+      const base64 = await readFileAsBase64(selectedFile);
+      payload = { base64, mimetype: 'application/pdf', filename: selectedFile.name };
     } else {
-      pricingEl.innerHTML='<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">See below</span></div>';
+      // Send text files as plain text
+      const text = await readFileAsText(selectedFile);
+      payload = { text, filename: selectedFile.name };
     }
 
-    // Total — check multiple possible field names
-    const total=pricing.total||t.total_fee||t.fee||sumPricing(pricingItems);
-    document.getElementById('modal-total-fee').textContent=total?formatFee(total):'POA';
-    document.getElementById('modal-fee-note').textContent=pricing.note||pricing.fee_note||t.fee_note||'All fees are exclusive of VAT. Payment required before submission.';
+    const res = await fetch(`${API}/extract-tender`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
-    // Cana AI button — always shows the same regardless of submission link
-    const applyBtn=document.getElementById('modal-apply-btn');
-    applyBtn.href='https://cana.icongrp.co.uk';
-    applyBtn.innerHTML='<div class="btn-cta-icon">⚡</div><div class="btn-cta-text"><span class="btn-cta-label">Write with Cana AI</span><span class="btn-cta-desc">Let our AI system draft your full tender response instantly</span></div><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-    applyBtn.className='btn-cta btn-cta--ai';
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Server error ' + res.status);
 
-    document.getElementById('modal-overlay').classList.add('open');
-    document.body.style.overflow='hidden';
+    extractedData = data;
+    document.getElementById('ps4').className = 'proc-step done';
+    await delay(400);
+    document.getElementById('aiStep2').style.display = 'none';
+    document.getElementById('aiStep3').style.display = 'block';
+    renderPreview(data);
+    document.getElementById('aiOpenFormBtn').style.display = 'flex';
+  } catch (err) {
+    document.getElementById('aiStep2').style.display = 'none';
+    document.getElementById('aiStep1').style.display = 'block';
+    document.getElementById('fileSelectedBar').style.display = 'flex';
+    document.getElementById('uploadZone').style.display = 'none';
+    document.getElementById('aiAnalyseBtn').style.display = 'flex';
+    showToast('Extraction failed: ' + err.message, 'error');
   }
+}
 
-  function setpill(id,val,label){
-    const el=document.getElementById(id);
-    if(val){ el.innerHTML=`<strong>${label}:</strong> ${val}`; el.style.display=''; }
-    else { el.style.display='none'; }
-  }
+function readFileAsBase64(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => {
+      // Strip the data URL prefix (e.g. "data:application/pdf;base64,")
+      const base64 = e.target.result.split(',')[1];
+      res(base64);
+    };
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+}
 
-  function formatFee(amount){
-    if(!amount||isNaN(amount)) return String(amount||'—');
-    return '£'+Number(amount).toLocaleString('en-GB');
-  }
+function readFileAsText(file) {
+  return new Promise((res, rej) => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result);
+    reader.onerror = rej;
+    reader.readAsText(file);
+  });
+}
 
-  function sumPricing(items){
-    if(!items||!items.length) return 0;
-    return items.reduce((s,p)=>s+(Number(p.amount||p.price||0)),0);
-  }
-
-  function closeModal(){
-    document.getElementById('modal-overlay').classList.remove('open');
-    document.body.style.overflow='';
-  }
-
-  function closeModalOnBg(e){
-    if(e.target===document.getElementById('modal-overlay')) closeModal();
-  }
-
-  document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
-
-  /* ── SAMPLE DATA (shown when database is empty) ── */
-  const SAMPLE_TENDERS = [
-    {
-      id:'sample-1',
-      title:'Domiciliary Care Services — Older Adults',
-      organisation:'Birmingham City Council',
-      region:'West Midlands',
-      category:'Domiciliary care',
-      value:'£2,400,000',
-      duration:'3 years + 2 year extension',
-      deadline:'31 July 2026',
-      status:'Open',
-      description:'Birmingham City Council is seeking experienced domiciliary care providers to deliver person-centred home care services to older adults aged 65 and above. Services include personal care, medication support, and reablement. Providers must demonstrate strong CQC ratings and experience managing complex care packages.',
-      eligibility_requirements:[
-        'CQC registered with a rating of Good or Outstanding',
-        'Minimum 2 years experience delivering domiciliary care',
-        'Valid public liability insurance of at least £5 million',
-        'DBS checks completed for all staff',
-        'Real Living Wage employer',
-      ],
-      pricing:[
-        { label:'Tender document preparation', amount:750 },
-        { label:'Quality questions & method statements', amount:500 },
-        { label:'Pricing schedule completion', amount:250 },
-      ],
-      total_fee:1500,
-      fee_note:'Fee is per tender submission, exclusive of VAT. Includes full review and quality check before submission.',
-      submission_link:'https://www.birmingham.gov.uk/tenders',
-      non_cqc: false,
-    },
-    {
-      id:'sample-2',
-      title:'Supported Living Services — Learning Disabilities',
-      organisation:'Lancashire County Council',
-      region:'North West',
-      category:'Supported living',
-      value:'£850,000',
-      duration:'2 years + 1 year extension',
-      deadline:'15 August 2026',
-      status:'Closing soon',
-      description:'Lancashire County Council requires providers to deliver supported living services for adults with learning disabilities and autism. Providers will support individuals in their own tenancies with 24/7 support packages, promoting independence and community integration.',
-      eligibility_requirements:[
-        'CQC registered for Supported Living',
-        'Experience supporting adults with learning disabilities or autism',
-        'Ability to provide 24/7 waking or sleeping night support',
-        'Commitment to co-production and personalised support planning',
-      ],
-      pricing:[
-        { label:'PQQ / SQ completion', amount:500 },
-        { label:'ITT quality questions', amount:650 },
-        { label:'Social value submission', amount:350 },
-      ],
-      total_fee:1500,
-      fee_note:'Fee is per tender submission, exclusive of VAT. Includes unlimited revisions until submission deadline.',
-      submission_link:'https://www.lancashire.gov.uk/tenders',
-      non_cqc: false,
-    },
-    {
-      id:'sample-3',
-      title:'Entry-Level Homecare Framework — New Providers',
-      organisation:'Stockport Metropolitan Borough Council',
-      region:'Greater Manchester',
-      category:'Domiciliary care',
-      value:'£120,000',
-      duration:'1 year',
-      deadline:'20 July 2026',
-      status:'New opportunity',
-      description:'An ideal opportunity for new and emerging care providers to gain their first local authority contract. This framework is open to providers who are CQC registered but not yet rated, allowing you to build a track record while delivering quality care in the community.',
-      eligibility_requirements:[
-        'CQC registered (rating not required)',
-        'Minimum 3 months trading history',
-        'Basic DBS checks for all care staff',
-        'Valid employers liability insurance',
-      ],
-      pricing:[
-        { label:'Application document preparation', amount:500 },
-        { label:'Quality questions', amount:300 },
-        { label:'Compliance review', amount:200 },
-      ],
-      total_fee:1000,
-      fee_note:'Reduced fee for new providers. Exclusive of VAT.',
-      submission_link:'',
-      non_cqc: true,
-      why_new_providers:'No CQC rating required — perfect for new providers building their track record.',
-    },
-    {
-      id:'sample-4',
-      title:'Commercial Cleaning Services — Office Estate',
-      organisation:'Thurrock Council',
-      region:'Essex',
-      category:'Cleaning',
-      value:'£210,000',
-      duration:'3 years',
-      deadline:'5 July 2026',
-      status:'Urgent',
-      description:'Thurrock Council requires a commercial cleaning contractor to deliver daily cleaning services across its corporate office estate, including council chambers, public-facing offices, and depot facilities. The contract includes window cleaning, deep cleans, and reactive cleaning following incidents.',
-      eligibility_requirements:[
-        'Minimum 3 years commercial cleaning experience',
-        'COSHH trained operatives',
-        'Valid public liability insurance of at least £5 million',
-        'DBS checks for staff accessing council buildings',
-        'ISO 9001 or equivalent quality management preferred',
-      ],
-      pricing:[
-        { label:'Tender submission preparation', amount:600 },
-        { label:'Pricing schedule & costings', amount:400 },
-        { label:'Method statement & TUPE review', amount:500 },
-      ],
-      total_fee:1500,
-      fee_note:'Fee is per tender submission, exclusive of VAT.',
-      submission_link:'https://in-tendhost.co.uk/thurrockcouncil',
-    },
-    {
-      id:'sample-5',
-      title:'Construction & Refurbishment Works Framework',
-      organisation:'STAR Procurement (Stockport MBC)',
-      region:'North West',
-      category:'Construction',
-      value:'£70,000 per year',
-      duration:'2 years + 1 year extension',
-      deadline:'5 July 2026',
-      status:'Open',
-      description:'STAR Procurement on behalf of Stockport Metropolitan Borough Council is seeking contractors to deliver a range of construction, refurbishment, and maintenance works across council-owned assets. Works include planned refurbishment, reactive repairs, and minor new-build projects.',
-      eligibility_requirements:[
-        'Registered on the Construction Hub and CDP',
-        'Real Living Wage employer',
-        'Minimum £2M employers liability insurance',
-        'Match My Project registration (at least 1 project per year)',
-        'Social Value Portal (SVP) registration required post-award',
-      ],
-      pricing:[
-        { label:'PQQ / SQ preparation', amount:500 },
-        { label:'Quality questions (methodology, experience, resource)', amount:750 },
-        { label:'Social value submission (SVP portal)', amount:500 },
-        { label:'Commercial pricing schedule', amount:250 },
-      ],
-      total_fee:2000,
-      fee_note:'Fee is per tender submission, exclusive of VAT. Includes BAFO support if required.',
-      submission_link:'https://www.chest.ac.uk',
-    },
+function renderPreview(data) {
+  const ch = '<span class="conf conf-high"><i class="ti ti-check" style="font-size:10px"></i> Extracted</span>';
+  const fields = [
+    { l: 'Tender title', v: data.title || 'Not found' },
+    { l: 'Organisation', v: data.org || 'Not found' },
+    { l: 'Region', v: data.region || 'Not found' },
+    { l: 'Contract value', v: data.value || 'Not found' },
+    { l: 'Duration', v: data.duration || 'Not found' },
+    { l: 'Deadline', v: data.deadline || 'Not found' },
+    { l: 'Our price (from doc)', v: data.our_price || 'Not stated' },
+    { l: 'Description', v: data.description || 'Not found', multi: true },
+    { l: 'Eligibility', v: (data.eligibility || []).join('\n'), multi: true },
   ];
+  document.getElementById('previewFields').innerHTML = fields.map(f => `
+    <div class="pf">
+      <div class="pf-label"><span class="ai-tag">AI</span>${f.l}${ch}</div>
+      <div class="pf-value ${f.multi ? 'multi' : ''}">${f.v || '—'}</div>
+    </div>`).join('');
+}
 
-  /* ── LOAD DATA ── */
-  async function loadData() {
-    try {
-      const res=await fetch('/.netlify/functions/get-tenders');
-      if(!res.ok) throw new Error('fetch failed');
-      const data=await res.json();
+function openInForm() { closeAiModal(); openDrawer(null, currentSection, extractedData); }
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-      // If database has real tenders use them, otherwise show samples
-      const tenders = (data && data.length > 0) ? data : SAMPLE_TENDERS;
+// DRAWER
+function openDrawer(tOrId, sectionType, aiData = null) {
+  // sectionType: 'care' | 'commercial' | 'noncqc'
+  currentSection = sectionType || 'care';
+  const isNc = sectionType === 'noncqc';
+  const isCommercial = sectionType === 'commercial';
 
-      allCareTenders       = tenders.filter(t=>isCare(t));
-      allCommercialTenders = tenders.filter(t=>!isCare(t));
+  document.getElementById('editIsNonCqc').value = isNc ? '1' : '0';
+  document.getElementById('categoryRow').style.display = isNc ? 'none' : 'grid';
+  document.getElementById('whyCqcRow').style.display = isNc ? 'flex' : 'none';
+  document.getElementById('aiBadge').style.display = aiData ? 'inline-flex' : 'none';
+  ['Title','Org','Region','Value','Duration','Deadline','Desc','Link'].forEach(f => {
+    const el = document.getElementById('f'+f); if (el) el.classList.remove('ai-filled');
+    const hint = document.getElementById('hint'+f); if (hint) hint.style.display = 'none';
+  });
 
-      const lc=allCareTenders.filter(t=>t.status!=='Draft').length;
-      const lm=allCommercialTenders.filter(t=>t.status!=='Draft').length;
-      document.getElementById('stat-care-count').textContent       = lc||'0';
-      document.getElementById('stat-commercial-count').textContent = lm||'0';
+  // Resolve tender object — may be passed directly or as an id string
+  let t = null;
+  if (tOrId && typeof tOrId === 'object') t = tOrId;
+  else if (tOrId && typeof tOrId === 'string') t = allTenders.find(x => x.id === tOrId);
 
-      renderTenders('care');
-      renderTenders('commercial');
-      renderNonCQC();
-    } catch(e) {
-      // On error, still show samples so the site never looks empty
-      allCareTenders       = SAMPLE_TENDERS.filter(t=>isCare(t));
-      allCommercialTenders = SAMPLE_TENDERS.filter(t=>!isCare(t));
-      document.getElementById('stat-care-count').textContent       = allCareTenders.length;
-      document.getElementById('stat-commercial-count').textContent = allCommercialTenders.length;
-      renderTenders('care');
-      renderTenders('commercial');
-      renderNonCQC();
+  if (t) {
+    // EDIT existing tender
+    document.getElementById('editId').value = t.id || '';
+    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Edit tender ';
+    document.getElementById('saveLabel').textContent = 'Save changes';
+    document.getElementById('fTitle').value = t.title || '';
+    document.getElementById('fOrg').value = t.org || t.organisation || '';
+    document.getElementById('fRegion').value = t.region || '';
+    document.getElementById('fValue').value = t.value || '';
+    document.getElementById('fDuration').value = t.duration || '';
+    document.getElementById('fDeadline').value = t.deadline || '';
+    document.getElementById('fStatus').value = t.status || 'open';
+    document.getElementById('fDesc').value = t.description || '';
+    document.getElementById('fLink').value = t.link || t.submission_link || '';
+    document.getElementById('fPricingNote').value = (t.pricing || {}).note || '';
+    if (!isNc) document.getElementById('fCategory').value = t.category || (isCommercial ? 'Construction' : 'Domiciliary care');
+    if (isNc) document.getElementById('fWhyCqc').value = t.why_cqc || '';
+    buildPriceRows((t.pricing || {}).items || []);
+    buildEligRows(Array.isArray(t.eligibility) ? t.eligibility : []);
+
+  } else if (aiData) {
+    // AI-extracted data
+    document.getElementById('editId').value = '';
+    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Review AI-extracted tender ';
+    document.getElementById('saveLabel').textContent = 'Publish tender';
+    [['fTitle',aiData.title,'hintTitle'],['fOrg',aiData.org,'hintOrg'],['fRegion',aiData.region,'hintRegion'],
+     ['fValue',aiData.value,'hintValue'],['fDuration',aiData.duration,'hintDuration'],
+     ['fDeadline',aiData.deadline,'hintDeadline'],['fDesc',aiData.description,'hintDesc'],['fLink',aiData.link,'hintLink']
+    ].forEach(([id,val,hint]) => {
+      const el = document.getElementById(id); el.value = val || '';
+      if (val) { el.classList.add('ai-filled'); const h = document.getElementById(hint); if (h) h.style.display = 'flex'; }
+    });
+    document.getElementById('fStatus').value = 'open';
+    document.getElementById('fPricingNote').value = 'One-off fee. No hidden charges. Payable on engagement.';
+    if (!isNc) {
+      // Use AI-detected category, or default based on section
+      const aiCat = aiData.category || (isCommercial ? 'Construction' : 'Domiciliary care');
+      document.getElementById('fCategory').value = aiCat;
     }
-  }
+    const priceItems = aiData.our_price
+      ? [{ label: 'Bid writing & strategy (from document)', price: aiData.our_price.replace(/[^0-9.]/g,'') }]
+      : [{ label: 'Bid writing & strategy', price: '' }, { label: 'Compliance review', price: '' }, { label: 'Submission support', price: '' }];
+    buildPriceRows(priceItems);
+    buildEligRows(aiData.eligibility && aiData.eligibility.length ? aiData.eligibility : ['']);
 
-  loadData();
+  } else {
+    // NEW blank tender
+    document.getElementById('editId').value = '';
+    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Add ' + (isNc ? 'listing ' : isCommercial ? 'commercial tender ' : 'care tender ');
+    document.getElementById('saveLabel').textContent = isNc ? 'Publish listing' : 'Publish tender';
+    ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink'].forEach(f => {
+      const el = document.getElementById(f); if (el) { el.value = ''; el.classList.remove('ai-filled'); }
+    });
+    document.getElementById('fDeadline').value = '';
+    document.getElementById('fStatus').value = 'open';
+    document.getElementById('fPricingNote').value = 'One-off fee. No hidden charges. Payable on engagement.';
+    // Default category based on which section we are in
+    if (!isNc) document.getElementById('fCategory').value = isCommercial ? 'Construction' : 'Domiciliary care';
+    buildPriceRows([{ label: 'Bid writing & strategy', price: '' }, { label: 'Compliance review', price: '' }, { label: 'Submission support', price: '' }]);
+    buildEligRows(['']);
+  }
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+function closeDrawer() { document.getElementById('drawerOverlay').classList.remove('open'); }
+function maybeCloseDrawer(e) { if (e.target === document.getElementById('drawerOverlay')) closeDrawer(); }
+
+// PRICING
+let prc = 0;
+function buildPriceRows(items) { prc = 0; document.getElementById('pricingBuilder').innerHTML = ''; items.forEach(i => _addPR(i.label, i.price)); updatePriceTotal(); }
+function _addPR(label, price) {
+  const b = document.getElementById('pricingBuilder');
+  const d = document.createElement('div'); d.className = 'price-row'; d.id = 'pr' + prc;
+  d.innerHTML = `<input type="text" placeholder="e.g. Bid writing & strategy" value="${label || ''}" oninput="updatePriceTotal()"><input type="number" placeholder="Amount" value="${price || ''}" oninput="updatePriceTotal()"><button class="rm-price" onclick="document.getElementById('pr${prc}').remove();updatePriceTotal()"><i class="ti ti-x"></i></button>`;
+  b.appendChild(d); prc++;
+}
+function addPriceRow() { _addPR('', ''); updatePriceTotal(); }
+function updatePriceTotal() { const t = Array.from(document.querySelectorAll('#pricingBuilder input[type=number]')).reduce((s, i) => s + (parseFloat(i.value) || 0), 0); document.getElementById('priceTotalPreview').textContent = t > 0 ? '£' + t.toLocaleString() + '+VAT' : '£0'; }
+function getPriceItems() { return Array.from(document.querySelectorAll('#pricingBuilder .price-row')).map(r => { const ins = r.querySelectorAll('input'); return { label: ins[0].value, price: ins[1].value }; }).filter(i => i.label || i.price); }
+
+// ELIGIBILITY
+let ec = 0;
+function buildEligRows(items) { ec = 0; document.getElementById('eligList').innerHTML = ''; items.forEach(v => addEligRow(v)); }
+function addEligRow(val = '') {
+  const list = document.getElementById('eligList');
+  const d = document.createElement('div'); d.className = 'elig-item'; d.id = 'el' + ec;
+  d.innerHTML = `<input type="text" placeholder="e.g. CQC registration required" value="${val}"><button class="rm-elig" onclick="this.parentElement.remove()"><i class="ti ti-x"></i></button>`;
+  list.appendChild(d); ec++;
+}
+function getEligItems() { return Array.from(document.querySelectorAll('#eligList input')).map(i => i.value).filter(v => v.trim()); }
+
+// SAVE TO SUPABASE
+async function saveTender(draft = false) {
+  const isNonCqc = document.getElementById('editIsNonCqc').value === '1';
+  const id = document.getElementById('editId').value;
+  const pItems = getPriceItems();
+  const total = pItems.reduce((s, i) => s + (parseFloat(i.price) || 0), 0);
+  const deadline = document.getElementById('fDeadline').value;
+
+  const tender = {
+    id: id || (isNonCqc ? 'NC' : 'T') + '-2026-' + String(nextId++).padStart(3, '0'),
+    status: draft ? 'draft' : document.getElementById('fStatus').value,
+    title: document.getElementById('fTitle').value,
+    org: document.getElementById('fOrg').value,
+    region: document.getElementById('fRegion').value,
+    value: document.getElementById('fValue').value,
+    duration: document.getElementById('fDuration').value,
+    deadline: deadline || null,
+    days_left: deadline ? Math.max(0, Math.round((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24))) : 0,
+    link: document.getElementById('fLink').value,
+    description: document.getElementById('fDesc').value,
+    pricing: { items: pItems, total: '£' + total.toLocaleString() + '+VAT', note: document.getElementById('fPricingNote').value },
+    eligibility: getEligItems(),
+    is_non_cqc: (function() {
+      const cat = document.getElementById('fCategory').value || '';
+      const commercialCats = ['Construction','Facilities','Cleaning','Consultancy','IT & Digital','Logistics','Other'];
+      if (commercialCats.includes(cat)) return false; // never non-CQC for commercial
+      return isNonCqc || isNonCqcEligible({category: cat, eligibility: getEligItems()});
+    })(),
+    why_cqc: isNonCqc ? document.getElementById('fWhyCqc').value : null,
+    category: document.getElementById('fCategory').value || null,
+  };
+
+  // Show saving state
+  document.getElementById('savingSpinner').style.display = 'block';
+  document.getElementById('saveIcon').style.display = 'none';
+  document.getElementById('publishBtn').disabled = true;
+
+  try {
+    const res = await fetch(`${API}/save-tender`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'upsert', tender })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    // Update local data
+    const idx = allTenders.findIndex(x => x.id === tender.id);
+    if (idx > -1) allTenders[idx] = tender;
+    else allTenders.unshift(tender);
+
+    closeDrawer();
+    renderAll();
+    showToast(draft ? 'Draft saved' : 'Tender published to live site ✓', 'success');
+  } catch (err) {
+    showToast('Save failed: ' + err.message, 'error');
+  } finally {
+    document.getElementById('savingSpinner').style.display = 'none';
+    document.getElementById('saveIcon').style.display = 'inline';
+    document.getElementById('publishBtn').disabled = false;
+  }
+}
+function saveDraft() { saveTender(true); }
+
+// DELETE
+function askDelete(id) { deleteTarget = { id }; document.getElementById('confirmOverlay').classList.add('open'); }
+async function confirmDelete() {
+  const { id } = deleteTarget;
+  const tender = allTenders.find(x => x.id === id);
+  document.getElementById('confirmOverlay').classList.remove('open');
+  try {
+    const res = await fetch(`${API}/save-tender`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', tender: { id } })
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    allTenders = allTenders.filter(x => x.id !== id);
+    renderAll();
+    showToast('Listing deleted', 'error');
+  } catch (err) {
+    showToast('Delete failed: ' + err.message, 'error');
+  }
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.className = 'toast show ' + (type || '');
+  const icons = { success: 'ti-check', error: 'ti-alert-circle', ai: 'ti-sparkles' };
+  document.getElementById('toastIcon').className = 'ti ' + (icons[type] || 'ti-check');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
 </script>
 </body>
 </html>
