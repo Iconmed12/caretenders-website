@@ -708,77 +708,88 @@ function renderPreview(data) {
     </div>`).join('');
 }
 
-function openInForm() { closeAiModal(); openDrawer(null, currentAiIsNonCqc, extractedData); }
+function openInForm() { closeAiModal(); openDrawer(null, currentSection, extractedData); }
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 // DRAWER
-function openDrawer(id, isNonCqc, aiData = null) {
-  document.getElementById('editIsNonCqc').value = isNonCqc ? '1' : '0';
-  document.getElementById('categoryRow').style.display = isNonCqc ? 'none' : 'grid';
-  document.getElementById('whyCqcRow').style.display = isNonCqc ? 'flex' : 'none';
+function openDrawer(tOrId, sectionType, aiData = null) {
+  // sectionType: 'care' | 'commercial' | 'noncqc'
+  currentSection = sectionType || 'care';
+  const isNc = sectionType === 'noncqc';
+  const isCommercial = sectionType === 'commercial';
+
+  document.getElementById('editIsNonCqc').value = isNc ? '1' : '0';
+  document.getElementById('categoryRow').style.display = isNc ? 'none' : 'grid';
+  document.getElementById('whyCqcRow').style.display = isNc ? 'flex' : 'none';
   document.getElementById('aiBadge').style.display = aiData ? 'inline-flex' : 'none';
-  ['Title', 'Org', 'Region', 'Value', 'Duration', 'Deadline', 'Desc', 'Link'].forEach(f => {
-    const el = document.getElementById('f' + f); if (el) el.classList.remove('ai-filled');
-    const hint = document.getElementById('hint' + f); if (hint) hint.style.display = 'none';
+  ['Title','Org','Region','Value','Duration','Deadline','Desc','Link'].forEach(f => {
+    const el = document.getElementById('f'+f); if (el) el.classList.remove('ai-filled');
+    const hint = document.getElementById('hint'+f); if (hint) hint.style.display = 'none';
   });
 
-  if (id) {
-    const t = allTenders.find(x => x.id === id);
-    if (!t) return;
-    document.getElementById('editId').value = id;
+  // Resolve tender object — may be passed directly or as an id string
+  let t = null;
+  if (tOrId && typeof tOrId === 'object') t = tOrId;
+  else if (tOrId && typeof tOrId === 'string') t = allTenders.find(x => x.id === tOrId);
+
+  if (t) {
+    // EDIT existing tender
+    document.getElementById('editId').value = t.id || '';
     document.getElementById('drawerTitleText').childNodes[0].textContent = 'Edit tender ';
     document.getElementById('saveLabel').textContent = 'Save changes';
     document.getElementById('fTitle').value = t.title || '';
-    document.getElementById('fOrg').value = t.org || '';
+    document.getElementById('fOrg').value = t.org || t.organisation || '';
     document.getElementById('fRegion').value = t.region || '';
     document.getElementById('fValue').value = t.value || '';
     document.getElementById('fDuration').value = t.duration || '';
     document.getElementById('fDeadline').value = t.deadline || '';
     document.getElementById('fStatus').value = t.status || 'open';
     document.getElementById('fDesc').value = t.description || '';
-    document.getElementById('fLink').value = t.link || '';
+    document.getElementById('fLink').value = t.link || t.submission_link || '';
     document.getElementById('fPricingNote').value = (t.pricing || {}).note || '';
-    if (!isNonCqc) document.getElementById('fCategory').value = t.category || 'domiciliary';
-    if (isNonCqc) document.getElementById('fWhyCqc').value = t.why_cqc || '';
-    const items = (t.pricing || {}).items || [];
-    buildPriceRows(items);
-    const elig = Array.isArray(t.eligibility) ? t.eligibility : (t.eligibility ? JSON.parse(t.eligibility) : []);
-    buildEligRows(elig);
+    if (!isNc) document.getElementById('fCategory').value = t.category || (isCommercial ? 'Construction' : 'Domiciliary care');
+    if (isNc) document.getElementById('fWhyCqc').value = t.why_cqc || '';
+    buildPriceRows((t.pricing || {}).items || []);
+    buildEligRows(Array.isArray(t.eligibility) ? t.eligibility : []);
+
   } else if (aiData) {
+    // AI-extracted data
     document.getElementById('editId').value = '';
     document.getElementById('drawerTitleText').childNodes[0].textContent = 'Review AI-extracted tender ';
     document.getElementById('saveLabel').textContent = 'Publish tender';
-    const fields = [
-      { id: 'fTitle', val: aiData.title, hint: 'hintTitle' },
-      { id: 'fOrg', val: aiData.org, hint: 'hintOrg' },
-      { id: 'fRegion', val: aiData.region, hint: 'hintRegion' },
-      { id: 'fValue', val: aiData.value, hint: 'hintValue' },
-      { id: 'fDuration', val: aiData.duration, hint: 'hintDuration' },
-      { id: 'fDeadline', val: aiData.deadline, hint: 'hintDeadline' },
-      { id: 'fDesc', val: aiData.description, hint: 'hintDesc' },
-      { id: 'fLink', val: aiData.link, hint: 'hintLink' },
-    ];
-    fields.forEach(f => {
-      const el = document.getElementById(f.id);
-      el.value = f.val || '';
-      if (f.val) { el.classList.add('ai-filled'); const hint = document.getElementById(f.hint); if (hint) hint.style.display = 'flex'; }
+    [['fTitle',aiData.title,'hintTitle'],['fOrg',aiData.org,'hintOrg'],['fRegion',aiData.region,'hintRegion'],
+     ['fValue',aiData.value,'hintValue'],['fDuration',aiData.duration,'hintDuration'],
+     ['fDeadline',aiData.deadline,'hintDeadline'],['fDesc',aiData.description,'hintDesc'],['fLink',aiData.link,'hintLink']
+    ].forEach(([id,val,hint]) => {
+      const el = document.getElementById(id); el.value = val || '';
+      if (val) { el.classList.add('ai-filled'); const h = document.getElementById(hint); if (h) h.style.display = 'flex'; }
     });
     document.getElementById('fStatus').value = 'open';
     document.getElementById('fPricingNote').value = 'One-off fee. No hidden charges. Payable on engagement.';
-    if (!isNonCqc && aiData.category) document.getElementById('fCategory').value = aiData.category;
+    if (!isNc) {
+      // Use AI-detected category, or default based on section
+      const aiCat = aiData.category || (isCommercial ? 'Construction' : 'Domiciliary care');
+      document.getElementById('fCategory').value = aiCat;
+    }
     const priceItems = aiData.our_price
-      ? [{ label: 'Bid writing & strategy (from document)', price: aiData.our_price.replace(/[^0-9.]/g, '') }]
+      ? [{ label: 'Bid writing & strategy (from document)', price: aiData.our_price.replace(/[^0-9.]/g,'') }]
       : [{ label: 'Bid writing & strategy', price: '' }, { label: 'Compliance review', price: '' }, { label: 'Submission support', price: '' }];
     buildPriceRows(priceItems);
     buildEligRows(aiData.eligibility && aiData.eligibility.length ? aiData.eligibility : ['']);
+
   } else {
+    // NEW blank tender
     document.getElementById('editId').value = '';
-    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Add ' + (isNonCqc ? 'listing ' : 'tender ');
-    document.getElementById('saveLabel').textContent = isNonCqc ? 'Publish listing' : 'Publish tender';
-    ['fTitle', 'fOrg', 'fRegion', 'fValue', 'fDuration', 'fDesc', 'fWhyCqc', 'fLink'].forEach(f => { const el = document.getElementById(f); if (el) { el.value = ''; el.classList.remove('ai-filled'); } });
+    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Add ' + (isNc ? 'listing ' : isCommercial ? 'commercial tender ' : 'care tender ');
+    document.getElementById('saveLabel').textContent = isNc ? 'Publish listing' : 'Publish tender';
+    ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink'].forEach(f => {
+      const el = document.getElementById(f); if (el) { el.value = ''; el.classList.remove('ai-filled'); }
+    });
     document.getElementById('fDeadline').value = '';
     document.getElementById('fStatus').value = 'open';
     document.getElementById('fPricingNote').value = 'One-off fee. No hidden charges. Payable on engagement.';
+    // Default category based on which section we are in
+    if (!isNc) document.getElementById('fCategory').value = isCommercial ? 'Construction' : 'Domiciliary care';
     buildPriceRows([{ label: 'Bid writing & strategy', price: '' }, { label: 'Compliance review', price: '' }, { label: 'Submission support', price: '' }]);
     buildEligRows(['']);
   }
@@ -833,9 +844,14 @@ async function saveTender(draft = false) {
     description: document.getElementById('fDesc').value,
     pricing: { items: pItems, total: '£' + total.toLocaleString() + '+VAT', note: document.getElementById('fPricingNote').value },
     eligibility: getEligItems(),
-    is_non_cqc: isNonCqc || isNonCqcEligible({category: document.getElementById('fCategory').value, eligibility: getEligItems()}),
+    is_non_cqc: (function() {
+      const cat = document.getElementById('fCategory').value || '';
+      const commercialCats = ['Construction','Facilities','Cleaning','Consultancy','IT & Digital','Logistics','Other'];
+      if (commercialCats.includes(cat)) return false; // never non-CQC for commercial
+      return isNonCqc || isNonCqcEligible({category: cat, eligibility: getEligItems()});
+    })(),
     why_cqc: isNonCqc ? document.getElementById('fWhyCqc').value : null,
-    category: !isNonCqc ? document.getElementById('fCategory').value : null,
+    category: document.getElementById('fCategory').value || null,
   };
 
   // Show saving state
