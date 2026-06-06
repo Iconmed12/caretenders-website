@@ -312,12 +312,8 @@
 
 
       // Set paywall stripe link
-      if (tenderData.stripe_link) {
-        document.getElementById('paywall-btn').href = tenderData.stripe_link;
-      } else {
-        document.getElementById('paywall-btn').href = 'mailto:consulting@icongrp.co.uk?subject=Cana AI payment: ' + encodeURIComponent(tenderData.title||'');
-        document.getElementById('paywall-btn').textContent = 'Contact us to unlock full bid';
-      }
+      // Always use the fixed Cana AI payment link
+      document.getElementById('paywall-btn').href = 'https://buy.stripe.com/8x25kC9tl9QjeqRdnucbC02';
 
     } catch(e) {
       document.getElementById('tender-title').textContent = 'Could not load tender';
