@@ -774,6 +774,7 @@
 
     const subtotal = explicitTotal || itemsSum || 0;
     window._currentTenderSubtotal = subtotal;
+    window._currentStripeLink = t.stripe_link||'';
     const totalIncVat = subtotal ? addVat(subtotal) : 0;
 
     if(pricingItems.length){
@@ -840,42 +841,13 @@
     return items.reduce((s,p)=>s+(Number(p.amount||p.price||0)),0);
   }
 
-  // Stripe publishable key
-  const STRIPE_PK = 'pk_live_51RxX99Cyj81ZAAJNd2EcZeTGzfz1mzuvXecvKTxZ2OVSuWOdP7KBwbvOMiEdhQwvlseUvpqpiuzosFdZURG67gau001EHcJxL1';
-
-  async function handlePayNow() {
-    const subtotal = window._currentTenderSubtotal || 0;
-    const title    = window._currentTenderTitle || 'Tender';
-
-    if (!subtotal) {
-      // Fee not set on this tender — send to email
+  function handlePayNow() {
+    const link  = window._currentStripeLink || '';
+    const title = window._currentTenderTitle || 'Tender';
+    if (link) {
+      window.location.href = link;
+    } else {
       window.location.href = 'mailto:consulting@icongrp.co.uk?subject=Payment enquiry: ' + encodeURIComponent(title);
-      return;
-    }
-
-    const btn   = document.getElementById('modal-pay-btn');
-    const label = document.getElementById('modal-pay-label');
-    label.textContent = '⏳ Preparing payment...';
-    btn.style.opacity = '0.8';
-    btn.style.pointerEvents = 'none';
-
-    try {
-      const res = await fetch('/.netlify/functions/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenderTitle: title, subtotal: subtotal })
-      });
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || 'No URL returned');
-      }
-    } catch(e) {
-      label.textContent = '💳 Pay for bid support';
-      btn.style.opacity = '1';
-      btn.style.pointerEvents = 'auto';
-      alert('Payment could not be started. Please call us on 01268 20 30 10 or email consulting@icongrp.co.uk');
     }
   }
 
