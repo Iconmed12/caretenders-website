@@ -35,7 +35,7 @@ exports.handler = async (event) => {
       return {
         statusCode: 400,
         headers: corsHeaders,
-        body: JSON.stringify({ error: 'This tender is not yet ready — our team is still adding the questions. Please contact consulting@icongrp.co.uk.' })
+        body: JSON.stringify({ error: 'This tender is not yet ready for Cana AI. Please contact consulting@icongrp.co.uk.' })
       };
     }
 
@@ -46,71 +46,31 @@ exports.handler = async (event) => {
     const scoringText = scoringDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 800);
     const knowledge = tender.cana_knowledge || '';
 
-    const systemPrompt = 'You are Cana AI, an expert UK public sector tender writer for ICONGRP Consulting. You write high-quality, compliant, and compelling tender responses on behalf of organisations bidding for contracts.' +
-      (knowledge ? '
+    var systemPrompt = 'You are Cana AI, an expert UK public sector tender writer for ICONGRP Consulting. You write high-quality, compliant, and compelling tender responses on behalf of organisations bidding for contracts.';
+    if (knowledge) { systemPrompt += ' WRITING GUIDANCE: ' + knowledge; }
+    systemPrompt += ' RULES: Write in first person on behalf of the bidding organisation. Be specific and use the company details provided. Use professional UK English. Structure each answer with a strong opening, clear evidence, and a confident conclusion. Every sentence must add value. Respect word limits.';
 
-WRITING GUIDANCE:
-' + knowledge : '') +
-      '
+    var questionsText = '';
+    for (var i = 0; i < questions.length; i++) {
+      var q = questions[i];
+      questionsText += 'Question ' + (i+1) + ': ' + q.question;
+      if (q.scoring) questionsText += ' [Scoring: ' + q.scoring + ']';
+      if (q.wordLimit) questionsText += ' [Word limit: ' + q.wordLimit + ' words]';
+      questionsText += '\n\n';
+    }
 
-RULES:
-- Write in first person on behalf of the bidding organisation
-- Be specific — use the company details provided throughout every answer
-- Use professional UK English
-- Structure each answer with a strong opening, clear evidence, and confident conclusion
-- Every sentence must add value — no generic filler
-- Respect word limits specified for each question';
+    var formatHint = '';
+    for (var j = 0; j < questions.length; j++) {
+      formatHint += 'QUESTION ' + (j+1) + ': ' + questions[j].question.substring(0, 50) + '\n[your response here]\n\n';
+    }
 
-    const questionsText = questions.map(function(q, i) {
-      return 'Question ' + (i+1) + ': ' + q.question +
-        (q.scoring ? ' [Scoring weight: ' + q.scoring + ']' : '') +
-        (q.wordLimit ? ' [Word limit: ' + q.wordLimit + ' words]' : '');
-    }).join('
-
-');
-
-    const userPrompt = 'Write tender responses for: ' + tender.title + '
-Buyer: ' + (tender.org || '') +
-      '
-
-BIDDING ORGANISATION:
-' +
-      '- Name: ' + companyDetails.name + '
-' +
-      '- Founded: ' + companyDetails.founded + '
-' +
-      '- Staff: ' + companyDetails.staff + '
-' +
-      '- CQC Status: ' + companyDetails.cqc + '
-' +
-      '- Services: ' + companyDetails.services + '
-' +
-      '- Regions: ' + companyDetails.regions + '
-' +
-      (companyDetails.experience ? '- Experience: ' + companyDetails.experience + '
-' : '') +
-      (specText ? '
-SERVICE SPECIFICATION CONTEXT:
-' + specText + '
-' : '') +
-      (scoringText ? '
-SCORING CRITERIA:
-' + scoringText + '
-' : '') +
-      '
-QUESTIONS TO ANSWER:
-' + questionsText +
-      '
-
-Write a complete response to EVERY question. Format exactly as:
-
-QUESTION 1: [first few words of question]
-[your full response]
-
-QUESTION 2: [first few words of question]
-[your full response]
-
-And so on for all ' + questions.length + ' questions.';
+    var userPrompt = 'Write tender responses for: ' + tender.title + '. Buyer: ' + (tender.org || '') + '.';
+    userPrompt += ' BIDDING ORGANISATION: Name: ' + companyDetails.name + '. Founded: ' + companyDetails.founded + '. Staff: ' + companyDetails.staff + '. CQC Status: ' + companyDetails.cqc + '. Services: ' + companyDetails.services + '. Regions: ' + companyDetails.regions + '.';
+    if (companyDetails.experience) { userPrompt += ' Experience: ' + companyDetails.experience + '.'; }
+    if (specText) { userPrompt += ' SERVICE SPEC CONTEXT: ' + specText; }
+    if (scoringText) { userPrompt += ' SCORING CRITERIA: ' + scoringText; }
+    userPrompt += ' QUESTIONS TO ANSWER: ' + questionsText;
+    userPrompt += ' Write a complete response to EVERY question. Format exactly as: ' + formatHint;
 
     const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -135,16 +95,14 @@ And so on for all ' + questions.length + ' questions.';
     const aiData = await apiResponse.json();
     const fullResponse = aiData.content[0].text;
 
-    const responses = [];
-    const blocks = fullResponse.split(/QUESTION \d+:/i).filter(function(b){ return b.trim(); });
-    questions.forEach(function(q, i) {
-      const block = blocks[i] ? blocks[i].trim() : '';
-      const lines = block.split('
-');
-      const answer = lines.slice(1).join('
-').trim() || block;
-      responses.push({ question: q.question, answer: answer || 'Response pending.' });
-    });
+    var responses = [];
+    var blocks = fullResponse.split(/QUESTION \d+:/i).filter(function(b){ return b.trim(); });
+    for (var k = 0; k < questions.length; k++) {
+      var block = blocks[k] ? blocks[k].trim() : '';
+      var blockLines = block.split('\n');
+      var answer = blockLines.slice(1).join('\n').trim() || block;
+      responses.push({ question: questions[k].question, answer: answer || 'Response pending.' });
+    }
 
     return {
       statusCode: 200,
