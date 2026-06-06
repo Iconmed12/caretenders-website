@@ -616,7 +616,8 @@ function renderCareTable() {
       <td>${ncBadge}</td>
       <td>${badgeHtml(t.status)}</td>
       <td style="color:var(--text-muted);font-size:12px">${fmtDate(t.deadline)}</td>
-      <td><div class="action-btns"><button class="action-btn edit" onclick='openDrawer(${JSON.stringify(t).replace(/'/g,"&#39;")},"care")'><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button></div></td>
+      <td><div class="action-btns">${t.status==='draft'?`<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;border-color:#9FE1CB;" onclick="publishDraft('${t.id}')" title="Publish"><i class="ti ti-send"></i></button>`:''}
+      <button class="action-btn edit" onclick='openDrawer(${JSON.stringify(t).replace(/'/g,"&#39;")},"care")'><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button></div></td>
     </tr>`;
   }).join('');
 }
@@ -634,7 +635,8 @@ function renderCommercialTable() {
     <td style="color:var(--green);font-weight:600">${feeStr(t)}</td>
     <td>${badgeHtml(t.status)}</td>
     <td style="color:var(--text-muted);font-size:12px">${fmtDate(t.deadline)}</td>
-    <td><div class="action-btns"><button class="action-btn edit" onclick='openDrawer(${JSON.stringify(t).replace(/'/g,"&#39;")},"commercial")'><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button></div></td>
+    <td><div class="action-btns">${t.status==='draft'?`<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;border-color:#9FE1CB;" onclick="publishDraft('${t.id}')" title="Publish"><i class="ti ti-send"></i></button>`:''}
+    <button class="action-btn edit" onclick='openDrawer(${JSON.stringify(t).replace(/'/g,"&#39;")},"commercial")'><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button></div></td>
   </tr>`).join('');
 }
 
@@ -1035,6 +1037,25 @@ async function saveTender(draft = false) {
   }
 }
 function saveDraft() { saveTender(true); }
+
+async function publishDraft(id) {
+  const t = allTenders.find(x => x.id === id);
+  if (!t) return;
+  t.status = 'open';
+  try {
+    const res = await fetch(`${API}/save-tender`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'upsert', tender: t })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error);
+    showToast('Tender published to live site ✓', 'success');
+    await loadTenders();
+  } catch(e) {
+    showToast('Publish failed: ' + e.message, 'error');
+  }
+}
 
 // DELETE
 function askDelete(id) { deleteTarget = { id }; document.getElementById('confirmOverlay').classList.add('open'); }
