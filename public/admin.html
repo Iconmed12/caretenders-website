@@ -737,13 +737,19 @@ async function runAiExtraction() {
       body: JSON.stringify(payload)
     });
 
-    const rawText = await res.text();
-    if (!rawText || rawText.trim() === '') throw new Error('Function returned empty response. The document may be too large — try a smaller file.');
-    let data;
+    let rawText, data;
+    try {
+      rawText = await res.text();
+    } catch(e) {
+      throw new Error('Could not read response: ' + e.message);
+    }
+    if (!rawText || rawText.trim() === '') {
+      throw new Error('Empty response from server (status ' + res.status + '). Check Netlify function logs.');
+    }
     try {
       data = JSON.parse(rawText);
     } catch(e) {
-      throw new Error('Response was not valid JSON: ' + rawText.substring(0, 200));
+      throw new Error('Bad response: ' + rawText.substring(0, 300));
     }
     if (!res.ok || data.error) throw new Error(data.error || 'Server error ' + res.status);
 
