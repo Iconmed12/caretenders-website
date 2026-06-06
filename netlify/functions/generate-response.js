@@ -1,106 +1,56 @@
 exports.handler = async (event) => {
-  const corsHeaders = {
+  const cors = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
-
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: corsHeaders, body: '' };
-  }
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { tenderId, companyDetails, batchStart, batchEnd } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    const { tenderId, companyDetails } = body;
+    const batchStart = body.batchStart || 0;
+    const batchEnd = body.batchEnd || 4;
 
-    const supabaseUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
-    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const tRes = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/tenders?id=eq.' + tenderId + '&select=*&limit=1',
+      { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } });
+    const rows = await tRes.json();
+    const t = rows[0];
+    if (!t) return { statusCode: 404, headers: cors, body: JSON.stringify({ error: 'Tender not found' }) };
 
-    const tenderRes = await fetch(
-      supabaseUrl + '/rest/v1/tenders?id=eq.' + tenderId + '&select=*&limit=1',
-      { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
-    );
-    const tenders = await tenderRes.json();
-    const tender = tenders[0];
+    const allQ = t.cana_questions || [];
+    if (!allQ.length) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'No questions set up for this tender yet.' }) };
 
-    if (!tender) {
-      return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Tender not found' }) };
+    const qs = allQ.slice(batchStart, batchEnd);
+    const co = companyDetails;
+    var prompt = 'You are a UK tender writer. Write responses for ' + co.name + ' (founded ' + co.founded + ', ' + co.staff + ' staff, CQC: ' + co.cqc + ', services: ' + co.services + ', regions: ' + co.regions + ').\nTender: ' + t.title + '\n\n';
+
+    for (var i = 0; i < qs.length; i++) {
+      prompt += 'QUESTION ' + (i+1) + ': ' + qs[i].question + (qs[i].wordLimit ? ' (max ' + qs[i].wordLimit + ' words)' : '') + '\nANSWER ' + (i+1) + ':\n\n';
     }
 
-    const allQuestions = tender.cana_questions || [];
-    if (!allQuestions.length) {
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'This tender is not yet ready for Cana AI. Please contact consulting@icongrp.co.uk.' })
-      };
-    }
-
-    // Get the batch of questions to answer
-    var start = batchStart || 0;
-    var end = batchEnd || allQuestions.length;
-    var questions = allQuestions.slice(start, end);
-
-    const knowledge = tender.cana_knowledge || '';
-    var systemPrompt = 'You are an expert UK public sector tender writer. Write professional tender responses in first person on behalf of the bidding organisation. Be specific, reference the company details, use professional UK English. Write clean paragraphs with no markdown symbols.';
-    if (knowledge) { systemPrompt += ' ' + knowledge; }
-
-    var company = 'Organisation: ' + companyDetails.name + '. Founded: ' + companyDetails.founded + '. Staff: ' + companyDetails.staff + '. CQC: ' + companyDetails.cqc + '. Services: ' + companyDetails.services + '. Regions: ' + companyDetails.regions + (companyDetails.experience ? '. Experience: ' + companyDetails.experience : '') + '.';
-
-    var questionsBlock = 'COMPANY: ' + company + '\nTENDER: ' + tender.title + '\n\n';
-    for (var i = 0; i < questions.length; i++) {
-      var q = questions[i];
-      questionsBlock += 'QUESTION ' + (i+1) + ': ' + q.question;
-      if (q.wordLimit) { questionsBlock += ' (max ' + q.wordLimit + ' words)'; }
-      questionsBlock += '\nANSWER ' + (i+1) + ':\n\n';
-    }
-
-    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
+    const ai = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: questionsBlock }]
-      })
+      headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 3000, system: 'You are an expert UK public sector tender writer. Write professional first-person responses. No markdown symbols.', messages: [{ role: 'user', content: prompt }] })
     });
 
-    if (!aiRes.ok) {
-      const errText = await aiRes.text();
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'AI error: ' + errText.substring(0, 200) }) };
-    }
+    if (!ai.ok) { const e = await ai.text(); return { statusCode: 500, headers: cors, body: JSON.stringify({ error: 'AI error: ' + e.substring(0,100) }) }; }
 
-    const aiData = await aiRes.json();
-    const fullResponse = aiData.content[0].text;
-
+    const aiData = await ai.json();
+    const full = aiData.content[0].text;
+    const blocks = full.split(/ANSWER \d+:/i);
     var responses = [];
-    var blocks = fullResponse.split(/ANSWER \d+:/i);
-    for (var k = 0; k < questions.length; k++) {
-      var answer = blocks[k+1] ? blocks[k+1].split(/QUESTION \d+:/i)[0].trim() : '';
-      responses.push({ question: questions[k].question, answer: answer || 'Response could not be generated.' });
+    for (var k = 0; k < qs.length; k++) {
+      var ans = blocks[k+1] ? blocks[k+1].split(/QUESTION \d+:/i)[0].trim() : '';
+      responses.push({ question: qs[k].question, answer: ans || 'Could not generate response.' });
     }
 
-    return {
-      statusCode: 200,
-      headers: corsHeaders,
-      body: JSON.stringify({
-        responses: responses,
-        tenderId: tenderId,
-        tenderTitle: tender.title,
-        totalQuestions: allQuestions.length
-      })
-    };
+    return { statusCode: 200, headers: cors, body: JSON.stringify({ responses: responses, totalQuestions: allQ.length, tenderId: tenderId, tenderTitle: t.title }) };
 
-  } catch (err) {
-    return {
-      statusCode: 500,
-      headers: corsHeaders,
-      body: JSON.stringify({ error: err.message || 'Generation failed' })
-    };
+  } catch(err) {
+    return { statusCode: 500, headers: cors, body: JSON.stringify({ error: err.message || 'Failed' }) };
   }
 };
