@@ -39,69 +39,54 @@ exports.handler = async (event) => {
       };
     }
 
-    const canaDocs = tender.cana_docs || {};
-    const specDocs = Array.isArray(canaDocs.spec) ? canaDocs.spec : (canaDocs.spec ? [canaDocs.spec] : []);
-    const scoringDocs = Array.isArray(canaDocs.scoring) ? canaDocs.scoring : (canaDocs.scoring ? [canaDocs.scoring] : []);
-    const specText = specDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 1500);
-    const scoringText = scoringDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 800);
     const knowledge = tender.cana_knowledge || '';
 
-    var systemPrompt = 'You are Cana AI, an expert UK public sector tender writer for ICONGRP Consulting. You write high-quality, compliant, and compelling tender responses on behalf of organisations bidding for contracts.';
-    if (knowledge) { systemPrompt += ' WRITING GUIDANCE: ' + knowledge; }
-    systemPrompt += ' RULES: Write in first person on behalf of the bidding organisation. Be specific and use the company details provided. Use professional UK English. Structure each answer with a strong opening, clear evidence, and a confident conclusion. Every sentence must add value. Respect word limits.';
-
-    var questionsText = '';
-    for (var i = 0; i < questions.length; i++) {
-      var q = questions[i];
-      questionsText += 'Question ' + (i+1) + ': ' + q.question;
-      if (q.scoring) questionsText += ' [Scoring: ' + q.scoring + ']';
-      if (q.wordLimit) questionsText += ' [Word limit: ' + q.wordLimit + ' words]';
-      questionsText += '\n\n';
-    }
-
-    var formatHint = '';
-    for (var j = 0; j < questions.length; j++) {
-      formatHint += 'QUESTION ' + (j+1) + ': ' + questions[j].question.substring(0, 50) + '\n[your response here]\n\n';
-    }
-
-    var userPrompt = 'Write tender responses for: ' + tender.title + '. Buyer: ' + (tender.org || '') + '.';
-    userPrompt += ' BIDDING ORGANISATION: Name: ' + companyDetails.name + '. Founded: ' + companyDetails.founded + '. Staff: ' + companyDetails.staff + '. CQC Status: ' + companyDetails.cqc + '. Services: ' + companyDetails.services + '. Regions: ' + companyDetails.regions + '.';
-    if (companyDetails.experience) { userPrompt += ' Experience: ' + companyDetails.experience + '.'; }
-    if (specText) { userPrompt += ' SERVICE SPEC CONTEXT: ' + specText; }
-    if (scoringText) { userPrompt += ' SCORING CRITERIA: ' + scoringText; }
-    userPrompt += ' QUESTIONS TO ANSWER: ' + questionsText;
-    userPrompt += ' Write a complete response to EVERY question. Format exactly as: ' + formatHint;
-
-    const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
-    });
-
-    if (!apiResponse.ok) {
-      const errText = await apiResponse.text();
-      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'AI API error: ' + errText.substring(0, 200) }) };
-    }
-
-    const aiData = await apiResponse.json();
-    const fullResponse = aiData.content[0].text;
+    var company = 'Organisation: ' + companyDetails.name +
+      ', Founded: ' + companyDetails.founded +
+      ', Staff: ' + companyDetails.staff +
+      ', CQC: ' + companyDetails.cqc +
+      ', Services: ' + companyDetails.services +
+      ', Regions: ' + companyDetails.regions +
+      (companyDetails.experience ? ', Experience: ' + companyDetails.experience : '');
 
     var responses = [];
-    var blocks = fullResponse.split(/QUESTION \d+:/i).filter(function(b){ return b.trim(); });
-    for (var k = 0; k < questions.length; k++) {
-      var block = blocks[k] ? blocks[k].trim() : '';
-      var blockLines = block.split('\n');
-      var answer = blockLines.slice(1).join('\n').trim() || block;
-      responses.push({ question: questions[k].question, answer: answer || 'Response pending.' });
+
+    for (var i = 0; i < questions.length; i++) {
+      var q = questions[i];
+      var wordLimit = q.wordLimit ? parseInt(q.wordLimit) : 500;
+
+      var prompt = 'You are an expert UK public sector tender writer. Write a professional, specific tender response on behalf of ' + companyDetails.name + '.\n\n';
+      prompt += 'COMPANY DETAILS:\n' + company + '\n\n';
+      prompt += 'TENDER: ' + tender.title + ' (' + (tender.org || '') + ')\n\n';
+      if (knowledge) { prompt += 'WRITING GUIDANCE:\n' + knowledge + '\n\n'; }
+      prompt += 'QUESTION ' + (i+1) + ':\n' + q.question + '\n\n';
+      prompt += 'Write a complete, high-quality response to this question. ';
+      prompt += 'Use first person (we/our). Be specific. Reference the company details throughout. ';
+      prompt += 'Maximum ' + wordLimit + ' words. Do not repeat the question. Just write the answer.';
+
+      const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      if (!apiResponse.ok) {
+        const errText = await apiResponse.text();
+        responses.push({ question: q.question, answer: 'Could not generate response: ' + errText.substring(0, 100) });
+        continue;
+      }
+
+      const aiData = await apiResponse.json();
+      var answer = aiData.content[0].text.trim();
+      responses.push({ question: q.question, answer: answer });
     }
 
     return {
