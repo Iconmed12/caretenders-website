@@ -390,7 +390,10 @@ tr:hover td{background:#fafafa}
           <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:var(--green);">✓ Saved — Cana is ready for this tender</span>
         </div>
       </div>
-    </div>
+    <div style="display:flex;align-items:center;gap:1rem;padding:0 1.25rem 1.25rem;">
+  <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">⚡ Save &amp; train Cana AI</button>
+  <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">✓ Saved — Cana is ready for this tender</span>
+</div>
     <!-- END CANA AI PAGE -->
 
     <!-- SETTINGS PAGE -->
@@ -1273,6 +1276,11 @@ async function handleCanaDoc(type, files) {
       reader.onload = e => res(e.target.result);
       reader.readAsText(file);
     });
+    const clean = text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\uFFFD]/g, '').substring(0, 12000);
+    canaDocData[type].push({ name: file.name, text: clean });
+  }
+  renderCanaFiles(type);
+}
     // Clean text — remove unicode escape sequences and non-printable chars
     const clean = text
       .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '')
