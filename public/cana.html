@@ -250,9 +250,9 @@
     <div id="responses-list"></div>
 
     <!-- PAYWALL -->
-    <div class="paywall-card">
+    <div class="paywall-card" id="paywall-card">
       <h2>Unlock your complete bid</h2>
-      <p>Your full responses are ready — tailored to this specific tender using your company information. Pay once to download everything.</p>
+      <p>Your full responses are ready — tailored to this specific tender using your company information. Pay once to unlock everything.</p>
       <div class="paywall-price">
         <span class="paywall-price-amount">£480</span>
         <span class="paywall-price-label">inc. VAT</span>
@@ -263,8 +263,12 @@
         <div class="paywall-feature"><span>✓</span> Written using your company details</div>
         <div class="paywall-feature"><span>✓</span> Copy, download or send straight away</div>
       </div>
-      <a id="paywall-btn" href="#" class="paywall-btn" target="_blank">💳 Pay £480 and unlock full bid</a>
+      <a id="paywall-btn" href="#" class="paywall-btn" target="_blank" onclick="sessionStorage.setItem('cana_pending_session', currentSessionId)">💳 Pay £480 and unlock full bid</a>
       <div class="paywall-note">Secure payment via Stripe · Instant access after payment</div>
+      <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1);">
+        <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:0.75rem;">Already paid? Click below to reveal your full responses.</p>
+        <button onclick="revealAfterPayment()" style="background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.3);color:white;border-radius:8px;padding:10px 24px;font-size:0.88rem;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;">✓ I've paid — show my full bid</button>
+      </div>
     </div>
 
   </div>
@@ -275,6 +279,7 @@
   let tenderId = null;
   let tenderData = null;
   let generatedResponses = [];
+  let currentSessionId = null;
   const SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
   const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg5NzYyMTEsImV4cCI6MjA2NDU1MjIxMX0.tDHJZPl4HZNM5PJuJ6-c7_xoKpgxFPuH5YlSdBEDqHw';
 
@@ -449,6 +454,7 @@
 
       // Generate session ID and save responses to Supabase
       const sid = 'cana_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      currentSessionId = sid;
       await saveResponses(sid);
 
       // Update paywall button with session ID so Stripe can redirect back
@@ -468,6 +474,28 @@
       errEl.textContent = e.message || 'Something went wrong. Please try again.';
       errEl.style.display = '';
     }
+  }
+
+  function revealAfterPayment() {
+    // Check if we have a session saved
+    const sid = currentSessionId || sessionStorage.getItem('cana_pending_session');
+    if (!sid) {
+      alert('No responses found. Please generate your responses first, then pay.');
+      return;
+    }
+    // Show all responses unlocked
+    const container = document.getElementById('responses-list');
+    container.innerHTML = generatedResponses.map(function(r, i) {
+      var words = r.answer.split(/\s+/).length;
+      return '<div class="response-card"><div class="response-card-header"><div class="response-q-num">' + (i+1) + '</div><div class="response-q-text">' + r.question + '</div></div><div class="response-body"><div class="response-text">' + r.answer + '</div><div class="word-count">' + words + ' words</div></div></div>';
+    }).join('');
+    // Replace paywall with success message
+    var paywall = document.getElementById('paywall-card');
+    if (paywall) {
+      paywall.innerHTML = '<h2 style="font-family:Playfair Display,serif;">Your full bid is unlocked!</h2><p style="color:rgba(255,255,255,0.7);margin-top:0.75rem;">All ' + generatedResponses.length + ' responses are now visible above. Copy each answer into your tender submission.</p>';
+    }
+    sessionStorage.removeItem('cana_pending_session');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   function renderResults() {
