@@ -9,7 +9,7 @@ exports.handler = async (event) => {
 
   try {
     const { sessionId } = JSON.parse(event.body);
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
     const sbKey = process.env.SUPABASE_ANON_KEY;
 
     // Search Stripe for a paid checkout session with this session_id in metadata
