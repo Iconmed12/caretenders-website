@@ -720,30 +720,16 @@ async function runAiExtraction() {
     document.getElementById(steps[i]).className = 'proc-step active';
   }
   try {
-    // Always extract text and send as text — avoids 6MB Netlify limit with base64
-    let text = '';
     const isPdf = selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf');
+    let payload;
 
     if (isPdf) {
-      try {
-        text = await extractPdfText(selectedFile);
-      } catch(e) {
-        // Fallback: send as base64 if PDF.js fails
-        const base64 = await readFileAsBase64(selectedFile);
-        const payload2 = { base64, mimetype: 'application/pdf', filename: selectedFile.name };
-        const res2 = await fetch(`${API}/extract-tender`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload2) });
-        const data2 = await res2.json();
-        if (!res2.ok || data2.error) throw new Error(data2.error || 'Server error ' + res2.status);
-        extractedData = data2;
-        document.getElementById('ps4').className = 'proc-step done';
-        document.getElementById('aiStep3').style.display = 'block';
-        return;
-      }
+      const base64 = await readFileAsBase64(selectedFile);
+      payload = { base64, mimetype: 'application/pdf', filename: selectedFile.name };
     } else {
-      text = await readFileAsText(selectedFile);
+      const text = await readFileAsText(selectedFile);
+      payload = { text, filename: selectedFile.name };
     }
-
-    const payload = { text: text.substring(0, 12000), filename: selectedFile.name };
 
     const res = await fetch(`${API}/extract-tender`, {
       method: 'POST',
