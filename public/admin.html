@@ -910,10 +910,13 @@ function addEligRow(val){
   val=val||'';
   var list=document.getElementById('eligList');
   var d=document.createElement('div');d.className='elig-item';d.id='el'+ec;
-  var inp=document.createElement('input');inp.type='text';inp.placeholder='e.g. CQC registration required';inp.value=val;
-  var btn=document.createElement('button');btn.className='rm-elig';btn.innerHTML='<i class="ti ti-x"></i>';
-  btn.onclick=function(){d.remove();};
-  d.appendChild(inp);d.appendChild(btn);
+    // Build price row using DOM to avoid quote escaping issues
+  var inp1=document.createElement('input');inp1.type='text';inp1.placeholder='e.g. Bid writing';inp1.value=label||'';inp1.oninput=updatePriceTotal;
+  var inp2=document.createElement('input');inp2.type='number';inp2.placeholder='Amount';inp2.value=price||'';inp2.oninput=updatePriceTotal;
+  var btn=document.createElement('button');btn.className='rm-price';btn.type='button';
+  btn.innerHTML='<i class="ti ti-x"></i>';
+  var n=prc;btn.onclick=function(){document.getElementById('pr'+n).remove();updatePriceTotal();};
+  d.appendChild(inp1);d.appendChild(inp2);d.appendChild(btn);
   list.appendChild(d);ec++;
 }
 function getEligItems(){return Array.from(document.querySelectorAll('#eligList input')).map(function(i){return i.value;}).filter(function(v){return v.trim();});}
@@ -1066,8 +1069,7 @@ async function handleCanaDoc(type,files){
       reader.onload=function(e){res(e.target.result);};
       reader.readAsText(file);
     });
-    var clean=text.replace(/[ -
---]/g,'').substring(0,12000);
+    var clean=text.replace(/[ ---]/g,'').substring(0,12000);
     canaDocData[type].push({name:file.name,text:clean});
   }
   renderCanaFiles(type);
