@@ -224,6 +224,7 @@ tr:hover td{background:#fafafa}
     </div>
     <div class="sidebar-section">System</div>
     <div class="sidebar-nav">
+      <button class="nav-item" onclick="showPage('cana',this)"><i class="ti ti-sparkles"></i> Cana AI <span class="nav-badge" id="sbCana">0</span></button>
       <button class="nav-item" onclick="showPage('settings',this)"><i class="ti ti-settings"></i> Settings</button>
       <button class="nav-item" onclick="window.open('index.html','_blank')"><i class="ti ti-external-link"></i> View live site</button>
     </div>
@@ -285,6 +286,97 @@ tr:hover td{background:#fafafa}
         <table><thead><tr><th>Listing</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Auto-detected</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="nonCqcTable"></tbody></table>
       </div>
     </div>
+
+    <!-- CANA AI PAGE -->
+    <div class="page" id="page-cana">
+      <div style="background:rgba(0,201,224,0.06);border:1px solid rgba(0,201,224,0.2);border-radius:8px;padding:10px 16px;margin-bottom:1.25rem;font-size:13px;color:#0099AA;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-sparkles" style="font-size:16px;flex-shrink:0;"></i>
+        <span>Upload documents for each tender so Cana AI knows exactly how to write the responses. Select a tender below then upload its documents.</span>
+      </div>
+
+      <!-- Tender selector -->
+      <div class="table-card" style="margin-bottom:1.25rem;padding:1.25rem;">
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+          <div style="flex:1;">
+            <label style="font-size:0.78rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Select tender</label>
+            <select id="canaTenderSelect" onchange="loadCanaDocs()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;color:var(--text);">
+              <option value="">Choose a tender...</option>
+            </select>
+          </div>
+          <div id="canaDocStatus" style="display:none;background:var(--green-bg);border:1px solid #9FE1CB;border-radius:8px;padding:8px 14px;font-size:0.82rem;color:var(--green);font-weight:500;white-space:nowrap;">
+            ✓ Documents uploaded
+          </div>
+        </div>
+      </div>
+
+      <!-- Document upload cards -->
+      <div id="canaDocArea" style="display:none;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem;margin-bottom:1.25rem;">
+
+          <!-- Quality Questions -->
+          <div class="table-card" style="padding:1.25rem;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+              <div style="width:36px;height:36px;background:rgba(0,201,224,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;">❓</div>
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;color:var(--text);">Quality Questions</div>
+                <div style="font-size:0.75rem;color:var(--text-light);">The questions the tender requires answering</div>
+              </div>
+            </div>
+            <div id="qualityStatus" class="cana-doc-status"></div>
+            <label class="cana-upload-btn" for="qualityInput">
+              <i class="ti ti-upload" style="font-size:14px;"></i> Upload document
+              <input type="file" id="qualityInput" accept=".pdf,.doc,.docx,.txt" style="display:none;" onchange="handleCanaDoc('quality', this)">
+            </label>
+            <div id="qualityFile" class="cana-file-tag" style="display:none;"></div>
+          </div>
+
+          <!-- Service Specification -->
+          <div class="table-card" style="padding:1.25rem;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+              <div style="width:36px;height:36px;background:rgba(245,166,35,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;">📋</div>
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;color:var(--text);">Service Specification</div>
+                <div style="font-size:0.75rem;color:var(--text-light);">What the commissioner expects to be delivered</div>
+              </div>
+            </div>
+            <div id="specStatus" class="cana-doc-status"></div>
+            <label class="cana-upload-btn" for="specInput">
+              <i class="ti ti-upload" style="font-size:14px;"></i> Upload document
+              <input type="file" id="specInput" accept=".pdf,.doc,.docx,.txt" style="display:none;" onchange="handleCanaDoc('spec', this)">
+            </label>
+            <div id="specFile" class="cana-file-tag" style="display:none;"></div>
+          </div>
+
+          <!-- Scoring Criteria -->
+          <div class="table-card" style="padding:1.25rem;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+              <div style="width:36px;height:36px;background:rgba(99,91,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;">🎯</div>
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;color:var(--text);">Scoring Criteria</div>
+                <div style="font-size:0.75rem;color:var(--text-light);">How responses will be evaluated and marked</div>
+              </div>
+            </div>
+            <div id="scoringStatus" class="cana-doc-status"></div>
+            <label class="cana-upload-btn" for="scoringInput">
+              <i class="ti ti-upload" style="font-size:14px;"></i> Upload document
+              <input type="file" id="scoringInput" accept=".pdf,.doc,.docx,.txt" style="display:none;" onchange="handleCanaDoc('scoring', this)">
+            </label>
+            <div id="scoringFile" class="cana-file-tag" style="display:none;"></div>
+          </div>
+
+        </div>
+
+        <!-- Save button -->
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <button onclick="saveCanaDocs()" style="background:var(--navy);color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-sparkles" style="font-size:14px;"></i> Save &amp; train Cana AI
+          </button>
+          <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:var(--green);">✓ Saved — Cana is ready for this tender</span>
+        </div>
+
+      </div>
+    </div>
+    <!-- END CANA AI PAGE -->
 
     <!-- SETTINGS PAGE -->
     <div class="page" id="page-settings">
@@ -499,6 +591,7 @@ async function loadTenders() {
     allTenders = await res.json() || [];
     nextId = allTenders.length + 1;
     renderAll();
+  populateCanaTenderSelect();
   } catch (err) {
     showToast('Could not load tenders from database', 'error');
   }
@@ -546,7 +639,7 @@ function showPage(page, btn) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   btn.classList.add('active');
-  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', settings:'Settings' };
+  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana AI', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[page] || page;
   ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   if (page === 'care')       { document.getElementById('aiUploadBtn').style.display='flex'; document.getElementById('addTenderBtn').style.display='flex'; renderCareTable(); }
@@ -565,6 +658,7 @@ function updateCounts() {
   const care = allTenders.filter(t => isCare(t));
   const commercial = allTenders.filter(t => !isCare(t));
   const nc = allTenders.filter(t => isNonCqcEligible(t) || t.is_non_cqc);
+  document.getElementById('sbCana').textContent = allTenders.filter(t=>t.cana_questions&&t.cana_questions.length).length;
   document.getElementById('sbCare').textContent = care.length;
   document.getElementById('sbCommercial').textContent = commercial.length;
   document.getElementById('sbNonCqc').textContent = nc.length;
@@ -1076,6 +1170,102 @@ async function confirmDelete() {
     showToast('Listing deleted', 'error');
   } catch (err) {
     showToast('Delete failed: ' + err.message, 'error');
+  }
+}
+
+// CANA AI DOCUMENT MANAGEMENT
+let canaDocData = { quality: null, spec: null, scoring: null };
+
+function populateCanaTenderSelect() {
+  const sel = document.getElementById('canaTenderSelect');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = '<option value="">Choose a tender...</option>';
+  allTenders.filter(t => t.status !== 'draft').forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = t.title + (t.cana_questions&&t.cana_questions.length ? ' ✓' : '');
+    sel.appendChild(opt);
+  });
+  if (current) sel.value = current;
+}
+
+function loadCanaDocs() {
+  const id = document.getElementById('canaTenderSelect').value;
+  const area = document.getElementById('canaDocArea');
+  if (!id) { area.style.display = 'none'; return; }
+  area.style.display = 'block';
+  canaDocData = { quality: null, spec: null, scoring: null };
+
+  const t = allTenders.find(x => x.id === id);
+  const docs = (t && t.cana_docs) || {};
+
+  ['quality','spec','scoring'].forEach(type => {
+    const fileTag = document.getElementById(type + 'File');
+    const status = document.getElementById(type + 'Status');
+    if (docs[type]) {
+      fileTag.style.display = 'flex';
+      fileTag.innerHTML = '<i class="ti ti-file-text"></i> ' + docs[type].name;
+      status.textContent = 'Uploaded';
+      status.style.color = 'var(--green)';
+      canaDocData[type] = docs[type];
+    } else {
+      fileTag.style.display = 'none';
+      status.textContent = 'Not uploaded';
+      status.style.color = 'var(--text-light)';
+    }
+  });
+
+  const hasAll = docs.quality && docs.spec && docs.scoring;
+  const statusEl = document.getElementById('canaDocStatus');
+  statusEl.style.display = hasAll ? 'block' : 'none';
+  document.getElementById('canaDocSaved').style.display = 'none';
+}
+
+async function handleCanaDoc(type, input) {
+  const file = input.files[0];
+  if (!file) return;
+  const fileTag = document.getElementById(type + 'File');
+  const status = document.getElementById(type + 'Status');
+
+  // Read file as text
+  const text = await new Promise((res) => {
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result);
+    reader.readAsText(file);
+  });
+
+  canaDocData[type] = { name: file.name, text: text.substring(0, 15000) };
+  fileTag.style.display = 'flex';
+  fileTag.innerHTML = '<i class="ti ti-file-text"></i> ' + file.name;
+  status.textContent = 'Ready to save';
+  status.style.color = 'var(--teal-dk)';
+}
+
+async function saveCanaDocs() {
+  const id = document.getElementById('canaTenderSelect').value;
+  if (!id) return;
+  const t = allTenders.find(x => x.id === id);
+  if (!t) return;
+
+  t.cana_docs = canaDocData;
+
+  try {
+    const res = await fetch(`${API}/save-tender`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'upsert', tender: t })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error);
+    showToast('Cana AI documents saved ✓', 'success');
+    document.getElementById('canaDocSaved').style.display = 'inline';
+    document.getElementById('canaDocStatus').style.display = 'block';
+    await loadTenders();
+    populateCanaTenderSelect();
+    document.getElementById('canaTenderSelect').value = id;
+  } catch(e) {
+    showToast('Save failed: ' + e.message, 'error');
   }
 }
 
