@@ -1096,11 +1096,15 @@ async function handleCanaDoc(type,files){
 
 async function saveCanaDocs(){
   var id=document.getElementById('canaTenderSelect').value;
-  if(!id) return;
+  if(!id){showToast('Please select a tender first','error');return;}
   var t=allTenders.find(function(x){return x.id===id;});
-  if(!t) return;
+  if(!t){showToast('Tender not found','error');return;}
+  var questions=getCanaQuestions();
+  if(!questions.length){
+    if(!confirm('No questions added yet. Save anyway?')) return;
+  }
   t.cana_docs=canaDocData;
-  t.cana_questions=getCanaQuestions();
+  t.cana_questions=questions;
   try {
     var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:t})});
     var data=await res.json();
