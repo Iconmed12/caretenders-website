@@ -402,7 +402,7 @@
 
   function renderResults() {
     const container = document.getElementById('responses-list');
-    const PREVIEW_WORDS = 300;
+    const PREVIEW_WORDS = 80;
 
     container.innerHTML = generatedResponses.map((r, i) => {
       const words = r.answer.split(/\s+/);
