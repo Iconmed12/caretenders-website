@@ -733,4 +733,390 @@ async function runAiExtraction() {
   var steps=['ps1','ps2','ps3','ps4'];
   for(var i=0;i<steps.length;i++){
     await delay(700);
-    if(i>0) do
+    if(i>0) document.getElementById(steps[i-1]).className='proc-step done';
+    document.getElementById(steps[i]).className='proc-step active';
+  }
+  try {
+    var isPdf=selectedFile.type==='application/pdf'||selectedFile.name.toLowerCase().endsWith('.pdf');
+    var payload;
+    if(isPdf){
+      var base64=await readFileAsBase64(selectedFile);
+      payload={base64:base64,mimetype:'application/pdf',filename:selectedFile.name};
+    } else {
+      var text=await readFileAsText(selectedFile);
+      payload={text:text,filename:selectedFile.name};
+    }
+    var res=await fetch(API+'/extract-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var rawText=await res.text();
+    if(!rawText||rawText.trim()==='') throw new Error('Empty response from server (status '+res.status+')');
+    var data;
+    try{data=JSON.parse(rawText);}catch(e){throw new Error('Bad response: '+rawText.substring(0,200));}
+    if(!res.ok||data.error) throw new Error(data.error||'Server error '+res.status);
+    extractedData=data;
+    document.getElementById('ps4').className='proc-step done';
+    await delay(400);
+    document.getElementById('aiStep2').style.display='none';
+    document.getElementById('aiStep3').style.display='block';
+    renderPreview(data);
+    document.getElementById('aiOpenFormBtn').style.display='flex';
+  } catch(err) {
+    document.getElementById('aiStep2').style.display='none';
+    document.getElementById('aiStep1').style.display='block';
+    document.getElementById('fileSelectedBar').style.display='flex';
+    document.getElementById('uploadZone').style.display='none';
+    document.getElementById('aiAnalyseBtn').style.display='flex';
+    showToast('Extraction failed: '+err.message,'error');
+  }
+}
+
+function readFileAsBase64(file){
+  return new Promise(function(res,rej){
+    var reader=new FileReader();
+    reader.onload=function(e){res(e.target.result.split(',')[1]);};
+    reader.onerror=rej;
+    reader.readAsDataURL(file);
+  });
+}
+function readFileAsText(file){
+  return new Promise(function(res,rej){
+    var reader=new FileReader();
+    reader.onload=function(e){res(e.target.result);};
+    reader.onerror=rej;
+    reader.readAsText(file);
+  });
+}
+
+function renderPreview(data) {
+  var ch='<span class="conf conf-high"><i class="ti ti-check" style="font-size:10px"></i> Extracted</span>';
+  var fields=[
+    {l:'Tender title',v:data.title||'Not found'},
+    {l:'Organisation',v:data.org||'Not found'},
+    {l:'Region',v:data.region||'Not found'},
+    {l:'Contract value',v:data.value||'Not found'},
+    {l:'Duration',v:data.duration||'Not found'},
+    {l:'Deadline',v:data.deadline||'Not found'},
+    {l:'Our price (from doc)',v:data.our_price||'Not stated'},
+    {l:'Description',v:data.description||'Not found',multi:true},
+    {l:'Eligibility',v:(data.eligibility||[]).join('\n'),multi:true},
+  ];
+  document.getElementById('previewFields').innerHTML=fields.map(function(f){return '<div class="pf"><div class="pf-label"><span class="ai-tag">AI</span>'+f.l+ch+'</div><div class="pf-value'+(f.multi?' multi':'')+'">'+(f.v||'')+'</div></div>';}).join('');
+}
+
+function openInForm(){closeAiModal();openDrawer(null,currentSection,extractedData);}
+function delay(ms){return new Promise(function(r){setTimeout(r,ms);});}
+
+function openDrawerById(id,section){
+  var t=allTenders.find(function(x){return x.id===id;});
+  if(t) openDrawer(t,section);
+}
+
+function openDrawer(tOrId,sectionType,aiData){
+  currentSection=sectionType||'care';
+  var isNc=sectionType==='noncqc';
+  var isCommercial=sectionType==='commercial';
+  document.getElementById('editIsNonCqc').value=isNc?'1':'0';
+  document.getElementById('categoryRow').style.display=isNc?'none':'grid';
+  document.getElementById('whyCqcRow').style.display=isNc?'flex':'none';
+  document.getElementById('aiBadge').style.display=aiData?'inline-flex':'none';
+  ['Title','Org','Region','Value','Duration','Deadline','Desc','Link'].forEach(function(f){
+    var el=document.getElementById('f'+f);if(el)el.classList.remove('ai-filled');
+    var hint=document.getElementById('hint'+f);if(hint)hint.style.display='none';
+  });
+  var t=null;
+  if(tOrId&&typeof tOrId==='object') t=tOrId;
+  else if(tOrId&&typeof tOrId==='string') t=allTenders.find(function(x){return x.id===tOrId;});
+  if(t){
+    document.getElementById('editId').value=t.id||'';
+    document.getElementById('drawerTitleText').childNodes[0].textContent='Edit tender ';
+    document.getElementById('saveLabel').textContent='Save changes';
+    document.getElementById('fTitle').value=t.title||'';
+    document.getElementById('fOrg').value=t.org||t.organisation||'';
+    document.getElementById('fRegion').value=t.region||'';
+    document.getElementById('fValue').value=t.value||'';
+    document.getElementById('fDuration').value=t.duration||'';
+    document.getElementById('fDeadline').value=t.deadline||'';
+    document.getElementById('fStatus').value=t.status||'open';
+    document.getElementById('fDesc').value=t.description||'';
+    document.getElementById('fLink').value=t.link||t.submission_link||'';
+    document.getElementById('fStripeLink').value=t.stripe_link||'';
+    document.getElementById('fPricingNote').value=(t.pricing||{}).note||'';
+    if(!isNc) document.getElementById('fCategory').value=t.category||(isCommercial?'Construction':'Domiciliary care');
+    if(isNc) document.getElementById('fWhyCqc').value=t.why_cqc||'';
+    buildPriceRows((t.pricing||{}).items||[]);
+    buildEligRows(Array.isArray(t.eligibility)?t.eligibility:[]);
+  } else if(aiData){
+    document.getElementById('editId').value='';
+    document.getElementById('drawerTitleText').childNodes[0].textContent='Review AI-extracted tender ';
+    document.getElementById('saveLabel').textContent='Publish tender';
+    [['fTitle',aiData.title,'hintTitle'],['fOrg',aiData.org,'hintOrg'],['fRegion',aiData.region,'hintRegion'],
+     ['fValue',aiData.value,'hintValue'],['fDuration',aiData.duration,'hintDuration'],
+     ['fDeadline',aiData.deadline,'hintDeadline'],['fDesc',aiData.description,'hintDesc'],['fLink',aiData.link,'hintLink']
+    ].forEach(function(arr){
+      var el=document.getElementById(arr[0]);el.value=arr[1]||'';
+      if(arr[1]){el.classList.add('ai-filled');var h=document.getElementById(arr[2]);if(h)h.style.display='flex';}
+    });
+    document.getElementById('fStatus').value='open';
+    document.getElementById('fPricingNote').value='One-off fee. No hidden charges. Payable on engagement.';
+    if(!isNc){
+      var aiCat=aiData.category||autoDetectCategory((aiData.title||'')+' '+(aiData.description||''))||(isCommercial?'Construction':'Domiciliary care');
+      document.getElementById('fCategory').value=aiCat;
+    }
+    var priceItems=aiData.our_price
+      ?[{label:'Bid writing and strategy (from document)',price:aiData.our_price.replace(/[^0-9.]/g,'')}]
+      :[{label:'Bid writing and strategy',price:''},{label:'Compliance review',price:''},{label:'Submission support',price:''}];
+    buildPriceRows(priceItems);
+    buildEligRows(aiData.eligibility&&aiData.eligibility.length?aiData.eligibility:['']);
+  } else {
+    document.getElementById('editId').value='';
+    document.getElementById('drawerTitleText').childNodes[0].textContent='Add '+(isNc?'listing ':isCommercial?'commercial tender ':'care tender ');
+    document.getElementById('saveLabel').textContent=isNc?'Publish listing':'Publish tender';
+    ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink','fStripeLink'].forEach(function(f){
+      var el=document.getElementById(f);if(el){el.value='';el.classList.remove('ai-filled');}
+    });
+    document.getElementById('fDeadline').value='';
+    document.getElementById('fStatus').value='open';
+    document.getElementById('fPricingNote').value='One-off fee. No hidden charges. Payable on engagement.';
+    if(!isNc) document.getElementById('fCategory').value=isCommercial?'Construction':'Domiciliary care';
+    buildPriceRows([{label:'Bid writing and strategy',price:''},{label:'Compliance review',price:''},{label:'Submission support',price:''}]);
+    buildEligRows(['']);
+  }
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+
+function closeDrawer(){document.getElementById('drawerOverlay').classList.remove('open');}
+function maybeCloseDrawer(e){if(e.target===document.getElementById('drawerOverlay'))closeDrawer();}
+
+var prc=0;
+function buildPriceRows(items){prc=0;document.getElementById('pricingBuilder').innerHTML='';items.forEach(function(i){_addPR(i.label,i.price);});updatePriceTotal();}
+function _addPR(label,price){
+  var b=document.getElementById('pricingBuilder');
+  var d=document.createElement('div');d.className='price-row';d.id='pr'+prc;
+    // Build price row using DOM to avoid quote escaping issues
+  var inp1=document.createElement('input');inp1.type='text';inp1.placeholder='e.g. Bid writing';inp1.value=label||'';inp1.oninput=updatePriceTotal;
+  var inp2=document.createElement('input');inp2.type='number';inp2.placeholder='Amount';inp2.value=price||'';inp2.oninput=updatePriceTotal;
+  var btn=document.createElement('button');btn.className='rm-price';btn.type='button';
+  btn.innerHTML='<i class="ti ti-x"></i>';
+  var n=prc;btn.onclick=function(){document.getElementById('pr'+n).remove();updatePriceTotal();};
+  d.appendChild(inp1);d.appendChild(inp2);d.appendChild(btn);
+  b.appendChild(d);prc++;
+}
+function addPriceRow(){_addPR('','');updatePriceTotal();}
+function updatePriceTotal(){var t=Array.from(document.querySelectorAll('#pricingBuilder input[type=number]')).reduce(function(s,i){return s+(parseFloat(i.value)||0);},0);document.getElementById('priceTotalPreview').textContent=t>0?'£'+t.toLocaleString()+'+VAT':'£0';}
+function getPriceItems(){return Array.from(document.querySelectorAll('#pricingBuilder .price-row')).map(function(r){var ins=r.querySelectorAll('input');return{label:ins[0].value,price:ins[1].value};}).filter(function(i){return i.label||i.price;});}
+
+var ec=0;
+function buildEligRows(items){ec=0;document.getElementById('eligList').innerHTML='';items.forEach(function(v){addEligRow(v);});}
+function addEligRow(val){
+  val=val||'';
+  var list=document.getElementById('eligList');
+  var d=document.createElement('div');d.className='elig-item';d.id='el'+ec;
+    // Build price row using DOM to avoid quote escaping issues
+  var inp1=document.createElement('input');inp1.type='text';inp1.placeholder='e.g. Bid writing';inp1.value=label||'';inp1.oninput=updatePriceTotal;
+  var inp2=document.createElement('input');inp2.type='number';inp2.placeholder='Amount';inp2.value=price||'';inp2.oninput=updatePriceTotal;
+  var btn=document.createElement('button');btn.className='rm-price';btn.type='button';
+  btn.innerHTML='<i class="ti ti-x"></i>';
+  var n=prc;btn.onclick=function(){document.getElementById('pr'+n).remove();updatePriceTotal();};
+  d.appendChild(inp1);d.appendChild(inp2);d.appendChild(btn);
+  list.appendChild(d);ec++;
+}
+function getEligItems(){return Array.from(document.querySelectorAll('#eligList input')).map(function(i){return i.value;}).filter(function(v){return v.trim();});}
+
+function tryAutoCategory(){
+  var title=document.getElementById('fTitle').value;
+  var desc=document.getElementById('fDesc').value;
+  var detected=autoDetectCategory(title+' '+desc);
+  if(detected){var sel=document.getElementById('fCategory');if(sel)sel.value=detected;}
+}
+
+async function saveTender(draft){
+  draft=draft||false;
+  var isNonCqc=document.getElementById('editIsNonCqc').value==='1';
+  var id=document.getElementById('editId').value;
+  var pItems=getPriceItems();
+  var total=pItems.reduce(function(s,i){return s+(parseFloat(i.price)||0);},0);
+  var deadline=document.getElementById('fDeadline').value;
+  var cat=document.getElementById('fCategory').value||null;
+  var commercialCats=['Construction','Facilities','Cleaning','Consultancy','IT & Digital','Logistics','Other'];
+  var tender={
+    id:id||(isNonCqc?'NC':'T')+'-2026-'+String(nextId++).padStart(3,'0'),
+    status:draft?'draft':document.getElementById('fStatus').value,
+    title:document.getElementById('fTitle').value,
+    org:document.getElementById('fOrg').value,
+    region:document.getElementById('fRegion').value,
+    value:document.getElementById('fValue').value,
+    duration:document.getElementById('fDuration').value,
+    deadline:deadline||null,
+    days_left:deadline?Math.max(0,Math.round((new Date(deadline)-new Date())/(1000*60*60*24))):0,
+    link:document.getElementById('fLink').value,
+    stripe_link:document.getElementById('fStripeLink').value||null,
+    description:document.getElementById('fDesc').value,
+    pricing:{items:pItems.map(function(i){return{label:i.label,price:parseFloat(i.price)||0};}),total:total,note:document.getElementById('fPricingNote').value},
+    eligibility:getEligItems(),
+    is_non_cqc:commercialCats.includes(cat)?false:(isNonCqc||isNonCqcEligible({category:cat,eligibility:getEligItems()})),
+    why_cqc:isNonCqc?document.getElementById('fWhyCqc').value:null,
+    category:cat,
+  };
+  document.getElementById('savingSpinner').style.display='block';
+  document.getElementById('saveIcon').style.display='none';
+  document.getElementById('publishBtn').disabled=true;
+  try {
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:tender})});
+    var data=await res.json();
+    if(data.error) throw new Error(data.error);
+    var idx=allTenders.findIndex(function(x){return x.id===tender.id;});
+    if(idx>-1) allTenders[idx]=tender; else allTenders.unshift(tender);
+    closeDrawer();renderAll();
+    showToast(draft?'Draft saved':'Tender published to live site','success');
+  } catch(err){
+    showToast('Save failed: '+err.message,'error');
+  } finally {
+    document.getElementById('savingSpinner').style.display='none';
+    document.getElementById('saveIcon').style.display='inline';
+    document.getElementById('publishBtn').disabled=false;
+  }
+}
+function saveDraft(){saveTender(true);}
+
+async function publishDraft(id){
+  var t=allTenders.find(function(x){return x.id===id;});
+  if(!t) return;
+  t.status='open';
+  try {
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:t})});
+    var data=await res.json();
+    if(!res.ok||data.error) throw new Error(data.error);
+    showToast('Tender published to live site','success');
+    await loadTenders();
+  } catch(e){showToast('Publish failed: '+e.message,'error');}
+}
+
+function askDelete(id){deleteTarget={id:id};document.getElementById('confirmOverlay').classList.add('open');}
+async function confirmDelete(){
+  var id=deleteTarget.id;
+  document.getElementById('confirmOverlay').classList.remove('open');
+  try {
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',tender:{id:id}})});
+    var data=await res.json();
+    if(data.error) throw new Error(data.error);
+    allTenders=allTenders.filter(function(x){return x.id!==id;});
+    renderAll();showToast('Listing deleted','error');
+  } catch(err){showToast('Delete failed: '+err.message,'error');}
+}
+
+var canaDocData={quality:[],spec:[],scoring:[]};
+
+function populateCanaTenderSelect(){
+  var sel=document.getElementById('canaTenderSelect');
+  if(!sel) return;
+  var cur=sel.value;
+  sel.innerHTML='<option value="">Choose a tender...</option>';
+  allTenders.filter(function(t){return t.status!=='draft';}).forEach(function(t){
+    var opt=document.createElement('option');
+    opt.value=t.id;
+    var hasDocs=t.cana_docs&&((t.cana_docs.quality&&t.cana_docs.quality.length)||(t.cana_docs.spec&&t.cana_docs.spec.length)||(t.cana_docs.scoring&&t.cana_docs.scoring.length));
+    opt.textContent=t.title+(hasDocs?' (docs ready)':'');
+    sel.appendChild(opt);
+  });
+  if(cur) sel.value=cur;
+}
+
+function loadCanaDocs(){
+  var id=document.getElementById('canaTenderSelect').value;
+  var area=document.getElementById('canaDocArea');
+  if(!id){area.style.display='none';return;}
+  area.style.display='block';
+  canaDocData={quality:[],spec:[],scoring:[]};
+  var t=allTenders.find(function(x){return x.id===id;});
+  var docs=(t&&t.cana_docs)||{};
+  ['quality','spec','scoring'].forEach(function(type){
+    canaDocData[type]=Array.isArray(docs[type])?docs[type]:(docs[type]?[docs[type]]:[]);
+    renderCanaFiles(type);
+  });
+  var hasAny=canaDocData.quality.length||canaDocData.spec.length||canaDocData.scoring.length;
+  document.getElementById('canaDocStatus').style.display=hasAny?'block':'none';
+  document.getElementById('canaDocSaved').style.display='none';
+}
+
+function renderCanaFiles(type){
+  var container=document.getElementById(type+'Files');
+  if(!container) return;
+  var files=canaDocData[type]||[];
+  if(!files.length){container.innerHTML='';return;}
+    var html='';
+  files.forEach(function(f,i){
+    var div=document.createElement('div');
+    div.className='cana-file-item';
+    var icon=document.createElement('i');icon.className='ti ti-file-text';
+    var span=document.createElement('span');span.title=f.name;span.textContent=f.name;span.style.flex='1';span.style.overflow='hidden';span.style.textOverflow='ellipsis';span.style.whiteSpace='nowrap';span.style.fontWeight='500';
+    var btn=document.createElement('button');btn.className='cana-file-remove';btn.title='Remove';btn.textContent='x';
+    var t2=type,i2=i;btn.onclick=function(){removeCanaFile(t2,i2);};
+    div.appendChild(icon);div.appendChild(span);div.appendChild(btn);
+    container.appendChild(div);
+  });
+}
+
+function removeCanaFile(type,index){canaDocData[type].splice(index,1);renderCanaFiles(type);}
+function canaDragOver(e,zoneId){e.preventDefault();document.getElementById(zoneId).classList.add('drag-over');}
+function canaDragLeave(zoneId){document.getElementById(zoneId).classList.remove('drag-over');}
+function canaOnDrop(e,type){e.preventDefault();document.getElementById(type+'Drop').classList.remove('drag-over');handleCanaDoc(type,e.dataTransfer.files);}
+
+async function handleCanaDoc(type,files){
+  if(!files||!files.length) return;
+  for(var i=0;i<files.length;i++){
+    var file=files[i];
+    var text=await new Promise(function(res){
+      var reader=new FileReader();
+      reader.onload=function(e){res(e.target.result);};
+      reader.readAsText(file);
+    });
+    var clean=text.replace(/[ ---]/g,'').substring(0,12000);
+    canaDocData[type].push({name:file.name,text:clean});
+  }
+  renderCanaFiles(type);
+}
+
+async function saveCanaDocs(){
+  var id=document.getElementById('canaTenderSelect').value;
+  if(!id) return;
+  var t=allTenders.find(function(x){return x.id===id;});
+  if(!t) return;
+  t.cana_docs=canaDocData;
+  try {
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:t})});
+    var data=await res.json();
+    if(!res.ok||data.error) throw new Error(data.error);
+    showToast('Cana AI documents saved','success');
+    document.getElementById('canaDocSaved').style.display='inline';
+    document.getElementById('canaDocStatus').style.display='block';
+    await loadTenders();
+    populateCanaTenderSelect();
+    document.getElementById('canaTenderSelect').value=id;
+  } catch(e){showToast('Save failed: '+e.message,'error');}
+}
+
+function saveCanaKnowledge(){
+  var k=document.getElementById('canaKnowledge');
+  if(k) localStorage.setItem('cana_knowledge',k.value);
+  var s=document.getElementById('canaKnowledgeSaved');
+  if(s){s.style.display='inline';setTimeout(function(){s.style.display='none';},2000);}
+}
+
+function loadCanaKnowledge(){
+  var k=document.getElementById('canaKnowledge');
+  if(k){var v=localStorage.getItem('cana_knowledge');if(v)k.value=v;}
+}
+
+loadCanaKnowledge();
+
+function showToast(msg,type){
+  type=type||'success';
+  var t=document.getElementById('toast');
+  document.getElementById('toastMsg').textContent=msg;
+  t.className='toast show '+(type||'');
+  var icons={success:'ti-check',error:'ti-alert-circle',ai:'ti-sparkles'};
+  document.getElementById('toastIcon').className='ti '+(icons[type]||'ti-check');
+  setTimeout(function(){t.classList.remove('show');},4000);
+}
+</script>
+</body>
+</html>
