@@ -1033,20 +1033,60 @@ function getQuestions() {
 
 let qCount = 0;
 function addQuestion(q, scoring, wordLimit) {
-  q=q||''; scoring=scoring||''; wordLimit=wordLimit||'';
+  q = q||''; scoring = scoring||''; wordLimit = wordLimit||'';
   qCount++;
   const el = document.getElementById('questionsBuilder');
   if (!el) return;
-  const d = document.createElement('div');
   const n = qCount;
-  d.id = 'q'+n;
-  d.style.cssText = 'background:#F4F6F9;border-radius:8px;padding:0.75rem;margin-bottom:0.4rem;';
-  d.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="background:#00C9E0;color:#0B1929;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;">'+n+'</div><input type="text" placeholder="Question e.g. Describe your safeguarding approach..." value="" style="flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.85rem;outline:none;"><button onclick=\"document.getElementById('q'+n+'').remove()\" style=\"background:none;border:none;color:#6B8FA3;cursor:pointer;font-size:1rem;\">\u2715</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-left:30px;"><input type="text" placeholder="Scoring criteria (optional)" style="padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.78rem;outline:none;"><input type="text" placeholder="Word limit (optional)" style="padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.78rem;outline:none;"></div>';
-  // Set values separately to avoid escaping issues
-  const inputs = d.querySelectorAll('input');
-  if (inputs[0]) inputs[0].value = q;
-  if (inputs[1]) inputs[1].value = scoring;
-  if (inputs[2]) inputs[2].value = wordLimit;
+  const d = document.createElement('div');
+  d.id = 'q' + n;
+  d.style.background = '#F4F6F9';
+  d.style.borderRadius = '8px';
+  d.style.padding = '0.75rem';
+  d.style.marginBottom = '0.4rem';
+
+  const row1 = document.createElement('div');
+  row1.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px;';
+
+  const num = document.createElement('div');
+  num.style.cssText = 'background:#00C9E0;color:#0B1929;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;';
+  num.textContent = n;
+
+  const inp1 = document.createElement('input');
+  inp1.type = 'text';
+  inp1.placeholder = 'Question e.g. Describe your safeguarding approach...';
+  inp1.value = q;
+  inp1.style.cssText = 'flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.85rem;outline:none;';
+
+  const rmBtn = document.createElement('button');
+  rmBtn.innerHTML = '&#x2715;';
+  rmBtn.style.cssText = 'background:none;border:none;color:#6B8FA3;cursor:pointer;font-size:1rem;padding:0 4px;';
+  rmBtn.onclick = function() { document.getElementById('q'+n).remove(); };
+
+  row1.appendChild(num);
+  row1.appendChild(inp1);
+  row1.appendChild(rmBtn);
+
+  const row2 = document.createElement('div');
+  row2.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-left:30px;';
+
+  const inp2 = document.createElement('input');
+  inp2.type = 'text';
+  inp2.placeholder = 'Scoring criteria (optional)';
+  inp2.value = scoring;
+  inp2.style.cssText = 'padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.78rem;outline:none;';
+
+  const inp3 = document.createElement('input');
+  inp3.type = 'text';
+  inp3.placeholder = 'Word limit (optional)';
+  inp3.value = wordLimit;
+  inp3.style.cssText = 'padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.78rem;outline:none;';
+
+  row2.appendChild(inp2);
+  row2.appendChild(inp3);
+
+  d.appendChild(row1);
+  d.appendChild(row2);
   el.appendChild(d);
 }
 
@@ -1054,7 +1094,7 @@ function buildQuestionRows(questions) {
   qCount = 0;
   const el = document.getElementById('questionsBuilder');
   if (el) el.innerHTML = '';
-  (questions||[]).forEach(q => addQuestion(q.question, q.scoring, q.wordLimit));
+  (questions||[]).forEach(function(q) { addQuestion(q.question, q.scoring, q.wordLimit); });
 }
 
 function saveCanaKnowledge() {
