@@ -335,7 +335,6 @@
   }
 
   async function generateResponses() {
-    // Validate
     const name     = document.getElementById('f-name').value.trim();
     const founded  = document.getElementById('f-founded').value.trim();
     const staff    = document.getElementById('f-staff').value.trim();
@@ -356,23 +355,37 @@
     showState('loading');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    try {
+    const companyDetails = { name, founded, staff, cqc, services, regions, experience };
+
+    async function callGenerate(batchStart, batchEnd) {
       const res = await fetch('/.netlify/functions/generate-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tenderId,
-          companyDetails: { name, founded, staff, cqc, services, regions, experience }
-        })
+        body: JSON.stringify({ tenderId, companyDetails, batchStart, batchEnd })
       });
+      const rawText = await res.text();
+      if (!rawText || rawText.trim().startsWith('<')) {
+        throw new Error('Server error — please try again in a moment.');
+      }
+      const data = JSON.parse(rawText);
+      if (!res.ok || data.error) throw new Error(data.error || 'Generation failed');
+      return data;
+    }
 
-      const data = await res.json();
+    try {
+      // First call: questions 0-3
+      const batch1 = await callGenerate(0, 4);
+      const total = batch1.totalQuestions || 4;
 
-      if (!res.ok || data.error) {
-        throw new Error(data.error || 'Generation failed');
+      let allResponses = batch1.responses || [];
+
+      // Second call: remaining questions if any
+      if (total > 4) {
+        const batch2 = await callGenerate(4, total);
+        allResponses = allResponses.concat(batch2.responses || []);
       }
 
-      generatedResponses = data.responses || [];
+      generatedResponses = allResponses;
       renderResults();
       setStep(3);
       showState('results');
