@@ -79,8 +79,8 @@ BIDDING ORGANISATION:
 - Regions: ${companyDetails.regions}
 ${companyDetails.experience ? '- Experience: ' + companyDetails.experience : ''}
 
-${specText ? 'SERVICE SPECIFICATION:\n' + specText.substring(0, 3000) + '\n\n' : ''}
-${scoringText ? 'SCORING CRITERIA:\n' + scoringText.substring(0, 2000) + '\n\n' : ''}
+${specText ? 'SERVICE SPECIFICATION:\n' + specText.substring(0, 2000) + '\n\n' : ''}
+${scoringText ? 'SCORING CRITERIA:\n' + scoringText.substring(0, 1000) + '\n\n' : ''}
 
 QUESTIONS TO ANSWER:
 ${manualQuestions.map((q, i) => `Question ${i+1}: ${q.question}${q.scoring ? '\nScoring: ' + q.scoring : ''}${q.wordLimit ? '\nWord limit: ' + q.wordLimit : ''}`).join('\n\n')}
@@ -104,11 +104,11 @@ BIDDING ORGANISATION:
 - Regions: ${companyDetails.regions}
 ${companyDetails.experience ? '- Experience: ' + companyDetails.experience : ''}
 
-${specText ? 'SERVICE SPECIFICATION:\n' + specText.substring(0, 2000) + '\n\n' : ''}
-${scoringText ? 'SCORING CRITERIA:\n' + scoringText.substring(0, 1500) + '\n\n' : ''}
+${specText ? 'SERVICE SPECIFICATION:\n' + specText.substring(0, 1500) + '\n\n' : ''}
+${scoringText ? 'SCORING CRITERIA:\n' + scoringText.substring(0, 1000) + '\n\n' : ''}
 
 QUALITY QUESTIONS DOCUMENT (extract each question and answer it):
-${qualityText.substring(0, 4000)}
+${qualityText.substring(0, 3000)}
 
 First identify all the questions from the quality questions document, then write a complete, high-quality response to each one.
 
@@ -123,8 +123,8 @@ And so on for every question found in the document.`;
     }
 
     const message = await anthropic.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 4000,
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 3000,
       system: systemPrompt,
       messages: [{ role: 'user', content: userPrompt }]
     });
