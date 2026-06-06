@@ -275,15 +275,75 @@
   let tenderId = null;
   let tenderData = null;
   let generatedResponses = [];
+  const SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDg5NzYyMTEsImV4cCI6MjA2NDU1MjIxMX0.tDHJZPl4HZNM5PJuJ6-c7_xoKpgxFPuH5YlSdBEDqHw';
 
-  // Get tender ID from URL
+  // Get URL params
   const params = new URLSearchParams(window.location.search);
   tenderId = params.get('tender');
+  const sessionId = params.get('session');
+  const paid = params.get('paid');
 
   if (!tenderId) {
     document.getElementById('tender-title').textContent = 'No tender selected';
+  } else if (paid === 'true' && sessionId) {
+    // Coming back from Stripe payment - load saved responses
+    loadTender().then(() => loadSavedResponses(sessionId));
   } else {
     loadTender();
+  }
+
+  async function loadSavedResponses(sid) {
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/cana_responses?id=eq.' + sid + '&select=*&limit=1', {
+        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+      });
+      const rows = await res.json();
+      if (rows && rows[0] && rows[0].responses) {
+        generatedResponses = rows[0].responses;
+        // Show all responses unlocked
+        setStep(3);
+        showState('results');
+        renderResultsUnlocked();
+      }
+    } catch(e) {
+      console.error('Could not load saved responses:', e);
+    }
+  }
+
+  async function saveResponses(sid) {
+    try {
+      await fetch(SUPABASE_URL + '/rest/v1/cana_responses', {
+        method: 'POST',
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          Prefer: 'resolution=merge-duplicates'
+        },
+        body: JSON.stringify({
+          id: sid,
+          tender_id: tenderId,
+          responses: generatedResponses,
+          created_at: new Date().toISOString()
+        })
+      });
+    } catch(e) {
+      console.error('Could not save responses:', e);
+    }
+  }
+
+  function renderResultsUnlocked() {
+    const container = document.getElementById('responses-list');
+    container.innerHTML = generatedResponses.map((r, i) => {
+      const words = r.answer.split(/\s+/).length;
+      return '<div class="response-card"><div class="response-card-header"><div class="response-q-num">' + (i+1) + '</div><div class="response-q-text">' + r.question + '</div></div><div class="response-body"><div class="response-text">' + r.answer + '</div><div class="word-count">' + words + ' words</div></div></div>';
+    }).join('');
+    // Hide paywall, show download message
+    const paywall = document.querySelector('.paywall-card');
+    if (paywall) {
+      paywall.innerHTML = '<h2 style="color:white;font-family:Playfair Display,serif;margin-bottom:1rem;">Your full bid is unlocked</h2><p style="color:rgba(255,255,255,0.7);">All responses are now visible above. Copy each answer into your tender submission document.</p>';
+    }
   }
 
   async function loadTender() {
@@ -386,6 +446,16 @@
       }
 
       generatedResponses = allResponses;
+
+      // Generate session ID and save responses to Supabase
+      const sid = 'cana_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      await saveResponses(sid);
+
+      // Update paywall button with session ID so Stripe can redirect back
+      const successUrl = encodeURIComponent(window.location.origin + '/cana.html?tender=' + tenderId + '&session=' + sid + '&paid=true');
+      const baseStripeUrl = 'https://buy.stripe.com/5kQfZgcFx0fJeqR3MUcbC03';
+      document.getElementById('paywall-btn').href = baseStripeUrl + '?success_url=' + successUrl;
+
       renderResults();
       setStep(3);
       showState('results');
