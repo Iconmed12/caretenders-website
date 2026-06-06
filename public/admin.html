@@ -370,6 +370,13 @@ tr:hover td{background:#fafafa}
           <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="fCategory"><optgroup label="── Care ──"><option value="Domiciliary care">Domiciliary care</option><option value="Residential">Residential</option><option value="Nursing">Nursing</option><option value="Supported living">Supported living</option><option value="Mental health">Mental health</option><option value="Hospital discharge">Hospital discharge</option></optgroup><optgroup label="── Commercial ──"><option value="Construction">Construction</option><option value="Facilities">Facilities</option><option value="Cleaning">Cleaning</option><option value="Consultancy">Consultancy</option><option value="IT & Digital">IT & Digital</option><option value="Logistics">Logistics</option><option value="Other">Other</option></optgroup></select></div>
           <div class="form-group"><label class="form-label">Submission link</label><input class="form-input" type="url" id="fLink" placeholder="https://…"><div class="ai-filled-note" id="hintLink"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
         </div>
+        <div class="form-row single">
+          <div class="form-group">
+            <label class="form-label">Stripe payment link <span style="color:var(--text-light);font-weight:400;">(for Pay Now button)</span></label>
+            <input class="form-input" type="url" id="fStripeLink" placeholder="https://buy.stripe.com/…">
+            <div class="form-hint">Create this in your Stripe dashboard → Payment Links. Paste the link here and it will appear on the Pay Now button for this tender.</div>
+          </div>
+        </div>
         <div class="form-row single" id="whyCqcRow" style="display:none"><div class="form-group"><label class="form-label">Why this works for new providers</label><textarea class="form-textarea" id="fWhyCqc" style="min-height:80px" placeholder="Explain why this is suitable for unregistered providers…"></textarea></div></div>
         <div class="form-row single"><div class="form-group"><label class="form-label">Description <span class="req">*</span></label><textarea class="form-textarea" id="fDesc" placeholder="Describe the tender scope…" oninput="tryAutoCategory()"></textarea><div class="ai-filled-note" id="hintDesc"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div></div>
       </div>
@@ -481,9 +488,9 @@ function showPage(page, btn) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   btn.classList.add('active');
-  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings' };
+  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[page] || page;
-  ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(id => document.getElementById(id).style.display = 'none');
+  ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
   if (page === 'care')       { document.getElementById('aiUploadBtn').style.display='flex'; document.getElementById('addTenderBtn').style.display='flex'; renderCareTable(); }
   if (page === 'commercial') { document.getElementById('aiCommercialBtn').style.display='flex'; document.getElementById('addCommercialBtn').style.display='flex'; renderCommercialTable(); }
   if (page === 'noncqc')     { document.getElementById('aiNonCqcBtn').style.display='flex'; document.getElementById('addNonCqcBtn').style.display='flex'; renderNonCqcTable(); }
@@ -774,6 +781,7 @@ function openDrawer(tOrId, sectionType, aiData = null) {
     document.getElementById('fStatus').value = t.status || 'open';
     document.getElementById('fDesc').value = t.description || '';
     document.getElementById('fLink').value = t.link || t.submission_link || '';
+    document.getElementById('fStripeLink').value = t.stripe_link || '';
     document.getElementById('fPricingNote').value = (t.pricing || {}).note || '';
     if (!isNc) document.getElementById('fCategory').value = t.category || (isCommercial ? 'Construction' : 'Domiciliary care');
     if (isNc) document.getElementById('fWhyCqc').value = t.why_cqc || '';
@@ -812,7 +820,7 @@ function openDrawer(tOrId, sectionType, aiData = null) {
     document.getElementById('editId').value = '';
     document.getElementById('drawerTitleText').childNodes[0].textContent = 'Add ' + (isNc ? 'listing ' : isCommercial ? 'commercial tender ' : 'care tender ');
     document.getElementById('saveLabel').textContent = isNc ? 'Publish listing' : 'Publish tender';
-    ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink'].forEach(f => {
+    ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink','fStripeLink'].forEach(f => {
       const el = document.getElementById(f); if (el) { el.value = ''; el.classList.remove('ai-filled'); }
     });
     document.getElementById('fDeadline').value = '';
@@ -882,6 +890,7 @@ async function saveTender(draft = false) {
     deadline: deadline || null,
     days_left: deadline ? Math.max(0, Math.round((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24))) : 0,
     link: document.getElementById('fLink').value,
+    stripe_link: document.getElementById('fStripeLink').value || null,
     description: document.getElementById('fDesc').value,
     pricing: { items: pItems, total: '£' + total.toLocaleString() + '+VAT', note: document.getElementById('fPricingNote').value },
     eligibility: getEligItems(),
