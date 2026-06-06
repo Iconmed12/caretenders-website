@@ -761,11 +761,17 @@
         .map(([k,v])=>({label:k,amount:v}));
     }
 
-    // Calculate subtotal — sum items, then check explicit total fields
+    // Calculate subtotal
     window._currentTenderSubtotal = 0;
     window._currentTenderTitle = t.title||'';
     const itemsSum = sumPricing(pricingItems);
-    const explicitTotal = Number(pricing.total||t.total_fee||t.fee||t.our_fee||t.price||0);
+
+    // Strip currency symbols before parsing
+    function parseFee(v){ return Number(String(v||0).replace(/[^0-9.]/g,''))||0; }
+    const explicitTotal = parseFee(pricing.total) || parseFee(pricing.price) ||
+                          parseFee(t.total_fee)   || parseFee(t.fee) ||
+                          parseFee(t.our_fee)     || parseFee(t.price) || 0;
+
     const subtotal = explicitTotal || itemsSum || 0;
     window._currentTenderSubtotal = subtotal;
     const totalIncVat = subtotal ? addVat(subtotal) : 0;
@@ -842,6 +848,7 @@
     const title    = window._currentTenderTitle || 'Tender';
 
     if (!subtotal) {
+      // Fee not set on this tender — send to email
       window.location.href = 'mailto:consulting@icongrp.co.uk?subject=Payment enquiry: ' + encodeURIComponent(title);
       return;
     }
