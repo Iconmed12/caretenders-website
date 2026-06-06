@@ -1,5 +1,3 @@
-const { createClient } = require('@supabase/supabase-js');
-
 exports.handler = async (event) => {
   const corsHeaders = {
     'Content-Type': 'application/json',
@@ -15,18 +13,18 @@ exports.handler = async (event) => {
   try {
     const { tenderId, companyDetails } = JSON.parse(event.body);
 
-    const supabase = createClient(
-      'https://igpjfpncfuawikoyzfcd.supabase.co',
-      process.env.SUPABASE_ANON_KEY
+    // Fetch tender directly from Supabase REST API - no SDK needed
+    const supabaseUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+    const tenderRes = await fetch(
+      supabaseUrl + '/rest/v1/tenders?id=eq.' + tenderId + '&select=*&limit=1',
+      { headers: { 'apikey': supabaseKey, 'Authorization': 'Bearer ' + supabaseKey } }
     );
+    const tenders = await tenderRes.json();
+    const tender = tenders[0];
 
-    const { data: tender, error } = await supabase
-      .from('tenders')
-      .select('*')
-      .eq('id', tenderId)
-      .single();
-
-    if (error || !tender) {
+    if (!tender) {
       return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Tender not found' }) };
     }
 
@@ -40,26 +38,20 @@ exports.handler = async (event) => {
     }
 
     const knowledge = tender.cana_knowledge || '';
-
-    var systemPrompt = 'You are an expert UK public sector tender writer working for ICONGRP Consulting. Write high-quality, professional tender responses in first person on behalf of the bidding organisation. Be specific, reference the company details throughout, and use professional UK English. Do not include any markdown headers or formatting symbols like ## or ---. Just write clean paragraphs.';
+    var systemPrompt = 'You are an expert UK public sector tender writer. Write professional tender responses in first person on behalf of the bidding organisation. Be specific, reference the company details, and use professional UK English. Write clean paragraphs with no markdown symbols like ## or ---.';
     if (knowledge) { systemPrompt += ' ' + knowledge; }
 
-    var company = 'Organisation: ' + companyDetails.name + '. Founded: ' + companyDetails.founded + '. Staff: ' + companyDetails.staff + '. CQC Status: ' + companyDetails.cqc + '. Services: ' + companyDetails.services + '. Regions: ' + companyDetails.regions + (companyDetails.experience ? '. Experience: ' + companyDetails.experience : '') + '.';
+    var company = 'Organisation: ' + companyDetails.name + '. Founded: ' + companyDetails.founded + '. Staff: ' + companyDetails.staff + '. CQC: ' + companyDetails.cqc + '. Services: ' + companyDetails.services + '. Regions: ' + companyDetails.regions + (companyDetails.experience ? '. Experience: ' + companyDetails.experience : '') + '.';
 
-    var questionsBlock = '';
+    var questionsBlock = 'COMPANY: ' + company + '\n\nTENDER: ' + tender.title + '\n\n';
     for (var i = 0; i < questions.length; i++) {
       var q = questions[i];
       questionsBlock += 'QUESTION ' + (i+1) + ': ' + q.question;
-      if (q.wordLimit) { questionsBlock += ' (Word limit: ' + q.wordLimit + ')'; }
+      if (q.wordLimit) { questionsBlock += ' (max ' + q.wordLimit + ' words)'; }
       questionsBlock += '\nANSWER ' + (i+1) + ':\n\n';
     }
 
-    var userPrompt = 'Write tender responses for: ' + tender.title + ' (' + (tender.org || '') + ').\n\n';
-    userPrompt += 'COMPANY: ' + company + '\n\n';
-    userPrompt += 'Answer every question below. For each question write a complete professional response. Do not use markdown symbols. Format exactly as shown:\n\n';
-    userPrompt += questionsBlock;
-
-    const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -70,16 +62,16 @@ exports.handler = async (event) => {
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 4000,
         system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
+        messages: [{ role: 'user', content: questionsBlock }]
       })
     });
 
-    if (!apiResponse.ok) {
-      const errText = await apiResponse.text();
+    if (!aiRes.ok) {
+      const errText = await aiRes.text();
       return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'AI error: ' + errText.substring(0, 200) }) };
     }
 
-    const aiData = await apiResponse.json();
+    const aiData = await aiRes.json();
     const fullResponse = aiData.content[0].text;
 
     var responses = [];
