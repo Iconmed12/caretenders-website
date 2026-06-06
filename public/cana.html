@@ -173,11 +173,7 @@
       </div>
     </div>
 
-    <!-- Questions preview -->
-    <div class="section" id="questions-section" style="display:none;">
-      <div class="section-title">Questions Cana AI will answer</div>
-      <div class="questions-list" id="questions-list"></div>
-    </div>
+
 
     <!-- Company form -->
     <div class="section">
@@ -313,21 +309,7 @@
         if (!el.textContent.trim()) el.style.display = 'none';
       });
 
-      // Show questions
-      const questions = tenderData.cana_questions || [];
-      if (questions.length) {
-        document.getElementById('questions-section').style.display = '';
-        document.getElementById('questions-list').innerHTML = questions.map((q, i) => `
-          <div class="question-item">
-            <div class="question-num">${i+1}</div>
-            <div>
-              <div class="question-text">${q.question}</div>
-              ${q.wordLimit ? `<div class="question-meta">Word limit: ${q.wordLimit}</div>` : ''}
-              ${q.scoring ? `<div class="question-meta">Scoring: ${q.scoring}</div>` : ''}
-            </div>
-          </div>
-        `).join('');
-      }
+
 
       // Set paywall stripe link
       if (tenderData.stripe_link) {
