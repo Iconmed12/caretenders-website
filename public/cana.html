@@ -343,18 +343,7 @@
     }
   }
 
-  function renderResultsUnlocked() {
-    const container = document.getElementById('responses-list');
-    container.innerHTML = generatedResponses.map((r, i) => {
-      const words = r.answer.split(/\s+/).length;
-      return '<div class="response-card"><div class="response-card-header"><div class="response-q-num">' + (i+1) + '</div><div class="response-q-text">' + r.question + '</div></div><div class="response-body"><div class="response-text">' + r.answer + '</div><div class="word-count">' + words + ' words</div></div></div>';
-    }).join('');
-    // Hide paywall, show download message
-    const paywall = document.querySelector('.paywall-card');
-    if (paywall) {
-      paywall.innerHTML = '<h2 style="color:white;font-family:Playfair Display,serif;margin-bottom:1rem;">Your full bid is unlocked</h2><p style="color:rgba(255,255,255,0.7);">All responses are now visible above. Copy each answer into your tender submission document.</p>';
-    }
-  }
+
 
   async function loadTender() {
     try {
@@ -463,9 +452,6 @@
       await saveResponses(sid);
 
       // Update paywall button with session ID so Stripe can redirect back
-      const successUrl = encodeURIComponent(window.location.origin + '/cana.html?tender=' + tenderId + '&session=' + sid + '&paid=true');
-      const baseStripeUrl = 'https://buy.stripe.com/5kQfZgcFx0fJeqR3MUcbC03';
-      document.getElementById('paywall-btn').href = baseStripeUrl + '?success_url=' + successUrl;
 
       renderResults();
       setStep(3);
