@@ -263,12 +263,8 @@
         <div class="paywall-feature"><span>✓</span> Written using your company details</div>
         <div class="paywall-feature"><span>✓</span> Copy, download or send straight away</div>
       </div>
-      <a id="paywall-btn" href="#" class="paywall-btn" target="_blank" onclick="sessionStorage.setItem('cana_pending_session', currentSessionId)">💳 Pay £480 and unlock full bid</a>
+      <button onclick="handlePayNow()" class="paywall-btn" id="paywall-btn">💳 Pay £480 and unlock full bid</button>
       <div class="paywall-note">Secure payment via Stripe · Instant access after payment</div>
-      <div style="margin-top:1.5rem;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.1);">
-        <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:0.75rem;">Already paid? Click below to reveal your full responses.</p>
-        <button onclick="revealAfterPayment()" style="background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.3);color:white;border-radius:8px;padding:10px 24px;font-size:0.88rem;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;">✓ I've paid — show my full bid</button>
-      </div>
     </div>
 
   </div>
@@ -292,27 +288,36 @@
   if (!tenderId) {
     document.getElementById('tender-title').textContent = 'No tender selected';
   } else if (paid === 'true' && sessionId) {
-    // Coming back from Stripe payment - load saved responses
-    loadTender().then(() => loadSavedResponses(sessionId));
+    // Coming back from Stripe - verify payment then show responses
+    loadTender().then(() => verifyAndUnlock(sessionId));
   } else {
     loadTender();
   }
 
-  async function loadSavedResponses(sid) {
+  async function verifyAndUnlock(sid) {
+    setStep(3);
+    showState('loading');
+    document.querySelector('.loading-state h3').textContent = 'Verifying your payment...';
+    document.querySelector('.loading-state p').textContent = 'Please wait while we confirm your payment with Stripe.';
     try {
-      const res = await fetch(SUPABASE_URL + '/rest/v1/cana_responses?id=eq.' + sid + '&select=*&limit=1', {
-        headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+      const res = await fetch('/.netlify/functions/cana-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: sid })
       });
-      const rows = await res.json();
-      if (rows && rows[0] && rows[0].responses) {
-        generatedResponses = rows[0].responses;
-        // Show all responses unlocked
-        setStep(3);
-        showState('results');
-        renderResultsUnlocked();
+      const data = await res.json();
+      if (res.ok && data.responses) {
+        generatedResponses = data.responses;
+        showUnlockedResponses(data.responses);
+      } else {
+        showState('form');
+        setStep(1);
+        alert('Payment could not be verified: ' + (data.error || 'Please contact consulting@icongrp.co.uk'));
       }
     } catch(e) {
-      console.error('Could not load saved responses:', e);
+      showState('form');
+      setStep(1);
+      alert('Verification error: ' + e.message);
     }
   }
 
@@ -476,25 +481,47 @@
     }
   }
 
-  function revealAfterPayment() {
-    // Check if we have a session saved
-    const sid = currentSessionId || sessionStorage.getItem('cana_pending_session');
-    if (!sid) {
-      alert('No responses found. Please generate your responses first, then pay.');
-      return;
+  async function handlePayNow() {
+    const btn = document.getElementById('paywall-btn');
+    btn.textContent = 'Preparing payment...';
+    btn.style.opacity = '0.7';
+    btn.disabled = true;
+    try {
+      const res = await fetch('/.netlify/functions/cana-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId: currentSessionId,
+          tenderId: tenderId,
+          tenderTitle: tenderData ? tenderData.title : ''
+        })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Could not create payment session');
+      }
+    } catch(e) {
+      btn.textContent = 'Pay £480 and unlock full bid';
+      btn.style.opacity = '1';
+      btn.disabled = false;
+      alert('Payment error: ' + e.message);
     }
-    // Show all responses unlocked
+  }
+
+  function showUnlockedResponses(responses) {
     const container = document.getElementById('responses-list');
-    container.innerHTML = generatedResponses.map(function(r, i) {
-      var words = r.answer.split(/\s+/).length;
+    container.innerHTML = responses.map(function(r, i) {
+      var words = r.answer ? r.answer.split(' ').length : 0;
       return '<div class="response-card"><div class="response-card-header"><div class="response-q-num">' + (i+1) + '</div><div class="response-q-text">' + r.question + '</div></div><div class="response-body"><div class="response-text">' + r.answer + '</div><div class="word-count">' + words + ' words</div></div></div>';
     }).join('');
-    // Replace paywall with success message
     var paywall = document.getElementById('paywall-card');
     if (paywall) {
-      paywall.innerHTML = '<h2 style="font-family:Playfair Display,serif;">Your full bid is unlocked!</h2><p style="color:rgba(255,255,255,0.7);margin-top:0.75rem;">All ' + generatedResponses.length + ' responses are now visible above. Copy each answer into your tender submission.</p>';
+      paywall.innerHTML = '<h2 style="font-family:Playfair Display,serif;color:white;">Your full bid is unlocked!</h2><p style="color:rgba(255,255,255,0.7);margin-top:0.75rem;">All ' + responses.length + ' responses are now visible above. Copy each answer into your tender submission document.</p>';
     }
-    sessionStorage.removeItem('cana_pending_session');
+    setStep(3);
+    showState('results');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
