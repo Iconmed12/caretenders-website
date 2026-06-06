@@ -192,15 +192,15 @@ tr:hover td{background:#fafafa}
 .toast.error{background:var(--red)}
 .toast.ai{background:linear-gradient(135deg,#7c3aed,#4f46e5)}
 .saving-spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite}
-  .cana-drop-zone { border:2px dashed rgba(11,25,41,0.15);border-radius:10px;padding:1.25rem;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center; }
-  .cana-drop-zone.drag-over { border-color:#00C9E0;background:rgba(0,201,224,0.04); }
-  .cana-files-list { display:flex;flex-direction:column;gap:6px;margin-top:0.75rem; }
-  .cana-file-item { display:flex;align-items:center;gap:8px;background:#e8f7ee;border:1.5px solid #9FE1CB;border-radius:8px;padding:8px 12px;font-size:0.82rem;color:#1a7a3f; }
-  .cana-file-item i { color:#1a7a3f;flex-shrink:0; }
-  .cana-file-item span { flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500; }
-  .cana-file-remove { background:none;border:none;color:#a32d2d;cursor:pointer;font-size:1rem;padding:0 2px;flex-shrink:0;font-weight:700; }
-  .cana-upload-btn { display:inline-flex;align-items:center;gap:6px;background:#F4F6F9;border:1.5px solid rgba(11,25,41,0.12);border-radius:8px;padding:7px 14px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:#6B8FA3;cursor:pointer;transition:all 0.2s;margin-top:6px; }
-  .cana-upload-btn:hover { border-color:#00C9E0;color:#0099AA; }
+.cana-drop-zone{border:2px dashed rgba(11,25,41,0.15);border-radius:10px;padding:1.25rem;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center}
+.cana-drop-zone.drag-over{border-color:#00C9E0;background:rgba(0,201,224,0.04)}
+.cana-files-list{display:flex;flex-direction:column;gap:6px;margin-top:0.75rem}
+.cana-file-item{display:flex;align-items:center;gap:8px;background:#e8f7ee;border:1.5px solid #9FE1CB;border-radius:8px;padding:8px 12px;font-size:0.82rem;color:#1a7a3f}
+.cana-file-item i{color:#1a7a3f;flex-shrink:0}
+.cana-file-item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.cana-file-remove{background:none;border:none;color:#a32d2d;cursor:pointer;font-size:1rem;padding:0 2px;flex-shrink:0;font-weight:700}
+.cana-upload-btn{display:inline-flex;align-items:center;gap:6px;background:#F4F6F9;border:1.5px solid rgba(11,25,41,0.12);border-radius:8px;padding:7px 14px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:#6B8FA3;cursor:pointer;transition:all 0.2s;margin-top:6px}
+.cana-upload-btn:hover{border-color:#00C9E0;color:#0099AA}
 </style>
 </head>
 <body>
@@ -249,49 +249,53 @@ tr:hover td{background:#fafafa}
     <div class="topbar">
       <div class="topbar-title" id="topbarTitle">Dashboard</div>
       <div class="topbar-right">
-        <button class="topbar-btn btn-ai" id="aiUploadBtn" style="display:none" onclick="openAiModal('care')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload & auto-fill</button>
+        <button class="topbar-btn btn-ai" id="aiUploadBtn" style="display:none" onclick="openAiModal('care')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload &amp; auto-fill</button>
         <button class="topbar-btn btn-primary" id="addTenderBtn" style="display:none" onclick="openDrawer(null,'care')"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
-        <button class="topbar-btn btn-ai" id="aiCommercialBtn" style="display:none" onclick="openAiModal('commercial')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload & auto-fill</button>
+        <button class="topbar-btn btn-ai" id="aiCommercialBtn" style="display:none" onclick="openAiModal('commercial')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload &amp; auto-fill</button>
         <button class="topbar-btn btn-primary" id="addCommercialBtn" style="display:none" onclick="openDrawer(null,'commercial')"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
-        <button class="topbar-btn btn-ai" id="aiNonCqcBtn" style="display:none" onclick="openAiModal('noncqc')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload & auto-fill</button>
+        <button class="topbar-btn btn-ai" id="aiNonCqcBtn" style="display:none" onclick="openAiModal('noncqc')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload &amp; auto-fill</button>
         <button class="topbar-btn btn-primary" id="addNonCqcBtn" style="display:none" onclick="openDrawer(null,'noncqc')"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
       </div>
     </div>
+
     <div class="page active" id="page-dashboard">
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-label">Total listings</div><div class="stat-value" id="statTotal">—</div><div class="stat-sub up"><i class="ti ti-trending-up" style="font-size:13px"></i> Live from database</div></div>
-        <div class="stat-card"><div class="stat-label">Live & open</div><div class="stat-value" id="statOpen">—</div><div class="stat-sub up"><i class="ti ti-circle-check" style="font-size:13px"></i> Accepting applications</div></div>
-        <div class="stat-card"><div class="stat-label">Closing soon</div><div class="stat-value" id="statClosing">—</div><div class="stat-sub warn"><i class="ti ti-alert-triangle" style="font-size:13px"></i> Within 14 days</div></div>
-        <div class="stat-card"><div class="stat-label">Non-CQC listings</div><div class="stat-value" id="statNonCqc">—</div><div class="stat-sub" style="color:var(--purple)"><i class="ti ti-certificate" style="font-size:13px"></i> Pre-registration</div></div>
+        <div class="stat-card"><div class="stat-label">Total listings</div><div class="stat-value" id="statTotal">0</div><div class="stat-sub up"><i class="ti ti-trending-up" style="font-size:13px"></i> Live from database</div></div>
+        <div class="stat-card"><div class="stat-label">Live &amp; open</div><div class="stat-value" id="statOpen">0</div><div class="stat-sub up"><i class="ti ti-circle-check" style="font-size:13px"></i> Accepting applications</div></div>
+        <div class="stat-card"><div class="stat-label">Closing soon</div><div class="stat-value" id="statClosing">0</div><div class="stat-sub warn"><i class="ti ti-alert-triangle" style="font-size:13px"></i> Within 14 days</div></div>
+        <div class="stat-card"><div class="stat-label">Non-CQC listings</div><div class="stat-value" id="statNonCqc">0</div><div class="stat-sub" style="color:var(--purple)"><i class="ti ti-certificate" style="font-size:13px"></i> Pre-registration</div></div>
       </div>
       <div class="table-card">
         <div class="table-header"><h2>All listings</h2></div>
-        <table><thead><tr><th>Tender</th><th>Value</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="dashboardTable"><tr><td colspan="5"><div class="empty-state"><i class="ti ti-loader" style="animation:spin 1s linear infinite"></i>Loading…</div></td></tr></tbody></table>
+        <table><thead><tr><th>Tender</th><th>Value</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="dashboardTable"></tbody></table>
       </div>
     </div>
+
     <div class="page" id="page-care">
       <div style="background:#e8f7ee;border:1px solid #9FE1CB;border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:13px;color:#085041;display:flex;align-items:center;gap:8px;">
         <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
         <span>If a care tender has <strong>no CQC rating requirement</strong> in its eligibility, it will automatically also appear under <strong>Non-CQC listings</strong> for new providers.</span>
       </div>
       <div class="table-card">
-        <div class="table-header"><h2>Care tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="careCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="careSearch" placeholder="Search…" oninput="renderCareTable()"></div></div>
+        <div class="table-header"><h2>Care tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="careCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="careSearch" placeholder="Search..." oninput="renderCareTable()"></div></div>
         <table><thead><tr><th>Tender</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Non-CQC?</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="careTable"></tbody></table>
       </div>
     </div>
+
     <div class="page" id="page-commercial">
       <div class="table-card">
-        <div class="table-header"><h2>Commercial tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="commercialCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="commercialSearch" placeholder="Search…" oninput="renderCommercialTable()"></div></div>
+        <div class="table-header"><h2>Commercial tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="commercialCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="commercialSearch" placeholder="Search..." oninput="renderCommercialTable()"></div></div>
         <table><thead><tr><th>Tender</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="commercialTable"></tbody></table>
       </div>
     </div>
+
     <div class="page" id="page-noncqc">
       <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:13px;color:#4c1d95;display:flex;align-items:center;gap:8px;">
         <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
-        <span>This list is <strong>auto-populated</strong> from care tenders where no CQC rating is required in the eligibility. You can also add them manually.</span>
+        <span>This list is <strong>auto-populated</strong> from care tenders where no CQC rating is required. You can also add them manually.</span>
       </div>
       <div class="table-card">
-        <div class="table-header"><h2>Non-CQC listings <span style="color:var(--text-light);font-weight:400;font-size:13px" id="nonCqcCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="nonCqcSearch" placeholder="Search…" oninput="renderNonCqcTable()"></div></div>
+        <div class="table-header"><h2>Non-CQC listings <span style="color:var(--text-light);font-weight:400;font-size:13px" id="nonCqcCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="nonCqcSearch" placeholder="Search..." oninput="renderNonCqcTable()"></div></div>
         <table><thead><tr><th>Listing</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Auto-detected</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="nonCqcTable"></tbody></table>
       </div>
     </div>
@@ -300,10 +304,8 @@ tr:hover td{background:#fafafa}
     <div class="page" id="page-cana">
       <div style="background:rgba(0,201,224,0.06);border:1px solid rgba(0,201,224,0.2);border-radius:8px;padding:10px 16px;margin-bottom:1.25rem;font-size:13px;color:#0099AA;display:flex;align-items:center;gap:8px;">
         <i class="ti ti-sparkles" style="font-size:16px;flex-shrink:0;"></i>
-        <span>Upload documents for each tender so Cana AI knows exactly how to write the responses. You can upload multiple files per section. Select a tender below to get started.</span>
+        <span>Upload documents for each tender so Cana AI knows exactly how to write the responses. You can upload multiple files per section.</span>
       </div>
-
-      <!-- Tender selector -->
       <div class="table-card" style="margin-bottom:1.25rem;padding:1.25rem;">
         <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
           <div style="flex:1;">
@@ -312,148 +314,93 @@ tr:hover td{background:#fafafa}
               <option value="">Choose a tender...</option>
             </select>
           </div>
-          <div id="canaDocStatus" style="display:none;background:var(--green-bg);border:1px solid #9FE1CB;border-radius:8px;padding:8px 14px;font-size:0.82rem;color:var(--green);font-weight:500;white-space:nowrap;">✓ Documents uploaded</div>
+          <div id="canaDocStatus" style="display:none;background:#e8f7ee;border:1px solid #9FE1CB;border-radius:8px;padding:8px 14px;font-size:0.82rem;color:#1a7a3f;font-weight:500;white-space:nowrap;">Documents uploaded</div>
         </div>
       </div>
-
-      <!-- Document upload cards -->
       <div id="canaDocArea" style="display:none;">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:1.25rem;">
-
-          <!-- Quality Questions -->
           <div class="table-card" style="padding:1.25rem;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
-              <div style="width:36px;height:36px;background:rgba(0,201,224,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">❓</div>
-              <div>
-                <div style="font-weight:600;font-size:0.9rem;color:var(--text);">Quality Questions</div>
-                <div style="font-size:0.75rem;color:var(--text-light);">The questions the tender requires answering</div>
-              </div>
+              <div style="width:36px;height:36px;background:rgba(0,201,224,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">?</div>
+              <div><div style="font-weight:600;font-size:0.9rem;">Quality Questions</div><div style="font-size:0.75rem;color:var(--text-light);">The questions the tender requires answering</div></div>
             </div>
             <div class="cana-drop-zone" id="qualityDrop" ondragover="canaDragOver(event,'qualityDrop')" ondragleave="canaDragLeave('qualityDrop')" ondrop="canaOnDrop(event,'quality')">
               <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
               <div style="font-size:0.82rem;color:var(--text-light);margin-top:4px;">Drag files here or</div>
-              <label class="cana-upload-btn" for="qualityInput" style="margin-top:6px;">
-                <i class="ti ti-upload" style="font-size:13px;"></i> Browse files
-                <input type="file" id="qualityInput" accept=".pdf,.doc,.docx,.txt" multiple style="display:none;" onchange="handleCanaDoc('quality',this.files)">
-              </label>
+              <label class="cana-upload-btn"><i class="ti ti-upload" style="font-size:13px;"></i> Browse files<input type="file" id="qualityInput" accept=".pdf,.doc,.docx,.txt" multiple style="display:none;" onchange="handleCanaDoc('quality',this.files)"></label>
             </div>
             <div id="qualityFiles" class="cana-files-list"></div>
           </div>
-
-          <!-- Service Specification -->
           <div class="table-card" style="padding:1.25rem;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
               <div style="width:36px;height:36px;background:rgba(245,166,35,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">📋</div>
-              <div>
-                <div style="font-weight:600;font-size:0.9rem;color:var(--text);">Service Specification</div>
-                <div style="font-size:0.75rem;color:var(--text-light);">What the commissioner expects to be delivered</div>
-              </div>
+              <div><div style="font-weight:600;font-size:0.9rem;">Service Specification</div><div style="font-size:0.75rem;color:var(--text-light);">What the commissioner expects to be delivered</div></div>
             </div>
             <div class="cana-drop-zone" id="specDrop" ondragover="canaDragOver(event,'specDrop')" ondragleave="canaDragLeave('specDrop')" ondrop="canaOnDrop(event,'spec')">
               <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
               <div style="font-size:0.82rem;color:var(--text-light);margin-top:4px;">Drag files here or</div>
-              <label class="cana-upload-btn" for="specInput" style="margin-top:6px;">
-                <i class="ti ti-upload" style="font-size:13px;"></i> Browse files
-                <input type="file" id="specInput" accept=".pdf,.doc,.docx,.txt" multiple style="display:none;" onchange="handleCanaDoc('spec',this.files)">
-              </label>
+              <label class="cana-upload-btn"><i class="ti ti-upload" style="font-size:13px;"></i> Browse files<input type="file" id="specInput" accept=".pdf,.doc,.docx,.txt" multiple style="display:none;" onchange="handleCanaDoc('spec',this.files)"></label>
             </div>
             <div id="specFiles" class="cana-files-list"></div>
           </div>
-
-          <!-- Scoring Criteria -->
           <div class="table-card" style="padding:1.25rem;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
               <div style="width:36px;height:36px;background:rgba(99,91,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🎯</div>
-              <div>
-                <div style="font-weight:600;font-size:0.9rem;color:var(--text);">Scoring Criteria</div>
-                <div style="font-size:0.75rem;color:var(--text-light);">How responses will be evaluated and marked</div>
-              </div>
+              <div><div style="font-weight:600;font-size:0.9rem;">Scoring Criteria</div><div style="font-size:0.75rem;color:var(--text-light);">How responses will be evaluated and marked</div></div>
             </div>
             <div class="cana-drop-zone" id="scoringDrop" ondragover="canaDragOver(event,'scoringDrop')" ondragleave="canaDragLeave('scoringDrop')" ondrop="canaOnDrop(event,'scoring')">
               <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
               <div style="font-size:0.82rem;color:var(--text-light);margin-top:4px;">Drag files here or</div>
-              <label class="cana-upload-btn" for="scoringInput" style="margin-top:6px;">
-                <i class="ti ti-upload" style="font-size:13px;"></i> Browse files
-                <input type="file" id="scoringInput" accept=".pdf,.doc,.docx,.txt" multiple style="display:none;" onchange="handleCanaDoc('scoring',this.files)">
-              </label>
+              <label class="cana-upload-btn"><i class="ti ti-upload" style="font-size:13px;"></i> Browse files<input type="file" id="scoringInput" accept=".pdf,.doc,.docx,.txt" multiple style="display:none;" onchange="handleCanaDoc('scoring',this.files)"></label>
             </div>
             <div id="scoringFiles" class="cana-files-list"></div>
           </div>
-
         </div>
-
-        <!-- Save button -->
         <div style="display:flex;align-items:center;gap:1rem;">
-          <button onclick="saveCanaDocs()" style="background:var(--navy);color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
+          <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
             <i class="ti ti-sparkles" style="font-size:14px;"></i> Save &amp; train Cana AI
           </button>
-          <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:var(--green);">✓ Saved — Cana is ready for this tender</span>
+          <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved — Cana is ready for this tender</span>
         </div>
       </div>
-    <div style="display:flex;align-items:center;gap:1rem;padding:0 1.25rem 1.25rem;">
-  <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">⚡ Save &amp; train Cana AI</button>
-  <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">✓ Saved — Cana is ready for this tender</span>
-</div>
-    <!-- END CANA AI PAGE -->
+    </div>
 
     <!-- SETTINGS PAGE -->
     <div class="page" id="page-settings">
       <div style="max-width:640px;">
         <h2 style="font-size:1.1rem;font-weight:600;margin-bottom:0.25rem;">Integrations</h2>
         <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:1.75rem;">Your connected services and integration status.</p>
-
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
             <div style="width:42px;height:42px;background:#635BFF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">💳</div>
-            <div style="flex:1;">
-              <div style="font-weight:600;font-size:0.95rem;">Stripe Payments</div>
-              <div style="font-size:0.78rem;color:var(--text-light);">Clients pay directly from the tender modal — funds go straight to your Stripe account</div>
-            </div>
-            <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">✓ Connected</div>
+            <div style="flex:1;"><div style="font-weight:600;font-size:0.95rem;">Stripe Payments</div><div style="font-size:0.78rem;color:var(--text-light);">Clients pay directly from the tender modal</div></div>
+            <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">Connected</div>
           </div>
           <div style="background:#F4F6F9;border-radius:8px;padding:1rem;font-size:0.81rem;color:var(--text-light);line-height:1.9;">
             <div><strong style="color:var(--text);">Publishable key:</strong> pk_live_51RxX99...cJxL1</div>
-            <div><strong style="color:var(--text);">Secret key:</strong> Stored in Netlify environment variables as <code style="background:#e2e8f0;padding:1px 6px;border-radius:4px;">STRIPE_SECRET_KEY</code></div>
-            <div><strong style="color:var(--text);">Checkout function:</strong> <code style="background:#e2e8f0;padding:1px 6px;border-radius:4px;">netlify/functions/create-checkout.js</code></div>
+            <div><strong style="color:var(--text);">Secret key:</strong> Stored in Netlify as <code style="background:#e2e8f0;padding:1px 6px;border-radius:4px;">STRIPE_SECRET_KEY</code></div>
           </div>
-          <div style="margin-top:0.85rem;font-size:0.78rem;color:var(--text-light);">Each payment is created dynamically using the fee you set per tender. No fixed payment links needed.</div>
         </div>
-
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
             <div style="width:42px;height:42px;background:#006BFF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">📅</div>
-            <div style="flex:1;">
-              <div style="font-weight:600;font-size:0.95rem;">Calendly</div>
-              <div style="font-size:0.78rem;color:var(--text-light);">Clients book a consultant call directly from the tender modal</div>
-            </div>
-            <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">✓ Connected</div>
+            <div style="flex:1;"><div style="font-weight:600;font-size:0.95rem;">Calendly</div><div style="font-size:0.78rem;color:var(--text-light);">Clients book a consultant call from the tender modal</div></div>
+            <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">Connected</div>
           </div>
           <div style="background:#F4F6F9;border-radius:8px;padding:1rem;font-size:0.81rem;color:var(--text-light);">
             <strong style="color:var(--text);">Booking link:</strong> <a href="https://calendly.com/icongrp" target="_blank" style="color:#006BFF;">https://calendly.com/icongrp</a>
           </div>
         </div>
-
-        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.5rem;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.5rem;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
             <div style="width:42px;height:42px;background:#0B1929;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">⚡</div>
-            <div style="flex:1;">
-              <div style="font-weight:600;font-size:0.95rem;">Cana AI — Writing Knowledge</div>
-              <div style="font-size:0.78rem;color:var(--text-light);">Teach Cana how to write winning tenders — this applies to every bid</div>
-            </div>
-            <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">✓ Active</div>
+            <div style="flex:1;"><div style="font-weight:600;font-size:0.95rem;">Cana AI Writing Knowledge</div><div style="font-size:0.78rem;color:var(--text-light);">Teach Cana how to write winning tenders</div></div>
+            <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">Active</div>
           </div>
-          <textarea id="canaKnowledge" style="width:100%;min-height:200px;padding:0.85rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);line-height:1.6;resize:vertical;outline:none;" placeholder="Write your tender guidance here. For example:
-- Always use the STAR method (Situation, Task, Action, Result) for experience questions
-- Lead with outcomes and measurable impact
-- Reference CQC standards and regulatory compliance where relevant
-- Use active, confident language — avoid passive voice
-- Always include a concrete example from the organisation's experience
-- For social value questions, reference local employment, training, and community benefit
-- Match the scoring criteria exactly — if they score on innovation, lead with innovation"></textarea>
-          <button onclick="saveCanaKnowledge()" style="margin-top:0.75rem;background:var(--navy);color:white;border:none;border-radius:8px;padding:9px 20px;font-size:0.85rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Save knowledge</button>
-          <span id="canaKnowledgeSaved" style="display:none;margin-left:10px;font-size:0.8rem;color:var(--green);">Saved!</span>
+          <textarea id="canaKnowledge" style="width:100%;min-height:180px;padding:0.85rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);line-height:1.6;resize:vertical;outline:none;" placeholder="Write your tender guidance here..."></textarea>
+          <button onclick="saveCanaKnowledge()" style="margin-top:0.75rem;background:#0B1929;color:white;border:none;border-radius:8px;padding:9px 20px;font-size:0.85rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Save knowledge</button>
+          <span id="canaKnowledgeSaved" style="display:none;margin-left:10px;font-size:0.8rem;color:#1a7a3f;">Saved!</span>
         </div>
-
       </div>
     </div>
 
@@ -465,7 +412,7 @@ tr:hover td{background:#fafafa}
 <div class="overlay" id="aiOverlay" onclick="maybeCloseAi(event)">
   <div class="ai-modal">
     <div class="ai-modal-header">
-      <div class="ai-modal-title"><div class="ai-title-icon"><i class="ti ti-sparkles"></i></div><div><h3>AI document upload</h3><p>Upload a tender document — we'll read it and fill all fields</p></div></div>
+      <div class="ai-modal-title"><div class="ai-title-icon"><i class="ti ti-sparkles"></i></div><div><h3>AI document upload</h3><p>Upload a tender document and we will read it and fill all fields</p></div></div>
       <div class="modal-x" onclick="closeAiModal()"><i class="ti ti-x"></i></div>
     </div>
     <div class="ai-modal-body">
@@ -489,8 +436,8 @@ tr:hover td{background:#fafafa}
       </div>
       <div class="processing-state" id="aiStep2">
         <div class="spinner"></div>
-        <div style="font-size:15px;font-weight:600;color:#4f46e5">Analysing your document…</div>
-        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">This usually takes 5–15 seconds</div>
+        <div style="font-size:15px;font-weight:600;color:#4f46e5">Analysing your document...</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">This usually takes 5 to 15 seconds</div>
         <div class="proc-steps">
           <div class="proc-step" id="ps1"><i class="ti ti-file-text"></i> Reading document content</div>
           <div class="proc-step" id="ps2"><i class="ti ti-brain"></i> Extracting key tender details</div>
@@ -508,7 +455,7 @@ tr:hover td{background:#fafafa}
     </div>
     <div class="ai-modal-footer">
       <button class="topbar-btn btn-ai" id="aiAnalyseBtn" style="display:none" onclick="runAiExtraction()"><i class="ti ti-sparkles" style="font-size:14px"></i> Analyse document</button>
-      <button class="topbar-btn btn-primary" id="aiOpenFormBtn" style="display:none" onclick="openInForm()"><i class="ti ti-arrow-right" style="font-size:14px"></i> Open in form & review</button>
+      <button class="topbar-btn btn-primary" id="aiOpenFormBtn" style="display:none" onclick="openInForm()"><i class="ti ti-arrow-right" style="font-size:14px"></i> Open in form &amp; review</button>
       <button class="topbar-btn btn-ghost" onclick="closeAiModal()">Cancel</button>
     </div>
   </div>
@@ -526,27 +473,28 @@ tr:hover td{background:#fafafa}
       <input type="hidden" id="editIsNonCqc">
       <div class="form-section">
         <div class="fsect-title">Tender details</div>
-        <div class="form-row single"><div class="form-group"><label class="form-label">Title <span class="req">*</span></label><input class="form-input" type="text" id="fTitle" placeholder="e.g. Housing, Health & Wellbeing Hospital Discharge Support Service"><div class="ai-filled-note" id="hintTitle"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div></div>
+        <div class="form-row single"><div class="form-group"><label class="form-label">Title <span class="req">*</span></label><input class="form-input" type="text" id="fTitle" placeholder="e.g. Domiciliary Care Services" oninput="tryAutoCategory()"><div class="ai-filled-note" id="hintTitle"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div></div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Organisation <span class="req">*</span></label><input class="form-input" type="text" id="fOrg" placeholder="e.g. Durham County Council"><div class="ai-filled-note" id="hintOrg"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
-          <div class="form-group"><label class="form-label">Region <span class="req">*</span></label><input class="form-input" type="text" id="fRegion" placeholder="e.g. North East"><div class="ai-filled-note" id="hintRegion"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+          <div class="form-group"><label class="form-label">Organisation <span class="req">*</span></label><input class="form-input" type="text" id="fOrg" placeholder="e.g. Durham County Council"><div class="ai-filled-note" id="hintOrg"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
+          <div class="form-group"><label class="form-label">Region <span class="req">*</span></label><input class="form-input" type="text" id="fRegion" placeholder="e.g. North East"><div class="ai-filled-note" id="hintRegion"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Contract value <span class="req">*</span></label><input class="form-input" type="text" id="fValue" placeholder="e.g. £3,100,000"><div class="ai-filled-note" id="hintValue"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
-          <div class="form-group"><label class="form-label">Duration <span class="req">*</span></label><input class="form-input" type="text" id="fDuration" placeholder="e.g. 3 years"><div class="ai-filled-note" id="hintDuration"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+          <div class="form-group"><label class="form-label">Contract value <span class="req">*</span></label><input class="form-input" type="text" id="fValue" placeholder="e.g. £3,100,000"><div class="ai-filled-note" id="hintValue"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
+          <div class="form-group"><label class="form-label">Duration <span class="req">*</span></label><input class="form-input" type="text" id="fDuration" placeholder="e.g. 3 years"><div class="ai-filled-note" id="hintDuration"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
         </div>
         <div class="form-row">
-          <div class="form-group"><label class="form-label">Deadline <span class="req">*</span></label><input class="form-input" type="date" id="fDeadline"><div class="ai-filled-note" id="hintDeadline"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
+          <div class="form-group"><label class="form-label">Deadline <span class="req">*</span></label><input class="form-input" type="date" id="fDeadline"><div class="ai-filled-note" id="hintDeadline"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
           <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="open">Open</option><option value="closing">Closing soon</option><option value="urgent">Urgent</option><option value="new">New opportunity</option><option value="draft">Draft</option></select></div>
         </div>
         <div class="form-row" id="categoryRow">
-          <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="fCategory"><optgroup label="── Care ──"><option value="Domiciliary care">Domiciliary care</option><option value="Residential">Residential</option><option value="Nursing">Nursing</option><option value="Supported living">Supported living</option><option value="Mental health">Mental health</option><option value="Hospital discharge">Hospital discharge</option></optgroup><optgroup label="── Commercial ──"><option value="Construction">Construction</option><option value="Facilities">Facilities</option><option value="Cleaning">Cleaning</option><option value="Consultancy">Consultancy</option><option value="IT & Digital">IT & Digital</option><option value="Logistics">Logistics</option><option value="Other">Other</option></optgroup></select></div>
-          <div class="form-group"><label class="form-label">Submission link</label><input class="form-input" type="url" id="fLink" placeholder="https://…"><div class="ai-filled-note" id="hintLink"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div>
-          <div class="form-group"><label class="form-label">Stripe payment link <span style="color:var(--text-light);font-weight:400;font-size:11px;">(clients click Pay Now → goes here)</span></label><input class="form-input" type="url" id="fStripeLink" placeholder="https://buy.stripe.com/…"></div>
-
+          <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="fCategory"><optgroup label="Care"><option value="Domiciliary care">Domiciliary care</option><option value="Residential">Residential</option><option value="Nursing">Nursing</option><option value="Supported living">Supported living</option><option value="Mental health">Mental health</option><option value="Hospital discharge">Hospital discharge</option></optgroup><optgroup label="Commercial"><option value="Construction">Construction</option><option value="Facilities">Facilities</option><option value="Cleaning">Cleaning</option><option value="Consultancy">Consultancy</option><option value="IT & Digital">IT &amp; Digital</option><option value="Logistics">Logistics</option><option value="Other">Other</option></optgroup></select></div>
+          <div class="form-group"><label class="form-label">Submission link</label><input class="form-input" type="url" id="fLink" placeholder="https://..."><div class="ai-filled-note" id="hintLink"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
         </div>
-        <div class="form-row single" id="whyCqcRow" style="display:none"><div class="form-group"><label class="form-label">Why this works for new providers</label><textarea class="form-textarea" id="fWhyCqc" style="min-height:80px" placeholder="Explain why this is suitable for unregistered providers…"></textarea></div></div>
-        <div class="form-row single"><div class="form-group"><label class="form-label">Description <span class="req">*</span></label><textarea class="form-textarea" id="fDesc" placeholder="Describe the tender scope…" oninput="tryAutoCategory()"></textarea><div class="ai-filled-note" id="hintDesc"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI — please verify</div></div></div>
+        <div class="form-row single">
+          <div class="form-group"><label class="form-label">Stripe payment link <span style="color:var(--text-light);font-weight:400;font-size:11px;">(clients click Pay Now)</span></label><input class="form-input" type="url" id="fStripeLink" placeholder="https://buy.stripe.com/..."></div>
+        </div>
+        <div class="form-row single" id="whyCqcRow" style="display:none"><div class="form-group"><label class="form-label">Why this works for new providers</label><textarea class="form-textarea" id="fWhyCqc" style="min-height:80px" placeholder="Explain why this is suitable for unregistered providers..."></textarea></div></div>
+        <div class="form-row single"><div class="form-group"><label class="form-label">Description <span class="req">*</span></label><textarea class="form-textarea" id="fDesc" placeholder="Describe the tender scope..." oninput="tryAutoCategory()"></textarea><div class="ai-filled-note" id="hintDesc"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div></div>
       </div>
       <div class="form-section">
         <div class="fsect-title">Our pricing breakdown</div>
@@ -585,8 +533,7 @@ const API = '/.netlify/functions';
 const ADMIN_PASSWORD = 'CareTenders2024!';
 let allTenders = [];
 let deleteTarget = { id: null };
-let currentAiIsNonCqc = false;
-let currentSection = "care";
+let currentSection = 'care';
 let extractedData = null;
 let selectedFile = null;
 let nextId = 1;
@@ -605,51 +552,50 @@ function doLogout() { document.getElementById('appScreen').style.display = 'none
 
 async function loadTenders() {
   try {
-    const res = await fetch(`${API}/get-tenders`);
+    const res = await fetch(API + '/get-tenders');
     allTenders = await res.json() || [];
     nextId = allTenders.length + 1;
     renderAll();
-  populateCanaTenderSelect();
-  } catch (err) {
+    populateCanaTenderSelect();
+  } catch(e) {
     showToast('Could not load tenders from database', 'error');
   }
 }
 
-// CQC detection — if no eligibility item mentions CQC rating/registration requirement, it's non-CQC eligible
 const CARE_CATS = ['domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
 const COMMERCIAL_CATS = ['construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','logistics','other','it & services'];
+
 function isCare(t) {
   const cat = (t.category||'').toLowerCase().trim();
   if (!cat) return !!t.is_non_cqc;
   if (COMMERCIAL_CATS.includes(cat)) return false;
   if (CARE_CATS.includes(cat)) return true;
-  if (['construction','facilit','cleaning','consultanc','logistic'].some(k=>cat.includes(k))) return false;
+  if (['construction','facilit','cleaning','consultanc','logistic'].some(k => cat.includes(k))) return false;
   return true;
 }
+
 function requiresCqcRating(t) {
   const reqs = (t.eligibility||[]).join(' ').toLowerCase();
   return reqs.includes('cqc rating') || reqs.includes('good or outstanding') || reqs.includes('cqc rated') || reqs.includes('cqc inspection') || reqs.includes('rated by cqc');
 }
+
 function isNonCqcEligible(t) { return isCare(t) && !requiresCqcRating(t); }
 
-// Auto-detect category from title + description text
 function autoDetectCategory(text) {
   const t = (text||'').toLowerCase();
-  // Commercial signals
   if (/construction|refurb|build|contractor|civil engineer|structural/.test(t)) return 'Construction';
-  if (/facilit|estate management|hard fm|soft fm|building management/.test(t)) return 'Facilities';
+  if (/facilit|estate management|hard fm|soft fm/.test(t)) return 'Facilities';
   if (/clean|janitorial|hygiene service|washroom/.test(t)) return 'Cleaning';
-  if (/consult|advisory|professional service|strategy|business support/.test(t)) return 'Consultancy';
-  if (/it service|digital|software|cyber|data|technology|ict|infrastructure/.test(t)) return 'IT & Digital';
-  if (/logistic|transport|courier|supply chain|delivery|haulage/.test(t)) return 'Logistics';
-  // Care signals
-  if (/domiciliary|home care|homecare|personal care|home-based/.test(t)) return 'Domiciliary care';
-  if (/residential|care home|nursing home|care facility/.test(t)) return 'Residential';
+  if (/consult|advisory|professional service|strategy/.test(t)) return 'Consultancy';
+  if (/it service|digital|software|cyber|data|technology|ict/.test(t)) return 'IT & Digital';
+  if (/logistic|transport|courier|supply chain|delivery/.test(t)) return 'Logistics';
+  if (/domiciliary|home care|homecare|personal care/.test(t)) return 'Domiciliary care';
+  if (/residential|care home|nursing home/.test(t)) return 'Residential';
   if (/nursing|clinical care|registered nurse/.test(t)) return 'Nursing';
-  if (/supported living|supported accommodation|independent living/.test(t)) return 'Supported living';
-  if (/mental health|psychiatric|wellbeing|psychological|talking therap/.test(t)) return 'Mental health';
-  if (/hospital discharge|step.?down|discharge to assess|reablement|intermediate care/.test(t)) return 'Hospital discharge';
-  return null; // can't detect
+  if (/supported living|supported accommodation/.test(t)) return 'Supported living';
+  if (/mental health|psychiatric|wellbeing/.test(t)) return 'Mental health';
+  if (/hospital discharge|step.?down|reablement/.test(t)) return 'Hospital discharge';
+  return null;
 }
 
 function showPage(page, btn) {
@@ -659,764 +605,132 @@ function showPage(page, btn) {
   btn.classList.add('active');
   const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana AI', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[page] || page;
-  ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
-  if (page === 'care')       { document.getElementById('aiUploadBtn').style.display='flex'; document.getElementById('addTenderBtn').style.display='flex'; renderCareTable(); }
+  ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(function(id) {
+    var el = document.getElementById(id); if(el) el.style.display = 'none';
+  });
+  if (page === 'care') { document.getElementById('aiUploadBtn').style.display='flex'; document.getElementById('addTenderBtn').style.display='flex'; renderCareTable(); }
   if (page === 'commercial') { document.getElementById('aiCommercialBtn').style.display='flex'; document.getElementById('addCommercialBtn').style.display='flex'; renderCommercialTable(); }
-  if (page === 'noncqc')     { document.getElementById('aiNonCqcBtn').style.display='flex'; document.getElementById('addNonCqcBtn').style.display='flex'; renderNonCqcTable(); }
+  if (page === 'noncqc') { document.getElementById('aiNonCqcBtn').style.display='flex'; document.getElementById('addNonCqcBtn').style.display='flex'; renderNonCqcTable(); }
 }
 
-function calcTotal(items) { return (items || []).reduce((s, i) => s + (parseFloat(i.price) || 0), 0); }
-function fmtDate(d) { if (!d) return '—'; try { return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }); } catch (e) { return d; } }
+function calcTotal(items) { return (items||[]).reduce(function(s,i){ return s+(parseFloat(i.price)||0); },0); }
+function fmtDate(d) { if(!d) return ''; try { return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); } catch(e){ return d; } }
 function badgeHtml(s) {
-  const map = { open: 'badge-open', closing: 'badge-closing', urgent: 'badge-urgent', new: 'badge-new', draft: 'badge-draft' };
-  const lbl = { open: 'Open', closing: 'Closing soon', urgent: 'Urgent', new: 'New opportunity', draft: 'Draft' };
-  return `<span class="td-badge ${map[s] || 'badge-draft'}">${lbl[s] || s}</span>`;
+  var map={open:'badge-open',closing:'badge-closing',urgent:'badge-urgent',new:'badge-new',draft:'badge-draft'};
+  var lbl={open:'Open',closing:'Closing soon',urgent:'Urgent',new:'New opportunity',draft:'Draft'};
+  return '<span class="td-badge '+(map[s]||'badge-draft')+'">'+(lbl[s]||s)+'</span>';
 }
+
 function updateCounts() {
-  const care = allTenders.filter(t => isCare(t));
-  const commercial = allTenders.filter(t => !isCare(t));
-  const nc = allTenders.filter(t => isNonCqcEligible(t) || t.is_non_cqc);
-  document.getElementById('sbCana').textContent = allTenders.filter(t=>t.cana_questions&&t.cana_questions.length).length;
-  document.getElementById('sbCare').textContent = care.length;
-  document.getElementById('sbCommercial').textContent = commercial.length;
-  document.getElementById('sbNonCqc').textContent = nc.length;
-  document.getElementById('statTotal').textContent = allTenders.length;
-  document.getElementById('statOpen').textContent = allTenders.filter(t => t.status === 'open').length;
-  document.getElementById('statClosing').textContent = allTenders.filter(t => t.status === 'closing' || t.status === 'urgent').length;
-  document.getElementById('statNonCqc').textContent = nc.length;
+  var care=allTenders.filter(isCare);
+  var commercial=allTenders.filter(function(t){return !isCare(t);});
+  var nc=allTenders.filter(function(t){return isNonCqcEligible(t)||t.is_non_cqc;});
+  var withDocs=allTenders.filter(function(t){return t.cana_docs&&(
+    (t.cana_docs.quality&&t.cana_docs.quality.length)||
+    (t.cana_docs.spec&&t.cana_docs.spec.length)||
+    (t.cana_docs.scoring&&t.cana_docs.scoring.length));});
+  document.getElementById('sbCare').textContent=care.length;
+  document.getElementById('sbCommercial').textContent=commercial.length;
+  document.getElementById('sbNonCqc').textContent=nc.length;
+  document.getElementById('sbCana').textContent=withDocs.length;
+  document.getElementById('statTotal').textContent=allTenders.length;
+  document.getElementById('statOpen').textContent=allTenders.filter(function(t){return t.status==='open';}).length;
+  document.getElementById('statClosing').textContent=allTenders.filter(function(t){return t.status==='closing'||t.status==='urgent';}).length;
+  document.getElementById('statNonCqc').textContent=nc.length;
 }
+
 function renderAll() { updateCounts(); renderDashboard(); renderCareTable(); renderCommercialTable(); renderNonCqcTable(); }
 
 function renderDashboard() {
-  const rows = allTenders.slice(0, 10);
-  document.getElementById('dashboardTable').innerHTML = rows.length ? rows.map(t => `<tr>
-    <td><div class="td-title">${t.title}</div><div class="td-org">${t.org}</div></td>
-    <td style="font-weight:600;color:${t.is_non_cqc ? 'var(--purple)' : 'var(--green)'}">${t.value}</td>
-    <td>${badgeHtml(t.status)}</td>
-    <td style="color:var(--text-muted)">${fmtDate(t.deadline)}</td>
-    <td><div class="action-btns">
-      <button class="action-btn edit" onclick="openDrawer('${t.id}',${!!t.is_non_cqc})" title="Edit"><i class="ti ti-edit"></i></button>
-      <button class="action-btn del" onclick="askDelete('${t.id}')" title="Delete"><i class="ti ti-trash"></i></button>
-    </div></td>
-  </tr>`).join('') : `<tr><td colspan="5"><div class="empty-state"><i class="ti ti-file-off"></i>No listings yet — add your first tender</div></td></tr>`;
+  var rows=allTenders.slice(0,10);
+  document.getElementById('dashboardTable').innerHTML=rows.length?rows.map(function(t){return '<tr><td><div class="td-title">'+t.title+'</div><div class="td-org">'+(t.org||'')+'</div></td><td style="font-weight:600">'+(t.value||'')+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted)">'+fmtDate(t.deadline)+'</td><td><div class="action-btns"><button class="action-btn edit" onclick="openDrawer(\''+t.id+'\',\'care\')" title="Edit"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')" title="Delete"><i class="ti ti-trash"></i></button></div></td></tr>';}).join(''):'<tr><td colspan="5"><div class="empty-state"><i class="ti ti-file-off"></i>No listings yet</div></td></tr>';
 }
 
 function feeStr(t) {
-  const p = t.pricing || {};
-  if (p.total) return p.total;
-  if (Array.isArray(p.items) && p.items.length) {
-    const sum = p.items.reduce((s,i)=>s+(parseFloat(i.price)||0),0);
-    return sum > 0 ? '£'+sum.toLocaleString()+'+VAT' : '—';
-  }
+  var p=t.pricing||{};
+  if(p.total) return typeof p.total==='number'?'£'+p.total.toLocaleString()+'+VAT':p.total;
+  if(Array.isArray(p.items)&&p.items.length){var s=p.items.reduce(function(a,i){return a+(parseFloat(i.price)||0);},0);return s>0?'£'+s.toLocaleString()+'+VAT':'—';}
   return '—';
 }
 
 function renderCareTable() {
-  const q = (document.getElementById('careSearch').value||'').toLowerCase();
-  const rows = allTenders.filter(t => isCare(t) && (!q || (t.title||'').toLowerCase().includes(q) || (t.org||'').toLowerCase().includes(q)));
-  document.getElementById('careCountLabel').textContent = '(' + rows.length + ')';
-  const tb = document.getElementById('careTable');
-  if (!rows.length) { tb.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="ti ti-file-off"></i>No care tenders yet</div></td></tr>'; return; }
-  tb.innerHTML = rows.map(t => {
-    const autoNc = isNonCqcEligible(t);
-    const ncBadge = autoNc ? '<span class="td-badge" style="background:#e8f7ee;color:#085041;font-size:10px">Auto ✓</span>' : '<span style="color:var(--text-light);font-size:12px">—</span>';
-    return `<tr>
-      <td><div class="td-title">${t.title||'Untitled'}</div><div class="td-org">${t.org||''}</div></td>
-      <td>${t.organisation||t.org||'—'}</td>
-      <td>${t.value||'—'}</td>
-      <td style="color:var(--green);font-weight:600">${feeStr(t)}</td>
-      <td>${ncBadge}</td>
-      <td>${badgeHtml(t.status)}</td>
-      <td style="color:var(--text-muted);font-size:12px">${fmtDate(t.deadline)}</td>
-      <td><div class="action-btns">${t.status==='draft'?`<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;border-color:#9FE1CB;" onclick="publishDraft('${t.id}')" title="Publish"><i class="ti ti-send"></i></button>`:''}
-      <button class="action-btn edit" onclick='openDrawer(${JSON.stringify(t).replace(/'/g,"&#39;")},"care")'><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button></div></td>
-    </tr>`;
+  var q=(document.getElementById('careSearch').value||'').toLowerCase();
+  var rows=allTenders.filter(function(t){return isCare(t)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  document.getElementById('careCountLabel').textContent='('+rows.length+')';
+  var tb=document.getElementById('careTable');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><i class="ti ti-file-off"></i>No care tenders yet</div></td></tr>';return;}
+  tb.innerHTML=rows.map(function(t){
+    var nc=isNonCqcEligible(t);
+    var ncBadge=nc?'<span class="td-badge" style="background:#e8f7ee;color:#085041;font-size:10px">Auto</span>':'<span style="color:var(--text-light)">—</span>';
+    var publishBtn=t.status==='draft'?'<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;" onclick="publishDraft(\''+t.id+'\')" title="Publish"><i class="ti ti-send"></i></button>':'';
+    return '<tr><td><div class="td-title">'+(t.title||'Untitled')+'</div><div class="td-org">'+(t.org||'')+'</div></td><td>'+(t.organisation||t.org||'')+'</td><td>'+(t.value||'')+'</td><td style="color:var(--green);font-weight:600">'+feeStr(t)+'</td><td>'+ncBadge+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted);font-size:12px">'+fmtDate(t.deadline)+'</td><td><div class="action-btns">'+publishBtn+'<button class="action-btn edit" onclick="openDrawerById(\''+t.id+'\',\'care\')"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')"><i class="ti ti-trash"></i></button></div></td></tr>';
   }).join('');
 }
 
 function renderCommercialTable() {
-  const q = (document.getElementById('commercialSearch').value||'').toLowerCase();
-  const rows = allTenders.filter(t => !isCare(t) && (!q || (t.title||'').toLowerCase().includes(q) || (t.org||'').toLowerCase().includes(q)));
-  document.getElementById('commercialCountLabel').textContent = '(' + rows.length + ')';
-  const tb = document.getElementById('commercialTable');
-  if (!rows.length) { tb.innerHTML = '<tr><td colspan="7"><div class="empty-state"><i class="ti ti-building-off"></i>No commercial tenders yet</div></td></tr>'; return; }
-  tb.innerHTML = rows.map(t => `<tr>
-    <td><div class="td-title">${t.title||'Untitled'}</div><div class="td-org">${t.org||''}</div></td>
-    <td>${t.organisation||t.org||'—'}</td>
-    <td>${t.value||'—'}</td>
-    <td style="color:var(--green);font-weight:600">${feeStr(t)}</td>
-    <td>${badgeHtml(t.status)}</td>
-    <td style="color:var(--text-muted);font-size:12px">${fmtDate(t.deadline)}</td>
-    <td><div class="action-btns">${t.status==='draft'?`<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;border-color:#9FE1CB;" onclick="publishDraft('${t.id}')" title="Publish"><i class="ti ti-send"></i></button>`:''}
-    <button class="action-btn edit" onclick='openDrawer(${JSON.stringify(t).replace(/'/g,"&#39;")},"commercial")'><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button></div></td>
-  </tr>`).join('');
-}
-
-function renderTenderTable() {
-  const q = (document.getElementById('tenderSearch').value || '').toLowerCase();
-  const f = allTenders.filter(t => !t.is_non_cqc && (!q || [t.title, t.org, t.region].some(v => (v || '').toLowerCase().includes(q))));
-  document.getElementById('tenderCountLabel').textContent = '(' + f.length + ')';
-  document.getElementById('tenderTable').innerHTML = f.length ? f.map(t => `<tr>
-    <td><div class="td-title">${t.title}</div></td>
-    <td style="color:var(--text-muted);font-size:13px">${t.org}</td>
-    <td style="font-weight:600;color:var(--green)">${t.value}</td>
-    <td style="font-weight:600;color:var(--green-dark)">£${calcTotal((t.pricing || {}).items).toLocaleString()}+VAT</td>
-    <td>${badgeHtml(t.status)}</td>
-    <td style="color:var(--text-muted);white-space:nowrap">${fmtDate(t.deadline)}</td>
-    <td><div class="action-btns">
-      <button class="action-btn edit" onclick="openDrawer('${t.id}',false)"><i class="ti ti-edit"></i></button>
-      <button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button>
-    </div></td>
-  </tr>`).join('') : `<tr><td colspan="7"><div class="empty-state"><i class="ti ti-search"></i>No tenders found</div></td></tr>`;
+  var q=(document.getElementById('commercialSearch').value||'').toLowerCase();
+  var rows=allTenders.filter(function(t){return !isCare(t)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  document.getElementById('commercialCountLabel').textContent='('+rows.length+')';
+  var tb=document.getElementById('commercialTable');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="ti ti-building-off"></i>No commercial tenders yet</div></td></tr>';return;}
+  tb.innerHTML=rows.map(function(t){
+    var publishBtn=t.status==='draft'?'<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;" onclick="publishDraft(\''+t.id+'\')" title="Publish"><i class="ti ti-send"></i></button>':'';
+    return '<tr><td><div class="td-title">'+(t.title||'Untitled')+'</div><div class="td-org">'+(t.org||'')+'</div></td><td>'+(t.organisation||t.org||'')+'</td><td>'+(t.value||'')+'</td><td style="color:var(--green);font-weight:600">'+feeStr(t)+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted);font-size:12px">'+fmtDate(t.deadline)+'</td><td><div class="action-btns">'+publishBtn+'<button class="action-btn edit" onclick="openDrawerById(\''+t.id+'\',\'commercial\')"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')"><i class="ti ti-trash"></i></button></div></td></tr>';
+  }).join('');
 }
 
 function renderNonCqcTable() {
-  const q = (document.getElementById('nonCqcSearch').value || '').toLowerCase();
-  const f = allTenders.filter(t => t.is_non_cqc && (!q || [t.title, t.org, t.region].some(v => (v || '').toLowerCase().includes(q))));
-  document.getElementById('nonCqcCountLabel').textContent = '(' + f.length + ')';
-  document.getElementById('nonCqcTable').innerHTML = f.length ? f.map(t => `<tr>
-    <td><div class="td-title">${t.title}</div></td>
-    <td style="color:var(--text-muted);font-size:13px">${t.org}</td>
-    <td style="font-weight:600;color:var(--purple)">${t.value}</td>
-    <td style="font-weight:600;color:var(--purple)">£${calcTotal((t.pricing || {}).items).toLocaleString()}+VAT</td>
-    <td>${badgeHtml(t.status)}</td>
-    <td style="color:var(--text-muted);white-space:nowrap">${fmtDate(t.deadline)}</td>
-    <td><div class="action-btns">
-      <button class="action-btn edit" onclick="openDrawer('${t.id}',true)"><i class="ti ti-edit"></i></button>
-      <button class="action-btn del" onclick="askDelete('${t.id}')"><i class="ti ti-trash"></i></button>
-    </div></td>
-  </tr>`).join('') : `<tr><td colspan="7"><div class="empty-state"><i class="ti ti-certificate"></i>No non-CQC listings yet</div></td></tr>`;
+  var q=(document.getElementById('nonCqcSearch').value||'').toLowerCase();
+  var rows=allTenders.filter(function(t){return (isNonCqcEligible(t)||t.is_non_cqc)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  document.getElementById('nonCqcCountLabel').textContent='('+rows.length+')';
+  var tb=document.getElementById('nonCqcTable');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="ti ti-certificate"></i>No non-CQC listings yet</div></td></tr>';return;}
+  tb.innerHTML=rows.map(function(t){
+    var isAuto=isNonCqcEligible(t)&&!t.is_non_cqc;
+    return '<tr><td><div class="td-title">'+(t.title||'')+'</div><div class="td-org">'+(t.org||'')+'</div></td><td>'+(t.organisation||t.org||'')+'</td><td>'+(t.value||'')+'</td><td style="color:var(--green);font-weight:600">'+feeStr(t)+'</td><td>'+(isAuto?'<span class="td-badge" style="background:#e8f7ee;color:#085041;font-size:10px">Auto</span>':'<span style="color:var(--text-light)">Manual</span>')+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted);font-size:12px">'+fmtDate(t.deadline)+'</td><td><div class="action-btns"><button class="action-btn edit" onclick="openDrawerById(\''+t.id+'\',\'noncqc\')"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')"><i class="ti ti-trash"></i></button></div></td></tr>';
+  }).join('');
 }
 
-// AI UPLOAD
+// AI MODAL
 function openAiModal(sectionType) {
-  currentAiIsNonCqc = sectionType === "noncqc"; currentSection = sectionType; extractedData = null; selectedFile = null;
-  document.getElementById('aiStep1').style.display = 'block';
-  document.getElementById('aiStep2').style.display = 'none';
-  document.getElementById('aiStep3').style.display = 'none';
-  document.getElementById('fileInput').value = '';
-  document.getElementById('fileSelectedBar').style.display = 'none';
-  document.getElementById('uploadZone').style.display = 'block';
-  document.getElementById('aiAnalyseBtn').style.display = 'none';
-  document.getElementById('aiOpenFormBtn').style.display = 'none';
+  currentSection=sectionType; extractedData=null; selectedFile=null;
+  document.getElementById('aiStep1').style.display='block';
+  document.getElementById('aiStep2').style.display='none';
+  document.getElementById('aiStep3').style.display='none';
+  document.getElementById('fileInput').value='';
+  document.getElementById('fileSelectedBar').style.display='none';
+  document.getElementById('uploadZone').style.display='block';
+  document.getElementById('aiAnalyseBtn').style.display='none';
+  document.getElementById('aiOpenFormBtn').style.display='none';
   document.getElementById('aiOverlay').classList.add('open');
 }
-function closeAiModal() { document.getElementById('aiOverlay').classList.remove('open'); }
-function maybeCloseAi(e) { if (e.target === document.getElementById('aiOverlay')) closeAiModal(); }
-function handleDrag(e) { e.preventDefault(); document.getElementById('uploadZone').classList.add('dragover'); }
-function handleDragLeave() { document.getElementById('uploadZone').classList.remove('dragover'); }
-function handleDrop(e) { e.preventDefault(); document.getElementById('uploadZone').classList.remove('dragover'); const f = e.dataTransfer.files[0]; if (f) setFile(f); }
-function handleFileSelect(e) { const f = e.target.files[0]; if (f) setFile(f); }
-function setFile(file) {
-  selectedFile = file;
-  document.getElementById('selectedFileName').textContent = file.name;
-  document.getElementById('selectedFileSize').textContent = (file.size / 1024).toFixed(1) + ' KB · Ready to analyse';
-  document.getElementById('fileSelectedBar').style.display = 'flex';
-  document.getElementById('uploadZone').style.display = 'none';
-  document.getElementById('aiAnalyseBtn').style.display = 'flex';
+function closeAiModal(){document.getElementById('aiOverlay').classList.remove('open');}
+function maybeCloseAi(e){if(e.target===document.getElementById('aiOverlay'))closeAiModal();}
+function handleDrag(e){e.preventDefault();document.getElementById('uploadZone').classList.add('dragover');}
+function handleDragLeave(){document.getElementById('uploadZone').classList.remove('dragover');}
+function handleDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('dragover');var f=e.dataTransfer.files[0];if(f)setFile(f);}
+function handleFileSelect(e){var f=e.target.files[0];if(f)setFile(f);}
+function setFile(file){
+  selectedFile=file;
+  document.getElementById('selectedFileName').textContent=file.name;
+  document.getElementById('selectedFileSize').textContent=(file.size/1024).toFixed(1)+' KB · Ready to analyse';
+  document.getElementById('fileSelectedBar').style.display='flex';
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('aiAnalyseBtn').style.display='flex';
 }
-function clearFile() {
-  selectedFile = null; document.getElementById('fileInput').value = '';
-  document.getElementById('fileSelectedBar').style.display = 'none';
-  document.getElementById('uploadZone').style.display = 'block';
-  document.getElementById('aiAnalyseBtn').style.display = 'none';
+function clearFile(){
+  selectedFile=null;document.getElementById('fileInput').value='';
+  document.getElementById('fileSelectedBar').style.display='none';
+  document.getElementById('uploadZone').style.display='block';
+  document.getElementById('aiAnalyseBtn').style.display='none';
 }
 
 async function runAiExtraction() {
-  if (!selectedFile) return;
-  document.getElementById('aiStep1').style.display = 'none';
-  document.getElementById('aiStep2').style.display = 'block';
-  document.getElementById('aiAnalyseBtn').style.display = 'none';
-  const steps = ['ps1', 'ps2', 'ps3', 'ps4'];
-  for (let i = 0; i < steps.length; i++) {
+  if(!selectedFile) return;
+  document.getElementById('aiStep1').style.display='none';
+  document.getElementById('aiStep2').style.display='block';
+  document.getElementById('aiAnalyseBtn').style.display='none';
+  var steps=['ps1','ps2','ps3','ps4'];
+  for(var i=0;i<steps.length;i++){
     await delay(700);
-    if (i > 0) document.getElementById(steps[i - 1]).className = 'proc-step done';
-    document.getElementById(steps[i]).className = 'proc-step active';
-  }
-  try {
-    const isPdf = selectedFile.type === 'application/pdf' || selectedFile.name.toLowerCase().endsWith('.pdf');
-    let payload;
-
-    if (isPdf) {
-      const base64 = await readFileAsBase64(selectedFile);
-      payload = { base64, mimetype: 'application/pdf', filename: selectedFile.name };
-    } else {
-      const text = await readFileAsText(selectedFile);
-      payload = { text, filename: selectedFile.name };
-    }
-
-    const res = await fetch(`${API}/extract-tender`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    let rawText, data;
-    try {
-      rawText = await res.text();
-    } catch(e) {
-      throw new Error('Could not read response: ' + e.message);
-    }
-    if (!rawText || rawText.trim() === '') {
-      throw new Error('Empty response from server (status ' + res.status + '). Check Netlify function logs.');
-    }
-    try {
-      data = JSON.parse(rawText);
-    } catch(e) {
-      throw new Error('Bad response: ' + rawText.substring(0, 300));
-    }
-    if (!res.ok || data.error) throw new Error(data.error || 'Server error ' + res.status);
-
-    extractedData = data;
-    document.getElementById('ps4').className = 'proc-step done';
-    await delay(400);
-    document.getElementById('aiStep2').style.display = 'none';
-    document.getElementById('aiStep3').style.display = 'block';
-    renderPreview(data);
-    document.getElementById('aiOpenFormBtn').style.display = 'flex';
-  } catch (err) {
-    document.getElementById('aiStep2').style.display = 'none';
-    document.getElementById('aiStep1').style.display = 'block';
-    document.getElementById('fileSelectedBar').style.display = 'flex';
-    document.getElementById('uploadZone').style.display = 'none';
-    document.getElementById('aiAnalyseBtn').style.display = 'flex';
-    showToast('Extraction failed: ' + err.message, 'error');
-  }
-}
-
-async function extractPdfText(file) {
-  // Use PDF.js CDN to extract text from PDF client-side
-  const pdfjsLib = await loadPdfJs();
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-  let text = '';
-  for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    text += content.items.map(function(item){ return item.str; }).join(' ') + '\n';
-  }
-  return text;
-}
-
-function loadPdfJs() {
-  return new Promise((resolve) => {
-    if (window.pdfjsLib) { resolve(window.pdfjsLib); return; }
-    const script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    script.onload = () => {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      resolve(window.pdfjsLib);
-    };
-    document.head.appendChild(script);
-  });
-}
-
-function readFileAsBase64(file) {
-  return new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload = e => {
-      // Strip the data URL prefix (e.g. "data:application/pdf;base64,")
-      const base64 = e.target.result.split(',')[1];
-      res(base64);
-    };
-    reader.onerror = rej;
-    reader.readAsDataURL(file);
-  });
-}
-
-function readFileAsText(file) {
-  return new Promise((res, rej) => {
-    const reader = new FileReader();
-    reader.onload = e => res(e.target.result);
-    reader.onerror = rej;
-    reader.readAsText(file);
-  });
-}
-
-function renderPreview(data) {
-  const ch = '<span class="conf conf-high"><i class="ti ti-check" style="font-size:10px"></i> Extracted</span>';
-  const fields = [
-    { l: 'Tender title', v: data.title || 'Not found' },
-    { l: 'Organisation', v: data.org || 'Not found' },
-    { l: 'Region', v: data.region || 'Not found' },
-    { l: 'Contract value', v: data.value || 'Not found' },
-    { l: 'Duration', v: data.duration || 'Not found' },
-    { l: 'Deadline', v: data.deadline || 'Not found' },
-    { l: 'Our price (from doc)', v: data.our_price || 'Not stated' },
-    { l: 'Description', v: data.description || 'Not found', multi: true },
-    { l: 'Eligibility', v: (data.eligibility || []).join('\n'), multi: true },
-  ];
-  document.getElementById('previewFields').innerHTML = fields.map(f => `
-    <div class="pf">
-      <div class="pf-label"><span class="ai-tag">AI</span>${f.l}${ch}</div>
-      <div class="pf-value ${f.multi ? 'multi' : ''}">${f.v || '—'}</div>
-    </div>`).join('');
-}
-
-function openInForm() { closeAiModal(); openDrawer(null, currentSection, extractedData); }
-function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
-
-// DRAWER
-function openDrawer(tOrId, sectionType, aiData = null) {
-  // sectionType: 'care' | 'commercial' | 'noncqc'
-  currentSection = sectionType || 'care';
-  const isNc = sectionType === 'noncqc';
-  const isCommercial = sectionType === 'commercial';
-
-  document.getElementById('editIsNonCqc').value = isNc ? '1' : '0';
-  document.getElementById('categoryRow').style.display = isNc ? 'none' : 'grid';
-  document.getElementById('whyCqcRow').style.display = isNc ? 'flex' : 'none';
-  document.getElementById('aiBadge').style.display = aiData ? 'inline-flex' : 'none';
-  ['Title','Org','Region','Value','Duration','Deadline','Desc','Link'].forEach(f => {
-    const el = document.getElementById('f'+f); if (el) el.classList.remove('ai-filled');
-    const hint = document.getElementById('hint'+f); if (hint) hint.style.display = 'none';
-  });
-
-  // Resolve tender object — may be passed directly or as an id string
-  let t = null;
-  if (tOrId && typeof tOrId === 'object') t = tOrId;
-  else if (tOrId && typeof tOrId === 'string') t = allTenders.find(x => x.id === tOrId);
-
-  if (t) {
-    // EDIT existing tender
-    document.getElementById('editId').value = t.id || '';
-    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Edit tender ';
-    document.getElementById('saveLabel').textContent = 'Save changes';
-    document.getElementById('fTitle').value = t.title || '';
-    document.getElementById('fOrg').value = t.org || t.organisation || '';
-    document.getElementById('fRegion').value = t.region || '';
-    document.getElementById('fValue').value = t.value || '';
-    document.getElementById('fDuration').value = t.duration || '';
-    document.getElementById('fDeadline').value = t.deadline || '';
-    document.getElementById('fStatus').value = t.status || 'open';
-    document.getElementById('fDesc').value = t.description || '';
-    document.getElementById('fLink').value = t.link || t.submission_link || '';
-    document.getElementById('fStripeLink').value = t.stripe_link || '';
-    document.getElementById('fPricingNote').value = (t.pricing || {}).note || '';
-    if (!isNc) document.getElementById('fCategory').value = t.category || (isCommercial ? 'Construction' : 'Domiciliary care');
-    if (isNc) document.getElementById('fWhyCqc').value = t.why_cqc || '';
-    buildPriceRows((t.pricing || {}).items || []);
-    buildEligRows(Array.isArray(t.eligibility) ? t.eligibility : []);
-    buildQuestionRows(t.cana_questions || []);
-
-  } else if (aiData) {
-    // AI-extracted data
-    document.getElementById('editId').value = '';
-    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Review AI-extracted tender ';
-    document.getElementById('saveLabel').textContent = 'Publish tender';
-    [['fTitle',aiData.title,'hintTitle'],['fOrg',aiData.org,'hintOrg'],['fRegion',aiData.region,'hintRegion'],
-     ['fValue',aiData.value,'hintValue'],['fDuration',aiData.duration,'hintDuration'],
-     ['fDeadline',aiData.deadline,'hintDeadline'],['fDesc',aiData.description,'hintDesc'],['fLink',aiData.link,'hintLink']
-    ].forEach(([id,val,hint]) => {
-      const el = document.getElementById(id); el.value = val || '';
-      if (val) { el.classList.add('ai-filled'); const h = document.getElementById(hint); if (h) h.style.display = 'flex'; }
-    });
-    document.getElementById('fStatus').value = 'open';
-    document.getElementById('fPricingNote').value = 'One-off fee. No hidden charges. Payable on engagement.';
-    if (!isNc) {
-      // Try AI category first, then auto-detect from title+desc, then section default
-      const aiCat = aiData.category
-        || autoDetectCategory((aiData.title||'') + ' ' + (aiData.description||''))
-        || (isCommercial ? 'Construction' : 'Domiciliary care');
-      document.getElementById('fCategory').value = aiCat;
-    }
-    const priceItems = aiData.our_price
-      ? [{ label: 'Bid writing & strategy (from document)', price: aiData.our_price.replace(/[^0-9.]/g,'') }]
-      : [{ label: 'Bid writing & strategy', price: '' }, { label: 'Compliance review', price: '' }, { label: 'Submission support', price: '' }];
-    buildPriceRows(priceItems);
-    buildEligRows(aiData.eligibility && aiData.eligibility.length ? aiData.eligibility : ['']);
-
-  } else {
-    // NEW blank tender
-    document.getElementById('editId').value = '';
-    document.getElementById('drawerTitleText').childNodes[0].textContent = 'Add ' + (isNc ? 'listing ' : isCommercial ? 'commercial tender ' : 'care tender ');
-    document.getElementById('saveLabel').textContent = isNc ? 'Publish listing' : 'Publish tender';
-    ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink','fStripeLink'].forEach(f => {
-      const el = document.getElementById(f); if (el) { el.value = ''; el.classList.remove('ai-filled'); }
-    });
-    document.getElementById('fDeadline').value = '';
-    document.getElementById('fStatus').value = 'open';
-    document.getElementById('fPricingNote').value = 'One-off fee. No hidden charges. Payable on engagement.';
-    // Default category based on which section we are in
-    if (!isNc) document.getElementById('fCategory').value = isCommercial ? 'Construction' : 'Domiciliary care';
-    buildPriceRows([{ label: 'Bid writing & strategy', price: '' }, { label: 'Compliance review', price: '' }, { label: 'Submission support', price: '' }]);
-    buildEligRows(['']);
-    buildQuestionRows([]);
-  }
-  document.getElementById('drawerOverlay').classList.add('open');
-}
-function closeDrawer() { document.getElementById('drawerOverlay').classList.remove('open'); }
-function maybeCloseDrawer(e) { if (e.target === document.getElementById('drawerOverlay')) closeDrawer(); }
-
-// PRICING
-let prc = 0;
-function buildPriceRows(items) { prc = 0; document.getElementById('pricingBuilder').innerHTML = ''; items.forEach(i => _addPR(i.label, i.price)); updatePriceTotal(); }
-function _addPR(label, price) {
-  const b = document.getElementById('pricingBuilder');
-  const d = document.createElement('div'); d.className = 'price-row'; d.id = 'pr' + prc;
-  d.innerHTML = `<input type="text" placeholder="e.g. Bid writing & strategy" value="${label || ''}" oninput="updatePriceTotal()"><input type="number" placeholder="Amount" value="${price || ''}" oninput="updatePriceTotal()"><button class="rm-price" onclick="document.getElementById('pr${prc}').remove();updatePriceTotal()"><i class="ti ti-x"></i></button>`;
-  b.appendChild(d); prc++;
-}
-function addPriceRow() { _addPR('', ''); updatePriceTotal(); }
-function updatePriceTotal() { const t = Array.from(document.querySelectorAll('#pricingBuilder input[type=number]')).reduce((s, i) => s + (parseFloat(i.value) || 0), 0); document.getElementById('priceTotalPreview').textContent = t > 0 ? '£' + t.toLocaleString() + '+VAT' : '£0'; }
-function getPriceItems() { return Array.from(document.querySelectorAll('#pricingBuilder .price-row')).map(r => { const ins = r.querySelectorAll('input'); return { label: ins[0].value, price: ins[1].value }; }).filter(i => i.label || i.price); }
-
-// ELIGIBILITY
-let ec = 0;
-function buildEligRows(items) { ec = 0; document.getElementById('eligList').innerHTML = ''; items.forEach(v => addEligRow(v)); }
-function addEligRow(val = '') {
-  const list = document.getElementById('eligList');
-  const d = document.createElement('div'); d.className = 'elig-item'; d.id = 'el' + ec;
-  d.innerHTML = `<input type="text" placeholder="e.g. CQC registration required" value="${val}"><button class="rm-elig" onclick="this.parentElement.remove()"><i class="ti ti-x"></i></button>`;
-  list.appendChild(d); ec++;
-}
-function getEligItems() { return Array.from(document.querySelectorAll('#eligList input')).map(i => i.value).filter(v => v.trim()); }
-
-// AUTO CATEGORY DETECTION
-function tryAutoCategory() {
-  const title = document.getElementById('fTitle').value;
-  const desc  = document.getElementById('fDesc').value;
-  const detected = autoDetectCategory(title + ' ' + desc);
-  if (detected) {
-    const sel = document.getElementById('fCategory');
-    if (sel) sel.value = detected;
-  }
-}
-
-// SAVE TO SUPABASE
-async function saveTender(draft = false) {
-  const isNonCqc = document.getElementById('editIsNonCqc').value === '1';
-  const id = document.getElementById('editId').value;
-  const pItems = getPriceItems();
-  const total = pItems.reduce((s, i) => s + (parseFloat(i.price) || 0), 0);
-  const deadline = document.getElementById('fDeadline').value;
-
-  const tender = {
-    id: id || (isNonCqc ? 'NC' : 'T') + '-2026-' + String(nextId++).padStart(3, '0'),
-    status: draft ? 'draft' : document.getElementById('fStatus').value,
-    title: document.getElementById('fTitle').value,
-    org: document.getElementById('fOrg').value,
-    region: document.getElementById('fRegion').value,
-    value: document.getElementById('fValue').value,
-    duration: document.getElementById('fDuration').value,
-    deadline: deadline || null,
-    days_left: deadline ? Math.max(0, Math.round((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24))) : 0,
-    link: document.getElementById('fLink').value,
-    stripe_link: document.getElementById('fStripeLink').value || null,
-    cana_questions: (function(){ try { return getQuestions(); } catch(e) { return []; } })(),
-    cana_knowledge: (function(){ try { return localStorage.getItem('cana_knowledge')||null; } catch(e) { return null; } })(),
-    description: document.getElementById('fDesc').value,
-    pricing: { items: pItems.map(i=>({label:i.label, price:parseFloat(i.price)||0})), total: total, note: document.getElementById('fPricingNote').value },
-    eligibility: getEligItems(),
-    is_non_cqc: (function() {
-      const cat = document.getElementById('fCategory').value || '';
-      const commercialCats = ['Construction','Facilities','Cleaning','Consultancy','IT & Digital','Logistics','Other'];
-      if (commercialCats.includes(cat)) return false; // never non-CQC for commercial
-      return isNonCqc || isNonCqcEligible({category: cat, eligibility: getEligItems()});
-    })(),
-    why_cqc: isNonCqc ? document.getElementById('fWhyCqc').value : null,
-    category: document.getElementById('fCategory').value || null,
-  };
-
-  // Show saving state
-  document.getElementById('savingSpinner').style.display = 'block';
-  document.getElementById('saveIcon').style.display = 'none';
-  document.getElementById('publishBtn').disabled = true;
-
-  try {
-    const res = await fetch(`${API}/save-tender`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'upsert', tender })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-
-    // Update local data
-    const idx = allTenders.findIndex(x => x.id === tender.id);
-    if (idx > -1) allTenders[idx] = tender;
-    else allTenders.unshift(tender);
-
-    closeDrawer();
-    renderAll();
-    showToast(draft ? 'Draft saved' : 'Tender published to live site ✓', 'success');
-  } catch (err) {
-    showToast('Save failed: ' + err.message, 'error');
-  } finally {
-    document.getElementById('savingSpinner').style.display = 'none';
-    document.getElementById('saveIcon').style.display = 'inline';
-    document.getElementById('publishBtn').disabled = false;
-  }
-}
-function saveDraft() { saveTender(true); }
-
-async function publishDraft(id) {
-  const t = allTenders.find(x => x.id === id);
-  if (!t) return;
-  t.status = 'open';
-  try {
-    const res = await fetch(`${API}/save-tender`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'upsert', tender: t })
-    });
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error);
-    showToast('Tender published to live site ✓', 'success');
-    await loadTenders();
-  } catch(e) {
-    showToast('Publish failed: ' + e.message, 'error');
-  }
-}
-
-// DELETE
-function askDelete(id) { deleteTarget = { id }; document.getElementById('confirmOverlay').classList.add('open'); }
-async function confirmDelete() {
-  const { id } = deleteTarget;
-  const tender = allTenders.find(x => x.id === id);
-  document.getElementById('confirmOverlay').classList.remove('open');
-  try {
-    const res = await fetch(`${API}/save-tender`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'delete', tender: { id } })
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    allTenders = allTenders.filter(x => x.id !== id);
-    renderAll();
-    showToast('Listing deleted', 'error');
-  } catch (err) {
-    showToast('Delete failed: ' + err.message, 'error');
-  }
-}
-
-// CANA AI DOCUMENT MANAGEMENT
-let canaDocData = { quality: [], spec: [], scoring: [] };
-
-function populateCanaTenderSelect() {
-  const sel = document.getElementById('canaTenderSelect');
-  if (!sel) return;
-  const current = sel.value;
-  sel.innerHTML = '<option value="">Choose a tender...</option>';
-  allTenders.filter(t => t.status !== 'draft').forEach(t => {
-    const opt = document.createElement('option');
-    opt.value = t.id;
-    const hasDocs = t.cana_docs && (
-      (t.cana_docs.quality&&t.cana_docs.quality.length) ||
-      (t.cana_docs.spec&&t.cana_docs.spec.length) ||
-      (t.cana_docs.scoring&&t.cana_docs.scoring.length)
-    );
-    opt.textContent = t.title + (hasDocs ? ' ✓' : '');
-    sel.appendChild(opt);
-  });
-  if (current) sel.value = current;
-}
-
-function loadCanaDocs() {
-  const id = document.getElementById('canaTenderSelect').value;
-  const area = document.getElementById('canaDocArea');
-  if (!id) { area.style.display = 'none'; return; }
-  area.style.display = 'block';
-  canaDocData = { quality: [], spec: [], scoring: [] };
-
-  const t = allTenders.find(x => x.id === id);
-  const docs = (t && t.cana_docs) || {};
-
-  ['quality','spec','scoring'].forEach(type => {
-    canaDocData[type] = Array.isArray(docs[type]) ? docs[type] : (docs[type] ? [docs[type]] : []);
-    renderCanaFiles(type);
-  });
-
-  const hasAny = canaDocData.quality.length || canaDocData.spec.length || canaDocData.scoring.length;
-  document.getElementById('canaDocStatus').style.display = hasAny ? 'block' : 'none';
-  document.getElementById('canaDocSaved').style.display = 'none';
-}
-
-function renderCanaFiles(type) {
-  const container = document.getElementById(type + 'Files');
-  if (!container) return;
-  const files = canaDocData[type] || [];
-  if (!files.length) { container.innerHTML = ''; return; }
-  container.innerHTML = files.map((f, i) => `
-    <div class="cana-file-item">
-      <i class="ti ti-file-text" style="flex-shrink:0;"></i>
-      <span title="${f.name}">${f.name}</span>
-      <button class="cana-file-remove" onclick="removeCanaFile('${type}',${i})" title="Remove">✕</button>
-    </div>
-  `).join('');
-}
-
-function removeCanaFile(type, index) {
-  canaDocData[type].splice(index, 1);
-  renderCanaFiles(type);
-}
-
-function canaDragOver(e, zoneId) {
-  e.preventDefault();
-  document.getElementById(zoneId).classList.add('drag-over');
-}
-
-function canaDragLeave(zoneId) {
-  document.getElementById(zoneId).classList.remove('drag-over');
-}
-
-function canaOnDrop(e, type) {
-  e.preventDefault();
-  const zoneId = type + 'Drop';
-  document.getElementById(zoneId).classList.remove('drag-over');
-  handleCanaDoc(type, e.dataTransfer.files);
-}
-
-async function handleCanaDoc(type, files) {
-  if (!files || !files.length) return;
-  for (const file of Array.from(files)) {
-    const text = await new Promise((res) => {
-      const reader = new FileReader();
-      reader.onload = e => res(e.target.result);
-      reader.readAsText(file);
-    });
-    const clean = text.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F\uFFFD]/g, '').substring(0, 12000);
-    canaDocData[type].push({ name: file.name, text: clean });
-  }
-  renderCanaFiles(type);
-}
-    // Clean text — remove unicode escape sequences and non-printable chars
-    const clean = text
-      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '')
-      .replace(/\uFFFD/g, '')
-      .substring(0, 12000);
-    canaDocData[type].push({ name: file.name, text: clean });
-  }
-  renderCanaFiles(type);
-}
-
-async function saveCanaDocs() {
-  const id = document.getElementById('canaTenderSelect').value;
-  if (!id) return;
-  const t = allTenders.find(x => x.id === id);
-  if (!t) return;
-
-  t.cana_docs = canaDocData;
-
-  try {
-    const res = await fetch(`${API}/save-tender`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'upsert', tender: t })
-    });
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error);
-    showToast('Cana AI documents saved ✓', 'success');
-    document.getElementById('canaDocSaved').style.display = 'inline';
-    document.getElementById('canaDocStatus').style.display = 'block';
-    await loadTenders();
-    populateCanaTenderSelect();
-    document.getElementById('canaTenderSelect').value = id;
-  } catch(e) {
-    showToast('Save failed: ' + e.message, 'error');
-  }
-}
-
-function getQuestions() {
-  try {
-    const el = document.getElementById('questionsBuilder');
-    if (!el) return [];
-    return Array.from(el.children).map(d => {
-      const inputs = d.querySelectorAll('input');
-      return { question: inputs[0]?inputs[0].value:'', scoring: inputs[1]?inputs[1].value:'', wordLimit: inputs[2]?inputs[2].value:'' };
-    }).filter(q => q.question && q.question.trim());
-  } catch(e) { return []; }
-}
-
-let qCount = 0;
-function addQuestion(q, scoring, wordLimit) {
-  q = q||''; scoring = scoring||''; wordLimit = wordLimit||'';
-  qCount++;
-  const el = document.getElementById('questionsBuilder');
-  if (!el) return;
-  const n = qCount;
-  const d = document.createElement('div');
-  d.id = 'q' + n;
-  d.style.background = '#F4F6F9';
-  d.style.borderRadius = '8px';
-  d.style.padding = '0.75rem';
-  d.style.marginBottom = '0.4rem';
-
-  const row1 = document.createElement('div');
-  row1.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px;';
-
-  const num = document.createElement('div');
-  num.style.cssText = 'background:#00C9E0;color:#0B1929;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;';
-  num.textContent = n;
-
-  const inp1 = document.createElement('input');
-  inp1.type = 'text';
-  inp1.placeholder = 'Question e.g. Describe your safeguarding approach...';
-  inp1.value = q;
-  inp1.style.cssText = 'flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.85rem;outline:none;';
-
-  const rmBtn = document.createElement('button');
-  rmBtn.innerHTML = '&#x2715;';
-  rmBtn.style.cssText = 'background:none;border:none;color:#6B8FA3;cursor:pointer;font-size:1rem;padding:0 4px;';
-  rmBtn.onclick = function() { document.getElementById('q'+n).remove(); };
-
-  row1.appendChild(num);
-  row1.appendChild(inp1);
-  row1.appendChild(rmBtn);
-
-  const row2 = document.createElement('div');
-  row2.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-left:30px;';
-
-  const inp2 = document.createElement('input');
-  inp2.type = 'text';
-  inp2.placeholder = 'Scoring criteria (optional)';
-  inp2.value = scoring;
-  inp2.style.cssText = 'padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.78rem;outline:none;';
-
-  const inp3 = document.createElement('input');
-  inp3.type = 'text';
-  inp3.placeholder = 'Word limit (optional)';
-  inp3.value = wordLimit;
-  inp3.style.cssText = 'padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.78rem;outline:none;';
-
-  row2.appendChild(inp2);
-  row2.appendChild(inp3);
-
-  d.appendChild(row1);
-  d.appendChild(row2);
-  el.appendChild(d);
-}
-
-function buildQuestionRows(questions) {
-  qCount = 0;
-  const el = document.getElementById('questionsBuilder');
-  if (el) el.innerHTML = '';
-  (questions||[]).forEach(function(q) { addQuestion(q.question, q.scoring, q.wordLimit); });
-}
-
-function saveCanaKnowledge() {
-  const k = document.getElementById('canaKnowledge');
-  if (k) localStorage.setItem('cana_knowledge', k.value);
-  const s = document.getElementById('canaKnowledgeSaved');
-  if (s) { s.style.display='inline'; setTimeout(()=>s.style.display='none',2000); }
-}
-
-function loadCanaKnowledge() {
-  const k = document.getElementById('canaKnowledge');
-  if (k) { const v=localStorage.getItem('cana_knowledge'); if(v) k.value=v; }
-}
-
-loadCanaKnowledge();
-
-function showToast(msg, type = 'success') {
-  const t = document.getElementById('toast');
-  document.getElementById('toastMsg').textContent = msg;
-  t.className = 'toast show ' + (type || '');
-  const icons = { success: 'ti-check', error: 'ti-alert-circle', ai: 'ti-sparkles' };
-  document.getElementById('toastIcon').className = 'ti ' + (icons[type] || 'ti-check');
-  setTimeout(() => t.classList.remove('show'), 4000);
-}
-</script>
-</body>
-</html>
+    if(i>0) do
