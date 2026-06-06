@@ -192,6 +192,15 @@ tr:hover td{background:#fafafa}
 .toast.error{background:var(--red)}
 .toast.ai{background:linear-gradient(135deg,#7c3aed,#4f46e5)}
 .saving-spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite}
+  .cana-drop-zone { border:2px dashed rgba(11,25,41,0.15);border-radius:10px;padding:1.25rem;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center; }
+  .cana-drop-zone.drag-over { border-color:#00C9E0;background:rgba(0,201,224,0.04); }
+  .cana-files-list { display:flex;flex-direction:column;gap:6px;margin-top:0.75rem; }
+  .cana-file-item { display:flex;align-items:center;gap:8px;background:#e8f7ee;border:1.5px solid #9FE1CB;border-radius:8px;padding:8px 12px;font-size:0.82rem;color:#1a7a3f; }
+  .cana-file-item i { color:#1a7a3f;flex-shrink:0; }
+  .cana-file-item span { flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500; }
+  .cana-file-remove { background:none;border:none;color:#a32d2d;cursor:pointer;font-size:1rem;padding:0 2px;flex-shrink:0;font-weight:700; }
+  .cana-upload-btn { display:inline-flex;align-items:center;gap:6px;background:#F4F6F9;border:1.5px solid rgba(11,25,41,0.12);border-radius:8px;padding:7px 14px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:#6B8FA3;cursor:pointer;transition:all 0.2s;margin-top:6px; }
+  .cana-upload-btn:hover { border-color:#00C9E0;color:#0099AA; }
 </style>
 </head>
 <body>
