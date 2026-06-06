@@ -31,44 +31,37 @@ exports.handler = async (event) => {
       return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Tender not found' }) };
     }
 
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const questions = tender.cana_questions || [];
+    if (!questions.length) {
+      return {
+        statusCode: 400,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'This tender is not yet ready for Cana AI — our team is still setting it up. Please contact us at consulting@icongrp.co.uk.' })
+      };
+    }
 
-    // Get documents
+    // Get context documents
     const canaDocs = tender.cana_docs || {};
-    const qualityDocs = Array.isArray(canaDocs.quality) ? canaDocs.quality : (canaDocs.quality ? [canaDocs.quality] : []);
     const specDocs = Array.isArray(canaDocs.spec) ? canaDocs.spec : (canaDocs.spec ? [canaDocs.spec] : []);
     const scoringDocs = Array.isArray(canaDocs.scoring) ? canaDocs.scoring : (canaDocs.scoring ? [canaDocs.scoring] : []);
-
-    const qualityText = qualityDocs.map(d => d.text || '').join('\n\n');
-    const specText = specDocs.map(d => d.text || '').join('\n\n');
-    const scoringText = scoringDocs.map(d => d.text || '').join('\n\n');
-
-    const manualQuestions = tender.cana_questions || [];
+    const specText = specDocs.map(d => d.text || '').join(' ').substring(0, 2000);
+    const scoringText = scoringDocs.map(d => d.text || '').join(' ').substring(0, 1000);
     const knowledge = tender.cana_knowledge || '';
 
-    // If no documents and no manual questions, error
-    if (!qualityText && !manualQuestions.length) {
-      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'No questions uploaded for this tender yet' }) };
-    }
+    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-    const systemPrompt = `You are Cana AI, an expert UK public sector tender writer. You write high-quality, compliant, and compelling tender responses on behalf of organisations bidding for contracts.
+    const systemPrompt = `You are Cana AI, an expert UK public sector tender writer for ICONGRP Consulting. You write high-quality, compliant, and compelling tender responses.
 
-${knowledge ? 'WRITING GUIDANCE:\n' + knowledge + '\n\n' : ''}
-
-RULES:
+${knowledge ? 'WRITING GUIDANCE:\n' + knowledge + '\n\n' : ''}RULES:
 - Write in first person on behalf of the bidding organisation
-- Be specific and use concrete examples based on the company details provided
-- Structure answers clearly with strong opening statements
+- Be specific — use the company details provided throughout every answer
 - Use professional UK English
-- Match scoring criteria where provided
-- Never use generic filler — every sentence must add value
-- Aim for 400-600 words per question unless a word limit is specified`;
+- Structure each answer with a strong opening, clear evidence, and confident conclusion
+- Every sentence must add value — no generic filler
+- Aim for 400-500 words per question`;
 
-    let userPrompt;
-
-    if (manualQuestions.length) {
-      // Use manual questions
-      userPrompt = `Write tender responses for: ${tender.title}
+    const userPrompt = `Write tender responses for: ${tender.title}
+Buyer: ${tender.org || ''}
 
 BIDDING ORGANISATION:
 - Name: ${companyDetails.name}
@@ -79,48 +72,18 @@ BIDDING ORGANISATION:
 - Regions: ${companyDetails.regions}
 ${companyDetails.experience ? '- Experience: ' + companyDetails.experience : ''}
 
-${specText ? 'SERVICE SPECIFICATION:\n' + specText.substring(0, 2000) + '\n\n' : ''}
-${scoringText ? 'SCORING CRITERIA:\n' + scoringText.substring(0, 1000) + '\n\n' : ''}
+${specText ? 'SERVICE SPECIFICATION CONTEXT:\n' + specText + '\n\n' : ''}${scoringText ? 'SCORING CRITERIA:\n' + scoringText + '\n\n' : ''}QUESTIONS TO ANSWER:
+${questions.map((q, i) => `Question ${i+1}: ${q.question}${q.scoring ? ' [Scoring: ' + q.scoring + ']' : ''}${q.wordLimit ? ' [Word limit: ' + q.wordLimit + ']' : ''}`).join('\n')}
 
-QUESTIONS TO ANSWER:
-${manualQuestions.map((q, i) => `Question ${i+1}: ${q.question}${q.scoring ? '\nScoring: ' + q.scoring : ''}${q.wordLimit ? '\nWord limit: ' + q.wordLimit : ''}`).join('\n\n')}
+Write a complete response to EVERY question. Format exactly as:
 
-Write a complete response to each question. Format as:
-QUESTION 1: [title]
-[response]
+QUESTION 1: ${questions[0] ? questions[0].question.substring(0, 60) : 'Question 1'}
+[your full response here]
 
-QUESTION 2: [title]
-[response]`;
-    } else {
-      // Use uploaded quality questions document
-      userPrompt = `You are writing tender responses for: ${tender.title}
+QUESTION 2: ${questions[1] ? questions[1].question.substring(0, 60) : 'Question 2'}
+[your full response here]
 
-BIDDING ORGANISATION:
-- Name: ${companyDetails.name}
-- Founded: ${companyDetails.founded}
-- Staff: ${companyDetails.staff}
-- CQC Status: ${companyDetails.cqc}
-- Services: ${companyDetails.services}
-- Regions: ${companyDetails.regions}
-${companyDetails.experience ? '- Experience: ' + companyDetails.experience : ''}
-
-${specText ? 'SERVICE SPECIFICATION:\n' + specText.substring(0, 1500) + '\n\n' : ''}
-${scoringText ? 'SCORING CRITERIA:\n' + scoringText.substring(0, 1000) + '\n\n' : ''}
-
-QUALITY QUESTIONS DOCUMENT (extract each question and answer it):
-${qualityText.substring(0, 3000)}
-
-First identify all the questions from the quality questions document, then write a complete, high-quality response to each one.
-
-Format your response as:
-QUESTION 1: [question title or summary]
-[your full response]
-
-QUESTION 2: [question title or summary]
-[your full response]
-
-And so on for every question found in the document.`;
-    }
+Continue for all ${questions.length} questions.`;
 
     const message = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
@@ -134,11 +97,11 @@ And so on for every question found in the document.`;
     // Parse into question/answer pairs
     const responses = [];
     const blocks = fullResponse.split(/QUESTION \d+:/i).filter(b => b.trim());
-    blocks.forEach((block, i) => {
-      const lines = block.trim().split('\n');
-      const question = lines[0].trim();
-      const answer = lines.slice(1).join('\n').trim();
-      responses.push({ question: question || `Question ${i+1}`, answer });
+    questions.forEach((q, i) => {
+      const block = blocks[i] ? blocks[i].trim() : '';
+      const lines = block.split('\n');
+      const answer = lines.slice(1).join('\n').trim() || block;
+      responses.push({ question: q.question, answer: answer || 'Response pending.' });
     });
 
     return {
