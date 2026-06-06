@@ -838,159 +838,16 @@
   document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
 
   /* ── SAMPLE DATA (shown when database is empty) ── */
-  const SAMPLE_TENDERS = [
-    {
-      id:'sample-1',
-      title:'Domiciliary Care Services Older Adults',
-      organisation:'Birmingham City Council',
-      region:'West Midlands',
-      category:'Domiciliary care',
-      value:'£2,400,000',
-      duration:'3 years + 2 year extension',
-      deadline:'31 July 2026',
-      status:'Open',
-      description:'Birmingham City Council is seeking experienced domiciliary care providers to deliver person-centred home care services to older adults aged 65 and above. Services include personal care, medication support, and reablement. Providers must demonstrate strong CQC ratings and experience managing complex care packages.',
-      eligibility:[
-        'CQC registered with a rating of Good or Outstanding',
-        'Minimum 2 years experience delivering domiciliary care',
-        'Valid public liability insurance of at least £5 million',
-        'DBS checks completed for all staff',
-        'Real Living Wage employer',
-      ],
-      pricing:[
-        { label:'Tender document preparation', amount:750 },
-        { label:'Quality questions & method statements', amount:500 },
-        { label:'Pricing schedule completion', amount:250 },
-      ],
-      total_fee:1500,
-      fee_note:'Fee is per tender submission, exclusive of VAT. Includes full review and quality check before submission.',
-      submission_link:'https://www.birmingham.gov.uk/tenders',
-      non_cqc: false,
-    },
-    {
-      id:'sample-2',
-      title:'Supported Living Services Learning Disabilities',
-      organisation:'Lancashire County Council',
-      region:'North West',
-      category:'Supported living',
-      value:'£850,000',
-      duration:'2 years + 1 year extension',
-      deadline:'15 August 2026',
-      status:'Closing soon',
-      description:'Lancashire County Council requires providers to deliver supported living services for adults with learning disabilities and autism. Providers will support individuals in their own tenancies with 24/7 support packages, promoting independence and community integration.',
-      eligibility:[
-        'CQC registered for Supported Living',
-        'Experience supporting adults with learning disabilities or autism',
-        'Ability to provide 24/7 waking or sleeping night support',
-        'Commitment to co-production and personalised support planning',
-      ],
-      pricing:[
-        { label:'PQQ / SQ completion', amount:500 },
-        { label:'ITT quality questions', amount:650 },
-        { label:'Social value submission', amount:350 },
-      ],
-      total_fee:1500,
-      fee_note:'Fee is per tender submission, exclusive of VAT. Includes unlimited revisions until submission deadline.',
-      submission_link:'https://www.lancashire.gov.uk/tenders',
-      non_cqc: false,
-    },
-    {
-      id:'sample-3',
-      title:'Entry-Level Homecare Framework New Providers',
-      organisation:'Stockport Metropolitan Borough Council',
-      region:'Greater Manchester',
-      category:'Domiciliary care',
-      value:'£120,000',
-      duration:'1 year',
-      deadline:'20 July 2026',
-      status:'New opportunity',
-      description:'An ideal opportunity for new and emerging care providers to gain their first local authority contract. This framework is open to providers who are CQC registered but not yet rated, allowing you to build a track record while delivering quality care in the community.',
-      eligibility:[
-        'CQC registered (rating not required)',
-        'Minimum 3 months trading history',
-        'Basic DBS checks for all care staff',
-        'Valid employers liability insurance',
-      ],
-      pricing:[
-        { label:'Application document preparation', amount:500 },
-        { label:'Quality questions', amount:300 },
-        { label:'Compliance review', amount:200 },
-      ],
-      total_fee:1000,
-      fee_note:'Reduced fee for new providers. Exclusive of VAT.',
-      submission_link:'',
-      non_cqc: true,
-      why_new_providers:'No CQC rating required perfect for new providers building their track record.',
-    },
-    {
-      id:'sample-4',
-      title:'Commercial Cleaning Services Office Estate',
-      organisation:'Thurrock Council',
-      region:'Essex',
-      category:'Cleaning',
-      value:'£210,000',
-      duration:'3 years',
-      deadline:'5 July 2026',
-      status:'Urgent',
-      description:'Thurrock Council requires a commercial cleaning contractor to deliver daily cleaning services across its corporate office estate, including council chambers, public-facing offices, and depot facilities. The contract includes window cleaning, deep cleans, and reactive cleaning following incidents.',
-      eligibility:[
-        'Minimum 3 years commercial cleaning experience',
-        'COSHH trained operatives',
-        'Valid public liability insurance of at least £5 million',
-        'DBS checks for staff accessing council buildings',
-        'ISO 9001 or equivalent quality management preferred',
-      ],
-      pricing:[
-        { label:'Tender submission preparation', amount:600 },
-        { label:'Pricing schedule & costings', amount:400 },
-        { label:'Method statement & TUPE review', amount:500 },
-      ],
-      total_fee:1500,
-      fee_note:'Fee is per tender submission, exclusive of VAT.',
-      submission_link:'https://in-tendhost.co.uk/thurrockcouncil',
-    },
-    {
-      id:'sample-5',
-      title:'Construction & Refurbishment Works Framework',
-      organisation:'STAR Procurement (Stockport MBC)',
-      region:'North West',
-      category:'Construction',
-      value:'£70,000 per year',
-      duration:'2 years + 1 year extension',
-      deadline:'5 July 2026',
-      status:'Open',
-      description:'STAR Procurement on behalf of Stockport Metropolitan Borough Council is seeking contractors to deliver a range of construction, refurbishment, and maintenance works across council-owned assets. Works include planned refurbishment, reactive repairs, and minor new-build projects.',
-      eligibility:[
-        'Registered on the Construction Hub and CDP',
-        'Real Living Wage employer',
-        'Minimum £2M employers liability insurance',
-        'Match My Project registration (at least 1 project per year)',
-        'Social Value Portal (SVP) registration required post-award',
-      ],
-      pricing:[
-        { label:'PQQ / SQ preparation', amount:500 },
-        { label:'Quality questions (methodology, experience, resource)', amount:750 },
-        { label:'Social value submission (SVP portal)', amount:500 },
-        { label:'Commercial pricing schedule', amount:250 },
-      ],
-      total_fee:2000,
-      fee_note:'Fee is per tender submission, exclusive of VAT. Includes BAFO support if required.',
-      submission_link:'https://www.chest.ac.uk',
-    },
-  ];
 
-  /* ── LOAD DATA ── */
+    /* ── LOAD DATA ── */
   async function loadData() {
     try {
       const res=await fetch('/.netlify/functions/get-tenders');
       if(!res.ok) throw new Error('fetch failed');
       const data=await res.json();
 
-      // If database has real tenders use them, otherwise show samples
-      const tenders = (data && data.length > 0) ? data : SAMPLE_TENDERS;
-
-      allCareTenders       = tenders.filter(t=>isCare(t));
-      allCommercialTenders = tenders.filter(t=>!isCare(t));
+      allCareTenders       = data.filter(t=>isCare(t));
+      allCommercialTenders = data.filter(t=>!isCare(t));
 
       const lc=allCareTenders.filter(t=>t.status!=='Draft').length;
       const lm=allCommercialTenders.filter(t=>t.status!=='Draft').length;
@@ -1001,14 +858,8 @@
       renderTenders('commercial');
       renderNonCQC();
     } catch(e) {
-      // On error, still show samples so the site never looks empty
-      allCareTenders       = SAMPLE_TENDERS.filter(t=>isCare(t));
-      allCommercialTenders = SAMPLE_TENDERS.filter(t=>!isCare(t));
-      document.getElementById('stat-care-count').textContent       = allCareTenders.length;
-      document.getElementById('stat-commercial-count').textContent = allCommercialTenders.length;
-      renderTenders('care');
-      renderTenders('commercial');
-      renderNonCQC();
+      document.getElementById('care-tenders-list').innerHTML='<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
+      document.getElementById('commercial-tenders-list').innerHTML='<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
     }
   }
 
