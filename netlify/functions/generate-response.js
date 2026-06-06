@@ -11,9 +11,8 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { tenderId, companyDetails } = JSON.parse(event.body);
+    const { tenderId, companyDetails, batchStart, batchEnd } = JSON.parse(event.body);
 
-    // Fetch tender directly from Supabase REST API - no SDK needed
     const supabaseUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
     const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
@@ -28,8 +27,8 @@ exports.handler = async (event) => {
       return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Tender not found' }) };
     }
 
-    const questions = tender.cana_questions || [];
-    if (!questions.length) {
+    const allQuestions = tender.cana_questions || [];
+    if (!allQuestions.length) {
       return {
         statusCode: 400,
         headers: corsHeaders,
@@ -37,13 +36,18 @@ exports.handler = async (event) => {
       };
     }
 
+    // Get the batch of questions to answer
+    var start = batchStart || 0;
+    var end = batchEnd || allQuestions.length;
+    var questions = allQuestions.slice(start, end);
+
     const knowledge = tender.cana_knowledge || '';
-    var systemPrompt = 'You are an expert UK public sector tender writer. Write professional tender responses in first person on behalf of the bidding organisation. Be specific, reference the company details, and use professional UK English. Write clean paragraphs with no markdown symbols like ## or ---.';
+    var systemPrompt = 'You are an expert UK public sector tender writer. Write professional tender responses in first person on behalf of the bidding organisation. Be specific, reference the company details, use professional UK English. Write clean paragraphs with no markdown symbols.';
     if (knowledge) { systemPrompt += ' ' + knowledge; }
 
     var company = 'Organisation: ' + companyDetails.name + '. Founded: ' + companyDetails.founded + '. Staff: ' + companyDetails.staff + '. CQC: ' + companyDetails.cqc + '. Services: ' + companyDetails.services + '. Regions: ' + companyDetails.regions + (companyDetails.experience ? '. Experience: ' + companyDetails.experience : '') + '.';
 
-    var questionsBlock = 'COMPANY: ' + company + '\n\nTENDER: ' + tender.title + '\n\n';
+    var questionsBlock = 'COMPANY: ' + company + '\nTENDER: ' + tender.title + '\n\n';
     for (var i = 0; i < questions.length; i++) {
       var q = questions[i];
       questionsBlock += 'QUESTION ' + (i+1) + ': ' + q.question;
@@ -60,7 +64,7 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 4000,
+        max_tokens: 3000,
         system: systemPrompt,
         messages: [{ role: 'user', content: questionsBlock }]
       })
@@ -84,7 +88,12 @@ exports.handler = async (event) => {
     return {
       statusCode: 200,
       headers: corsHeaders,
-      body: JSON.stringify({ responses: responses, tenderId: tenderId, tenderTitle: tender.title })
+      body: JSON.stringify({
+        responses: responses,
+        tenderId: tenderId,
+        tenderTitle: tender.title,
+        totalQuestions: allQuestions.length
+      })
     };
 
   } catch (err) {
