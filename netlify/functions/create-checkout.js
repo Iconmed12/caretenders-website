@@ -1,5 +1,4 @@
-const Stripe = require('stripe');
-
+// Uses native fetch — no npm packages needed
 exports.handler = async (event) => {
   const corsHeaders = {
     'Content-Type': 'application/json',
@@ -13,10 +12,18 @@ exports.handler = async (event) => {
   }
 
   try {
-    const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    if (!stripeKey) {
+      return {
+        statusCode: 500,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: 'Missing STRIPE_SECRET_KEY environment variable' })
+      };
+    }
+
     const { tenderTitle, subtotal } = JSON.parse(event.body);
 
-    if (!subtotal || isNaN(subtotal)) {
+    if (!subtotal || isNaN(subtotal) || Number(subtotal) <= 0) {
       return {
         statusCode: 400,
         headers: corsHeaders,
@@ -24,29 +31,41 @@ exports.handler = async (event) => {
       };
     }
 
-    // Amount in pence, inc. VAT (multiply by 1.2)
+    // Amount in pence inc. VAT
     const amountPence = Math.round(Number(subtotal) * 1.2 * 100);
+    const title = tenderTitle || 'Tender';
 
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [{
-        price_data: {
-          currency: 'gbp',
-          product_data: {
-            name: 'Bid Support — ' + (tenderTitle || 'Tender'),
-            description: 'Full managed service: SQ completion, tender writing, quality review and submission on your behalf. Price includes VAT.',
-          },
-          unit_amount: amountPence,
-        },
-        quantity: 1,
-      }],
-      mode: 'payment',
-      success_url: 'https://caretenders-website.netlify.app/?payment=success',
-      cancel_url:  'https://caretenders-website.netlify.app/?payment=cancelled',
-      metadata: {
-        tender_title: tenderTitle || '',
+    // Build form-encoded body for Stripe API
+    const params = new URLSearchParams();
+    params.append('payment_method_types[]', 'card');
+    params.append('line_items[0][price_data][currency]', 'gbp');
+    params.append('line_items[0][price_data][product_data][name]', 'Bid Support: ' + title);
+    params.append('line_items[0][price_data][product_data][description]', 'Full managed service: SQ completion, tender writing, quality review and submission. Price includes VAT.');
+    params.append('line_items[0][price_data][unit_amount]', String(amountPence));
+    params.append('line_items[0][quantity]', '1');
+    params.append('mode', 'payment');
+    params.append('success_url', 'https://caretenders-website.netlify.app/?payment=success');
+    params.append('cancel_url', 'https://caretenders-website.netlify.app/?payment=cancelled');
+    params.append('metadata[tender_title]', title);
+
+    const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + stripeKey,
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
+      body: params.toString()
     });
+
+    const session = await response.json();
+
+    if (!response.ok || !session.url) {
+      return {
+        statusCode: 500,
+        headers: corsHeaders,
+        body: JSON.stringify({ error: session.error?.message || 'Stripe error' })
+      };
+    }
 
     return {
       statusCode: 200,
@@ -58,7 +77,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 500,
       headers: corsHeaders,
-      body: JSON.stringify({ error: err.message || 'Stripe error' })
+      body: JSON.stringify({ error: err.message || 'Unknown error' })
     };
   }
 };
