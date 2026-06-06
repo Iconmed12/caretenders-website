@@ -327,14 +327,21 @@ tr:hover td{background:#fafafa}
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
             <div style="width:42px;height:42px;background:#0B1929;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">⚡</div>
             <div style="flex:1;">
-              <div style="font-weight:600;font-size:0.95rem;">Cana AI</div>
-              <div style="font-size:0.78rem;color:var(--text-light);">AI-powered tender writing from £480 inc. VAT</div>
+              <div style="font-weight:600;font-size:0.95rem;">Cana AI — Writing Knowledge</div>
+              <div style="font-size:0.78rem;color:var(--text-light);">Teach Cana how to write winning tenders — this applies to every bid</div>
             </div>
             <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">✓ Active</div>
           </div>
-          <div style="background:#F4F6F9;border-radius:8px;padding:1rem;font-size:0.81rem;color:var(--text-light);">
-            <strong style="color:var(--text);">Platform:</strong> <a href="https://cana.icongrp.co.uk" target="_blank" style="color:#0099AA;">https://cana.icongrp.co.uk</a>
-          </div>
+          <textarea id="canaKnowledge" style="width:100%;min-height:200px;padding:0.85rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);line-height:1.6;resize:vertical;outline:none;" placeholder="Write your tender guidance here. For example:
+- Always use the STAR method (Situation, Task, Action, Result) for experience questions
+- Lead with outcomes and measurable impact
+- Reference CQC standards and regulatory compliance where relevant
+- Use active, confident language — avoid passive voice
+- Always include a concrete example from the organisation's experience
+- For social value questions, reference local employment, training, and community benefit
+- Match the scoring criteria exactly — if they score on innovation, lead with innovation"></textarea>
+          <button onclick="saveCanaKnowledge()" style="margin-top:0.75rem;background:var(--navy);color:white;border:none;border-radius:8px;padding:9px 20px;font-size:0.85rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Save knowledge</button>
+          <span id="canaKnowledgeSaved" style="display:none;margin-left:10px;font-size:0.8rem;color:var(--green);">Saved!</span>
         </div>
 
       </div>
@@ -838,6 +845,7 @@ function openDrawer(tOrId, sectionType, aiData = null) {
     if (isNc) document.getElementById('fWhyCqc').value = t.why_cqc || '';
     buildPriceRows((t.pricing || {}).items || []);
     buildEligRows(Array.isArray(t.eligibility) ? t.eligibility : []);
+    buildQuestionRows(t.cana_questions || []);
 
   } else if (aiData) {
     // AI-extracted data
@@ -881,6 +889,7 @@ function openDrawer(tOrId, sectionType, aiData = null) {
     if (!isNc) document.getElementById('fCategory').value = isCommercial ? 'Construction' : 'Domiciliary care';
     buildPriceRows([{ label: 'Bid writing & strategy', price: '' }, { label: 'Compliance review', price: '' }, { label: 'Submission support', price: '' }]);
     buildEligRows(['']);
+    buildQuestionRows([]);
   }
   document.getElementById('drawerOverlay').classList.add('open');
 }
@@ -942,6 +951,8 @@ async function saveTender(draft = false) {
     days_left: deadline ? Math.max(0, Math.round((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24))) : 0,
     link: document.getElementById('fLink').value,
     stripe_link: document.getElementById('fStripeLink').value || null,
+    cana_questions: getQuestions(),
+    cana_knowledge: localStorage.getItem('cana_knowledge') || null,
     description: document.getElementById('fDesc').value,
     pricing: { items: pItems.map(i=>({label:i.label, price:parseFloat(i.price)||0})), total: total, note: document.getElementById('fPricingNote').value },
     eligibility: getEligItems(),
