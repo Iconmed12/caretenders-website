@@ -471,7 +471,7 @@ tr:hover td{background:#fafafa}
 <div class="toast" id="toast"><i class="ti ti-check" style="font-size:16px" id="toastIcon"></i><span id="toastMsg"></span></div>
 
 <script>
-const API = '/.netlify/functions';
+const API = '/api';
 const ADMIN_PASSWORD = 'CareTenders2024!';
 let allTenders = [];
 let deleteTarget = { id: null };
@@ -951,8 +951,8 @@ async function saveTender(draft = false) {
     days_left: deadline ? Math.max(0, Math.round((new Date(deadline) - new Date()) / (1000 * 60 * 60 * 24))) : 0,
     link: document.getElementById('fLink').value,
     stripe_link: document.getElementById('fStripeLink').value || null,
-    cana_questions: getQuestions(),
-    cana_knowledge: localStorage.getItem('cana_knowledge') || null,
+    cana_questions: (function(){ try { return getQuestions(); } catch(e) { return []; } })(),
+    cana_knowledge: (function(){ try { return localStorage.getItem('cana_knowledge')||null; } catch(e) { return null; } })(),
     description: document.getElementById('fDesc').value,
     pricing: { items: pItems.map(i=>({label:i.label, price:parseFloat(i.price)||0})), total: total, note: document.getElementById('fPricingNote').value },
     eligibility: getEligItems(),
@@ -1019,6 +1019,57 @@ async function confirmDelete() {
     showToast('Delete failed: ' + err.message, 'error');
   }
 }
+
+function getQuestions() {
+  try {
+    const el = document.getElementById('questionsBuilder');
+    if (!el) return [];
+    return Array.from(el.children).map(d => {
+      const inputs = d.querySelectorAll('input');
+      return { question: inputs[0]?inputs[0].value:'', scoring: inputs[1]?inputs[1].value:'', wordLimit: inputs[2]?inputs[2].value:'' };
+    }).filter(q => q.question && q.question.trim());
+  } catch(e) { return []; }
+}
+
+let qCount = 0;
+function addQuestion(q, scoring, wordLimit) {
+  q=q||''; scoring=scoring||''; wordLimit=wordLimit||'';
+  qCount++;
+  const el = document.getElementById('questionsBuilder');
+  if (!el) return;
+  const d = document.createElement('div');
+  const n = qCount;
+  d.id = 'q'+n;
+  d.style.cssText = 'background:#F4F6F9;border-radius:8px;padding:0.75rem;margin-bottom:0.4rem;';
+  d.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="background:#00C9E0;color:#0B1929;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:700;flex-shrink:0;">'+n+'</div><input type="text" placeholder="Question e.g. Describe your safeguarding approach..." value="" style="flex:1;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.85rem;outline:none;"><button onclick=\"document.getElementById('q'+n+'').remove()\" style=\"background:none;border:none;color:#6B8FA3;cursor:pointer;font-size:1rem;\">\u2715</button></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding-left:30px;"><input type="text" placeholder="Scoring criteria (optional)" style="padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.78rem;outline:none;"><input type="text" placeholder="Word limit (optional)" style="padding:6px 10px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:0.78rem;outline:none;"></div>';
+  // Set values separately to avoid escaping issues
+  const inputs = d.querySelectorAll('input');
+  if (inputs[0]) inputs[0].value = q;
+  if (inputs[1]) inputs[1].value = scoring;
+  if (inputs[2]) inputs[2].value = wordLimit;
+  el.appendChild(d);
+}
+
+function buildQuestionRows(questions) {
+  qCount = 0;
+  const el = document.getElementById('questionsBuilder');
+  if (el) el.innerHTML = '';
+  (questions||[]).forEach(q => addQuestion(q.question, q.scoring, q.wordLimit));
+}
+
+function saveCanaKnowledge() {
+  const k = document.getElementById('canaKnowledge');
+  if (k) localStorage.setItem('cana_knowledge', k.value);
+  const s = document.getElementById('canaKnowledgeSaved');
+  if (s) { s.style.display='inline'; setTimeout(()=>s.style.display='none',2000); }
+}
+
+function loadCanaKnowledge() {
+  const k = document.getElementById('canaKnowledge');
+  if (k) { const v=localStorage.getItem('cana_knowledge'); if(v) k.value=v; }
+}
+
+loadCanaKnowledge();
 
 function showToast(msg, type = 'success') {
   const t = document.getElementById('toast');
