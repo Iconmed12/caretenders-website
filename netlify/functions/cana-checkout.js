@@ -9,7 +9,7 @@ exports.handler = async (event) => {
 
   try {
     const { sessionId, tenderId, tenderTitle } = JSON.parse(event.body);
-    const stripeKey = process.env.STRIPE_SECRET_KEY;
+    const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
 
     const params = new URLSearchParams({
       'mode': 'payment',
