@@ -1069,7 +1069,8 @@ async function handleCanaDoc(type,files){
       reader.onload=function(e){res(e.target.result);};
       reader.readAsText(file);
     });
-    var clean=text.replace(/[ ---]/g,'').substring(0,12000);
+    var clean=text.replace(/[ -
+--]/g,'').substring(0,12000);
     canaDocData[type].push({name:file.name,text:clean});
   }
   renderCanaFiles(type);
