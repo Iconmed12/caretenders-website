@@ -1132,17 +1132,33 @@ function addCanaQuestion(q, wordLimit, scoring) {
   header.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
 
   var num = document.createElement('div');
+  num.className = 'q-num';
   num.style.cssText = 'background:#0B1929;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;';
   num.textContent = n;
 
   var label = document.createElement('div');
+  label.className = 'q-label';
   label.style.cssText = 'font-size:0.82rem;font-weight:600;color:var(--text);flex:1;';
   label.textContent = 'Question ' + n;
 
   var rmBtn = document.createElement('button');
   rmBtn.style.cssText = 'background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0;';
   rmBtn.innerHTML = '<i class="ti ti-trash"></i>';
-  rmBtn.onclick = function() { d.remove(); updateCanaQuestionNumbers(); };
+  rmBtn.onclick = function() {
+    d.remove();
+    // Renumber remaining questions
+    var builder = document.getElementById('canaQuestionsBuilder');
+    var empty = document.getElementById('canaQuestionsEmpty');
+    if (builder) {
+      Array.from(builder.children).forEach(function(item, idx) {
+        var numEl = item.querySelector('.q-num');
+        var labelEl = item.querySelector('.q-label');
+        if (numEl) numEl.textContent = idx + 1;
+        if (labelEl) labelEl.textContent = 'Question ' + (idx + 1);
+      });
+      if (empty) empty.style.display = builder.children.length ? 'none' : 'block';
+    }
+  };
 
   header.appendChild(num);
   header.appendChild(label);
