@@ -1,4 +1,3 @@
-const Anthropic = require('@anthropic-ai/sdk');
 const { createClient } = require('@supabase/supabase-js');
 
 exports.handler = async (event) => {
@@ -36,78 +35,121 @@ exports.handler = async (event) => {
       return {
         statusCode: 400,
         headers: corsHeaders,
-        body: JSON.stringify({ error: 'No questions have been set up for this tender yet. Questions saved: ' + JSON.stringify(tender.cana_questions) + ' Tender ID: ' + tenderId })
+        body: JSON.stringify({ error: 'This tender is not yet ready — our team is still adding the questions. Please contact consulting@icongrp.co.uk.' })
       };
     }
 
-    // Get context documents
     const canaDocs = tender.cana_docs || {};
     const specDocs = Array.isArray(canaDocs.spec) ? canaDocs.spec : (canaDocs.spec ? [canaDocs.spec] : []);
     const scoringDocs = Array.isArray(canaDocs.scoring) ? canaDocs.scoring : (canaDocs.scoring ? [canaDocs.scoring] : []);
-    const specText = specDocs.map(d => d.text || '').join(' ').substring(0, 2000);
-    const scoringText = scoringDocs.map(d => d.text || '').join(' ').substring(0, 1000);
+    const specText = specDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 1500);
+    const scoringText = scoringDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 800);
     const knowledge = tender.cana_knowledge || '';
 
-    const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    const systemPrompt = 'You are Cana AI, an expert UK public sector tender writer for ICONGRP Consulting. You write high-quality, compliant, and compelling tender responses on behalf of organisations bidding for contracts.' +
+      (knowledge ? '
 
-    const systemPrompt = `You are Cana AI, an expert UK public sector tender writer for ICONGRP Consulting. You write high-quality, compliant, and compelling tender responses.
+WRITING GUIDANCE:
+' + knowledge : '') +
+      '
 
-${knowledge ? 'WRITING GUIDANCE:\n' + knowledge + '\n\n' : ''}RULES:
+RULES:
 - Write in first person on behalf of the bidding organisation
 - Be specific — use the company details provided throughout every answer
 - Use professional UK English
 - Structure each answer with a strong opening, clear evidence, and confident conclusion
 - Every sentence must add value — no generic filler
-- Aim for 400-500 words per question`;
+- Respect word limits specified for each question';
 
-    const userPrompt = `Write tender responses for: ${tender.title}
-Buyer: ${tender.org || ''}
+    const questionsText = questions.map(function(q, i) {
+      return 'Question ' + (i+1) + ': ' + q.question +
+        (q.scoring ? ' [Scoring weight: ' + q.scoring + ']' : '') +
+        (q.wordLimit ? ' [Word limit: ' + q.wordLimit + ' words]' : '');
+    }).join('
+
+');
+
+    const userPrompt = 'Write tender responses for: ' + tender.title + '
+Buyer: ' + (tender.org || '') +
+      '
 
 BIDDING ORGANISATION:
-- Name: ${companyDetails.name}
-- Founded: ${companyDetails.founded}
-- Staff: ${companyDetails.staff}
-- CQC Status: ${companyDetails.cqc}
-- Services: ${companyDetails.services}
-- Regions: ${companyDetails.regions}
-${companyDetails.experience ? '- Experience: ' + companyDetails.experience : ''}
-
-${specText ? 'SERVICE SPECIFICATION CONTEXT:\n' + specText + '\n\n' : ''}${scoringText ? 'SCORING CRITERIA:\n' + scoringText + '\n\n' : ''}QUESTIONS TO ANSWER:
-${questions.map((q, i) => `Question ${i+1}: ${q.question}${q.scoring ? ' [Scoring: ' + q.scoring + ']' : ''}${q.wordLimit ? ' [Word limit: ' + q.wordLimit + ']' : ''}`).join('\n')}
+' +
+      '- Name: ' + companyDetails.name + '
+' +
+      '- Founded: ' + companyDetails.founded + '
+' +
+      '- Staff: ' + companyDetails.staff + '
+' +
+      '- CQC Status: ' + companyDetails.cqc + '
+' +
+      '- Services: ' + companyDetails.services + '
+' +
+      '- Regions: ' + companyDetails.regions + '
+' +
+      (companyDetails.experience ? '- Experience: ' + companyDetails.experience + '
+' : '') +
+      (specText ? '
+SERVICE SPECIFICATION CONTEXT:
+' + specText + '
+' : '') +
+      (scoringText ? '
+SCORING CRITERIA:
+' + scoringText + '
+' : '') +
+      '
+QUESTIONS TO ANSWER:
+' + questionsText +
+      '
 
 Write a complete response to EVERY question. Format exactly as:
 
-QUESTION 1: ${questions[0] ? questions[0].question.substring(0, 60) : 'Question 1'}
-[your full response here]
+QUESTION 1: [first few words of question]
+[your full response]
 
-QUESTION 2: ${questions[1] ? questions[1].question.substring(0, 60) : 'Question 2'}
-[your full response here]
+QUESTION 2: [first few words of question]
+[your full response]
 
-Continue for all ${questions.length} questions.`;
+And so on for all ' + questions.length + ' questions.';
 
-    const message = await anthropic.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 3000,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }]
+    const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 3000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
     });
 
-    const fullResponse = message.content[0].text;
+    if (!apiResponse.ok) {
+      const errText = await apiResponse.text();
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'AI API error: ' + errText.substring(0, 200) }) };
+    }
 
-    // Parse into question/answer pairs
+    const aiData = await apiResponse.json();
+    const fullResponse = aiData.content[0].text;
+
     const responses = [];
-    const blocks = fullResponse.split(/QUESTION \d+:/i).filter(b => b.trim());
-    questions.forEach((q, i) => {
+    const blocks = fullResponse.split(/QUESTION \d+:/i).filter(function(b){ return b.trim(); });
+    questions.forEach(function(q, i) {
       const block = blocks[i] ? blocks[i].trim() : '';
-      const lines = block.split('\n');
-      const answer = lines.slice(1).join('\n').trim() || block;
+      const lines = block.split('
+');
+      const answer = lines.slice(1).join('
+').trim() || block;
       responses.push({ question: q.question, answer: answer || 'Response pending.' });
     });
 
     return {
       statusCode: 200,
       headers: corsHeaders,
-      body: JSON.stringify({ responses, tenderId, tenderTitle: tender.title })
+      body: JSON.stringify({ responses: responses, tenderId: tenderId, tenderTitle: tender.title })
     };
 
   } catch (err) {
