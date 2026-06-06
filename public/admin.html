@@ -356,6 +356,23 @@ tr:hover td{background:#fafafa}
             <div id="scoringFiles" class="cana-files-list"></div>
           </div>
         </div>
+        <!-- QUESTIONS ENTRY -->
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <div>
+              <div style="font-weight:600;font-size:0.95rem;">Tender Questions</div>
+              <div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">Type or paste each question below. Cana AI will write a full response to every one.</div>
+            </div>
+            <button onclick="addCanaQuestion()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <i class="ti ti-plus" style="font-size:13px;"></i> Add question
+            </button>
+          </div>
+          <div id="canaQuestionsBuilder" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
+          <div id="canaQuestionsEmpty" style="text-align:center;padding:1.5rem;color:var(--text-light);font-size:0.85rem;background:var(--bg);border-radius:8px;">
+            No questions added yet — click "Add question" to start
+          </div>
+        </div>
+
         <div style="display:flex;align-items:center;gap:1rem;">
           <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
             <i class="ti ti-sparkles" style="font-size:14px;"></i> Save &amp; train Cana AI
@@ -1032,6 +1049,8 @@ function loadCanaDocs(){
   var hasAny=canaDocData.quality.length||canaDocData.spec.length||canaDocData.scoring.length;
   document.getElementById('canaDocStatus').style.display=hasAny?'block':'none';
   document.getElementById('canaDocSaved').style.display='none';
+  // Load questions
+  buildCanaQuestionRows(t && t.cana_questions ? t.cana_questions : []);
 }
 
 function renderCanaFiles(type){
@@ -1081,6 +1100,7 @@ async function saveCanaDocs(){
   var t=allTenders.find(function(x){return x.id===id;});
   if(!t) return;
   t.cana_docs=canaDocData;
+  t.cana_questions=getCanaQuestions();
   try {
     var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:t})});
     var data=await res.json();
@@ -1092,6 +1112,103 @@ async function saveCanaDocs(){
     populateCanaTenderSelect();
     document.getElementById('canaTenderSelect').value=id;
   } catch(e){showToast('Save failed: '+e.message,'error');}
+}
+
+function addCanaQuestion(q, wordLimit, scoring) {
+  q = q || ''; wordLimit = wordLimit || ''; scoring = scoring || '';
+  var builder = document.getElementById('canaQuestionsBuilder');
+  var empty = document.getElementById('canaQuestionsEmpty');
+  if (!builder) return;
+  empty.style.display = 'none';
+  var n = builder.children.length + 1;
+  var d = document.createElement('div');
+  d.style.cssText = 'background:#f9fafb;border:1.5px solid var(--border);border-radius:8px;padding:0.85rem;';
+
+  var header = document.createElement('div');
+  header.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+
+  var num = document.createElement('div');
+  num.style.cssText = 'background:#0B1929;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;';
+  num.textContent = n;
+
+  var label = document.createElement('div');
+  label.style.cssText = 'font-size:0.82rem;font-weight:600;color:var(--text);flex:1;';
+  label.textContent = 'Question ' + n;
+
+  var rmBtn = document.createElement('button');
+  rmBtn.style.cssText = 'background:none;border:none;color:var(--red);cursor:pointer;font-size:0.9rem;padding:0;';
+  rmBtn.innerHTML = '<i class="ti ti-trash"></i>';
+  rmBtn.onclick = function() { d.remove(); updateCanaQuestionNumbers(); };
+
+  header.appendChild(num);
+  header.appendChild(label);
+  header.appendChild(rmBtn);
+
+  var ta = document.createElement('textarea');
+  ta.placeholder = 'Paste or type the question here e.g. Describe your approach to safeguarding vulnerable adults...';
+  ta.value = q;
+  ta.style.cssText = 'width:100%;min-height:80px;padding:8px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:0.85rem;font-family:DM Sans,sans-serif;resize:vertical;outline:none;line-height:1.5;';
+
+  var meta = document.createElement('div');
+  meta.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;';
+
+  var wlInp = document.createElement('input');
+  wlInp.type = 'text';
+  wlInp.placeholder = 'Word limit (optional) e.g. 500';
+  wlInp.value = wordLimit;
+  wlInp.style.cssText = 'padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:0.78rem;font-family:DM Sans,sans-serif;outline:none;';
+
+  var scInp = document.createElement('input');
+  scInp.type = 'text';
+  scInp.placeholder = 'Scoring criteria (optional) e.g. 10%';
+  scInp.value = scoring;
+  scInp.style.cssText = 'padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:0.78rem;font-family:DM Sans,sans-serif;outline:none;';
+
+  meta.appendChild(wlInp);
+  meta.appendChild(scInp);
+
+  d.appendChild(header);
+  d.appendChild(ta);
+  d.appendChild(meta);
+  builder.appendChild(d);
+}
+
+function updateCanaQuestionNumbers() {
+  var builder = document.getElementById('canaQuestionsBuilder');
+  var empty = document.getElementById('canaQuestionsEmpty');
+  if (!builder) return;
+  Array.from(builder.children).forEach(function(d, i) {
+    var num = d.querySelector('div div');
+    if (num) num.textContent = i + 1;
+    var label = d.querySelectorAll('div div')[1];
+    if (label) label.textContent = 'Question ' + (i + 1);
+  });
+  if (empty) empty.style.display = builder.children.length ? 'none' : 'block';
+}
+
+function getCanaQuestions() {
+  var builder = document.getElementById('canaQuestionsBuilder');
+  if (!builder) return [];
+  return Array.from(builder.children).map(function(d) {
+    var ta = d.querySelector('textarea');
+    var inputs = d.querySelectorAll('input');
+    return {
+      question: ta ? ta.value.trim() : '',
+      wordLimit: inputs[0] ? inputs[0].value.trim() : '',
+      scoring: inputs[1] ? inputs[1].value.trim() : ''
+    };
+  }).filter(function(q) { return q.question; });
+}
+
+function buildCanaQuestionRows(questions) {
+  var builder = document.getElementById('canaQuestionsBuilder');
+  var empty = document.getElementById('canaQuestionsEmpty');
+  if (!builder) return;
+  builder.innerHTML = '';
+  if (empty) empty.style.display = questions && questions.length ? 'none' : 'block';
+  (questions || []).forEach(function(q) {
+    addCanaQuestion(q.question, q.wordLimit, q.scoring);
+  });
 }
 
 function saveCanaKnowledge(){
