@@ -481,10 +481,11 @@
           <span class="pricing-total-amount" id="modal-total-fee"></span>
         </div>
         <div class="pricing-note" id="modal-fee-note"></div>
-        <a id="modal-pay-btn" href="https://buy.stripe.com/yourlink" target="_blank"
-           style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.1rem;background:var(--teal);color:var(--navy);border-radius:10px;padding:13px 18px;text-decoration:none;font-weight:700;font-size:0.9rem;transition:background 0.2s;">
-<span>💳 Pay for bid support</span>
-        </a>
+        <button id="modal-pay-btn" onclick="handlePayNow()"
+           style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.1rem;background:var(--teal);color:var(--navy);border-radius:10px;padding:13px 18px;font-weight:700;font-size:0.9rem;transition:background 0.2s;width:100%;border:none;cursor:pointer;">
+          <span id="modal-pay-label">💳 Pay for bid support</span>
+          <span id="modal-pay-amount" style="background:rgba(11,25,41,0.15);border-radius:6px;padding:3px 10px;font-size:0.85rem;white-space:nowrap;"></span>
+        </button>
         <div style="text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.3);margin-top:8px;">Secure payment via Stripe · Invoice provided on receipt</div>
       </div>
 
@@ -520,7 +521,7 @@
 
       <!-- CTA -->
       <div class="modal-cta">
-        <a href="https://calendly.com/icongrp-consulting" target="_blank" class="btn-cta btn-cta--teal">
+        <a href="https://calendly.com/icongrp" target="_blank" class="btn-cta btn-cta--teal">
           <div class="btn-cta-icon">📅</div>
           <div class="btn-cta-text">
             <span class="btn-cta-label">Book a consultant call</span>
@@ -761,9 +762,12 @@
     }
 
     // Calculate subtotal — sum items, then check explicit total fields
+    window._currentTenderSubtotal = 0;
+    window._currentTenderTitle = t.title||'';
     const itemsSum = sumPricing(pricingItems);
     const explicitTotal = Number(pricing.total||t.total_fee||t.fee||t.our_fee||t.price||0);
     const subtotal = explicitTotal || itemsSum || 0;
+    window._currentTenderSubtotal = subtotal;
     const totalIncVat = subtotal ? addVat(subtotal) : 0;
 
     if(pricingItems.length){
@@ -828,6 +832,44 @@
   function sumPricing(items){
     if(!items||!items.length) return 0;
     return items.reduce((s,p)=>s+(Number(p.amount||p.price||0)),0);
+  }
+
+  // Stripe publishable key
+  const STRIPE_PK = 'pk_live_51RxX99Cyj81ZAAJNd2EcZeTGzfz1mzuvXecvKTxZ2OVSuWOdP7KBwbvOMiEdhQwvlseUvpqpiuzosFdZURG67gau001EHcJxL1';
+
+  async function handlePayNow() {
+    const subtotal = window._currentTenderSubtotal || 0;
+    const title    = window._currentTenderTitle || 'Tender';
+
+    if (!subtotal) {
+      window.location.href = 'mailto:consulting@icongrp.co.uk?subject=Payment enquiry: ' + encodeURIComponent(title);
+      return;
+    }
+
+    const btn   = document.getElementById('modal-pay-btn');
+    const label = document.getElementById('modal-pay-label');
+    label.textContent = '⏳ Preparing payment...';
+    btn.style.opacity = '0.8';
+    btn.style.pointerEvents = 'none';
+
+    try {
+      const res = await fetch('/.netlify/functions/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenderTitle: title, subtotal: subtotal })
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'No URL returned');
+      }
+    } catch(e) {
+      label.textContent = '💳 Pay for bid support';
+      btn.style.opacity = '1';
+      btn.style.pointerEvents = 'auto';
+      alert('Payment could not be started. Please call us on 01268 20 30 10 or email consulting@icongrp.co.uk');
+    }
   }
 
   function closeModal(){
