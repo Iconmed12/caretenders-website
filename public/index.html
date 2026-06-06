@@ -106,7 +106,7 @@
   .tenders-grid { display:grid; gap:0.85rem; }
   .tender-card { background:var(--white); border:1.5px solid var(--border); border-radius:12px; padding:1.4rem 1.5rem; display:grid; grid-template-columns:1fr auto; gap:0.4rem 2rem; align-items:start; transition:box-shadow 0.2s,border-color 0.2s; cursor:pointer; }
   .tender-card:hover { box-shadow:0 4px 20px rgba(0,0,0,0.09); border-color:rgba(0,201,224,0.25); }
-  .tender-org { font-size:0.75rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px; }
+  .tender-org { font-size:0.75rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:420px; }
   .tender-title { font-size:1rem; font-weight:600; color:var(--navy); margin-bottom:6px; }
   .tender-meta { display:flex; gap:0.75rem; flex-wrap:wrap; font-size:0.8rem; color:var(--muted); align-items:center; }
   .tender-badge { display:inline-flex; align-items:center; gap:4px; font-size:0.7rem; font-weight:600; padding:3px 10px; border-radius:999px; white-space:nowrap; }
@@ -115,7 +115,7 @@
   .badge-urgent { background:#fee8e8; color:#a32d2d; }
   .badge-new { background:#e6f1fb; color:#185FA5; }
   .tender-right { text-align:right; }
-  .tender-value { font-size:1.05rem; font-weight:600; color:var(--navy); white-space:nowrap; }
+  .tender-value { font-size:0.95rem; font-weight:600; color:var(--navy); white-space:normal; max-width:220px; text-align:right; line-height:1.35; }
   .tender-deadline { font-size:0.75rem; color:var(--muted); margin-top:3px; }
   .tender-view-btn { font-size:0.75rem; color:var(--teal-dk); font-weight:600; margin-top:6px; display:block; }
   .empty-state { text-align:center; padding:4rem 2rem; color:var(--muted); }
@@ -749,34 +749,39 @@
     const pricingEl=document.getElementById('modal-pricing-items');
     const pricing=t.pricing||{};
 
-    // Support both object format {items,total,note} and array format
+    // Handle all pricing formats from Supabase
     let pricingItems=[];
     if(Array.isArray(pricing)){
       pricingItems=pricing;
     } else if(pricing.items && Array.isArray(pricing.items)){
       pricingItems=pricing.items;
     } else if(typeof pricing==='object' && Object.keys(pricing).length){
-      // flat object: treat each key/value pair as a line item
       pricingItems=Object.entries(pricing)
-        .filter(([k])=>k!=='total'&&k!=='note'&&k!=='fee_note')
+        .filter(([k])=>k!=='total'&&k!=='note'&&k!=='fee_note'&&k!=='price'&&k!=='stripe_link')
         .map(([k,v])=>({label:k,amount:v}));
     }
+
+    // Calculate subtotal — sum items, then check explicit total fields
+    const itemsSum = sumPricing(pricingItems);
+    const explicitTotal = Number(pricing.total||t.total_fee||t.fee||t.our_fee||t.price||0);
+    const subtotal = explicitTotal || itemsSum || 0;
+    const totalIncVat = subtotal ? addVat(subtotal) : 0;
 
     if(pricingItems.length){
       pricingEl.innerHTML=pricingItems.map(p=>`
         <div class="pricing-row">
           <span class="pricing-label">${p.label||p.name||p.description||''}</span>
-          <span class="pricing-amount">${formatFee(p.amount||p.price||p.value||0)}</span>
+          <span class="pricing-amount">${formatFee(Number(p.amount||p.price||p.value)||0)}</span>
         </div>
       `).join('');
+    } else if(subtotal){
+      pricingEl.innerHTML=`<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">${formatFee(subtotal)}</span></div>`;
     } else {
-      pricingEl.innerHTML='<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">Contact us</span></div>';
+      pricingEl.innerHTML='<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">Contact us for pricing</span></div>';
     }
 
-    // Total — always shown inc. VAT
-    const subtotal=pricing.total||t.total_fee||t.fee||sumPricing(pricingItems);
-    const totalIncVat=subtotal?addVat(subtotal):null;
-    document.getElementById('modal-total-fee').textContent=totalIncVat?'£'+totalIncVat.toLocaleString('en-GB')+' inc. VAT':'POA';
+    // Total inc VAT — never show POA
+    document.getElementById('modal-total-fee').textContent=totalIncVat?'£'+totalIncVat.toLocaleString('en-GB')+' inc. VAT':'Contact us for pricing';
     document.getElementById('modal-fee-note').textContent=pricing.note||pricing.fee_note||t.fee_note||'Price shown includes VAT. Payable on engagement.';
     // Set pay button amount and Stripe link
 
