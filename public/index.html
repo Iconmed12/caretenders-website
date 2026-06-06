@@ -793,23 +793,8 @@
     // Total inc VAT — never show POA
     document.getElementById('modal-total-fee').textContent=totalIncVat?'£'+totalIncVat.toLocaleString('en-GB')+' inc. VAT':'Contact us for pricing';
     document.getElementById('modal-fee-note').textContent=pricing.note||pricing.fee_note||t.fee_note||'Price shown includes VAT. Payable on engagement.';
-    // Set pay button amount and Stripe link
-
-    const payBtn=document.getElementById('modal-pay-btn');
-    if(payBtn){
-      if(t.stripe_link){
-        payBtn.href=t.stripe_link;
-        payBtn.style.opacity='1';
-        payBtn.style.pointerEvents='auto';
-        payBtn.title='';
-      } else {
-        // No Stripe link set show button but link to email enquiry
-        payBtn.href='mailto:consulting@icongrp.co.uk?subject=Payment enquiry: '+encodeURIComponent(t.title||'');
-        payBtn.style.opacity='0.75';
-        payBtn.style.pointerEvents='auto';
-        payBtn.title='Payment link not yet set up for this tender click to contact us';
-      }
-    }
+    // Store stripe link for Pay Now button
+    window._currentStripeLink = t.stripe_link || '';
 
     // Cana AI button always shows the same regardless of submission link
     const applyBtn=document.getElementById('modal-apply-btn');
