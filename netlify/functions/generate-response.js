@@ -16,7 +16,6 @@ exports.handler = async (event) => {
   try {
     const { tenderId, companyDetails } = JSON.parse(event.body);
 
-    // Get tender from Supabase
     const supabase = createClient(
       'https://igpjfpncfuawikoyzfcd.supabase.co',
       process.env.SUPABASE_ANON_KEY
@@ -29,84 +28,117 @@ exports.handler = async (event) => {
       .single();
 
     if (error || !tender) {
-      return {
-        statusCode: 404,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'Tender not found' })
-      };
-    }
-
-    const questions = tender.cana_questions || [];
-    const knowledge = tender.cana_knowledge || process.env.CANA_DEFAULT_KNOWLEDGE || '';
-
-    if (!questions.length) {
-      return {
-        statusCode: 400,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: 'No questions uploaded for this tender yet' })
-      };
+      return { statusCode: 404, headers: corsHeaders, body: JSON.stringify({ error: 'Tender not found' }) };
     }
 
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-    const systemPrompt = `You are Cana AI, an expert tender writer for UK public sector contracts. You write high-quality, compliant, and compelling tender responses on behalf of organisations.
+    // Get documents
+    const canaDocs = tender.cana_docs || {};
+    const qualityDocs = Array.isArray(canaDocs.quality) ? canaDocs.quality : (canaDocs.quality ? [canaDocs.quality] : []);
+    const specDocs = Array.isArray(canaDocs.spec) ? canaDocs.spec : (canaDocs.spec ? [canaDocs.spec] : []);
+    const scoringDocs = Array.isArray(canaDocs.scoring) ? canaDocs.scoring : (canaDocs.scoring ? [canaDocs.scoring] : []);
 
-${knowledge ? `TENDER WRITING KNOWLEDGE AND GUIDANCE:\n${knowledge}\n\n` : ''}
+    const qualityText = qualityDocs.map(d => d.text || '').join('\n\n');
+    const specText = specDocs.map(d => d.text || '').join('\n\n');
+    const scoringText = scoringDocs.map(d => d.text || '').join('\n\n');
 
-IMPORTANT RULES:
-- Write in first person on behalf of the organisation
-- Be specific, use concrete examples where possible
-- Match the scoring criteria if provided
+    const manualQuestions = tender.cana_questions || [];
+    const knowledge = tender.cana_knowledge || '';
+
+    // If no documents and no manual questions, error
+    if (!qualityText && !manualQuestions.length) {
+      return { statusCode: 400, headers: corsHeaders, body: JSON.stringify({ error: 'No questions uploaded for this tender yet' }) };
+    }
+
+    const systemPrompt = `You are Cana AI, an expert UK public sector tender writer. You write high-quality, compliant, and compelling tender responses on behalf of organisations bidding for contracts.
+
+${knowledge ? 'WRITING GUIDANCE:\n' + knowledge + '\n\n' : ''}
+
+RULES:
+- Write in first person on behalf of the bidding organisation
+- Be specific and use concrete examples based on the company details provided
+- Structure answers clearly with strong opening statements
 - Use professional UK English
-- Structure answers clearly with the organisation's strengths front and centre
-- Never use generic filler — every sentence should add value
-- Aim for 300-500 words per question unless the question suggests otherwise`;
+- Match scoring criteria where provided
+- Never use generic filler — every sentence must add value
+- Aim for 400-600 words per question unless a word limit is specified`;
 
-    const userPrompt = `You are writing a tender response for the following opportunity:
+    let userPrompt;
 
-TENDER: ${tender.title}
-ORGANISATION: ${tender.organisation || tender.org || ''}
-CONTRACT VALUE: ${tender.value || ''}
+    if (manualQuestions.length) {
+      // Use manual questions
+      userPrompt = `Write tender responses for: ${tender.title}
 
-COMPANY DETAILS (the organisation bidding):
-- Organisation name: ${companyDetails.name}
+BIDDING ORGANISATION:
+- Name: ${companyDetails.name}
 - Founded: ${companyDetails.founded}
-- Number of staff: ${companyDetails.staff}
-- Services provided: ${companyDetails.services}
-- Regions operating in: ${companyDetails.regions}
-- CQC status: ${companyDetails.cqc}
-- Previous contract experience: ${companyDetails.experience || 'Not provided'}
+- Staff: ${companyDetails.staff}
+- CQC Status: ${companyDetails.cqc}
+- Services: ${companyDetails.services}
+- Regions: ${companyDetails.regions}
+${companyDetails.experience ? '- Experience: ' + companyDetails.experience : ''}
 
-TENDER QUESTIONS TO ANSWER:
-${questions.map((q, i) => `Question ${i + 1}: ${q.question}${q.scoring ? `\nScoring criteria: ${q.scoring}` : ''}${q.wordLimit ? `\nWord limit: ${q.wordLimit}` : ''}`).join('\n\n')}
+${specText ? 'SERVICE SPECIFICATION:\n' + specText.substring(0, 3000) + '\n\n' : ''}
+${scoringText ? 'SCORING CRITERIA:\n' + scoringText.substring(0, 2000) + '\n\n' : ''}
 
-Please write a complete, high-quality response to EACH question. Format your response as:
+QUESTIONS TO ANSWER:
+${manualQuestions.map((q, i) => `Question ${i+1}: ${q.question}${q.scoring ? '\nScoring: ' + q.scoring : ''}${q.wordLimit ? '\nWord limit: ' + q.wordLimit : ''}`).join('\n\n')}
 
-QUESTION 1: [question title]
-[your response]
+Write a complete response to each question. Format as:
+QUESTION 1: [title]
+[response]
 
-QUESTION 2: [question title]
-[your response]
+QUESTION 2: [title]
+[response]`;
+    } else {
+      // Use uploaded quality questions document
+      userPrompt = `You are writing tender responses for: ${tender.title}
 
-And so on for all questions.`;
+BIDDING ORGANISATION:
+- Name: ${companyDetails.name}
+- Founded: ${companyDetails.founded}
+- Staff: ${companyDetails.staff}
+- CQC Status: ${companyDetails.cqc}
+- Services: ${companyDetails.services}
+- Regions: ${companyDetails.regions}
+${companyDetails.experience ? '- Experience: ' + companyDetails.experience : ''}
+
+${specText ? 'SERVICE SPECIFICATION:\n' + specText.substring(0, 2000) + '\n\n' : ''}
+${scoringText ? 'SCORING CRITERIA:\n' + scoringText.substring(0, 1500) + '\n\n' : ''}
+
+QUALITY QUESTIONS DOCUMENT (extract each question and answer it):
+${qualityText.substring(0, 4000)}
+
+First identify all the questions from the quality questions document, then write a complete, high-quality response to each one.
+
+Format your response as:
+QUESTION 1: [question title or summary]
+[your full response]
+
+QUESTION 2: [question title or summary]
+[your full response]
+
+And so on for every question found in the document.`;
+    }
 
     const message = await anthropic.messages.create({
       model: 'claude-opus-4-20250514',
       max_tokens: 4000,
-      messages: [{ role: 'user', content: userPrompt }],
-      system: systemPrompt
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
     });
 
     const fullResponse = message.content[0].text;
 
-    // Split into individual question responses
+    // Parse into question/answer pairs
     const responses = [];
-    const qBlocks = fullResponse.split(/QUESTION \d+:/i).filter(b => b.trim());
-    questions.forEach((q, i) => {
-      responses.push({
-        question: q.question,
-        answer: qBlocks[i] ? qBlocks[i].trim() : ''
-      });
+    const blocks = fullResponse.split(/QUESTION \d+:/i).filter(b => b.trim());
+    blocks.forEach((block, i) => {
+      const lines = block.trim().split('\n');
+      const question = lines[0].trim();
+      const answer = lines.slice(1).join('\n').trim();
+      responses.push({ question: question || `Question ${i+1}`, answer });
     });
 
     return {
