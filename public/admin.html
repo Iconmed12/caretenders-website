@@ -780,8 +780,7 @@ async function extractPdfText(file) {
   for (let i = 1; i <= Math.min(pdf.numPages, 20); i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
-    text += content.items.map(item => item.str).join(' ') + '
-';
+    text += content.items.map(function(item){ return item.str; }).join(' ') + '\n';
   }
   return text;
 }
