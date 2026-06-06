@@ -41,52 +41,52 @@ exports.handler = async (event) => {
 
     const knowledge = tender.cana_knowledge || '';
 
-    var company = 'Organisation: ' + companyDetails.name +
-      ', Founded: ' + companyDetails.founded +
-      ', Staff: ' + companyDetails.staff +
-      ', CQC: ' + companyDetails.cqc +
-      ', Services: ' + companyDetails.services +
-      ', Regions: ' + companyDetails.regions +
-      (companyDetails.experience ? ', Experience: ' + companyDetails.experience : '');
+    var systemPrompt = 'You are an expert UK public sector tender writer working for ICONGRP Consulting. Write high-quality, professional tender responses in first person on behalf of the bidding organisation. Be specific, reference the company details throughout, and use professional UK English. Do not include any markdown headers or formatting symbols like ## or ---. Just write clean paragraphs.';
+    if (knowledge) { systemPrompt += ' ' + knowledge; }
 
-    var responses = [];
+    var company = 'Organisation: ' + companyDetails.name + '. Founded: ' + companyDetails.founded + '. Staff: ' + companyDetails.staff + '. CQC Status: ' + companyDetails.cqc + '. Services: ' + companyDetails.services + '. Regions: ' + companyDetails.regions + (companyDetails.experience ? '. Experience: ' + companyDetails.experience : '') + '.';
 
+    var questionsBlock = '';
     for (var i = 0; i < questions.length; i++) {
       var q = questions[i];
-      var wordLimit = q.wordLimit ? parseInt(q.wordLimit) : 500;
+      questionsBlock += 'QUESTION ' + (i+1) + ': ' + q.question;
+      if (q.wordLimit) { questionsBlock += ' (Word limit: ' + q.wordLimit + ')'; }
+      questionsBlock += '\nANSWER ' + (i+1) + ':\n\n';
+    }
 
-      var prompt = 'You are an expert UK public sector tender writer. Write a professional, specific tender response on behalf of ' + companyDetails.name + '.\n\n';
-      prompt += 'COMPANY DETAILS:\n' + company + '\n\n';
-      prompt += 'TENDER: ' + tender.title + ' (' + (tender.org || '') + ')\n\n';
-      if (knowledge) { prompt += 'WRITING GUIDANCE:\n' + knowledge + '\n\n'; }
-      prompt += 'QUESTION ' + (i+1) + ':\n' + q.question + '\n\n';
-      prompt += 'Write a complete, high-quality response to this question. ';
-      prompt += 'Use first person (we/our). Be specific. Reference the company details throughout. ';
-      prompt += 'Maximum ' + wordLimit + ' words. Do not repeat the question. Just write the answer.';
+    var userPrompt = 'Write tender responses for: ' + tender.title + ' (' + (tender.org || '') + ').\n\n';
+    userPrompt += 'COMPANY: ' + company + '\n\n';
+    userPrompt += 'Answer every question below. For each question write a complete professional response. Do not use markdown symbols. Format exactly as shown:\n\n';
+    userPrompt += questionsBlock;
 
-      const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01'
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: prompt }]
-        })
-      });
+    const apiResponse = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 4000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
 
-      if (!apiResponse.ok) {
-        const errText = await apiResponse.text();
-        responses.push({ question: q.question, answer: 'Could not generate response: ' + errText.substring(0, 100) });
-        continue;
-      }
+    if (!apiResponse.ok) {
+      const errText = await apiResponse.text();
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'AI error: ' + errText.substring(0, 200) }) };
+    }
 
-      const aiData = await apiResponse.json();
-      var answer = aiData.content[0].text.trim();
-      responses.push({ question: q.question, answer: answer });
+    const aiData = await apiResponse.json();
+    const fullResponse = aiData.content[0].text;
+
+    var responses = [];
+    var blocks = fullResponse.split(/ANSWER \d+:/i);
+    for (var k = 0; k < questions.length; k++) {
+      var answer = blocks[k+1] ? blocks[k+1].split(/QUESTION \d+:/i)[0].trim() : '';
+      responses.push({ question: questions[k].question, answer: answer || 'Response could not be generated.' });
     }
 
     return {
