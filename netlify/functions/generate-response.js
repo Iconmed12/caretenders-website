@@ -36,7 +36,7 @@ exports.handler = async (event) => {
       return {
         statusCode: 400,
         headers: corsHeaders,
-        body: JSON.stringify({ error: 'This tender is not yet ready for Cana AI — our team is still setting it up. Please contact us at consulting@icongrp.co.uk.' })
+        body: JSON.stringify({ error: 'No questions have been set up for this tender yet. Questions saved: ' + JSON.stringify(tender.cana_questions) + ' Tender ID: ' + tenderId })
       };
     }
 
