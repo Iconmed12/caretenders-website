@@ -2,8 +2,8 @@
   publish = "public"
   functions = "netlify/functions"
 
-[functions]
-  node_bundler = "esbuild"
+[functions."stream-response"]
+  timeout = 26
 
 [functions."generate-response"]
   timeout = 26
