@@ -605,13 +605,13 @@ let selectedFile = null;
 let nextId = 1;
 
 function doLogin() {
-  var p = document.getElementById('loginPass').value;
-  if (p === 'CareTenders2024!' || localStorage.getItem('adminLoggedIn') === 'true') {
+  var p = document.getElementById('loginPass') ? document.getElementById('loginPass').value : '';
+  if (p === 'CareTenders2024!') {
     localStorage.setItem('adminLoggedIn', 'true');
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appScreen').style.display = 'block';
     loadTenders();
-  } else {
+  } else if (p !== '') {
     document.getElementById('loginError').style.display = 'flex';
   }
 }
