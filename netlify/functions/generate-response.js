@@ -10,24 +10,21 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body);
     const { tenderId, companyDetails, questionIndex } = body;
-
     const sbKey = process.env.SUPABASE_ANON_KEY;
-    const tRes = await fetch(
-      'https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/tenders?id=eq.' + tenderId + '&select=*&limit=1',
-      { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } }
-    );
-    const rows = await tRes.json();
-    const t = rows[0];
-    if (!t) return { statusCode: 404, headers: cors, body: JSON.stringify({ error: 'Tender not found' }) };
+    const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
-    // Fetch global knowledge base
-    var kb = {};
-    try {
-      var kbRes = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/cana_knowledge?id=eq.global&select=*&limit=1',
-        { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } });
-      var kbRows = await kbRes.json();
-      kb = kbRows[0] || {};
-    } catch(e) { console.log('KB fetch error:', e.message); }
+    // Fetch tender and knowledge base in parallel
+    const [tRes, kbRes] = await Promise.all([
+      fetch(sbUrl + '/rest/v1/tenders?id=eq.' + tenderId + '&select=*&limit=1', { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } }),
+      fetch(sbUrl + '/rest/v1/cana_knowledge?id=eq.global&select=*&limit=1', { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } })
+    ]);
+
+    const tRows = await tRes.json();
+    const kbRows = await kbRes.json();
+    const t = tRows[0];
+    const kb = kbRows[0] || {};
+
+    if (!t) return { statusCode: 404, headers: cors, body: JSON.stringify({ error: 'Tender not found' }) };
 
     const allQ = t.cana_questions || [];
     if (!allQ.length) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'No questions set up for this tender yet.' }) };
@@ -36,98 +33,43 @@ exports.handler = async (event) => {
     const q = allQ[idx];
     if (!q) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Question not found' }) };
 
-    // Extract spec and scoring docs
     const canaDocs = t.cana_docs || {};
     const specDocs = Array.isArray(canaDocs.spec) ? canaDocs.spec : (canaDocs.spec ? [canaDocs.spec] : []);
     const scoringDocs = Array.isArray(canaDocs.scoring) ? canaDocs.scoring : (canaDocs.scoring ? [canaDocs.scoring] : []);
-    const specText = specDocs.map(function(d){ return d.text || ''; }).join('\n').substring(0, 3000);
-    const scoringText = scoringDocs.map(function(d){ return d.text || ''; }).join('\n').substring(0, 2000);
-    const knowledge = t.cana_knowledge || '';
+    const specText = specDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 3000);
+    const scoringText = scoringDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 2000);
 
-    const co = companyDetails;
     const wordLimit = q.wordLimit ? parseInt(q.wordLimit) : 500;
     const maxTokens = Math.min(Math.ceil(wordLimit * 1.8), 2000);
+    const co = companyDetails;
 
-    var systemPrompt = 'You are an expert UK public sector tender writer with 20 years of experience winning care contracts. You write high-quality, compelling, evidence-based tender responses that score maximum marks.';
-
-    if (kb.writing_style) {
-      systemPrompt += ' ' + kb.writing_style;
-    }
-    if (kb.commissioner_preferences) {
-      systemPrompt += ' ' + kb.commissioner_preferences;
-    }
-    if (kb.avoid_patterns_text) {
-      systemPrompt += ' ' + kb.avoid_patterns_text;
-    }
+    // Build system prompt
+    var sp = 'You are an expert UK public sector tender writer with 20 years experience winning care contracts.';
+    if (kb.writing_style) { sp = sp + ' WRITING STYLE: ' + kb.writing_style.replace(/\n/g, ' '); }
+    if (kb.commissioner_preferences) { sp = sp + ' COMMISSIONER PRIORITIES: ' + kb.commissioner_preferences.replace(/\n/g, ' '); }
+    if (kb.avoid_patterns_text) { sp = sp + ' AVOID: ' + kb.avoid_patterns_text.replace(/\n/g, ' '); }
     if (kb.winning_examples && kb.winning_examples.length) {
-      var winText = kb.winning_examples.map(function(w){ return 'Example (' + w.name + '):
-' + (w.text||'').substring(0,800); }).join('
-
----
-
-');
-      systemPrompt += '
-
-WINNING TENDER EXAMPLES (study this style and approach):
-' + winText;
+      sp = sp + ' WINNING EXAMPLES TO STUDY: ' + kb.winning_examples.map(function(w){ return w.name + ': ' + (w.text||'').substring(0,500).replace(/\n/g,' '); }).join(' | ');
     }
     if (kb.failed_examples && kb.failed_examples.length) {
-      var failText = kb.failed_examples.map(function(f){ return 'Failed example (' + f.name + '):
-' + (f.text||'').substring(0,400); }).join('
-
----
-
-');
-      systemPrompt += '
-
-FAILED TENDER EXAMPLES (avoid these patterns):
-' + failText;
-    }
-    systemPrompt += '\n\nWRITING RULES:';
-    systemPrompt += '\n- Write in first person (we/our) on behalf of the bidding organisation';
-    systemPrompt += '\n- Always reference the specific company details provided — name, CQC rating, staff numbers, regions, experience';
-    systemPrompt += '\n- Structure every answer: strong opening statement, detailed evidence, specific examples, confident conclusion';
-    systemPrompt += '\n- Use professional UK English — formal but readable';
-    systemPrompt += '\n- Never use vague language like "we will endeavour to" — be specific and committal';
-    systemPrompt += '\n- Reference the service specification requirements where relevant';
-    systemPrompt += '\n- Align every answer to the scoring criteria to maximise marks';
-    systemPrompt += '\n- Do not use markdown symbols, bullet points with dashes, or headers with # symbols';
-    systemPrompt += '\n- Write in clear paragraphs only';
-    if (knowledge) { systemPrompt += '\n\nADDITIONAL GUIDANCE:\n' + knowledge; }
-
-    var userPrompt = 'Write a tender response for the following question.\n\n';
-    userPrompt += 'TENDER: ' + t.title + '\n';
-    userPrompt += 'BUYER: ' + (t.org || '') + '\n\n';
-    userPrompt += 'BIDDING ORGANISATION:\n';
-    userPrompt += '- Name: ' + co.name + '\n';
-    userPrompt += '- Founded: ' + co.founded + '\n';
-    userPrompt += '- Staff: ' + co.staff + '\n';
-    userPrompt += '- CQC Status: ' + co.cqc + '\n';
-    userPrompt += '- Services: ' + co.services + '\n';
-    userPrompt += '- Regions: ' + co.regions + '\n';
-    if (co.experience) { userPrompt += '- Previous experience: ' + co.experience + '\n'; }
-
-    if (specText) {
-      userPrompt += '\nSERVICE SPECIFICATION (use this to align your answer to what the commissioner requires):\n' + specText + '\n';
-    }
-    if (scoringText) {
-      userPrompt += '\nSCORING CRITERIA (align your answer to score maximum marks):\n' + scoringText + '\n';
+      sp = sp + ' FAILED PATTERNS TO AVOID: ' + kb.failed_examples.map(function(f){ return f.name + ': ' + (f.text||'').substring(0,300).replace(/\n/g,' '); }).join(' | ');
     }
 
-    userPrompt += '\nQUESTION ' + (idx + 1) + ': ' + q.question;
-    if (q.scoring) { userPrompt += '\nScoring weight: ' + q.scoring; }
-    if (q.wordLimit) { userPrompt += '\nWord limit: ' + q.wordLimit + ' words'; }
-    userPrompt += '\n\nWrite a complete, high-quality response. Stay within the word limit. Do not repeat the question. Just write the answer in clear paragraphs.';
+    // Build user prompt
+    var up = 'Write a tender response for this question.';
+    up = up + ' Tender: ' + t.title + '. Buyer: ' + (t.org||'') + '.';
+    up = up + ' Organisation: ' + co.name + ', founded ' + co.founded + ', ' + co.staff + ' staff, CQC: ' + co.cqc + ', services: ' + co.services + ', regions: ' + co.regions + (co.experience ? ', experience: ' + co.experience : '') + '.';
+    if (specText) { up = up + ' SERVICE SPECIFICATION: ' + specText; }
+    if (scoringText) { up = up + ' SCORING CRITERIA: ' + scoringText; }
+    up = up + ' QUESTION: ' + q.question;
+    if (q.scoring) { up = up + ' [Scoring weight: ' + q.scoring + ']'; }
+    if (q.wordLimit) { up = up + ' [Word limit: ' + q.wordLimit + ' words]'; }
+    up = up + ' Write the full response now. Stay within the word limit. Do not repeat the question.';
 
     const ai = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': process.env.ANTHROPIC_API_KEY, 'anthropic-version': '2023-06-01' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: maxTokens,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-5', max_tokens: maxTokens, system: sp, messages: [{ role: 'user', content: up }] })
     });
 
     if (!ai.ok) { const e = await ai.text(); return { statusCode: 500, headers: cors, body: JSON.stringify({ error: 'AI error: ' + e.substring(0,200) }) }; }
@@ -138,12 +80,7 @@ FAILED TENDER EXAMPLES (avoid these patterns):
     return {
       statusCode: 200,
       headers: cors,
-      body: JSON.stringify({
-        question: q.question,
-        answer: answer,
-        questionIndex: idx,
-        totalQuestions: allQ.length
-      })
+      body: JSON.stringify({ question: q.question, answer: answer, questionIndex: idx, totalQuestions: allQ.length })
     };
 
   } catch(err) {
