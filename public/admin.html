@@ -1277,11 +1277,13 @@ function loadCanaKnowledge(){
 loadCanaKnowledge();
 
 // Auto-login if previously logged in
-if (localStorage.getItem('adminLoggedIn') === 'true') {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display = 'block';
-  loadTenders();
-}
+document.addEventListener('DOMContentLoaded', function() {
+  if (localStorage.getItem('adminLoggedIn') === 'true') {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    loadTenders();
+  }
+});
 
 
 var canaDocData={quality:[],spec:[],scoring:[]};
