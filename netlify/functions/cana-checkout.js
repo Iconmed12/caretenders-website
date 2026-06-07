@@ -14,8 +14,8 @@ exports.handler = async (event) => {
     const params = new URLSearchParams({
       'mode': 'payment',
       'line_items[0][price_data][currency]': 'gbp',
-      'line_items[0][price_data][product_data][name]': 'Cana AI — Full Bid: ' + (tenderTitle || 'Tender').substring(0, 60),
-      'line_items[0][price_data][unit_amount]': '48000',
+      'line_items[0][price_data][product_data][name]': 'Cana AI — TEST £1: ' + (tenderTitle || 'Tender').substring(0, 60),
+      'line_items[0][price_data][unit_amount]': '100',
       'line_items[0][quantity]': '1',
       'success_url': 'https://caretenders-website.netlify.app/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true',
       'cancel_url': 'https://caretenders-website.netlify.app/cana.html?tender=' + tenderId,
