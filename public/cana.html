@@ -415,42 +415,39 @@
 
     const companyDetails = { name, founded, staff, cqc, services, regions, experience };
 
-    async function callGenerate(batchStart, batchEnd) {
+    async function callOne(questionIndex) {
       const res = await fetch('/.netlify/functions/generate-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenderId, companyDetails, batchStart, batchEnd })
+        body: JSON.stringify({ tenderId, companyDetails, questionIndex })
       });
       const rawText = await res.text();
-      if (!rawText) throw new Error('Empty response from server (status ' + res.status + ')');
+      if (!rawText) throw new Error('Empty response (status ' + res.status + ')');
       if (rawText.trim().startsWith('<')) throw new Error('Function error (status ' + res.status + '): ' + rawText.substring(0, 150));
       let data;
-      try { data = JSON.parse(rawText); } catch(e) { throw new Error('Bad JSON: ' + rawText.substring(0, 150)); }
+      try { data = JSON.parse(rawText); } catch(e) { throw new Error('Bad response: ' + rawText.substring(0, 100)); }
       if (!res.ok || data.error) throw new Error(data.error || 'Generation failed');
       return data;
     }
 
     try {
-      // First call: questions 0-3
-      const batch1 = await callGenerate(0, 4);
-      const total = batch1.totalQuestions || 4;
+      // Get total questions first
+      const first = await callOne(0);
+      const total = first.totalQuestions || 1;
+      const allResponses = [{ question: first.question, answer: first.answer }];
 
-      let allResponses = batch1.responses || [];
-
-      // Second call: remaining questions if any
-      if (total > 4) {
-        const batch2 = await callGenerate(4, total);
-        allResponses = allResponses.concat(batch2.responses || []);
+      // Get remaining questions one by one
+      for (let qi = 1; qi < total; qi++) {
+        const r = await callOne(qi);
+        allResponses.push({ question: r.question, answer: r.answer });
       }
 
       generatedResponses = allResponses;
 
-      // Generate session ID and save responses to Supabase
+      // Save to Supabase
       const sid = 'cana_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
       currentSessionId = sid;
       try { await saveResponses(sid); } catch(saveErr) { console.log('Save error:', saveErr); }
-
-      // Update paywall button with session ID so Stripe can redirect back
 
       renderResults();
       setStep(3);
