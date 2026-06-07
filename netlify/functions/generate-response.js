@@ -54,6 +54,9 @@ exports.handler = async (event) => {
     if (kb.failed_examples && kb.failed_examples.length) {
       sp = sp + ' FAILED PATTERNS TO AVOID: ' + kb.failed_examples.map(function(f){ return f.name + ': ' + (f.text||'').substring(0,300).replace(/\n/g,' '); }).join(' | ');
     }
+    if (kb.feedback_examples && kb.feedback_examples.length) {
+      sp = sp + ' COMMISSIONER FEEDBACK FROM PAST TENDERS (use this to understand exactly what commissioners value and criticise): ' + kb.feedback_examples.map(function(f){ return f.name + ': ' + (f.text||'').substring(0,500).replace(/\n/g,' '); }).join(' | ');
+    }
 
     // Build user prompt
     var up = 'Write a tender response for this question.';
