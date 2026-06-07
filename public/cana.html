@@ -314,7 +314,6 @@
       if (res.ok && data.paid && data.responses) {
         generatedResponses = data.responses;
         showUnlockedResponses(data.responses);
-        sendResponseEmails(data.responses);
       } else if (res.ok && data.paid && !data.responses) {
         // Payment confirmed but responses not saved - show helpful message
         showState('results');
@@ -533,7 +532,10 @@
     sendResponseEmails(responses);
   }
 
+  var emailsSent = false;
   async function sendResponseEmails(responses) {
+    if (emailsSent) { console.log('Emails already sent - skipping'); return; }
+    emailsSent = true;
     try {
       // Try form fields first, then sessionStorage (for post-payment redirect)
       var clientEmail = '';
