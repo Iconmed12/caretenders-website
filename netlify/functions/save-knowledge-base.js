@@ -11,6 +11,7 @@ exports.handler = async (event) => {
       avoid_patterns_text: body.avoid_patterns_text || '',
       winning_examples: body.winning_examples || [],
       failed_examples: body.failed_examples || [],
+      feedback_examples: body.feedback_examples || [],
       updated_at: new Date().toISOString()
     };
     const res = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/cana_knowledge', {
