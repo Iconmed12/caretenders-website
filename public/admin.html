@@ -605,22 +605,20 @@ let selectedFile = null;
 let nextId = 1;
 
 function doLogin() {
-  document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display = 'block';
-  loadTenders();
-}
-function doLogout() { document.getElementById('appScreen').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; }
-
-async function loadTenders() {
-  try {
-    const res = await fetch(API + '/get-tenders');
-    allTenders = await res.json() || [];
-    nextId = allTenders.length + 1;
-    renderAll();
-    populateCanaTenderSelect();
-  } catch(e) {
-    showToast('Could not load tenders from database', 'error');
+  var p = document.getElementById('loginPass').value;
+  if (p === 'CareTenders2024!' || localStorage.getItem('adminLoggedIn') === 'true') {
+    localStorage.setItem('adminLoggedIn', 'true');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    loadTenders();
+  } else {
+    document.getElementById('loginError').style.display = 'flex';
   }
+}
+function doLogout() {
+  localStorage.removeItem('adminLoggedIn');
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
 }
 
 const CARE_CATS = ['domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
