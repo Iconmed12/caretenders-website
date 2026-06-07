@@ -1551,6 +1551,17 @@ function showToast(msg,type){
 }
 
 
+
+// Stay logged in across refreshes
+document.addEventListener('DOMContentLoaded', function() {
+  if (localStorage.getItem('adminLoggedIn') === 'true') {
+    var ls = document.getElementById('loginScreen');
+    var as = document.getElementById('appScreen');
+    if (ls) ls.style.display = 'none';
+    if (as) as.style.display = 'block';
+    loadTenders();
+  }
+});
 </script>
 </body>
 </html>
