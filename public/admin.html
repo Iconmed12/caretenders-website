@@ -1304,6 +1304,220 @@ async function loadTenders(){
   }
 }
 
+// ── GLOBAL VARS ───────────────────────────────────────────
+var kbData = { winning: [], failed: [], feedback: [] };
+
+// ── KNOWLEDGE BASE ─────────────────────────────────────────
+async function loadKnowledgeBase() {
+  try {
+    var res = await fetch('/.netlify/functions/get-knowledge-base');
+    if (!res.ok) return;
+    var d = await res.json();
+    var ws = document.getElementById('kb-writing-style');
+    var cp = document.getElementById('kb-commissioner-prefs');
+    var av = document.getElementById('kb-avoid');
+    if (ws && d.writing_style) ws.value = d.writing_style;
+    if (cp && d.commissioner_preferences) cp.value = d.commissioner_preferences;
+    if (av && d.avoid_patterns_text) av.value = d.avoid_patterns_text;
+    kbData.winning = d.winning_examples || [];
+    kbData.failed = d.failed_examples || [];
+    kbData.feedback = d.feedback_examples || [];
+    renderKbFiles('winning');
+    renderKbFiles('failed');
+    renderKbFiles('feedback');
+  } catch(e) { console.log('KB load error:', e); }
+}
+
+function renderKbFiles(type) {
+  var list = document.getElementById('kb-' + type + '-list');
+  var empty = document.getElementById('kb-' + type + '-empty');
+  if (!list) return;
+  var files = kbData[type] || [];
+  if (empty) empty.style.display = files.length ? 'none' : 'block';
+  list.innerHTML = '';
+  files.forEach(function(f, i) {
+    var d = document.createElement('div');
+    d.style.cssText = 'display:flex;align-items:center;gap:8px;background:#f9fafb;border:1px solid var(--border);border-radius:6px;padding:8px 12px;margin-bottom:4px;';
+    var span = document.createElement('span');
+    span.style.cssText = 'flex:1;font-size:0.82rem;';
+    span.textContent = f.name + ' (' + Math.round((f.text||'').length/100)/10 + 'k)';
+    var btn = document.createElement('button');
+    btn.style.cssText = 'background:none;border:none;color:#dc2626;cursor:pointer;';
+    btn.innerHTML = '<i class="ti ti-x"></i>';
+    btn.onclick = (function(t, idx) { return function() { removeKbFile(t, idx); }; })(type, i);
+    d.appendChild(span);
+    d.appendChild(btn);
+    list.appendChild(d);
+  });
+}
+
+function removeKbFile(type, idx) {
+  kbData[type].splice(idx, 1);
+  renderKbFiles(type);
+}
+
+async function handleKbUpload(type, files) {
+  if (!files || !files.length) return;
+  for (var i = 0; i < files.length; i++) {
+    var file = files[i];
+    showToast('Extracting ' + file.name + '...', 'ai');
+    try {
+      var b64 = await new Promise(function(res, rej) {
+        var reader = new FileReader();
+        reader.onload = function(e) { res(e.target.result.split(',')[1]); };
+        reader.onerror = rej;
+        reader.readAsDataURL(file);
+      });
+      var resp = await fetch('/.netlify/functions/extract-cana-doc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileBase64: b64, fileName: file.name, fileType: file.type })
+      });
+      var result = await resp.json();
+      if (!resp.ok || result.error) { showToast('Error: ' + (result.error || 'Could not read'), 'error'); continue; }
+      kbData[type].push({ name: file.name, text: result.text });
+      renderKbFiles(type);
+      showToast(file.name + ' added', 'success');
+    } catch(e) { showToast('Failed: ' + e.message, 'error'); }
+  }
+}
+
+async function saveKnowledgeBase() {
+  var ws = document.getElementById('kb-writing-style');
+  var cp = document.getElementById('kb-commissioner-prefs');
+  var av = document.getElementById('kb-avoid');
+  try {
+    var res = await fetch('/.netlify/functions/save-knowledge-base', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        writing_style: ws ? ws.value : '',
+        commissioner_preferences: cp ? cp.value : '',
+        avoid_patterns_text: av ? av.value : '',
+        winning_examples: kbData.winning,
+        failed_examples: kbData.failed,
+        feedback_examples: kbData.feedback
+      })
+    });
+    var d = await res.json();
+    if (!res.ok || d.error) throw new Error(d.error);
+    showToast('Knowledge base saved successfully', 'success');
+  } catch(e) { showToast('Save failed: ' + e.message, 'error'); }
+}
+
+// ── CANA AI QUESTIONS ──────────────────────────────────────
+function buildCanaQuestionRows(questions) {
+  var builder = document.getElementById('canaQuestionsBuilder');
+  var empty = document.getElementById('canaQuestionsEmpty');
+  if (!builder) return;
+  builder.innerHTML = '';
+  if (empty) empty.style.display = (questions && questions.length) ? 'none' : 'block';
+  (questions || []).forEach(function(q) {
+    addCanaQuestion(q.question, q.wordLimit, q.scoring);
+  });
+}
+
+function addCanaQuestion(q, wordLimit, scoring) {
+  q = q || ''; wordLimit = wordLimit || ''; scoring = scoring || '';
+  var builder = document.getElementById('canaQuestionsBuilder');
+  var empty = document.getElementById('canaQuestionsEmpty');
+  if (!builder) return;
+  if (empty) empty.style.display = 'none';
+  var n = builder.children.length + 1;
+  var d = document.createElement('div');
+  d.style.cssText = 'background:#f9fafb;border:1.5px solid var(--border);border-radius:8px;padding:0.85rem;margin-bottom:8px;';
+  var header = document.createElement('div');
+  header.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:8px;';
+  var num = document.createElement('div');
+  num.className = 'q-num';
+  num.style.cssText = 'background:#0B1929;color:white;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.72rem;font-weight:700;flex-shrink:0;';
+  num.textContent = n;
+  var label = document.createElement('div');
+  label.className = 'q-label';
+  label.style.cssText = 'font-size:0.82rem;font-weight:600;flex:1;';
+  label.textContent = 'Question ' + n;
+  var rmBtn = document.createElement('button');
+  rmBtn.style.cssText = 'background:none;border:none;color:#dc2626;cursor:pointer;';
+  rmBtn.innerHTML = '<i class="ti ti-trash"></i>';
+  rmBtn.onclick = function() {
+    d.remove();
+    Array.from(builder.children).forEach(function(item, idx) {
+      var numEl = item.querySelector('.q-num');
+      var labelEl = item.querySelector('.q-label');
+      if (numEl) numEl.textContent = idx + 1;
+      if (labelEl) labelEl.textContent = 'Question ' + (idx + 1);
+    });
+    if (empty) empty.style.display = builder.children.length ? 'none' : 'block';
+  };
+  header.appendChild(num);
+  header.appendChild(label);
+  header.appendChild(rmBtn);
+  var ta = document.createElement('textarea');
+  ta.placeholder = 'Paste or type the question here...';
+  ta.value = q;
+  ta.style.cssText = 'width:100%;min-height:80px;padding:8px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:0.85rem;font-family:DM Sans,sans-serif;resize:vertical;';
+  var meta = document.createElement('div');
+  meta.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;';
+  var wlInp = document.createElement('input');
+  wlInp.type = 'text';
+  wlInp.placeholder = 'Word limit (optional)';
+  wlInp.value = wordLimit;
+  wlInp.style.cssText = 'padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:0.78rem;font-family:DM Sans,sans-serif;';
+  var scInp = document.createElement('input');
+  scInp.type = 'text';
+  scInp.placeholder = 'Scoring (optional) e.g. 22%';
+  scInp.value = scoring;
+  scInp.style.cssText = 'padding:6px 10px;border:1.5px solid var(--border);border-radius:6px;font-size:0.78rem;font-family:DM Sans,sans-serif;';
+  meta.appendChild(wlInp);
+  meta.appendChild(scInp);
+  d.appendChild(header);
+  d.appendChild(ta);
+  d.appendChild(meta);
+  builder.appendChild(d);
+}
+
+function getCanaQuestions() {
+  var builder = document.getElementById('canaQuestionsBuilder');
+  if (!builder) return [];
+  return Array.from(builder.children).map(function(d) {
+    var ta = d.querySelector('textarea');
+    var inputs = d.querySelectorAll('input');
+    return {
+      question: ta ? ta.value.trim() : '',
+      wordLimit: inputs[0] ? inputs[0].value.trim() : '',
+      scoring: inputs[1] ? inputs[1].value.trim() : ''
+    };
+  }).filter(function(q) { return q.question; });
+}
+
+async function saveCanaDocs() {
+  var id = document.getElementById('canaTenderSelect') ? document.getElementById('canaTenderSelect').value : '';
+  if (!id) { showToast('Please select a tender first', 'error'); return; }
+  var t = allTenders.find(function(x) { return x.id === id; });
+  if (!t) { showToast('Tender not found', 'error'); return; }
+  t.cana_docs = canaDocData;
+  t.cana_questions = getCanaQuestions();
+  try {
+    var res = await fetch(API + '/save-tender', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'upsert', tender: t })
+    });
+    var d = await res.json();
+    if (!res.ok || d.error) throw new Error(d.error);
+    showToast('Cana AI saved successfully', 'success');
+    var savedEl = document.getElementById('canaDocSaved');
+    if (savedEl) savedEl.style.display = 'inline';
+    await loadTenders();
+    populateCanaTenderSelect();
+    document.getElementById('canaTenderSelect').value = id;
+  } catch(e) { showToast('Save failed: ' + e.message, 'error'); }
+}
+
+// Auto-login on page load
+
+
+
 function showToast(msg,type){
   type=type||'success';
   var t=document.getElementById('toast');
@@ -1313,6 +1527,8 @@ function showToast(msg,type){
   document.getElementById('toastIcon').className='ti '+(icons[type]||'ti-check');
   setTimeout(function(){t.classList.remove('show');},4000);
 }
+
+
 </script>
 </body>
 </html>
