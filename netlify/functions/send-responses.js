@@ -12,7 +12,11 @@ exports.handler = async (event) => {
     const RESEND_KEY = process.env.RESEND_API_KEY;
     const ICONGRP_EMAIL = 'consulting@icongrp.co.uk';
 
+    console.log('send-responses called:', { clientEmail, clientName, tenderTitle, sessionId, hasResponses: !!(responses && responses.length) });
+    console.log('RESEND_KEY present:', !!RESEND_KEY);
+
     if (!RESEND_KEY) {
+      console.log('ERROR: RESEND_API_KEY not set');
       return { statusCode: 500, headers: cors, body: JSON.stringify({ error: 'RESEND_API_KEY not set' }) };
     }
 
