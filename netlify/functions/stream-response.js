@@ -43,7 +43,7 @@ exports.handler = async (event) => {
     const scoringText = scoringDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 2000);
 
     const wordLimit = q.wordLimit ? parseInt(q.wordLimit) : 500;
-    const maxTokens = Math.min(Math.ceil(wordLimit * 1.8), 2000);
+    const maxTokens = Math.min(Math.ceil(wordLimit * 1.3), 1200);
     const co = companyDetails;
 
     // Build system prompt
@@ -81,9 +81,8 @@ exports.handler = async (event) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5-20251001',
         max_tokens: maxTokens,
-        stream: true,
         system: sp,
         messages: [{ role: 'user', content: up }]
       })
