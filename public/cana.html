@@ -213,6 +213,11 @@
           <input class="form-input" type="text" id="f-regions" placeholder="e.g. West Midlands, Greater Manchester, London">
         </div>
         <div class="form-group form-full">
+          <label class="form-label">Email address <span style="color:#e53e3e;">*</span></label>
+          <input class="form-input" type="email" id="f-email" placeholder="e.g. info@yourcompany.co.uk">
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Your full responses will be emailed here after payment</div>
+        </div>
+        <div class="form-group form-full">
           <label class="form-label">Previous contract experience <span>(optional)</span></label>
           <textarea class="form-textarea" id="f-experience" placeholder="e.g. We have delivered domiciliary care contracts for Birmingham City Council since 2019..."></textarea>
         </div>
@@ -412,8 +417,9 @@
     const experience = document.getElementById('f-experience').value.trim();
 
     const errEl = document.getElementById('form-error');
-    if (!name || !founded || !staff || !cqc || !services || !regions) {
-      errEl.textContent = 'Please fill in all required fields before generating.';
+    const email = document.getElementById('f-email').value.trim();
+    if (!name || !founded || !staff || !cqc || !services || !regions || !email) {
+      errEl.textContent = 'Please fill in all required fields including your email address.';
       errEl.style.display = '';
       return;
     }
@@ -423,7 +429,7 @@
     showState('loading');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    const companyDetails = { name, founded, staff, cqc, services, regions, experience };
+    const companyDetails = { name, founded, staff, cqc, services, regions, experience, email };
 
     async function callOne(questionIndex) {
       const res = await fetch('/.netlify/functions/generate-response', {
@@ -510,11 +516,39 @@
     }).join('');
     var paywall = document.getElementById('paywall-card');
     if (paywall) {
-      paywall.innerHTML = '<h2 style="font-family:Playfair Display,serif;color:white;">Your full bid is unlocked!</h2><p style="color:rgba(255,255,255,0.7);margin-top:0.75rem;">All ' + responses.length + ' responses are now visible above. Copy each answer into your tender submission document.</p>';
+      paywall.innerHTML = '<h2 style="font-family:Playfair Display,serif;color:white;margin-bottom:0.75rem;">Your full bid is unlocked!</h2>' +
+        '<p style="color:rgba(255,255,255,0.7);margin-bottom:0.5rem;">All ' + responses.length + ' responses are now visible above.</p>' +
+        '<p style="color:rgba(255,255,255,0.6);font-size:0.85rem;">A Word document with all your responses has been emailed to you. Check your inbox.</p>';
     }
     setStep(3);
     showState('results');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // Send emails with Word doc
+    sendResponseEmails(responses);
+  }
+
+  async function sendResponseEmails(responses) {
+    try {
+      var clientEmail = '';
+      var clientName = '';
+      // Try to get from companyDetails if still in scope
+      try { clientEmail = document.getElementById('f-email') ? document.getElementById('f-email').value : ''; } catch(e){}
+      try { clientName = document.getElementById('f-name') ? document.getElementById('f-name').value : ''; } catch(e){}
+
+      await fetch('/.netlify/functions/send-responses', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          responses: responses,
+          clientEmail: clientEmail,
+          clientName: clientName,
+          tenderTitle: tenderData ? tenderData.title : 'Tender',
+          sessionId: currentSessionId || ''
+        })
+      });
+    } catch(e) {
+      console.log('Email send error:', e);
+    }
   }
 
   function renderResults() {
