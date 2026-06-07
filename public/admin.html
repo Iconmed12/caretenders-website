@@ -1288,7 +1288,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 var canaDocData={quality:[],spec:[],scoring:[]};
-var kbData={winning:[],failed:[]};
+var kbData={winning:[],failed:[],feedback:[]};
 
 async function saveCanaDocs(){
   var id=document.getElementById('canaTenderSelect').value;
@@ -1322,8 +1322,10 @@ async function loadKnowledgeBase(){
     if(av&&d.avoid_patterns_text)av.value=d.avoid_patterns_text;
     kbData.winning=d.winning_examples||[];
     kbData.failed=d.failed_examples||[];
+    kbData.feedback=d.feedback_examples||[];
     renderKbFiles('winning');
     renderKbFiles('failed');
+    renderKbFiles('feedback');
   }catch(e){console.log('KB load:',e);}
 }
 
@@ -1394,7 +1396,8 @@ async function saveKnowledgeBase(){
         commissioner_preferences:cp?cp.value:'',
         avoid_patterns_text:av?av.value:'',
         winning_examples:kbData.winning,
-        failed_examples:kbData.failed
+        failed_examples:kbData.failed,
+        feedback_examples:kbData.feedback
       })
     });
     var data=await res.json();
