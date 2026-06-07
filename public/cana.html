@@ -314,6 +314,7 @@
       if (res.ok && data.paid && data.responses) {
         generatedResponses = data.responses;
         showUnlockedResponses(data.responses);
+        sendResponseEmails(data.responses);
       } else if (res.ok && data.paid && !data.responses) {
         // Payment confirmed but responses not saved - show helpful message
         showState('results');
@@ -485,6 +486,13 @@
     btn.style.opacity = '0.7';
     btn.disabled = true;
     try {
+      // Save client details before redirect
+      try {
+        sessionStorage.setItem('cana_email', document.getElementById('f-email') ? document.getElementById('f-email').value : '');
+        sessionStorage.setItem('cana_name', document.getElementById('f-name') ? document.getElementById('f-name').value : '');
+        sessionStorage.setItem('cana_session', currentSessionId);
+      } catch(e) {}
+
       const res = await fetch('/.netlify/functions/cana-checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -529,10 +537,12 @@
 
   async function sendResponseEmails(responses) {
     try {
+      // Try form fields first, then sessionStorage (for post-payment redirect)
       var clientEmail = '';
       var clientName = '';
-      try { clientEmail = document.getElementById('f-email') ? document.getElementById('f-email').value : ''; } catch(e){}
-      try { clientName = document.getElementById('f-name') ? document.getElementById('f-name').value : ''; } catch(e){}
+      try { clientEmail = (document.getElementById('f-email') && document.getElementById('f-email').value) || sessionStorage.getItem('cana_email') || ''; } catch(e){}
+      try { clientName = (document.getElementById('f-name') && document.getElementById('f-name').value) || sessionStorage.getItem('cana_name') || ''; } catch(e){}
+      if (!currentSessionId) { try { currentSessionId = sessionStorage.getItem('cana_session') || ''; } catch(e){} }
 
       var res = await fetch('/.netlify/functions/send-responses', {
         method: 'POST',
