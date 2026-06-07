@@ -491,6 +491,7 @@
         sessionStorage.setItem('cana_email', document.getElementById('f-email') ? document.getElementById('f-email').value : '');
         sessionStorage.setItem('cana_name', document.getElementById('f-name') ? document.getElementById('f-name').value : '');
         sessionStorage.setItem('cana_session', currentSessionId);
+        sessionStorage.setItem('cana_tender_title', tenderData ? tenderData.title : '');
       } catch(e) {}
 
       const res = await fetch('/.netlify/functions/cana-checkout', {
@@ -544,6 +545,9 @@
       try { clientName = (document.getElementById('f-name') && document.getElementById('f-name').value) || sessionStorage.getItem('cana_name') || ''; } catch(e){}
       if (!currentSessionId) { try { currentSessionId = sessionStorage.getItem('cana_session') || ''; } catch(e){} }
 
+      var tTitle = '';
+      try { tTitle = (tenderData && tenderData.title) || sessionStorage.getItem('cana_tender_title') || 'Tender'; } catch(e){ tTitle = 'Tender'; }
+
       var res = await fetch('/.netlify/functions/send-responses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -551,8 +555,8 @@
           responses: responses,
           clientEmail: clientEmail,
           clientName: clientName,
-          tenderTitle: tenderData ? tenderData.title : 'Tender',
-          sessionId: currentSessionId || ''
+          tenderTitle: tTitle,
+          sessionId: currentSessionId || sessionStorage.getItem('cana_session') || ''
         })
       });
       var result = await res.json();
