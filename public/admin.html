@@ -1075,42 +1075,31 @@ async function handleCanaDoc(type,files){
   if(!files||!files.length) return;
   for(var i=0;i<files.length;i++){
     var file=files[i];
-    var text=await new Promise(function(res){
-      var reader=new FileReader();
-      reader.onload=function(e){res(e.target.result);};
-      reader.readAsText(file);
-    });
-    // Strip non-printable chars safely
-    var cleanChars=[];
-    for(var ci=0;ci<text.length&&ci<12000;ci++){var cc=text.charCodeAt(ci);if(cc>=32||cc===9||cc===10||cc===13)cleanChars.push(text[ci]);}
-    var clean=cleanChars.join('');
-    canaDocData[type].push({name:file.name,text:clean});
+    showToast('Extracting '+file.name+'...','info');
+    try{
+      var base64=await new Promise(function(res,rej){
+        var reader=new FileReader();
+        reader.onload=function(e){res(e.target.result.split(',')[1]);};
+        reader.onerror=rej;
+        reader.readAsDataURL(file);
+      });
+      var resp=await fetch('/.netlify/functions/extract-cana-doc',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({fileBase64:base64,fileName:file.name,fileType:file.type})
+      });
+      var result=await resp.json();
+      if(!resp.ok||result.error){
+        showToast('Error: '+(result.error||'Could not read file'),'error');
+        continue;
+      }
+      canaDocData[type].push({name:file.name,text:result.text});
+      showToast(file.name+' ready ('+Math.round(result.length/100)/10+'k chars)','success');
+    }catch(e){
+      showToast('Failed: '+e.message,'error');
+    }
   }
   renderCanaFiles(type);
-}
-
-async function saveCanaDocs(){
-  var id=document.getElementById('canaTenderSelect').value;
-  if(!id){showToast('Please select a tender first','error');return;}
-  var t=allTenders.find(function(x){return x.id===id;});
-  if(!t){showToast('Tender not found','error');return;}
-  var questions=getCanaQuestions();
-  if(!questions.length){
-    if(!confirm('No questions added yet. Save anyway?')) return;
-  }
-  t.cana_docs=canaDocData;
-  t.cana_questions=questions;
-  try {
-    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:t})});
-    var data=await res.json();
-    if(!res.ok||data.error) throw new Error(data.error);
-    showToast('Cana AI documents saved','success');
-    document.getElementById('canaDocSaved').style.display='inline';
-    document.getElementById('canaDocStatus').style.display='block';
-    await loadTenders();
-    populateCanaTenderSelect();
-    document.getElementById('canaTenderSelect').value=id;
-  } catch(e){showToast('Save failed: '+e.message,'error');}
 }
 
 function addCanaQuestion(q, wordLimit, scoring) {
