@@ -51,22 +51,13 @@ exports.handler = async (event) => {
     var systemPrompt = 'You are an expert UK public sector tender writer with 20 years of experience winning care contracts. You write high-quality, compelling, evidence-based tender responses that score maximum marks.';
 
     if (kb.writing_style) {
-      systemPrompt += '
-
-WRITING STYLE GUIDANCE:
-' + kb.writing_style;
+      systemPrompt += ' ' + kb.writing_style;
     }
     if (kb.commissioner_preferences) {
-      systemPrompt += '
-
-WHAT COMMISSIONERS LOOK FOR:
-' + kb.commissioner_preferences;
+      systemPrompt += ' ' + kb.commissioner_preferences;
     }
     if (kb.avoid_patterns_text) {
-      systemPrompt += '
-
-WHAT TO AVOID:
-' + kb.avoid_patterns_text;
+      systemPrompt += ' ' + kb.avoid_patterns_text;
     }
     if (kb.winning_examples && kb.winning_examples.length) {
       var winText = kb.winning_examples.map(function(w){ return 'Example (' + w.name + '):
