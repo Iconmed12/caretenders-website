@@ -556,14 +556,9 @@ let selectedFile = null;
 let nextId = 1;
 
 function doLogin() {
-  const p = document.getElementById('loginPass').value;
-  if (p === ADMIN_PASSWORD) {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appScreen').style.display = 'block';
-    loadTenders();
-  } else {
-    document.getElementById('loginError').style.display = 'flex';
-  }
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  loadTenders();
 }
 function doLogout() { document.getElementById('appScreen').style.display = 'none'; document.getElementById('loginScreen').style.display = 'flex'; }
 
