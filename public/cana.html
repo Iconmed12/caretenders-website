@@ -430,7 +430,7 @@
     const companyDetails = { name, founded, staff, cqc, services, regions, experience, email };
 
     async function callOne(questionIndex) {
-      const res = await fetch('/.netlify/functions/generate-response', {
+      const res = await fetch('/.netlify/functions/stream-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tenderId, companyDetails, questionIndex })
