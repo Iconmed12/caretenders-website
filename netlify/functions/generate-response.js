@@ -20,6 +20,15 @@ exports.handler = async (event) => {
     const t = rows[0];
     if (!t) return { statusCode: 404, headers: cors, body: JSON.stringify({ error: 'Tender not found' }) };
 
+    // Fetch global knowledge base
+    var kb = {};
+    try {
+      var kbRes = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/cana_knowledge?id=eq.global&select=*&limit=1',
+        { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } });
+      var kbRows = await kbRes.json();
+      kb = kbRows[0] || {};
+    } catch(e) { console.log('KB fetch error:', e.message); }
+
     const allQ = t.cana_questions || [];
     if (!allQ.length) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'No questions set up for this tender yet.' }) };
 
@@ -40,6 +49,49 @@ exports.handler = async (event) => {
     const maxTokens = Math.min(Math.ceil(wordLimit * 1.8), 2000);
 
     var systemPrompt = 'You are an expert UK public sector tender writer with 20 years of experience winning care contracts. You write high-quality, compelling, evidence-based tender responses that score maximum marks.';
+
+    if (kb.writing_style) {
+      systemPrompt += '
+
+WRITING STYLE GUIDANCE:
+' + kb.writing_style;
+    }
+    if (kb.commissioner_preferences) {
+      systemPrompt += '
+
+WHAT COMMISSIONERS LOOK FOR:
+' + kb.commissioner_preferences;
+    }
+    if (kb.avoid_patterns_text) {
+      systemPrompt += '
+
+WHAT TO AVOID:
+' + kb.avoid_patterns_text;
+    }
+    if (kb.winning_examples && kb.winning_examples.length) {
+      var winText = kb.winning_examples.map(function(w){ return 'Example (' + w.name + '):
+' + (w.text||'').substring(0,800); }).join('
+
+---
+
+');
+      systemPrompt += '
+
+WINNING TENDER EXAMPLES (study this style and approach):
+' + winText;
+    }
+    if (kb.failed_examples && kb.failed_examples.length) {
+      var failText = kb.failed_examples.map(function(f){ return 'Failed example (' + f.name + '):
+' + (f.text||'').substring(0,400); }).join('
+
+---
+
+');
+      systemPrompt += '
+
+FAILED TENDER EXAMPLES (avoid these patterns):
+' + failText;
+    }
     systemPrompt += '\n\nWRITING RULES:';
     systemPrompt += '\n- Write in first person (we/our) on behalf of the bidding organisation';
     systemPrompt += '\n- Always reference the specific company details provided — name, CQC rating, staff numbers, regions, experience';
