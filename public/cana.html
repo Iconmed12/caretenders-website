@@ -531,11 +531,10 @@
     try {
       var clientEmail = '';
       var clientName = '';
-      // Try to get from companyDetails if still in scope
       try { clientEmail = document.getElementById('f-email') ? document.getElementById('f-email').value : ''; } catch(e){}
       try { clientName = document.getElementById('f-name') ? document.getElementById('f-name').value : ''; } catch(e){}
 
-      await fetch('/.netlify/functions/send-responses', {
+      var res = await fetch('/.netlify/functions/send-responses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -546,8 +545,14 @@
           sessionId: currentSessionId || ''
         })
       });
+      var result = await res.json();
+      if (!res.ok || result.error) {
+        console.error('Email error:', result.error);
+      } else {
+        console.log('Emails sent successfully');
+      }
     } catch(e) {
-      console.log('Email send error:', e);
+      console.error('Email send error:', e);
     }
   }
 
