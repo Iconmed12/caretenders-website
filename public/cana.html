@@ -306,9 +306,19 @@
         body: JSON.stringify({ sessionId: sid })
       });
       const data = await res.json();
-      if (res.ok && data.responses) {
+      if (res.ok && data.paid && data.responses) {
         generatedResponses = data.responses;
         showUnlockedResponses(data.responses);
+      } else if (res.ok && data.paid && !data.responses) {
+        // Payment confirmed but responses not saved - show helpful message
+        showState('results');
+        document.getElementById('responses-list').innerHTML = '';
+        const paywall = document.getElementById('paywall-card');
+        if (paywall) {
+          paywall.innerHTML = '<h2 style="font-family:Playfair Display,serif;color:white;margin-bottom:1rem;">Payment Confirmed!</h2>' +
+            '<p style="color:rgba(255,255,255,0.8);line-height:1.8;margin-bottom:1rem;">' + (data.message || 'Your payment has been received. Our team will send your full bid responses to your email within 1 hour.') + '</p>' +
+            '<p style="color:rgba(255,255,255,0.6);font-size:0.85rem;">Reference: ' + sid + '</p>';
+        }
       } else {
         showState('form');
         setStep(1);
