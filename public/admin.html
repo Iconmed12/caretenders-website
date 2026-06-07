@@ -426,7 +426,21 @@ tr:hover td{background:#fafafa}
         <div id="kb-failed-list" style="display:flex;flex-direction:column;gap:6px;"></div>
         <div id="kb-failed-empty" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.82rem;background:var(--bg);border-radius:8px;">No failed examples uploaded yet</div>
       </div>
-      <button onclick="saveKnowledgeBase()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:12px 28px;font-size:0.9rem;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;gap:8px;">
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div>
+            <div style="font-weight:600;display:flex;align-items:center;gap:8px;"><i class="ti ti-message-2" style="color:#7c3aed;"></i> Commissioner Feedback</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:3px;">Upload score sheets, feedback letters or evaluator comments from past tenders</div>
+          </div>
+          <label style="background:#7c3aed;color:white;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-upload"></i> Upload
+            <input type="file" multiple accept=".pdf,.docx,.doc,.txt" style="display:none;" onchange="handleKbUpload('feedback',this.files)">
+          </label>
+        </div>
+        <div id="kb-feedback-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div id="kb-feedback-empty" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.82rem;background:var(--bg);border-radius:8px;">No commissioner feedback uploaded yet</div>
+      </div>
+            <button onclick="saveKnowledgeBase()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:12px 28px;font-size:0.9rem;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;gap:8px;">
         <i class="ti ti-brain"></i> Save Knowledge Base
       </button>
     </div>
