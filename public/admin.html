@@ -205,7 +205,7 @@ tr:hover td{background:#fafafa}
 </head>
 <body>
 
-<div id="loginScreen">
+<div id="loginScreen" style="display:flex;">
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-mark"><i class="ti ti-heart-handshake"></i></div>
@@ -220,7 +220,7 @@ tr:hover td{background:#fafafa}
   </div>
 </div>
 
-<div id="appScreen">
+<div id="appScreen" style="display:none;">
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-logo"><div class="sidebar-logo-inner"><div class="sidebar-logo-mark"><i class="ti ti-heart-handshake"></i></div><span class="sidebar-logo-text">Tender <span>Experts</span></span></div></div>
@@ -1400,6 +1400,18 @@ async function saveKnowledgeBase(){
     if(!res.ok||data.error)throw new Error(data.error);
     showToast('Knowledge base saved','success');
   }catch(e){showToast('Save failed: '+e.message,'error');}
+}
+
+async function loadTenders(){
+  try{
+    const res=await fetch(API+'/get-tenders');
+    allTenders=await res.json()||[];
+    renderAll();
+    updateCounts();
+    populateCanaTenderSelect();
+  }catch(e){
+    showToast('Could not load tenders','error');
+  }
 }
 
 function showToast(msg,type){
