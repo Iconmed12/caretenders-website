@@ -670,6 +670,7 @@ function showPage(page, btn) {
   if (page === 'care') { document.getElementById('aiUploadBtn').style.display='flex'; document.getElementById('addTenderBtn').style.display='flex'; renderCareTable(); }
   if (page === 'commercial') { document.getElementById('aiCommercialBtn').style.display='flex'; document.getElementById('addCommercialBtn').style.display='flex'; renderCommercialTable(); }
   if (page === 'noncqc') { document.getElementById('aiNonCqcBtn').style.display='flex'; document.getElementById('addNonCqcBtn').style.display='flex'; renderNonCqcTable(); }
+  if (page === 'knowledge') { loadKnowledgeBase(); }
 }
 
 function calcTotal(items) { return (items||[]).reduce(function(s,i){ return s+(parseFloat(i.price)||0); },0); }
