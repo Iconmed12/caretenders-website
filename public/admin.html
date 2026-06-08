@@ -1318,6 +1318,11 @@ async function loadTenders(){
   try{
     const res=await fetch(API+'/get-tenders');
     allTenders=await res.json()||[];
+    // Sync nextId to avoid overwriting existing tenders
+    allTenders.forEach(function(t){
+      var m=t.id&&t.id.match(/(\d+)$/);
+      if(m){var n=parseInt(m[1]);if(n>=nextId)nextId=n+1;}
+    });
     renderAll();
     updateCounts();
     populateCanaTenderSelect();
