@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Evidence Vault — Tender Experts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --navy:#0B1929; --navy-mid:#112236; --teal:#00C9E0; --teal-dk:#0099AA;
+    --amber:#F5A623; --white:#ffffff; --offwhite:#F4F6F9;
+    --muted:#6B8FA3; --border:rgba(11,25,41,0.09);
+    --success:#38A169; --warning:#D97706; --error:#E53E3E;
+  }
+  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; }
+
+  /* NAV */
+  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; border-bottom:1px solid rgba(255,255,255,0.06); position:sticky; top:0; z-index:100; }
+  .nav-logo { display:flex; align-items:baseline; gap:8px; text-decoration:none; }
+  .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
+  .nav-logo-main span { color:var(--teal); }
+  .nav-logo-by { font-size:0.7rem; color:rgba(255,255,255,0.35); letter-spacing:0.04em; }
+  .nav-links { display:flex; align-items:center; gap:1.75rem; list-style:none; }
+  .nav-links a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.88rem; transition:color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color:var(--white); }
+  .nav-right { display:flex; align-items:center; gap:1rem; }
+  .nav-user { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,0.8); font-size:0.88rem; }
+  .nav-avatar { width:30px; height:30px; background:var(--teal); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; color:var(--navy); }
+  .nav-signout { font-size:0.82rem; color:rgba(255,255,255,0.4); cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif; transition:color 0.2s; }
+  .nav-signout:hover { color:rgba(255,255,255,0.8); }
+
+  /* LOADING */
+  #loading-screen { position:fixed; inset:0; background:var(--offwhite); display:flex; align-items:center; justify-content:center; z-index:999; }
+  .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--teal); border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .page { max-width:1100px; margin:0 auto; padding:2.5rem 1.5rem; }
+
+  /* PAGE HEADER */
+  .page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:2rem; flex-wrap:wrap; }
+  .page-header-left h1 { font-family:'Playfair Display',serif; font-size:1.75rem; color:var(--navy); margin-bottom:0.35rem; }
+  .page-header-left p { font-size:0.9rem; color:var(--muted); line-height:1.6; }
+  .btn-upload { background:var(--navy); color:var(--white); border:none; border-radius:10px; padding:11px 22px; font-size:0.9rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; display:flex; align-items:center; gap:8px; transition:background 0.2s; white-space:nowrap; }
+  .btn-upload:hover { background:#1a3550; }
+
+  /* STATS */
+  .vault-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+  .vstat { background:var(--white); border:1px solid var(--border); border-radius:11px; padding:1rem 1.25rem; }
+  .vstat-label { font-size:0.75rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.4rem; }
+  .vstat-value { font-size:1.6rem; font-weight:700; color:var(--navy); line-height:1; }
+  .vstat-value.amber { color:var(--warning); }
+  .vstat-value.red { color:var(--error); }
+  .vstat-value.teal { color:var(--teal-dk); }
+
+  /* EXPIRY ALERT BANNER */
+  .expiry-alert { background:rgba(217,119,6,0.08); border:1px solid rgba(217,119,6,0.25); border-radius:12px; padding:1rem 1.5rem; margin-bottom:1.5rem; display:none; }
+  .expiry-alert.show { display:block; }
+  .expiry-alert h3 { font-size:0.9rem; font-weight:700; color:#92400e; margin-bottom:0.3rem; }
+  .expiry-alert p { font-size:0.83rem; color:#92400e; opacity:0.8; }
+
+  /* FILTER TABS */
+  .filter-tabs { display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+  .filter-tab { background:var(--white); border:1.5px solid var(--border); border-radius:999px; padding:6px 16px; font-size:0.83rem; font-weight:500; color:var(--muted); cursor:pointer; transition:all 0.2s; font-family:'DM Sans',sans-serif; }
+  .filter-tab:hover { border-color:var(--teal); color:var(--navy); }
+  .filter-tab.active { background:var(--navy); border-color:var(--navy); color:var(--white); font-weight:600; }
+
+  /* DOCUMENT GRID */
+  .doc-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:1rem; }
+
+  /* DOCUMENT CARD */
+  .doc-card { background:var(--white); border:1.5px solid var(--border); border-radius:13px; overflow:hidden; transition:border-color 0.2s, box-shadow 0.2s, transform 0.15s; cursor:pointer; position:relative; }
+  .doc-card:hover { border-color:var(--teal); box-shadow:0 4px 20px rgba(0,201,224,0.1); transform:translateY(-2px); }
+  .doc-card.expiring { border-color:rgba(217,119,6,0.4); }
+  .doc-card.expired { border-color:rgba(229,62,62,0.4); }
+  .doc-thumb { height:130px; background:var(--offwhite); display:flex; align-items:center; justify-content:center; font-size:3rem; position:relative; overflow:hidden; }
+  .doc-thumb img { width:100%; height:100%; object-fit:cover; }
+  .doc-thumb-pdf { width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #f8f9fb 0%, #eef0f4 100%); }
+  .doc-thumb-pdf span { font-size:2.5rem; }
+  .expiry-badge { position:absolute; top:8px; right:8px; padding:3px 8px; border-radius:999px; font-size:0.68rem; font-weight:700; letter-spacing:0.03em; }
+  .expiry-badge.valid { background:rgba(56,161,105,0.12); color:#276749; }
+  .expiry-badge.soon { background:rgba(217,119,6,0.12); color:#92400e; }
+  .expiry-badge.expired { background:rgba(229,62,62,0.12); color:#c53030; }
+  .expiry-badge.none { background:rgba(107,143,163,0.1); color:var(--muted); }
+  .doc-info { padding:0.85rem 1rem; }
+  .doc-category { font-size:0.7rem; font-weight:600; color:var(--teal-dk); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:3px; }
+  .doc-name { font-size:0.88rem; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px; }
+  .doc-meta { font-size:0.75rem; color:var(--muted); }
+  .doc-actions { display:flex; gap:0.5rem; padding:0 1rem 0.85rem; }
+  .doc-btn { flex:1; padding:6px; border-radius:7px; border:1.5px solid var(--border); background:transparent; font-size:0.78rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; color:var(--navy); }
+  .doc-btn:hover { border-color:var(--teal); color:var(--teal-dk); }
+  .doc-btn.danger:hover { border-color:var(--error); color:var(--error); }
+
+  /* EMPTY STATE */
+  .empty-state { grid-column:1/-1; background:var(--white); border:2px dashed var(--border); border-radius:16px; padding:4rem 2rem; text-align:center; }
+  .empty-icon { font-size:3rem; margin-bottom:1rem; }
+  .empty-state h3 { font-size:1.05rem; font-weight:600; margin-bottom:0.5rem; }
+  .empty-state p { font-size:0.87rem; color:var(--muted); line-height:1.6; max-width:340px; margin:0 auto; }
+
+  /* UPLOAD MODAL */
+  .modal-overlay { position:fixed; inset:0; background:rgba(11,25,41,0.6); display:flex; align-items:center; justify-content:center; z-index:500; padding:1rem; opacity:0; pointer-events:none; transition:opacity 0.2s; }
+  .modal-overlay.show { opacity:1; pointer-events:all; }
+  .modal { background:var(--white); border-radius:16px; width:100%; max-width:520px; overflow:hidden; transform:translateY(16px); transition:transform 0.2s; }
+  .modal-overlay.show .modal { transform:translateY(0); }
+  .modal-head { padding:1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .modal-head h2 { font-size:1.1rem; font-weight:700; }
+  .modal-close { background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--muted); line-height:1; padding:2px; }
+  .modal-close:hover { color:var(--navy); }
+  .modal-body { padding:1.5rem; }
+
+  /* DRAG DROP */
+  .drop-zone { border:2px dashed var(--border); border-radius:12px; padding:2.5rem 1.5rem; text-align:center; transition:all 0.2s; cursor:pointer; margin-bottom:1.25rem; }
+  .drop-zone:hover, .drop-zone.drag-over { border-color:var(--teal); background:rgba(0,201,224,0.04); }
+  .drop-zone-icon { font-size:2.5rem; margin-bottom:0.75rem; }
+  .drop-zone h3 { font-size:0.97rem; font-weight:600; margin-bottom:0.35rem; }
+  .drop-zone p { font-size:0.82rem; color:var(--muted); }
+  .drop-zone p span { color:var(--teal); font-weight:600; cursor:pointer; }
+  #file-input { display:none; }
+
+  /* SELECTED FILE */
+  .selected-file { background:var(--offwhite); border-radius:9px; padding:0.85rem 1rem; display:none; align-items:center; gap:10px; margin-bottom:1.25rem; }
+  .selected-file.show { display:flex; }
+  .selected-file-icon { font-size:1.5rem; }
+  .selected-file-info { flex:1; min-width:0; }
+  .selected-file-name { font-size:0.88rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .selected-file-size { font-size:0.76rem; color:var(--muted); }
+  .selected-file-remove { background:none; border:none; cursor:pointer; color:var(--muted); font-size:1.1rem; }
+
+  .form-group { display:flex; flex-direction:column; gap:5px; margin-bottom:1rem; }
+  .form-label { font-size:0.82rem; font-weight:600; color:var(--navy); }
+  .form-label span { font-weight:400; color:var(--muted); }
+  .form-select, .form-input { padding:10px 13px; border:1.5px solid var(--border); border-radius:8px; font-size:0.9rem; font-family:'DM Sans',sans-serif; color:var(--navy); outline:none; transition:border-color 0.2s; background:var(--white); width:100%; }
+  .form-select:focus, .form-input:focus { border-color:var(--teal); }
+
+  /* UPLOAD PROGRESS */
+  .upload-progress { display:none; }
+  .upload-progress.show { display:block; }
+  .progress-track { height:6px; background:var(--offwhite); border-radius:6px; overflow:hidden; margin-bottom:8px; }
+  .progress-bar { height:100%; background:var(--teal); border-radius:6px; transition:width 0.3s; }
+  .progress-label { font-size:0.8rem; color:var(--muted); }
+
+  .modal-foot { padding:1rem 1.5rem; border-top:1px solid var(--border); display:flex; gap:0.75rem; justify-content:flex-end; }
+  .btn-cancel { background:transparent; border:1.5px solid var(--border); border-radius:9px; padding:10px 20px; font-size:0.88rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; color:var(--navy); transition:border-color 0.2s; }
+  .btn-cancel:hover { border-color:var(--navy); }
+  .btn-confirm { background:var(--navy); color:var(--white); border:none; border-radius:9px; padding:10px 24px; font-size:0.88rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.2s; }
+  .btn-confirm:hover { background:#1a3550; }
+  .btn-confirm:disabled { opacity:0.5; cursor:not-allowed; }
+
+  /* VIEWER MODAL */
+  .viewer-overlay { position:fixed; inset:0; background:rgba(7,17,28,0.92); display:flex; flex-direction:column; z-index:600; opacity:0; pointer-events:none; transition:opacity 0.2s; }
+  .viewer-overlay.show { opacity:1; pointer-events:all; }
+  .viewer-head { padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+  .viewer-head-info h3 { font-size:1rem; font-weight:600; color:var(--white); }
+  .viewer-head-info p { font-size:0.78rem; color:rgba(255,255,255,0.45); margin-top:2px; }
+  .viewer-actions { display:flex; gap:0.75rem; align-items:center; }
+  .viewer-btn { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.15); border-radius:8px; padding:8px 16px; font-size:0.83rem; font-weight:600; color:var(--white); cursor:pointer; font-family:'DM Sans',sans-serif; transition:background 0.2s; text-decoration:none; display:inline-flex; align-items:center; gap:6px; }
+  .viewer-btn:hover { background:rgba(255,255,255,0.18); }
+  .viewer-close { background:none; border:none; color:rgba(255,255,255,0.6); font-size:1.5rem; cursor:pointer; transition:color 0.2s; }
+  .viewer-close:hover { color:var(--white); }
+  .viewer-body { flex:1; display:flex; align-items:center; justify-content:center; padding:0 1.5rem 1.5rem; overflow:hidden; }
+  .viewer-body iframe { width:100%; height:100%; border:none; border-radius:8px; background:var(--white); }
+  .viewer-body img { max-width:100%; max-height:100%; object-fit:contain; border-radius:8px; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:2rem; left:50%; transform:translateX(-50%); background:var(--navy); color:var(--white); padding:12px 24px; border-radius:10px; font-size:0.88rem; font-weight:500; box-shadow:0 8px 32px rgba(0,0,0,0.2); display:none; z-index:999; white-space:nowrap; }
+  .toast.show { display:block; animation:fadeup 0.3s ease; }
+  .toast.success { background:#1a5c38; }
+  .toast.error { background:#c53030; }
+  @keyframes fadeup { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+
+  @media(max-width:768px) {
+    .vault-stats { grid-template-columns:repeat(2,1fr); }
+    .doc-grid { grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading-screen"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span class="nav-logo-main">Tender <span>Experts</span></span>
+    <span class="nav-logo-by">by ICONGRP</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/dashboard.html">Dashboard</a></li>
+    <li><a href="/profile.html">My Profile</a></li>
+    <li><a href="/vault.html" class="active">Evidence Vault</a></li>
+    <li><a href="/">Find Tenders</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span id="nav-name"></span>
+    </div>
+    <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page" id="main-page" style="display:none;">
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1>Evidence Vault</h1>
+      <p>Upload your documents once — used automatically in every tender and SQ response.</p>
+    </div>
+    <button class="btn-upload" onclick="openUploadModal()">+ Upload document</button>
+  </div>
+
+  <!-- STATS -->
+  <div class="vault-stats">
+    <div class="vstat">
+      <div class="vstat-label">Total documents</div>
+      <div class="vstat-value teal" id="stat-total">0</div>
+    </div>
+    <div class="vstat">
+      <div class="vstat-label">Valid</div>
+      <div class="vstat-value" style="color:var(--success)" id="stat-valid">0</div>
+    </div>
+    <div class="vstat">
+      <div class="vstat-label">Expiring soon</div>
+      <div class="vstat-value amber" id="stat-expiring">0</div>
+    </div>
+    <div class="vstat">
+      <div class="vstat-label">Expired</div>
+      <div class="vstat-value red" id="stat-expired">0</div>
+    </div>
+  </div>
+
+  <!-- EXPIRY ALERT -->
+  <div class="expiry-alert" id="expiry-alert">
+    <h3>⚠️ Documents expiring soon</h3>
+    <p id="expiry-alert-text"></p>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" onclick="filterDocs('all', this)">All documents</button>
+    <button class="filter-tab" onclick="filterDocs('insurance', this)">Insurance</button>
+    <button class="filter-tab" onclick="filterDocs('regulatory', this)">Regulatory</button>
+    <button class="filter-tab" onclick="filterDocs('policies', this)">Policies</button>
+    <button class="filter-tab" onclick="filterDocs('financial', this)">Financial</button>
+    <button class="filter-tab" onclick="filterDocs('experience', this)">Experience</button>
+    <button class="filter-tab" onclick="filterDocs('accreditations', this)">Accreditations</button>
+  </div>
+
+  <!-- DOC GRID -->
+  <div class="doc-grid" id="doc-grid">
+    <div class="empty-state">
+      <div class="empty-icon">🗂️</div>
+      <h3>Your vault is empty</h3>
+      <p>Upload your first document using the button above. PDFs and images accepted.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-overlay" id="upload-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <h2>Upload document</h2>
+      <button class="modal-close" onclick="closeUploadModal()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- DROP ZONE -->
+      <div class="drop-zone" id="drop-zone"
+        ondragover="handleDragOver(event)"
+        ondragleave="handleDragLeave(event)"
+        ondrop="handleDrop(event)"
+        onclick="document.getElementById('file-input').click()">
+        <div class="drop-zone-icon">📄</div>
+        <h3>Drag &amp; drop your file here</h3>
+        <p>or <span>browse to upload</span> — PDF or image only, max 10MB</p>
+      </div>
+      <input type="file" id="file-input" accept=".pdf,image/*" onchange="handleFileSelect(event)">
+
+      <!-- SELECTED FILE PREVIEW -->
+      <div class="selected-file" id="selected-file">
+        <span class="selected-file-icon" id="sel-icon">📄</span>
+        <div class="selected-file-info">
+          <div class="selected-file-name" id="sel-name"></div>
+          <div class="selected-file-size" id="sel-size"></div>
+        </div>
+        <button class="selected-file-remove" onclick="clearFile()">✕</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Document type</label>
+        <select class="form-select" id="doc-type-select">
+          <option value="">Select document type</option>
+          <optgroup label="Insurance">
+            <option value="public_liability">Public Liability Insurance</option>
+            <option value="employers_liability">Employers Liability Insurance</option>
+            <option value="professional_indemnity">Professional Indemnity Insurance</option>
+          </optgroup>
+          <optgroup label="Regulatory">
+            <option value="cqc_certificate">CQC Certificate</option>
+            <option value="ico_registration">ICO Registration</option>
+          </optgroup>
+          <optgroup label="Policies">
+            <option value="safeguarding">Safeguarding Policy</option>
+            <option value="health_safety">Health &amp; Safety Policy</option>
+            <option value="equality_diversity">Equality &amp; Diversity Policy</option>
+            <option value="modern_slavery">Modern Slavery Statement</option>
+            <option value="business_continuity">Business Continuity Plan</option>
+            <option value="gdpr_policy">GDPR / Data Protection Policy</option>
+            <option value="infection_control">Infection Control Policy</option>
+            <option value="medication_management">Medication Management Policy</option>
+          </optgroup>
+          <optgroup label="Financial">
+            <option value="latest_accounts">Latest Accounts</option>
+          </optgroup>
+          <optgroup label="Experience">
+            <option value="case_study">Case Study</option>
+            <option value="reference_letter">Reference Letter</option>
+          </optgroup>
+          <optgroup label="Accreditations">
+            <option value="accreditation_cert">Accreditation Certificate</option>
+          </optgroup>
+          <optgroup label="Other">
+            <option value="other">Other document</option>
+          </optgroup>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Document label <span>(optional — give it a clear name)</span></label>
+        <input class="form-input" type="text" id="doc-label-input" placeholder="e.g. Public Liability Insurance 2025–2026">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Expiry date <span>(AI will extract automatically — override here if needed)</span></label>
+        <input class="form-input" type="text" id="doc-expiry-input" placeholder="DD/MM/YYYY">
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="upload-progress" id="upload-progress">
+        <div class="progress-track"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+        <div class="progress-label" id="progress-label">Uploading...</div>
+      </div>
+
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
+      <button class="btn-confirm" id="upload-btn" onclick="uploadDocument()">Upload &amp; scan</button>
+    </div>
+  </div>
+</div>
+
+<!-- VIEWER MODAL -->
+<div class="viewer-overlay" id="viewer-overlay">
+  <div class="viewer-head">
+    <div class="viewer-head-info">
+      <h3 id="viewer-title">Document</h3>
+      <p id="viewer-meta"></p>
+    </div>
+    <div class="viewer-actions">
+      <a class="viewer-btn" id="viewer-download" href="#" download>⬇ Download</a>
+      <button class="viewer-close" onclick="closeViewer()">×</button>
+    </div>
+  </div>
+  <div class="viewer-body" id="viewer-body"></div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MzA3ODcsImV4cCI6MjA1OTIwNjc4N30.m7MNnKFQxMVp8M50e7cMBhO-bBMDpJNIUoGvlPlZxBo';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  var currentUser = null;
+  var allDocs = [];
+  var selectedFile = null;
+  var currentFilter = 'all';
+
+  var DOC_CATEGORIES = {
+    public_liability:'insurance', employers_liability:'insurance', professional_indemnity:'insurance',
+    cqc_certificate:'regulatory', ico_registration:'regulatory',
+    safeguarding:'policies', health_safety:'policies', equality_diversity:'policies',
+    modern_slavery:'policies', business_continuity:'policies', gdpr_policy:'policies',
+    infection_control:'policies', medication_management:'policies',
+    latest_accounts:'financial',
+    case_study:'experience', reference_letter:'experience',
+    accreditation_cert:'accreditations', other:'other'
+  };
+
+  var DOC_LABELS = {
+    public_liability:'Public Liability Insurance', employers_liability:'Employers Liability Insurance',
+    professional_indemnity:'Professional Indemnity Insurance', cqc_certificate:'CQC Certificate',
+    ico_registration:'ICO Registration', safeguarding:'Safeguarding Policy',
+    health_safety:'Health & Safety Policy', equality_diversity:'Equality & Diversity Policy',
+    modern_slavery:'Modern Slavery Statement', business_continuity:'Business Continuity Plan',
+    gdpr_policy:'GDPR / Data Protection Policy', infection_control:'Infection Control Policy',
+    medication_management:'Medication Management Policy', latest_accounts:'Latest Accounts',
+    case_study:'Case Study', reference_letter:'Reference Letter',
+    accreditation_cert:'Accreditation Certificate', other:'Document'
+  };
+
+  var CAT_LABELS = {
+    insurance:'Insurance', regulatory:'Regulatory', policies:'Policies',
+    financial:'Financial', experience:'Experience', accreditations:'Accreditations', other:'Other'
+  };
+
+  function showToast(msg, type) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show ' + (type||'');
+    setTimeout(function(){ t.classList.remove('show'); }, 3500);
+  }
+
+  function getExpiryStatus(expiryDate) {
+    if (!expiryDate) return { label:'No expiry', cls:'none', days:null };
+    var parts = expiryDate.split('/');
+    if (parts.length !== 3) return { label:'No expiry', cls:'none', days:null };
+    var exp = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
+    var today = new Date(); today.setHours(0,0,0,0);
+    var days = Math.ceil((exp - today) / (1000*60*60*24));
+    if (days < 0) return { label:'Expired', cls:'expired', days:days };
+    if (days <= 14) return { label:'Expires in '+days+'d', cls:'expired', days:days };
+    if (days <= 30) return { label:'Expires in '+days+'d', cls:'soon', days:days };
+    return { label:'Valid until '+expiryDate, cls:'valid', days:days };
+  }
+
+  function formatFileSize(bytes) {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return Math.round(bytes/1024) + ' KB';
+    return (bytes/(1024*1024)).toFixed(1) + ' MB';
+  }
+
+  function renderDocs() {
+    var grid = document.getElementById('doc-grid');
+    var filtered = currentFilter === 'all' ? allDocs : allDocs.filter(function(d){
+      return DOC_CATEGORIES[d.doc_type] === currentFilter;
+    });
+
+    // Update stats
+    var total = allDocs.length;
+    var expiring = 0, expired = 0, valid = 0;
+    allDocs.forEach(function(d){
+      var s = getExpiryStatus(d.expiry_date);
+      if (s.cls === 'expired') expired++;
+      else if (s.cls === 'soon') expiring++;
+      else if (s.cls === 'valid') valid++;
+    });
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-valid').textContent = valid;
+    document.getElementById('stat-expiring').textContent = expiring;
+    document.getElementById('stat-expired').textContent = expired;
+
+    // Expiry alert banner
+    var alert = document.getElementById('expiry-alert');
+    if (expiring > 0 || expired > 0) {
+      var msgs = [];
+      if (expired > 0) msgs.push(expired + ' document' + (expired>1?'s are':' is') + ' expired');
+      if (expiring > 0) msgs.push(expiring + ' document' + (expiring>1?'s are':' is') + ' expiring within 30 days');
+      document.getElementById('expiry-alert-text').textContent = msgs.join('. ') + '. Please re-upload to avoid submitting outdated documents.';
+      alert.classList.add('show');
+    } else {
+      alert.classList.remove('show');
+    }
+
+    if (!filtered.length) {
+      grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🗂️</div><h3>' +
+        (currentFilter==='all' ? 'Your vault is empty' : 'No '+CAT_LABELS[currentFilter]+' documents') +
+        '</h3><p>' + (currentFilter==='all' ? 'Upload your first document using the button above.' : 'Upload a document and select the '+CAT_LABELS[currentFilter]+' category.') + '</p></div>';
+      return;
+    }
+
+    grid.innerHTML = filtered.map(function(doc) {
+      var status = getExpiryStatus(doc.expiry_date);
+      var isImage = doc.file_name && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name);
+      var cardCls = status.cls === 'expired' ? 'expired' : status.cls === 'soon' ? 'expiring' : '';
+      var thumb = isImage
+        ? '<img src="' + (doc._signedUrl||'') + '" alt="" onerror="this.parentElement.innerHTML=\'<div class=doc-thumb-pdf><span>🖼️</span></div>\'">'
+        : '<div class="doc-thumb-pdf"><span>📄</span></div>';
+      var uploadedDate = new Date(doc.uploaded_at).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+      return '<div class="doc-card ' + cardCls + '" onclick="viewDoc(\'' + doc.id + '\')">' +
+        '<div class="doc-thumb">' + thumb +
+          '<span class="expiry-badge ' + status.cls + '">' + status.label + '</span>' +
+        '</div>' +
+        '<div class="doc-info">' +
+          '<div class="doc-category">' + (CAT_LABELS[DOC_CATEGORIES[doc.doc_type]]||'Document') + '</div>' +
+          '<div class="doc-name">' + (doc.doc_label || DOC_LABELS[doc.doc_type] || doc.file_name) + '</div>' +
+          '<div class="doc-meta">Uploaded ' + uploadedDate + '</div>' +
+        '</div>' +
+        '<div class="doc-actions" onclick="event.stopPropagation()">' +
+          '<button class="doc-btn" onclick="viewDoc(\'' + doc.id + '\')">👁 View</button>' +
+          '<button class="doc-btn" onclick="downloadDoc(\'' + doc.id + '\')">⬇ Save</button>' +
+          '<button class="doc-btn danger" onclick="deleteDoc(\'' + doc.id + '\')">🗑</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function loadDocs() {
+    var { data, error } = await sb.from('vault_documents')
+      .select('*').eq('user_id', currentUser.id).order('uploaded_at', { ascending:false });
+    if (error) { showToast('Could not load documents', 'error'); return; }
+    allDocs = data || [];
+    // Generate signed URLs for images
+    for (var i = 0; i < allDocs.length; i++) {
+      var doc = allDocs[i];
+      if (doc.file_path && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name||'')) {
+        var { data: urlData } = await sb.storage.from('vault').createSignedUrl(doc.file_path, 3600);
+        if (urlData) doc._signedUrl = urlData.signedUrl;
+      }
+    }
+    renderDocs();
+  }
+
+  function filterDocs(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-tab').forEach(function(t){ t.classList.remove('active'); });
+    btn.classList.add('active');
+    renderDocs();
+  }
+
+  // ── UPLOAD ──
+  function openUploadModal() {
+    document.getElementById('upload-modal').classList.add('show');
+  }
+  function closeUploadModal() {
+    if (document.getElementById('upload-btn').disabled) return;
+    document.getElementById('upload-modal').classList.remove('show');
+    clearFile();
+    document.getElementById('doc-type-select').value = '';
+    document.getElementById('doc-label-input').value = '';
+    document.getElementById('doc-expiry-input').value = '';
+    document.getElementById('upload-progress').classList.remove('show');
+  }
+
+  function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
+  function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
+  function handleDrop(e) {
+    e.preventDefault();
+    document.getElementById('drop-zone').classList.remove('drag-over');
+    var file = e.dataTransfer.files[0];
+    if (file) processSelectedFile(file);
+  }
+  function handleFileSelect(e) { if (e.target.files[0]) processSelectedFile(e.target.files[0]); }
+
+  function processSelectedFile(file) {
+    var allowed = ['application/pdf','image/jpeg','image/png','image/gif','image/webp'];
+    if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|jpg|jpeg|png|gif|webp)$/i)) {
+      showToast('Only PDF and image files are accepted', 'error'); return;
+    }
+    if (file.size > 10 * 1024 * 1024) { showToast('File must be under 10MB', 'error'); return; }
+    selectedFile = file;
+    document.getElementById('sel-icon').textContent = file.type === 'application/pdf' ? '📄' : '🖼️';
+    document.getElementById('sel-name').textContent = file.name;
+    document.getElementById('sel-size').textContent = formatFileSize(file.size);
+    document.getElementById('selected-file').classList.add('show');
+    document.getElementById('drop-zone').style.display = 'none';
+    // Auto-set label from filename
+    var baseName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g,' ');
+    if (!document.getElementById('doc-label-input').value) {
+      document.getElementById('doc-label-input').value = baseName;
+    }
+  }
+
+  function clearFile() {
+    selectedFile = null;
+    document.getElementById('selected-file').classList.remove('show');
+    document.getElementById('drop-zone').style.display = '';
+    document.getElementById('file-input').value = '';
+  }
+
+  function setProgress(pct, label) {
+    document.getElementById('upload-progress').classList.add('show');
+    document.getElementById('progress-bar').style.width = pct + '%';
+    document.getElementById('progress-label').textContent = label;
+  }
+
+  async function uploadDocument() {
+    if (!selectedFile) { showToast('Please select a file first', 'error'); return; }
+    var docType = document.getElementById('doc-type-select').value;
+    if (!docType) { showToast('Please select a document type', 'error'); return; }
+
+    var btn = document.getElementById('upload-btn');
+    btn.disabled = true; btn.textContent = 'Uploading...';
+
+    try {
+      var docLabel = document.getElementById('doc-label-input').value.trim() || DOC_LABELS[docType] || 'Document';
+      var manualExpiry = document.getElementById('doc-expiry-input').value.trim();
+
+      // 1. Upload to Supabase Storage
+      setProgress(20, 'Uploading file to vault...');
+      var ext = selectedFile.name.split('.').pop().toLowerCase();
+      var filePath = currentUser.id + '/' + docType + '/' + Date.now() + '_' + selectedFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+
+      var { error: uploadErr } = await sb.storage.from('vault').upload(filePath, selectedFile, {
+        contentType: selectedFile.type, upsert: false
+      });
+      if (uploadErr) throw uploadErr;
+
+      // 2. AI extraction of expiry date
+      var extractedExpiry = manualExpiry || null;
+      if (!manualExpiry && selectedFile.size < 4 * 1024 * 1024) {
+        setProgress(55, 'Scanning document for expiry date...');
+        try {
+          var base64 = await fileToBase64(selectedFile);
+          var res = await fetch('/.netlify/functions/process-vault-doc', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ base64: base64, fileType: selectedFile.type, docType: docType })
+          });
+          if (res.ok) {
+            var result = await res.json();
+            if (result.expiry_date) {
+              extractedExpiry = result.expiry_date;
+              document.getElementById('doc-expiry-input').value = extractedExpiry;
+            }
+          }
+        } catch(e) { /* extraction failed — no problem, just skip */ }
+      }
+
+      // 3. Save metadata to vault_documents
+      setProgress(85, 'Saving document record...');
+      var { error: dbErr } = await sb.from('vault_documents').insert({
+        user_id: currentUser.id,
+        doc_type: docType,
+        doc_label: docLabel,
+        file_name: selectedFile.name,
+        file_path: filePath,
+        file_size: selectedFile.size,
+        expiry_date: extractedExpiry,
+        uploaded_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+      if (dbErr) throw dbErr;
+
+      setProgress(100, 'Done!');
+      setTimeout(async function() {
+        closeUploadModal();
+        await loadDocs();
+        showToast(extractedExpiry ? 'Document uploaded — expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
+      }, 500);
+
+    } catch(err) {
+      showToast('Upload failed: ' + (err.message||'Unknown error'), 'error');
+      btn.disabled = false; btn.textContent = 'Upload & scan';
+    }
+  }
+
+  function fileToBase64(file) {
+    return new Promise(function(resolve, reject) {
+      var reader = new FileReader();
+      reader.onload = function(){ resolve(reader.result.split(',')[1]); };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── VIEW ──
+  async function viewDoc(id) {
+    var doc = allDocs.find(function(d){ return d.id === id; });
+    if (!doc) return;
+    var { data } = await sb.storage.from('vault').createSignedUrl(doc.file_path, 3600);
+    if (!data) { showToast('Could not load document', 'error'); return; }
+    var url = data.signedUrl;
+    var isImage = doc.file_name && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name);
+    document.getElementById('viewer-title').textContent = doc.doc_label || DOC_LABELS[doc.doc_type] || doc.file_name;
+    var status = getExpiryStatus(doc.expiry_date);
+    document.getElementById('viewer-meta').textContent = (doc.expiry_date ? 'Expires: ' + doc.expiry_date + ' · ' : '') + status.label;
+    var dl = document.getElementById('viewer-download');
+    dl.href = url; dl.download = doc.file_name || 'document';
+    var body = document.getElementById('viewer-body');
+    body.innerHTML = isImage
+      ? '<img src="' + url + '" alt="' + (doc.doc_label||'Document') + '">'
+      : '<iframe src="' + url + '"></iframe>';
+    document.getElementById('viewer-overlay').classList.add('show');
+  }
+
+  function closeViewer() {
+    document.getElementById('viewer-overlay').classList.remove('show');
+    document.getElementById('viewer-body').innerHTML = '';
+  }
+
+  // ── DOWNLOAD ──
+  async function downloadDoc(id) {
+    var doc = allDocs.find(function(d){ return d.id === id; });
+    if (!doc) return;
+    var { data } = await sb.storage.from('vault').createSignedUrl(doc.file_path, 300);
+    if (!data) { showToast('Could not download document', 'error'); return; }
+    var a = document.createElement('a');
+    a.href = data.signedUrl; a.download = doc.file_name || 'document';
+    a.click();
+  }
+
+  // ── DELETE ──
+  async function deleteDoc(id) {
+    var doc = allDocs.find(function(d){ return d.id === id; });
+    if (!doc) return;
+    if (!confirm('Delete "' + (doc.doc_label||doc.file_name) + '"? This cannot be undone.')) return;
+    await sb.storage.from('vault').remove([doc.file_path]);
+    await sb.from('vault_documents').delete().eq('id', id);
+    allDocs = allDocs.filter(function(d){ return d.id !== id; });
+    renderDocs();
+    showToast('Document deleted', '');
+  }
+
+  async function handleSignOut() { await sb.auth.signOut(); window.location.href = '/'; }
+
+  // ── INIT ──
+  async function init() {
+    var { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = '/login.html?redirect=/vault.html'; return; }
+    currentUser = session.user;
+    var meta = session.user.user_metadata || {};
+    var initials = ((meta.first_name||'?')[0]+(meta.last_name||'?')[0]).toUpperCase();
+    document.getElementById('nav-avatar').textContent = initials;
+    document.getElementById('nav-name').textContent = (meta.first_name||'')+' '+(meta.last_name||'');
+    await loadDocs();
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('main-page').style.display = 'block';
+  }
+
+  // Close viewer on escape
+  document.addEventListener('keydown', function(e){ if (e.key==='Escape') closeViewer(); });
+
+  init();
+</script>
+</body>
+</html>
