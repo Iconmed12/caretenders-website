@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Confirming your account — Tender Experts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root { --navy:#0B1929; --teal:#00C9E0; --white:#fff; --offwhite:#F4F6F9; --muted:#6B8FA3; --border:rgba(11,25,41,0.09); --success:#38A169; --error:#E53E3E; }
+  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; display:flex; flex-direction:column; }
+  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; height:62px; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
+  .nav-logo-main span { color:var(--teal); }
+  .page { flex:1; display:flex; align-items:center; justify-content:center; padding:3rem 1.5rem; }
+  .card { background:var(--white); border-radius:16px; border:1px solid var(--border); box-shadow:0 4px 32px rgba(11,25,41,0.07); width:100%; max-width:420px; padding:2.5rem; text-align:center; }
+  .icon { font-size:3rem; margin-bottom:1.25rem; }
+  h1 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:0.75rem; }
+  p { font-size:0.9rem; color:var(--muted); line-height:1.7; }
+  .spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--teal); border-radius:50%; animation:spin 0.7s linear infinite; margin:0 auto 1.5rem; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<nav><span class="nav-logo-main">Tender <span>Experts</span></span></nav>
+<div class="page">
+  <div class="card" id="card">
+    <div class="spinner"></div>
+    <h1>Confirming your account...</h1>
+    <p>Just a moment while we verify your email address.</p>
+  </div>
+</div>
+<script>
+  const SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  async function handleConfirm() {
+    try {
+      // Supabase puts the token in the URL hash or query params
+      var hash = window.location.hash;
+      var params = new URLSearchParams(window.location.search);
+
+      // Handle token_hash flow (newer Supabase)
+      var tokenHash = params.get('token_hash');
+      var type = params.get('type');
+
+      if (tokenHash && type) {
+        var { data, error } = await sb.auth.verifyOtp({ token_hash: tokenHash, type: type });
+        if (error) throw error;
+        if (data.session) {
+          window.location.href = '/dashboard.html';
+          return;
+        }
+      }
+
+      // Handle access_token in hash (older flow)
+      if (hash && hash.includes('access_token')) {
+        var { data, error } = await sb.auth.getSession();
+        if (error) throw error;
+        if (data.session) {
+          window.location.href = '/dashboard.html';
+          return;
+        }
+      }
+
+      // If already logged in just go to dashboard
+      var { data: { session } } = await sb.auth.getSession();
+      if (session) { window.location.href = '/dashboard.html'; return; }
+
+      // If nothing worked show error
+      throw new Error('Verification link may have expired. Please try signing up again.');
+
+    } catch(err) {
+      document.getElementById('card').innerHTML =
+        '<div class="icon">❌</div>' +
+        '<h1>Verification failed</h1>' +
+        '<p>' + (err.message || 'Something went wrong.') + '</p>' +
+        '<p style="margin-top:1rem;"><a href="/register.html" style="color:#00C9E0;font-weight:600;">Try registering again</a> or <a href="/login.html" style="color:#00C9E0;font-weight:600;">sign in</a> if you already confirmed.</p>';
+    }
+  }
+
+  handleConfirm();
+</script>
+</body>
+</html>
