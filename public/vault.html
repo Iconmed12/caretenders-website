@@ -416,9 +416,11 @@
     setTimeout(function(){ t.classList.remove('show'); }, 3500);
   }
 
-  function getExpiryStatus(expiryDate, docType) {
-    if (!expiryDate) return { label: (REVIEW_DATE_TYPES && REVIEW_DATE_TYPES.includes(docType)) ? 'No review date' : 'No date set', cls:'none', days:null };
-    var parts = expiryDate.split('/');
+  function getExpiryStatus(expiryDate, docType, reviewDate) {
+    var isReview = REVIEW_DATE_TYPES && REVIEW_DATE_TYPES.includes(docType);
+    var dateToUse = isReview ? reviewDate : expiryDate;
+    if (!dateToUse) return { label: isReview ? 'No review date' : 'No expiry set', cls:'none', days:null };
+    var parts = dateToUse.split('/');
     if (parts.length !== 3) return { label:'No date set', cls:'none', days:null };
     var exp = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
     var today = new Date(); today.setHours(0,0,0,0);
@@ -636,6 +638,8 @@
     try {
       var docLabel = document.getElementById('doc-label-input').value.trim() || DOC_LABELS[docType] || 'Document';
       var manualExpiry = document.getElementById('doc-expiry-input').value.trim();
+      var manualReview = document.getElementById('doc-review-input').value.trim();
+      var isReviewType = REVIEW_DATE_TYPES.includes(docType);
 
       // 1. Upload to Supabase Storage
       setProgress(20, 'Uploading file to vault...');
@@ -681,7 +685,8 @@
         file_name: selectedFile.name,
         file_path: filePath,
         file_size: selectedFile.size,
-        expiry_date: extractedExpiry,
+        expiry_date: isReviewType ? null : (manualExpiry || extractedExpiry || null),
+        review_date: isReviewType ? (manualReview || extractedExpiry || null) : null,
         uploaded_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });
