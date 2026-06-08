@@ -42,7 +42,7 @@ exports.handler = async (event) => {
 
     const wordLimit = q.wordLimit ? parseInt(q.wordLimit) : 500;
     // Allow generous token budget: words * ~1.5 tokens/word, plus 500 buffer, capped at 4000
-    const maxTokens = Math.min(Math.ceil(wordLimit * 1.5) + 500, 4000);
+    const maxTokens = Math.min(Math.ceil(wordLimit * 1.5) + 500, 7000);
 
     const co = companyDetails;
 
