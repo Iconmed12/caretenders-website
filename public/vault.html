@@ -506,7 +506,7 @@
     for (var i = 0; i < allDocs.length; i++) {
       var doc = allDocs[i];
       if (doc.file_path && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name||'')) {
-        var { data: urlData } = await sb.storage.from('vault').createSignedUrl(doc.file_path, 3600);
+        var { data: urlData } = await sb.storage.from('Vault').createSignedUrl(doc.file_path, 3600);
         if (urlData) doc._signedUrl = urlData.signedUrl;
       }
     }
@@ -593,7 +593,7 @@
       var ext = selectedFile.name.split('.').pop().toLowerCase();
       var filePath = currentUser.id + '/' + docType + '/' + Date.now() + '_' + selectedFile.name.replace(/[^a-zA-Z0-9._-]/g,'_');
 
-      var { error: uploadErr } = await sb.storage.from('vault').upload(filePath, selectedFile, {
+      var { error: uploadErr } = await sb.storage.from('Vault').upload(filePath, selectedFile, {
         contentType: selectedFile.type, upsert: false
       });
       if (uploadErr) throw uploadErr;
@@ -660,7 +660,7 @@
   async function viewDoc(id) {
     var doc = allDocs.find(function(d){ return d.id === id; });
     if (!doc) return;
-    var { data } = await sb.storage.from('vault').createSignedUrl(doc.file_path, 3600);
+    var { data } = await sb.storage.from('Vault').createSignedUrl(doc.file_path, 3600);
     if (!data) { showToast('Could not load document', 'error'); return; }
     var url = data.signedUrl;
     var isImage = doc.file_name && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name);
@@ -685,7 +685,7 @@
   async function downloadDoc(id) {
     var doc = allDocs.find(function(d){ return d.id === id; });
     if (!doc) return;
-    var { data } = await sb.storage.from('vault').createSignedUrl(doc.file_path, 300);
+    var { data } = await sb.storage.from('Vault').createSignedUrl(doc.file_path, 300);
     if (!data) { showToast('Could not download document', 'error'); return; }
     var a = document.createElement('a');
     a.href = data.signedUrl; a.download = doc.file_name || 'document';
@@ -697,7 +697,7 @@
     var doc = allDocs.find(function(d){ return d.id === id; });
     if (!doc) return;
     if (!confirm('Delete "' + (doc.doc_label||doc.file_name) + '"? This cannot be undone.')) return;
-    await sb.storage.from('vault').remove([doc.file_path]);
+    await sb.storage.from('Vault').remove([doc.file_path]);
     await sb.from('vault_documents').delete().eq('id', id);
     allDocs = allDocs.filter(function(d){ return d.id !== id; });
     renderDocs();
