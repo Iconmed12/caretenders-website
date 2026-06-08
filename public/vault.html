@@ -88,6 +88,7 @@
   .doc-category { font-size:0.7rem; font-weight:600; color:var(--teal-dk); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:3px; }
   .doc-name { font-size:0.88rem; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:4px; }
   .doc-meta { font-size:0.75rem; color:var(--muted); }
+  .doc-date { font-size:0.76rem; font-weight:600; color:var(--navy); margin-bottom:2px; }
   .doc-actions { display:flex; gap:0.5rem; padding:0 1rem 0.85rem; }
   .doc-btn { flex:1; padding:6px; border-radius:7px; border:1.5px solid var(--border); background:transparent; font-size:0.78rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.2s; color:var(--navy); }
   .doc-btn:hover { border-color:var(--teal); color:var(--teal-dk); }
@@ -492,11 +493,17 @@
         '<div class="doc-info">' +
           '<div class="doc-category">' + (CAT_LABELS[DOC_CATEGORIES[doc.doc_type]]||'Document') + '</div>' +
           '<div class="doc-name">' + (doc.doc_label || DOC_LABELS[doc.doc_type] || doc.file_name) + '</div>' +
+          '<div class="doc-date">' + (
+            status.cls !== 'none'
+              ? (REVIEW_DATE_TYPES.includes(doc.doc_type) ? '🔄 Review: ' : '📅 Expires: ') + (doc.review_date || doc.expiry_date)
+              : ''
+          ) + '</div>' +
           '<div class="doc-meta">Uploaded ' + uploadedDate + '</div>' +
         '</div>' +
         '<div class="doc-actions" onclick="event.stopPropagation()">' +
           '<button class="doc-btn" onclick="viewDoc(\'' + doc.id + '\')">👁 View</button>' +
           '<button class="doc-btn" onclick="downloadDoc(\'' + doc.id + '\')">⬇ Save</button>' +
+          '<button class="doc-btn" onclick="editDoc(\\\'' + doc.id + '\\\')">' + '✏️ Edit</button>' +
           '<button class="doc-btn danger" onclick="deleteDoc(\'' + doc.id + '\')">🗑</button>' +
         '</div>' +
       '</div>';
@@ -532,6 +539,12 @@
   }
   function closeUploadModal() {
     if (document.getElementById('upload-btn').textContent === 'Uploading...') return;
+    // Reset to upload mode if we were in edit mode
+    var btn = document.getElementById('upload-btn');
+    if (btn.textContent === 'Update dates') {
+      btn.textContent = 'Upload & scan';
+      btn.onclick = uploadDocument;
+    }
     document.getElementById('upload-modal').classList.remove('show');
     clearFile();
     document.getElementById('doc-type-select').value = '';
@@ -660,17 +673,16 @@
           var res = await fetch('/.netlify/functions/process-vault-doc', {
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ base64: base64, fileType: selectedFile.type, docType: docType })
+            body: JSON.stringify({ base64: base64, fileType: selectedFile.type, docType: docType, isReviewType: isReviewType })
           });
           if (res.ok) {
             var result = await res.json();
-            if (result.expiry_date) {
+            if (isReviewType && result.review_date) {
+              extractedExpiry = result.review_date;
+              document.getElementById('doc-review-input').value = extractedExpiry;
+            } else if (!isReviewType && result.expiry_date) {
               extractedExpiry = result.expiry_date;
-              if (isReviewType) {
-                document.getElementById('doc-review-input').value = extractedExpiry;
-              } else {
-                document.getElementById('doc-expiry-input').value = extractedExpiry;
-              }
+              document.getElementById('doc-expiry-input').value = extractedExpiry;
             }
           }
         } catch(e) { /* extraction failed — no problem, just skip */ }
@@ -695,8 +707,9 @@
       setProgress(100, 'Done!');
       btn.disabled = false;
       btn.textContent = 'Upload & scan';
-      await loadDocs();
       closeUploadModal();
+      await new Promise(r => setTimeout(r, 800));
+      await loadDocs();
       showToast(extractedExpiry ? isReviewType ? 'Document uploaded — review date: ' : 'Document uploaded — expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
 
     } catch(err) {
@@ -760,6 +773,53 @@
     allDocs = allDocs.filter(function(d){ return d.id !== id; });
     renderDocs();
     showToast('Document deleted', '');
+  }
+
+  // ── EDIT ──
+  function editDoc(id) {
+    var doc = allDocs.find(function(d){ return d.id === id; });
+    if (!doc) return;
+    // Open upload modal in edit mode
+    openUploadModal();
+    document.getElementById('doc-type-select').value = doc.doc_type;
+    // Trigger change event to show correct fields
+    document.getElementById('doc-type-select').dispatchEvent(new Event('change'));
+    document.getElementById('doc-label-input').value = doc.doc_label || '';
+    if (doc.expiry_date) document.getElementById('doc-expiry-input').value = doc.expiry_date;
+    if (doc.review_date) document.getElementById('doc-review-input').value = doc.review_date;
+    // Switch button to update mode
+    var btn = document.getElementById('upload-btn');
+    btn.textContent = 'Update dates';
+    btn.onclick = function() { saveEditedDates(id); };
+  }
+
+  async function saveEditedDates(id) {
+    var btn = document.getElementById('upload-btn');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+      var docType = document.getElementById('doc-type-select').value;
+      var isReview = REVIEW_DATE_TYPES.includes(docType);
+      var expiry = document.getElementById('doc-expiry-input').value.trim() || null;
+      var review = document.getElementById('doc-review-input').value.trim() || null;
+      var label = document.getElementById('doc-label-input').value.trim();
+      var { error } = await sb.from('vault_documents').update({
+        doc_label: label || undefined,
+        expiry_date: isReview ? null : expiry,
+        review_date: isReview ? review : null,
+        updated_at: new Date().toISOString()
+      }).eq('id', id);
+      if (error) throw error;
+      closeUploadModal();
+      // Reset button
+      document.getElementById('upload-btn').textContent = 'Upload & scan';
+      document.getElementById('upload-btn').onclick = uploadDocument;
+      await new Promise(r => setTimeout(r, 400));
+      await loadDocs();
+      showToast('Document updated successfully', 'success');
+    } catch(err) {
+      showToast('Update failed: ' + (err.message||'Error'), 'error');
+      btn.disabled = false; btn.textContent = 'Update dates';
+    }
   }
 
   async function handleSignOut() { await sb.auth.signOut(); window.location.href = '/'; }
