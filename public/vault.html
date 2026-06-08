@@ -335,7 +335,7 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Expiry date <span>(AI will extract automatically — override here if needed)</span></label>
+        <label class="form-label" id="date-label">Expiry date <span>(AI will extract automatically — override here if needed)</span></label>
         <input class="form-input" type="text" id="doc-expiry-input" placeholder="DD/MM/YYYY">
       </div>
 
@@ -412,10 +412,10 @@
     setTimeout(function(){ t.classList.remove('show'); }, 3500);
   }
 
-  function getExpiryStatus(expiryDate) {
-    if (!expiryDate) return { label:'No expiry', cls:'none', days:null };
+  function getExpiryStatus(expiryDate, docType) {
+    if (!expiryDate) return { label: (REVIEW_DATE_TYPES && REVIEW_DATE_TYPES.includes(docType)) ? 'No review date' : 'No date set', cls:'none', days:null };
     var parts = expiryDate.split('/');
-    if (parts.length !== 3) return { label:'No expiry', cls:'none', days:null };
+    if (parts.length !== 3) return { label:'No date set', cls:'none', days:null };
     var exp = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
     var today = new Date(); today.setHours(0,0,0,0);
     var days = Math.ceil((exp - today) / (1000*60*60*24));
@@ -472,7 +472,7 @@
     }
 
     grid.innerHTML = filtered.map(function(doc) {
-      var status = getExpiryStatus(doc.expiry_date);
+      var status = getExpiryStatus(doc.expiry_date, doc.doc_type);
       var isImage = doc.file_name && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name);
       var cardCls = status.cls === 'expired' ? 'expired' : status.cls === 'soon' ? 'expiring' : '';
       var thumb = isImage
@@ -533,6 +533,31 @@
     document.getElementById('doc-expiry-input').value = '';
     document.getElementById('upload-progress').classList.remove('show');
   }
+
+  // Doc types that have review dates rather than expiry dates
+  var REVIEW_DATE_TYPES = ['safeguarding','health_safety','equality_diversity','modern_slavery',
+    'business_continuity','gdpr_policy','infection_control','medication_management',
+    'case_study','reference_letter'];
+
+  // Doc types with no date needed
+  var NO_DATE_TYPES = ['case_study','reference_letter'];
+
+  document.getElementById('doc-type-select').addEventListener('change', function() {
+    var type = this.value;
+    var label = document.getElementById('date-label');
+    var dateGroup = label ? label.closest('.form-group') : null;
+    if (!label) return;
+    if (NO_DATE_TYPES.includes(type)) {
+      if (dateGroup) dateGroup.style.display = 'none';
+    } else {
+      if (dateGroup) dateGroup.style.display = '';
+      if (REVIEW_DATE_TYPES.includes(type)) {
+        label.innerHTML = 'Review date <span>(AI will extract automatically — override here if needed)</span>';
+      } else {
+        label.innerHTML = 'Expiry date <span>(AI will extract automatically — override here if needed)</span>';
+      }
+    }
+  });
 
   function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
   function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
@@ -639,7 +664,7 @@
       btn.textContent = 'Upload & scan';
       await loadDocs();
       closeUploadModal();
-      showToast(extractedExpiry ? 'Document uploaded — expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
+      showToast(extractedExpiry ? REVIEW_DATE_TYPES.includes(document.getElementById('doc-type-select').value) ? 'Document uploaded — review date: ' : 'Document uploaded — expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
 
     } catch(err) {
       showToast('Upload failed: ' + (err.message||'Unknown error'), 'error');
@@ -665,7 +690,7 @@
     var url = data.signedUrl;
     var isImage = doc.file_name && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name);
     document.getElementById('viewer-title').textContent = doc.doc_label || DOC_LABELS[doc.doc_type] || doc.file_name;
-    var status = getExpiryStatus(doc.expiry_date);
+    var status = getExpiryStatus(doc.expiry_date, doc.doc_type);
     document.getElementById('viewer-meta').textContent = (doc.expiry_date ? 'Expires: ' + doc.expiry_date + ' · ' : '') + status.label;
     var dl = document.getElementById('viewer-download');
     dl.href = url; dl.download = doc.file_name || 'document';
