@@ -9,36 +9,39 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { base64, fileType, docType } = JSON.parse(event.body);
+    const { base64, fileType, docType, isReviewType } = JSON.parse(event.body);
     if (!base64 || !fileType) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing file data' }) };
 
-    // Build message with document
-    var mediaType = fileType;
     var contentBlock;
-
     if (fileType === 'application/pdf') {
-      contentBlock = {
-        type: 'document',
-        source: { type: 'base64', media_type: 'application/pdf', data: base64 }
-      };
+      contentBlock = { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: base64 } };
     } else {
-      // Image
-      var imgType = fileType.includes('png') ? 'image/png'
-        : fileType.includes('gif') ? 'image/gif'
-        : fileType.includes('webp') ? 'image/webp'
-        : 'image/jpeg';
-      contentBlock = {
-        type: 'image',
-        source: { type: 'base64', media_type: imgType, data: base64 }
-      };
+      var imgType = fileType.includes('png') ? 'image/png' : fileType.includes('gif') ? 'image/gif' : fileType.includes('webp') ? 'image/webp' : 'image/jpeg';
+      contentBlock = { type: 'image', source: { type: 'base64', media_type: imgType, data: base64 } };
     }
 
-    var prompt = 'Look at this document carefully. Find any expiry date, renewal date, valid until date, or certificate end date.\n\n' +
-      'Return ONLY a valid JSON object in exactly this format with no other text:\n' +
-      '{"expiry_date": "DD/MM/YYYY"}\n\n' +
-      'If there is no expiry date in the document, return:\n' +
-      '{"expiry_date": null}\n\n' +
-      'Do not include any explanation, preamble or markdown. Only the JSON object.';
+    var prompt;
+
+    if (isReviewType) {
+      // For policies: find last reviewed date and add 1 year
+      prompt = 'Look at this document carefully. Find any date related to when it was last reviewed, approved or written. ' +
+        'Look for phrases like "Last reviewed", "Date reviewed", "Review date", "Approved", "Written", "Date", "Version date", "Last updated". ' +
+        'Once you find that date, calculate exactly 1 year (365 days) later — that is the next review date. ' +
+        'Return ONLY a valid JSON object with no other text:\n' +
+        '{"review_date": "DD/MM/YYYY", "last_reviewed": "DD/MM/YYYY"}\n\n' +
+        'If you cannot find any date at all, return:\n' +
+        '{"review_date": null, "last_reviewed": null}\n\n' +
+        'Only the JSON object. No explanation. No markdown.';
+    } else {
+      // For insurance/regulatory: find direct expiry date
+      prompt = 'Look at this document carefully. Find the expiry date, renewal date, valid until date, or certificate end date. ' +
+        'Look for phrases like "Expiry date", "Renewal date", "Valid until", "Valid to", "Expires", "Period of insurance", "To:", "End date". ' +
+        'Return ONLY a valid JSON object with no other text:\n' +
+        '{"expiry_date": "DD/MM/YYYY"}\n\n' +
+        'If there is no expiry date, return:\n' +
+        '{"expiry_date": null}\n\n' +
+        'Only the JSON object. No explanation. No markdown.';
+    }
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -49,41 +52,44 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 100,
-        messages: [{
-          role: 'user',
-          content: [contentBlock, { type: 'text', text: prompt }]
-        }]
+        max_tokens: 150,
+        messages: [{ role: 'user', content: [contentBlock, { type: 'text', text: prompt }] }]
       })
     });
 
-    if (!res.ok) return { statusCode: 200, headers: cors, body: JSON.stringify({ expiry_date: null }) };
+    if (!res.ok) return { statusCode: 200, headers: cors, body: JSON.stringify({ expiry_date: null, review_date: null }) };
 
     const data = await res.json();
     const text = data.content && data.content[0] ? data.content[0].text.trim() : '{}';
-
-    // Safely parse JSON response
     var clean = text.replace(/```json|```/g, '').trim();
     var parsed = JSON.parse(clean);
 
-    // Validate date format DD/MM/YYYY
-    if (parsed.expiry_date) {
-      var match = parsed.expiry_date.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-      if (!match) {
-        // Try to reformat if AI returned different format (YYYY-MM-DD)
-        var altMatch = parsed.expiry_date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-        if (altMatch) {
-          parsed.expiry_date = altMatch[3] + '/' + altMatch[2] + '/' + altMatch[1];
-        } else {
-          parsed.expiry_date = null;
-        }
-      }
+    // Normalise date format to DD/MM/YYYY
+    function normaliseDate(d) {
+      if (!d) return null;
+      // Already DD/MM/YYYY
+      if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(d)) return d;
+      // YYYY-MM-DD
+      var m = d.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (m) return m[3] + '/' + m[2] + '/' + m[1];
+      // DD-MM-YYYY
+      var m2 = d.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+      if (m2) return m2[1] + '/' + m2[2] + '/' + m2[3];
+      return null;
     }
 
-    return { statusCode: 200, headers: cors, body: JSON.stringify({ expiry_date: parsed.expiry_date || null }) };
+    if (isReviewType) {
+      return { statusCode: 200, headers: cors, body: JSON.stringify({
+        review_date: normaliseDate(parsed.review_date),
+        last_reviewed: normaliseDate(parsed.last_reviewed)
+      })};
+    } else {
+      return { statusCode: 200, headers: cors, body: JSON.stringify({
+        expiry_date: normaliseDate(parsed.expiry_date)
+      })};
+    }
 
   } catch(err) {
-    // Never fail hard — just return null expiry so upload continues
-    return { statusCode: 200, headers: cors, body: JSON.stringify({ expiry_date: null }) };
+    return { statusCode: 200, headers: cors, body: JSON.stringify({ expiry_date: null, review_date: null }) };
   }
 };
