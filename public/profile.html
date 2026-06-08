@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Profile — Tender Experts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --navy:#0B1929; --navy-mid:#112236; --teal:#00C9E0; --teal-dk:#0099AA;
+    --amber:#F5A623; --white:#ffffff; --offwhite:#F4F6F9;
+    --muted:#6B8FA3; --border:rgba(11,25,41,0.09);
+    --success:#38A169; --error:#E53E3E;
+  }
+  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; }
+
+  /* NAV */
+  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; border-bottom:1px solid rgba(255,255,255,0.06); position:sticky; top:0; z-index:100; }
+  .nav-logo { display:flex; align-items:baseline; gap:8px; text-decoration:none; }
+  .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
+  .nav-logo-main span { color:var(--teal); }
+  .nav-logo-by { font-size:0.7rem; color:rgba(255,255,255,0.35); letter-spacing:0.04em; }
+  .nav-links { display:flex; align-items:center; gap:1.75rem; list-style:none; }
+  .nav-links a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.88rem; transition:color 0.2s; }
+  .nav-links a:hover { color:var(--white); }
+  .nav-links a.active { color:var(--white); }
+  .nav-right { display:flex; align-items:center; gap:1rem; }
+  .nav-user { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,0.8); font-size:0.88rem; }
+  .nav-avatar { width:30px; height:30px; background:var(--teal); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; color:var(--navy); flex-shrink:0; }
+  .nav-signout { font-size:0.82rem; color:rgba(255,255,255,0.4); cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif; transition:color 0.2s; }
+  .nav-signout:hover { color:rgba(255,255,255,0.8); }
+
+  /* LOADING */
+  #loading-screen { position:fixed; inset:0; background:var(--offwhite); display:flex; align-items:center; justify-content:center; z-index:999; }
+  .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--teal); border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* LAYOUT */
+  .page { max-width:860px; margin:0 auto; padding:2.5rem 1.5rem; }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom:2rem; }
+  .page-header h1 { font-family:'Playfair Display',serif; font-size:1.75rem; color:var(--navy); margin-bottom:0.4rem; }
+  .page-header p { font-size:0.9rem; color:var(--muted); line-height:1.6; }
+
+  /* COMPLETION BAR */
+  .completion-bar-wrap { background:var(--white); border:1px solid var(--border); border-radius:12px; padding:1.25rem 1.5rem; margin-bottom:2rem; display:flex; align-items:center; gap:1.5rem; }
+  .completion-label { font-size:0.82rem; font-weight:600; color:var(--muted); white-space:nowrap; }
+  .completion-track { flex:1; height:8px; background:var(--offwhite); border-radius:8px; overflow:hidden; }
+  .completion-fill { height:100%; background:var(--teal); border-radius:8px; transition:width 0.4s; }
+  .completion-pct { font-size:1rem; font-weight:700; color:var(--navy); white-space:nowrap; min-width:38px; text-align:right; }
+
+  /* SECTION CARD */
+  .section-card { background:var(--white); border:1px solid var(--border); border-radius:14px; margin-bottom:1.5rem; overflow:hidden; }
+  .section-head { padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; }
+  .section-head-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+  .section-head-icon.teal { background:rgba(0,201,224,0.1); }
+  .section-head-icon.amber { background:rgba(245,166,35,0.1); }
+  .section-head-icon.green { background:rgba(56,161,105,0.1); }
+  .section-head-icon.navy { background:rgba(11,25,41,0.06); }
+  .section-head-text h2 { font-size:0.97rem; font-weight:700; color:var(--navy); }
+  .section-head-text p { font-size:0.8rem; color:var(--muted); margin-top:2px; }
+  .section-body { padding:1.5rem; }
+  .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.1rem; }
+  .form-grid.three { grid-template-columns:1fr 1fr 1fr; }
+  .form-full { grid-column:1/-1; }
+  .form-group { display:flex; flex-direction:column; gap:5px; }
+  .form-label { font-size:0.82rem; font-weight:600; color:var(--navy); }
+  .form-label span { font-weight:400; color:var(--muted); }
+  .form-input, .form-textarea, .form-select {
+    padding:10px 13px; border:1.5px solid var(--border); border-radius:8px;
+    font-size:0.9rem; font-family:'DM Sans',sans-serif; color:var(--navy);
+    outline:none; transition:border-color 0.2s, box-shadow 0.2s; background:var(--white); width:100%;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,201,224,0.07); }
+  .form-textarea { resize:vertical; min-height:90px; line-height:1.6; }
+  .form-hint { font-size:0.76rem; color:var(--muted); line-height:1.5; }
+
+  /* SAVE BAR */
+  .save-bar { position:sticky; bottom:0; background:var(--white); border-top:1px solid var(--border); padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; box-shadow:0 -4px 20px rgba(11,25,41,0.06); z-index:50; }
+  .save-bar-left { font-size:0.85rem; color:var(--muted); }
+  .save-bar-left strong { color:var(--navy); }
+  .btn-save { background:var(--navy); color:var(--white); border:none; border-radius:9px; padding:11px 28px; font-size:0.92rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; gap:8px; }
+  .btn-save:hover { background:#1a3550; }
+  .btn-save:disabled { opacity:0.6; cursor:not-allowed; }
+  .save-status { font-size:0.82rem; color:var(--success); font-weight:500; display:none; }
+  .save-status.show { display:inline; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:var(--navy); color:var(--white); padding:12px 24px; border-radius:10px; font-size:0.88rem; font-weight:500; box-shadow:0 8px 32px rgba(0,0,0,0.2); display:none; z-index:999; white-space:nowrap; }
+  .toast.show { display:block; animation:fadeup 0.3s ease; }
+  .toast.success { background:#1a5c38; }
+  .toast.error { background:#c53030; }
+  @keyframes fadeup { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+
+  @media (max-width:640px) {
+    .form-grid, .form-grid.three { grid-template-columns:1fr; }
+    .form-full { grid-column:1; }
+  }
+</style>
+</head>
+<body>
+
+<div id="loading-screen"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span class="nav-logo-main">Tender <span>Experts</span></span>
+    <span class="nav-logo-by">by ICONGRP</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/dashboard.html">Dashboard</a></li>
+    <li><a href="/profile.html" class="active">My Profile</a></li>
+    <li><a href="/vault.html">Evidence Vault</a></li>
+    <li><a href="/">Find Tenders</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span id="nav-name"></span>
+    </div>
+    <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page" id="main-page" style="display:none;">
+
+  <div class="page-header">
+    <h1>Company Profile</h1>
+    <p>Fill in your company details once. Cana AI uses everything here to write better, more specific tender responses — and SQ Assist will use it to auto-fill your questionnaires.</p>
+  </div>
+
+  <!-- COMPLETION -->
+  <div class="completion-bar-wrap">
+    <span class="completion-label">Profile strength</span>
+    <div class="completion-track"><div class="completion-fill" id="comp-fill" style="width:0%"></div></div>
+    <span class="completion-pct" id="comp-pct">0%</span>
+  </div>
+
+  <!-- SECTION 1: CONTACT -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-head-icon teal">👤</div>
+      <div class="section-head-text">
+        <h2>Your contact details</h2>
+        <p>The person responsible for this account</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input class="form-input" type="text" id="f-first" placeholder="Sarah">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input class="form-input" type="text" id="f-last" placeholder="Johnson">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input class="form-input" type="email" id="f-email" placeholder="sarah@company.co.uk">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Job title</label>
+          <input class="form-input" type="text" id="f-jobtitle" placeholder="Director / Manager / Bid Writer">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: COMPANY IDENTITY -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-head-icon amber">🏢</div>
+      <div class="section-head-text">
+        <h2>Company identity</h2>
+        <p>Your registered company details — used in SQ supplier information sections</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Registered company name</label>
+          <input class="form-input" type="text" id="f-company" placeholder="Sunrise Care Services Ltd">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Companies House number <span>(optional)</span></label>
+          <input class="form-input" type="text" id="f-co-number" placeholder="12345678">
+        </div>
+        <div class="form-group">
+          <label class="form-label">VAT number <span>(optional)</span></label>
+          <input class="form-input" type="text" id="f-vat" placeholder="GB123456789">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Year founded</label>
+          <input class="form-input" type="text" id="f-founded" placeholder="2016">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Company type</label>
+          <select class="form-select" id="f-co-type">
+            <option value="">Select type</option>
+            <option>Private limited company</option>
+            <option>Limited liability partnership</option>
+            <option>Community interest company (CIC)</option>
+            <option>Charity / charitable incorporated organisation</option>
+            <option>Sole trader</option>
+            <option>Partnership</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Registered address</label>
+          <input class="form-input" type="text" id="f-address" placeholder="123 High Street, Birmingham, B1 1AA">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: CQC & REGULATORY -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-head-icon green">⚕️</div>
+      <div class="section-head-text">
+        <h2>CQC &amp; regulatory</h2>
+        <p>Your registration, rating and regulated activities — critical for care tenders</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">CQC registration status</label>
+          <select class="form-select" id="f-cqc-status">
+            <option value="">Select status</option>
+            <option>CQC Registered</option>
+            <option>CQC Registered — Rated Outstanding</option>
+            <option>CQC Registered — Rated Good</option>
+            <option>CQC Registered — Requires Improvement</option>
+            <option>CQC Registered — Inadequate</option>
+            <option>Not yet CQC registered</option>
+            <option>Not applicable</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CQC Provider ID <span>(optional)</span></label>
+          <input class="form-input" type="text" id="f-cqc-id" placeholder="1-123456789">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date of last CQC inspection <span>(optional)</span></label>
+          <input class="form-input" type="text" id="f-cqc-date" placeholder="March 2024">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ICO registration number <span>(optional)</span></label>
+          <input class="form-input" type="text" id="f-ico" placeholder="ZA123456">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Regulated activities <span>(optional)</span></label>
+          <input class="form-input" type="text" id="f-regulated" placeholder="e.g. Personal care, Treatment of disease, disorder or injury, Accommodation for persons who require nursing or personal care">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: OPERATIONS -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-head-icon teal">⚙️</div>
+      <div class="section-head-text">
+        <h2>Operations</h2>
+        <p>Your size, services and geographic reach</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Total number of staff</label>
+          <input class="form-input" type="text" id="f-staff" placeholder="87">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Annual turnover range <span>(optional)</span></label>
+          <select class="form-select" id="f-turnover">
+            <option value="">Select range</option>
+            <option>Under £500k</option>
+            <option>£500k – £1m</option>
+            <option>£1m – £3m</option>
+            <option>£3m – £5m</option>
+            <option>£5m – £10m</option>
+            <option>Over £10m</option>
+          </select>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Services you deliver</label>
+          <textarea class="form-textarea" id="f-services" placeholder="e.g. Domiciliary care, supported living, personal care for adults with learning disabilities, dementia care, end of life care, reablement services"></textarea>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Regions you operate in</label>
+          <input class="form-input" type="text" id="f-regions" placeholder="e.g. West Midlands, Worcestershire, Warwickshire">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: QUALITY & PERFORMANCE -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-head-icon amber">🏆</div>
+      <div class="section-head-text">
+        <h2>Quality &amp; performance</h2>
+        <p>Evidence that makes your bids stand out — be as specific as possible</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Key achievements &amp; awards</label>
+          <textarea class="form-textarea" id="f-achievements" placeholder="e.g. Rated Good across all 5 CQC domains (March 2024). 96% service user satisfaction in 2024 annual survey. Staff turnover 18% against sector average of 34%. Zero upheld safeguarding concerns in last 24 months."></textarea>
+          <span class="form-hint">Include inspection outcomes, satisfaction scores, staff turnover rates, award nominations.</span>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Performance KPIs &amp; outcomes data</label>
+          <textarea class="form-textarea" id="f-kpis" placeholder="e.g. 98.4% on-time visit rate (last quarter), average carer tenure 3.8 years, hospital admission rate 14% below local average, 91% of care plans reviewed within 28 days of any change."></textarea>
+          <span class="form-hint">Use real numbers — percentages, timescales and benchmarks score highest with evaluators.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: POLICIES & FRAMEWORKS -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-head-icon navy">📋</div>
+      <div class="section-head-text">
+        <h2>Policies &amp; frameworks</h2>
+        <p>Named policies, systems and standards you operate to</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Named policies &amp; frameworks</label>
+          <textarea class="form-textarea" id="f-policies" placeholder="e.g. Care Act 2014 assessment framework, Mental Capacity Act 2005 best interest process, NICE dementia care guidelines, Person-Centred Care Planning using CarePlanner software, monthly MDT review meetings, Oliver McGowan mandatory training completed by 100% of staff."></textarea>
+          <span class="form-hint">Name the actual frameworks, systems and legislation you reference. Generic language like "we follow best practice" scores poorly.</span>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Accreditations &amp; memberships</label>
+          <textarea class="form-textarea" id="f-accreditations" placeholder="e.g. UKHCA member, Skills for Care endorsed employer, Investors in People Bronze, DBS Update Service registered for all staff, ISO 9001 certified."></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7: CONTRACT EXPERIENCE -->
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-head-icon green">📁</div>
+      <div class="section-head-text">
+        <h2>Contract experience</h2>
+        <p>Previous and current contracts — used as evidence in tender responses</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="form-grid">
+        <div class="form-group form-full">
+          <label class="form-label">Previous &amp; current contract experience</label>
+          <textarea class="form-textarea" id="f-experience" style="min-height:120px;" placeholder="e.g. Delivered domiciliary care for Birmingham City Council since 2019 supporting 140 service users. Current contract with Worcestershire County Council for supported living — 3 registered locations, 28 beds. Previously held Sandwell MBC spot purchase agreement 2017–2022."></textarea>
+          <span class="form-hint">Name the commissioners, contract types, service user numbers and contract duration. This feeds directly into SQ contract reference sections.</span>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Social value &amp; community impact <span>(optional)</span></label>
+          <textarea class="form-textarea" id="f-social" placeholder="e.g. We employ 80% of our workforce from the local community. We provide 4 apprenticeships annually. We volunteer 200 hours per year to local community projects. We have reduced our carbon footprint by 22% since 2022."></textarea>
+          <span class="form-hint">Social value is now scored in almost every public sector tender. Concrete figures score much higher than vague commitments.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- SAVE BAR -->
+<div class="save-bar" id="save-bar" style="display:none;">
+  <div class="save-bar-left">
+    <strong id="save-bar-company">Your profile</strong> — last saved <span id="save-bar-time">never</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <span class="save-status" id="save-status">✓ Saved</span>
+    <button class="btn-save" id="save-btn" onclick="saveProfile()">Save profile</button>
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MzA3ODcsImV4cCI6MjA1OTIwNjc4N30.m7MNnKFQxMVp8M50e7cMBhO-bBMDpJNIUoGvlPlZxBo';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  var currentUser = null;
+
+  // Field list for completion scoring
+  var SCORED_FIELDS = [
+    'f-first','f-last','f-email','f-jobtitle',
+    'f-company','f-founded','f-co-type','f-address',
+    'f-cqc-status','f-staff','f-services','f-regions',
+    'f-achievements','f-kpis','f-policies','f-accreditations','f-experience'
+  ];
+
+  function updateCompletion() {
+    var filled = SCORED_FIELDS.filter(function(id){
+      var el = document.getElementById(id);
+      return el && el.value.trim().length > 0;
+    }).length;
+    var pct = Math.round((filled / SCORED_FIELDS.length) * 100);
+    document.getElementById('comp-fill').style.width = pct + '%';
+    document.getElementById('comp-pct').textContent = pct + '%';
+  }
+
+  // Listen for any input change to update completion
+  SCORED_FIELDS.forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', updateCompletion);
+  });
+
+  function showToast(msg, type) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + (type||'');
+    setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  }
+
+  function fillForm(p) {
+    var map = {
+      'f-first':        p.contact_first_name,
+      'f-last':         p.contact_last_name,
+      'f-email':        p.contact_email,
+      'f-jobtitle':     p.contact_job_title,
+      'f-company':      p.company_name,
+      'f-co-number':    p.company_number,
+      'f-vat':          p.vat_number,
+      'f-founded':      p.founded_year,
+      'f-co-type':      p.company_type,
+      'f-address':      p.registered_address,
+      'f-cqc-status':   p.cqc_status,
+      'f-cqc-id':       p.cqc_provider_id,
+      'f-cqc-date':     p.cqc_inspection_date,
+      'f-ico':          p.ico_number,
+      'f-regulated':    p.regulated_activities,
+      'f-staff':        p.total_staff,
+      'f-turnover':     p.turnover_range,
+      'f-services':     p.services,
+      'f-regions':      p.regions,
+      'f-achievements': p.achievements,
+      'f-kpis':         p.kpis,
+      'f-policies':     p.policies,
+      'f-accreditations':p.accreditations,
+      'f-experience':   p.experience,
+      'f-social':       p.social_value
+    };
+    Object.keys(map).forEach(function(id){
+      var el = document.getElementById(id);
+      if (el && map[id]) el.value = map[id];
+    });
+    updateCompletion();
+    if (p.company_name) {
+      document.getElementById('save-bar-company').textContent = p.company_name;
+    }
+    if (p.updated_at) {
+      var d = new Date(p.updated_at);
+      document.getElementById('save-bar-time').textContent = d.toLocaleDateString('en-GB', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
+    }
+  }
+
+  function readForm() {
+    return {
+      contact_first_name:  document.getElementById('f-first').value.trim(),
+      contact_last_name:   document.getElementById('f-last').value.trim(),
+      contact_email:       document.getElementById('f-email').value.trim(),
+      contact_job_title:   document.getElementById('f-jobtitle').value.trim(),
+      company_name:        document.getElementById('f-company').value.trim(),
+      company_number:      document.getElementById('f-co-number').value.trim(),
+      vat_number:          document.getElementById('f-vat').value.trim(),
+      founded_year:        document.getElementById('f-founded').value.trim(),
+      company_type:        document.getElementById('f-co-type').value,
+      registered_address:  document.getElementById('f-address').value.trim(),
+      cqc_status:          document.getElementById('f-cqc-status').value,
+      cqc_provider_id:     document.getElementById('f-cqc-id').value.trim(),
+      cqc_inspection_date: document.getElementById('f-cqc-date').value.trim(),
+      ico_number:          document.getElementById('f-ico').value.trim(),
+      regulated_activities:document.getElementById('f-regulated').value.trim(),
+      total_staff:         document.getElementById('f-staff').value.trim(),
+      turnover_range:      document.getElementById('f-turnover').value,
+      services:            document.getElementById('f-services').value.trim(),
+      regions:             document.getElementById('f-regions').value.trim(),
+      achievements:        document.getElementById('f-achievements').value.trim(),
+      kpis:                document.getElementById('f-kpis').value.trim(),
+      policies:            document.getElementById('f-policies').value.trim(),
+      accreditations:      document.getElementById('f-accreditations').value.trim(),
+      experience:          document.getElementById('f-experience').value.trim(),
+      social_value:        document.getElementById('f-social').value.trim(),
+      updated_at:          new Date().toISOString()
+    };
+  }
+
+  async function saveProfile() {
+    var btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+    try {
+      var data = readForm();
+      data.user_id = currentUser.id;
+      data.profile_complete = SCORED_FIELDS.filter(function(id){
+        var el = document.getElementById(id); return el && el.value.trim().length > 0;
+      }).length === SCORED_FIELDS.length;
+
+      var { error } = await sb.from('company_profiles').upsert(data, { onConflict: 'user_id' });
+      if (error) throw error;
+
+      // Update save bar
+      document.getElementById('save-bar-time').textContent = 'just now';
+      if (data.company_name) document.getElementById('save-bar-company').textContent = data.company_name;
+      var ss = document.getElementById('save-status');
+      ss.classList.add('show');
+      setTimeout(function(){ ss.classList.remove('show'); }, 3000);
+      showToast('Profile saved successfully', 'success');
+    } catch(err) {
+      showToast('Save failed: ' + (err.message||'Unknown error'), 'error');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Save profile';
+  }
+
+  async function init() {
+    var { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = '/login.html?redirect=/profile.html'; return; }
+    currentUser = session.user;
+
+    var meta = session.user.user_metadata || {};
+    var initials = ((meta.first_name||'?')[0] + (meta.last_name||'?')[0]).toUpperCase();
+    document.getElementById('nav-avatar').textContent = initials;
+    document.getElementById('nav-name').textContent = (meta.first_name||'') + ' ' + (meta.last_name||'');
+
+    // Pre-fill contact from auth metadata
+    if (meta.first_name) document.getElementById('f-first').value = meta.first_name;
+    if (meta.last_name)  document.getElementById('f-last').value  = meta.last_name;
+    if (session.user.email) document.getElementById('f-email').value = session.user.email;
+    if (meta.company_name) document.getElementById('f-company').value = meta.company_name;
+    if (meta.job_title) document.getElementById('f-jobtitle').value = meta.job_title;
+
+    // Load saved profile
+    var { data: profile } = await sb.from('company_profiles').select('*').eq('user_id', currentUser.id).single();
+    if (profile) fillForm(profile);
+
+    updateCompletion();
+    document.getElementById('loading-screen').style.display = 'none';
+    document.getElementById('main-page').style.display = 'block';
+    document.getElementById('save-bar').style.display = 'flex';
+  }
+
+  async function handleSignOut() {
+    await sb.auth.signOut();
+    window.location.href = '/';
+  }
+
+  init();
+</script>
+</body>
+</html>
