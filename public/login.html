@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign In — Tender Experts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:#0B1929; --navy-mid:#112236; --teal:#00C9E0; --teal-dk:#0099AA;
+    --amber:#F5A623; --white:#ffffff; --offwhite:#F4F6F9;
+    --muted:#6B8FA3; --border:rgba(11,25,41,0.09);
+    --error:#E53E3E; --success:#38A169;
+  }
+  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; display:flex; flex-direction:column; }
+  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .nav-logo { display:flex; align-items:baseline; gap:8px; text-decoration:none; }
+  .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
+  .nav-logo-main span { color:var(--teal); }
+  .nav-logo-by { font-size:0.7rem; color:rgba(255,255,255,0.35); letter-spacing:0.04em; }
+  .nav-right { font-size:0.85rem; color:rgba(255,255,255,0.55); }
+  .nav-right a { color:var(--teal); text-decoration:none; font-weight:500; }
+  .nav-right a:hover { text-decoration:underline; }
+  .page { flex:1; display:flex; align-items:center; justify-content:center; padding:3rem 1.5rem; }
+  .auth-card { background:var(--white); border-radius:16px; border:1px solid var(--border); box-shadow:0 4px 32px rgba(11,25,41,0.07); width:100%; max-width:440px; padding:2.5rem; }
+  .auth-card-header { text-align:center; margin-bottom:2rem; }
+  .auth-badge { display:inline-flex; align-items:center; gap:7px; background:rgba(0,201,224,0.08); border:1px solid rgba(0,201,224,0.2); border-radius:999px; padding:5px 14px; font-size:0.74rem; color:var(--teal); font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:1rem; }
+  .auth-card-header h1 { font-family:'Playfair Display',serif; font-size:1.75rem; color:var(--navy); margin-bottom:0.5rem; }
+  .auth-card-header p { font-size:0.88rem; color:var(--muted); line-height:1.6; }
+  .form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:1.1rem; }
+  .form-label { font-size:0.82rem; font-weight:600; color:var(--navy); display:flex; justify-content:space-between; align-items:center; }
+  .form-label a { font-weight:400; color:var(--teal); text-decoration:none; font-size:0.8rem; }
+  .form-label a:hover { text-decoration:underline; }
+  .form-input { padding:11px 14px; border:1.5px solid var(--border); border-radius:9px; font-size:0.92rem; font-family:'DM Sans',sans-serif; color:var(--navy); outline:none; transition:border-color 0.2s; background:var(--white); width:100%; }
+  .form-input:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,201,224,0.08); }
+  .form-input.error { border-color:var(--error); }
+  .field-error { font-size:0.78rem; color:var(--error); display:none; }
+  .field-error.show { display:block; }
+  .alert { border-radius:9px; padding:12px 16px; font-size:0.87rem; margin-bottom:1.25rem; display:none; line-height:1.5; }
+  .alert.show { display:block; }
+  .alert-error { background:rgba(229,62,62,0.08); border:1px solid rgba(229,62,62,0.25); color:#c53030; }
+  .btn-primary { width:100%; background:var(--navy); color:var(--white); border:none; border-radius:10px; padding:14px 24px; font-size:0.95rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.2s; margin-top:0.5rem; }
+  .btn-primary:hover { background:#1a3550; }
+  .btn-primary:disabled { opacity:0.6; cursor:not-allowed; }
+  .auth-footer { text-align:center; margin-top:1.5rem; font-size:0.87rem; color:var(--muted); }
+  .auth-footer a { color:var(--teal); text-decoration:none; font-weight:500; }
+  .auth-footer a:hover { text-decoration:underline; }
+  .divider { display:flex; align-items:center; gap:1rem; margin:1.5rem 0; }
+  .divider hr { flex:1; border:none; border-top:1px solid var(--border); }
+  .divider span { font-size:0.78rem; color:var(--muted); white-space:nowrap; }
+
+  /* Reset password view */
+  .reset-view { display:none; }
+  .reset-view.show { display:block; }
+  .main-view.hide { display:none; }
+  .back-link { font-size:0.83rem; color:var(--teal); text-decoration:none; cursor:pointer; display:inline-flex; align-items:center; gap:5px; margin-bottom:1.5rem; }
+  .back-link:hover { text-decoration:underline; }
+  .alert-success { background:rgba(56,161,105,0.08); border:1px solid rgba(56,161,105,0.25); color:#276749; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span class="nav-logo-main">Tender <span>Experts</span></span>
+    <span class="nav-logo-by">by ICONGRP</span>
+  </a>
+  <div class="nav-right">New here? <a href="/register.html">Create a free account</a></div>
+</nav>
+
+<div class="page">
+  <div class="auth-card">
+
+    <!-- MAIN LOGIN VIEW -->
+    <div class="main-view" id="main-view">
+      <div class="auth-card-header">
+        <div class="auth-badge">✦ Welcome Back</div>
+        <h1>Sign in</h1>
+        <p>Access your company profile, evidence vault and tender responses.</p>
+      </div>
+
+      <div class="alert alert-error" id="error-alert"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email address</label>
+        <input class="form-input" type="email" id="email" placeholder="sarah@yourcompany.co.uk" autocomplete="email">
+        <span class="field-error" id="err-email">Please enter a valid email</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">
+          Password
+          <a href="#" onclick="showReset(); return false;">Forgot password?</a>
+        </label>
+        <input class="form-input" type="password" id="password" placeholder="Your password" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter') handleLogin()">
+        <span class="field-error" id="err-password">Please enter your password</span>
+      </div>
+
+      <button class="btn-primary" id="login-btn" onclick="handleLogin()">Sign in to my account →</button>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="/register.html">Create one free</a>
+      </div>
+    </div>
+
+    <!-- RESET PASSWORD VIEW -->
+    <div class="reset-view" id="reset-view">
+      <a class="back-link" onclick="showLogin()">← Back to sign in</a>
+      <div class="auth-card-header" style="text-align:left; margin-bottom:1.5rem;">
+        <h1 style="font-size:1.5rem;">Reset password</h1>
+        <p style="margin-top:0.5rem;">Enter your email and we'll send you a reset link.</p>
+      </div>
+
+      <div class="alert alert-error" id="reset-error"></div>
+      <div class="alert alert-success" id="reset-success"></div>
+
+      <div class="form-group">
+        <label class="form-label" for="reset-email">Email address</label>
+        <input class="form-input" type="email" id="reset-email" placeholder="sarah@yourcompany.co.uk">
+      </div>
+
+      <button class="btn-primary" id="reset-btn" onclick="handleReset()">Send reset link →</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MzA3ODcsImV4cCI6MjA1OTIwNjc4N30.m7MNnKFQxMVp8M50e7cMBhO-bBMDpJNIUoGvlPlZxBo';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  function showReset() {
+    document.getElementById('main-view').classList.add('hide');
+    document.getElementById('reset-view').classList.add('show');
+  }
+  function showLogin() {
+    document.getElementById('main-view').classList.remove('hide');
+    document.getElementById('reset-view').classList.remove('show');
+  }
+
+  async function handleLogin() {
+    document.querySelectorAll('.field-error').forEach(function(e){ e.classList.remove('show'); });
+    document.querySelectorAll('.form-input').forEach(function(e){ e.classList.remove('error'); });
+    document.getElementById('error-alert').classList.remove('show');
+
+    var email    = document.getElementById('email').value.trim();
+    var password = document.getElementById('password').value;
+
+    var valid = true;
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      document.getElementById('err-email').classList.add('show');
+      document.getElementById('email').classList.add('error');
+      valid = false;
+    }
+    if (!password) {
+      document.getElementById('err-password').classList.add('show');
+      document.getElementById('password').classList.add('error');
+      valid = false;
+    }
+    if (!valid) return;
+
+    var btn = document.getElementById('login-btn');
+    btn.disabled = true;
+    btn.textContent = 'Signing in...';
+
+    try {
+      var { data, error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
+      // Redirect to dashboard
+      var redirect = new URLSearchParams(window.location.search).get('redirect') || '/dashboard.html';
+      window.location.href = redirect;
+
+    } catch(err) {
+      var msg = err.message || 'Sign in failed. Please try again.';
+      if (msg.includes('Invalid login')) msg = 'Incorrect email or password. Please try again.';
+      if (msg.includes('Email not confirmed')) msg = 'Please verify your email before signing in. Check your inbox.';
+      document.getElementById('error-alert').textContent = msg;
+      document.getElementById('error-alert').classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Sign in to my account →';
+    }
+  }
+
+  async function handleReset() {
+    document.getElementById('reset-error').classList.remove('show');
+    document.getElementById('reset-success').classList.remove('show');
+    var email = document.getElementById('reset-email').value.trim();
+    if (!email) {
+      document.getElementById('reset-error').textContent = 'Please enter your email address.';
+      document.getElementById('reset-error').classList.add('show');
+      return;
+    }
+    var btn = document.getElementById('reset-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+    try {
+      var { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin + '/reset-password.html'
+      });
+      if (error) throw error;
+      document.getElementById('reset-success').textContent = 'Reset link sent to ' + email + '. Check your inbox.';
+      document.getElementById('reset-success').classList.add('show');
+    } catch(err) {
+      document.getElementById('reset-error').textContent = err.message || 'Failed to send reset email.';
+      document.getElementById('reset-error').classList.add('show');
+    }
+    btn.disabled = false;
+    btn.textContent = 'Send reset link →';
+  }
+
+  // If already logged in, redirect to dashboard
+  sb.auth.getSession().then(function(r){
+    if (r.data.session) window.location.href = '/dashboard.html';
+  });
+</script>
+</body>
+</html>
