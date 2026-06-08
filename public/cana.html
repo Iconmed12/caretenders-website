@@ -252,8 +252,8 @@
     <div class="section">
       <div class="loading-state">
         <div class="loading-spinner"></div>
-        <h3 id="loading-heading">Cana AI is writing your responses...</h3>
-        <p id="loading-msg">Reading the tender spec, extracting scoring criteria and crafting tailored answers using Sonnet AI. This usually takes 30–90 seconds per question.</p>
+        <h3>Cana AI is writing your responses...</h3>
+        <p>Reading the tender spec, extracting scoring criteria and crafting tailored answers. This takes around 15–30 seconds per question.</p>
       </div>
     </div>
   </div>
@@ -449,32 +449,18 @@
     const companyDetails = { name, founded, staff, cqc, services, regions, experience, achievements, policies, accreditations, kpis, email };
 
     async function callOne(questionIndex) {
-      // Generate unique job ID
-      const jobId = crypto.randomUUID();
-
-      // Trigger background generation — returns 202 immediately, no timeout risk
-      await fetch('/.netlify/functions/generate-cana-background', {
+      const res = await fetch('/.netlify/functions/stream-response', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenderId, companyDetails, jobId, questionIndex })
+        body: JSON.stringify({ tenderId, companyDetails, questionIndex })
       });
-
-      // Poll for result every 2.5 seconds, up to 3 minutes
-      for (let i = 0; i < 72; i++) {
-        await new Promise(r => setTimeout(r, 2500));
-        const pollRes = await fetch('/.netlify/functions/get-cana-result?jobId=' + jobId);
-        const job = await pollRes.json();
-        if (job.status === 'done') {
-          return {
-            question: job.question,
-            answer: job.answer,
-            questionIndex: job.question_index,
-            totalQuestions: job.total_questions
-          };
-        }
-        if (job.status === 'error') throw new Error(job.error || 'Generation failed');
-      }
-      throw new Error('Generation timed out — please try again');
+      const rawText = await res.text();
+      if (!rawText) throw new Error('Empty response (status ' + res.status + ')');
+      if (rawText.trim().startsWith('<')) throw new Error('Function error (status ' + res.status + '): ' + rawText.substring(0, 150));
+      let data;
+      try { data = JSON.parse(rawText); } catch(e) { throw new Error('Bad response: ' + rawText.substring(0, 100)); }
+      if (!res.ok || data.error) throw new Error(data.error || 'Generation failed');
+      return data;
     }
 
     try {
