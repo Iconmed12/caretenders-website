@@ -525,7 +525,7 @@
     document.getElementById('upload-modal').classList.add('show');
   }
   function closeUploadModal() {
-    if (document.getElementById('upload-btn').disabled) return;
+    if (document.getElementById('upload-btn').textContent === 'Uploading...') return;
     document.getElementById('upload-modal').classList.remove('show');
     clearFile();
     document.getElementById('doc-type-select').value = '';
@@ -635,11 +635,11 @@
       if (dbErr) throw dbErr;
 
       setProgress(100, 'Done!');
-      setTimeout(async function() {
-        closeUploadModal();
-        await loadDocs();
-        showToast(extractedExpiry ? 'Document uploaded — expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
-      }, 500);
+      btn.disabled = false;
+      btn.textContent = 'Upload & scan';
+      await loadDocs();
+      closeUploadModal();
+      showToast(extractedExpiry ? 'Document uploaded — expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
 
     } catch(err) {
       showToast('Upload failed: ' + (err.message||'Unknown error'), 'error');
