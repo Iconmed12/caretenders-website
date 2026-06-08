@@ -10,3 +10,6 @@
 
 [functions."generate-response"]
   timeout = 26
+
+[functions."check-vault-expiry"]
+  schedule = "0 9 * * *"
