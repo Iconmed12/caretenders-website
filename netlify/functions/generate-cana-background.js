@@ -96,6 +96,60 @@ exports.handler = async (event) => {
     const maxTokens = Math.min(Math.ceil(wordLimit * 1.5) + 500, 7000);
     const co = companyDetails;
 
+    // ── UNIQUE PERSONA BUILDER ──
+    // Generates a distinct voice for each company so no two responses read the same
+    function buildPersona(co) {
+      var staffNum = parseInt(co.staff) || 0;
+      var sizeDesc = staffNum < 25
+        ? 'small, owner-operated provider with a close-knit team'
+        : staffNum < 60
+          ? 'growing mid-sized provider with a structured management team'
+          : staffNum < 150
+            ? 'established regional provider with dedicated operational leads'
+            : 'large, multi-site provider with a corporate governance structure';
+
+      var founded = parseInt(co.founded) || 2015;
+      var age = new Date().getFullYear() - founded;
+      var maturityDesc = age <= 4
+        ? 'a newer organisation that has grown rapidly and brings a fresh, evidence-led approach'
+        : age <= 10
+          ? 'an organisation with a solid track record built over the past decade'
+          : age <= 20
+            ? 'a well-established provider with deep sector roots and long-standing commissioner relationships'
+            : 'a long-standing provider with over two decades of operational experience';
+
+      var cqcDesc = co.cqc && co.cqc.includes('Outstanding')
+        ? 'CQC-rated Outstanding — position this as a differentiator and weave it into evidence points'
+        : co.cqc && co.cqc.includes('Good')
+          ? 'CQC-rated Good — reference the inspection findings as validation of quality processes'
+          : co.cqc && co.cqc.includes('Improvement')
+            ? 'on a demonstrable improvement journey — focus on actions taken and progress made since the inspection'
+            : 'building towards first CQC registration — focus on the rigour of processes being put in place';
+
+      // Randomly vary the structural opening approach so no two responses lead the same way
+      var openingApproaches = [
+        'Lead with your single strongest piece of evidence for this question, then build the full argument around it.',
+        'Open by naming the commissioner's core need directly, then demonstrate how your model meets it with specific evidence.',
+        'Open with a concrete outcome you have already achieved that is directly relevant to this question, then explain the process behind it.',
+        'Open with a clear statement of your organisational approach, then ground every claim in named evidence and figures.',
+        'Open from the service user perspective — what they experience — then show the operational capability that delivers it.'
+      ];
+      var approach = openingApproaches[Math.floor(Math.random() * openingApproaches.length)];
+
+      // Vary paragraph rhythm instruction to prevent structural sameness
+      var rhythmOptions = [
+        'Vary sentence length throughout — mix short punchy sentences with longer evidential ones.',
+        'Use confident, declarative statements. Avoid hedging language. Each paragraph should make one clear claim and then prove it.',
+        'Write with authority. Each paragraph should open with a strong assertion and close with a specific piece of evidence.',
+        'Use a direct, professional tone. Front-load the key point in each paragraph, then elaborate with evidence.'
+      ];
+      var rhythm = rhythmOptions[Math.floor(Math.random() * rhythmOptions.length)];
+
+      return { sizeDesc, maturityDesc, cqcDesc, approach, rhythm };
+    }
+
+    var persona = buildPersona(co);
+
     // ── SYSTEM PROMPT ──
     var sp = 'You are a senior UK public sector bid writer with 20 years of experience winning care and support contracts for local authorities and NHS commissioners.\n\n';
     sp += 'WRITING RULES — follow these absolutely:\n';
@@ -107,6 +161,13 @@ exports.handler = async (event) => {
     sp += '6. Do not repeat or rephrase the question. Begin your answer immediately.\n';
     sp += '7. Stay within the word limit. Write as close to it as possible without exceeding it.\n';
     sp += '8. Be specific to this organisation and this tender — do not write generic responses.\n';
+    sp += '\nTHIS ORGANISATION\'S VOICE AND CHARACTER:\n';
+    sp += co.name + ' is ' + persona.sizeDesc + ', and ' + persona.maturityDesc + '. ';
+    sp += 'CQC status: ' + persona.cqcDesc + '. ';
+    sp += 'Write in a voice that reflects this specific type of organisation — the tone, confidence level, and language should feel authentic to who they are. ';
+    sp += 'Do not write as if this is a large corporate if they are small, and do not write as if they are a fledgling provider if they are established.\n';
+    sp += '\nSTRUCTURAL APPROACH FOR THIS RESPONSE: ' + persona.approach + '\n';
+    sp += 'RHYTHM AND TONE: ' + persona.rhythm + '\n';
 
     if (kb.writing_style) { sp += '\nHOUSE STYLE: ' + kb.writing_style.replace(/\n/g, ' ') + '\n'; }
     if (kb.commissioner_preferences) { sp += '\nWHAT THIS COMMISSIONER VALUES: ' + kb.commissioner_preferences.replace(/\n/g, ' ') + '\n'; }
@@ -170,6 +231,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: maxTokens,
+        temperature: 1.0,
         system: sp,
         messages: [{ role: 'user', content: up }]
       })
@@ -187,6 +249,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: maxTokens,
+          temperature: 1.0,
           system: sp,
           messages: [{ role: 'user', content: up }]
         })
