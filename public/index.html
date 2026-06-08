@@ -33,6 +33,14 @@
   nav ul a:hover { color:var(--white); }
   .nav-admin { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.13); border-radius:6px; padding:6px 14px; font-size:0.82rem !important; color:rgba(255,255,255,0.75) !important; }
   .nav-admin:hover { background:rgba(255,255,255,0.13) !important; color:var(--white) !important; }
+  .nav-auth { display:flex; align-items:center; gap:0.75rem; margin-left:1rem; }
+  .nav-signin { color:rgba(255,255,255,0.7) !important; text-decoration:none; font-size:0.88rem; transition:color 0.2s; }
+  .nav-signin:hover { color:var(--white) !important; }
+  .nav-register { background:var(--teal); color:var(--navy) !important; text-decoration:none; font-size:0.85rem; font-weight:700; padding:7px 16px; border-radius:7px; transition:background 0.2s; white-space:nowrap; }
+  .nav-register:hover { background:var(--teal-dk); }
+  .nav-account { color:rgba(255,255,255,0.7) !important; text-decoration:none; font-size:0.88rem; display:flex; align-items:center; gap:6px; }
+  .nav-account:hover { color:var(--white) !important; }
+  .nav-account-dot { width:28px; height:28px; background:var(--teal); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; color:var(--navy); }
 
   /* HERO */
   .hero { background:var(--navy); padding:5.5rem 2rem 4.5rem; text-align:center; position:relative; overflow:hidden; }
@@ -265,6 +273,10 @@
     <li><a href="https://icongrp.co.uk/" target="_blank">ICONGRP</a></li>
     <li><a href="/admin" class="nav-admin">Admin</a></li>
   </ul>
+  <div class="nav-auth" id="nav-auth">
+    <a href="/login.html" class="nav-signin">Sign in</a>
+    <a href="/register.html" class="nav-register">Get started free</a>
+  </div>
 </nav>
 
 <!-- ══ HOME ══ -->
@@ -874,6 +886,34 @@
   }
 
   loadData();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MzA3ODcsImV4cCI6MjA1OTIwNjc4N30.m7MNnKFQxMVp8M50e7cMBhO-bBMDpJNIUoGvlPlZxBo';
+  const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  _sb.auth.getSession().then(function(r) {
+    var session = r.data.session;
+    var navAuth = document.getElementById('nav-auth');
+    if (!navAuth) return;
+    if (session && session.user) {
+      var meta = session.user.user_metadata || {};
+      var initials = ((meta.first_name || '?')[0] + (meta.last_name || '?')[0]).toUpperCase();
+      var firstName = meta.first_name || 'My Account';
+      navAuth.innerHTML =
+        '<a href="/dashboard.html" class="nav-account">' +
+          '<div class="nav-account-dot">' + initials + '</div>' +
+          firstName +
+        '</a>' +
+        '<a href="#" onclick="handleSignOut(); return false;" class="nav-signin">Sign out</a>';
+    }
+  });
+
+  async function handleSignOut() {
+    await _sb.auth.signOut();
+    window.location.reload();
+  }
 </script>
 </body>
 </html>
