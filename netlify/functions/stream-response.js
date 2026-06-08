@@ -37,33 +37,74 @@ exports.handler = async (event) => {
     const canaDocs = t.cana_docs || {};
     const specDocs = Array.isArray(canaDocs.spec) ? canaDocs.spec : (canaDocs.spec ? [canaDocs.spec] : []);
     const scoringDocs = Array.isArray(canaDocs.scoring) ? canaDocs.scoring : (canaDocs.scoring ? [canaDocs.scoring] : []);
-    const specText = specDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 2000);
-    const scoringText = scoringDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 1000);
+    const specText = specDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 3000);
+    const scoringText = scoringDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 1500);
 
     const wordLimit = q.wordLimit ? parseInt(q.wordLimit) : 500;
-    const maxTokens = Math.min(Math.ceil(wordLimit * 1.3), 1200);
+    // Allow generous token budget: words * ~1.5 tokens/word, plus 500 buffer, capped at 4000
+    const maxTokens = Math.min(Math.ceil(wordLimit * 1.5) + 500, 4000);
+
     const co = companyDetails;
 
-    var sp = 'You are an expert UK public sector tender writer with 20 years experience winning care contracts.';
-    if (kb.writing_style) { sp += ' WRITING STYLE: ' + kb.writing_style.replace(/\n/g, ' '); }
-    if (kb.commissioner_preferences) { sp += ' COMMISSIONER PRIORITIES: ' + kb.commissioner_preferences.replace(/\n/g, ' '); }
-    if (kb.avoid_patterns_text) { sp += ' AVOID: ' + kb.avoid_patterns_text.replace(/\n/g, ' '); }
-    if (kb.winning_examples && kb.winning_examples.length) {
-      sp += ' WINNING STYLE EXAMPLES: ' + kb.winning_examples.map(function(w){ return (w.text||'').substring(0,400).replace(/\n/g,' '); }).join(' | ');
+    // Build system prompt
+    var sp = 'You are an expert UK public sector tender writer with 20 years experience winning care contracts. ';
+    sp += 'Write detailed, specific, evidence-based responses. Use concrete figures, percentages, and named processes. ';
+    sp += 'Never use vague language. Always stay within the word limit. Write in flowing, professional paragraphs. ';
+    sp += 'Do not use bullet points unless the question specifically asks for a list. ';
+    sp += 'Do not repeat or rephrase the question. Begin your response directly.';
+
+    if (kb.writing_style) {
+      sp += '\n\nWRITING STYLE INSTRUCTIONS: ' + kb.writing_style.replace(/\n/g, ' ');
     }
-    if (kb.feedback_examples && kb.feedback_examples.length) {
-      sp += ' COMMISSIONER FEEDBACK: ' + kb.feedback_examples.map(function(f){ return (f.text||'').substring(0,300).replace(/\n/g,' '); }).join(' | ');
+    if (kb.commissioner_preferences) {
+      sp += '\n\nCOMMISSIONER PRIORITIES: ' + kb.commissioner_preferences.replace(/\n/g, ' ');
+    }
+    if (kb.avoid_patterns_text) {
+      sp += '\n\nAVOID THESE PATTERNS: ' + kb.avoid_patterns_text.replace(/\n/g, ' ');
     }
 
-    var up = 'Write a tender response for: ' + t.title + ' (' + (t.org||'') + ').';
-    up += ' Bidding organisation: ' + co.name + ', founded ' + co.founded + ', ' + co.staff + ' staff, CQC: ' + co.cqc + ', services: ' + co.services + ', regions: ' + co.regions;
-    if (co.experience) { up += ', experience: ' + co.experience; }
-    if (specText) { up += '. SPECIFICATION: ' + specText; }
-    if (scoringText) { up += '. SCORING: ' + scoringText; }
-    up += '. QUESTION: ' + q.question;
-    if (q.scoring) { up += ' (Scoring weight: ' + q.scoring + ')'; }
-    if (q.wordLimit) { up += ' (Word limit: ' + q.wordLimit + ' words)'; }
-    up += '. Write the complete response now. Do not repeat the question. Write in flowing paragraphs.';
+    // Include winning examples with more content for better style modelling
+    if (kb.winning_examples && kb.winning_examples.length) {
+      sp += '\n\nWINNING TENDER RESPONSE EXAMPLES (study these for tone, depth, and specificity):\n';
+      kb.winning_examples.forEach(function(w, i) {
+        var excerpt = (w.text || '').replace(/\n+/g, ' ').trim().substring(0, 1200);
+        sp += '\n--- Example ' + (i + 1) + ' (' + (w.name || 'Winning response') + ') ---\n' + excerpt + '\n';
+      });
+      sp += '\n--- Use the above examples as your style and quality benchmark. ---';
+    }
+
+    // Include commissioner feedback for quality awareness
+    if (kb.feedback_examples && kb.feedback_examples.length) {
+      sp += '\n\nCOMMISSIONER FEEDBACK FROM PAST TENDERS (use this to understand what evaluators reward):\n';
+      kb.feedback_examples.forEach(function(f, i) {
+        var excerpt = (f.text || '').replace(/\n+/g, ' ').trim().substring(0, 600);
+        sp += '\n--- Feedback ' + (i + 1) + ': ' + excerpt + '\n';
+      });
+    }
+
+    // Build user prompt
+    var up = 'TENDER: ' + t.title + ' (' + (t.org || '') + ')\n\n';
+    up += 'BIDDING ORGANISATION:\n';
+    up += '- Company: ' + co.name + '\n';
+    up += '- Founded: ' + co.founded + '\n';
+    up += '- Staff: ' + co.staff + '\n';
+    up += '- CQC rating: ' + co.cqc + '\n';
+    up += '- Services: ' + co.services + '\n';
+    up += '- Regions: ' + co.regions + '\n';
+    if (co.experience) { up += '- Additional experience: ' + co.experience + '\n'; }
+
+    if (specText) {
+      up += '\nSPECIFICATION CONTEXT:\n' + specText + '\n';
+    }
+    if (scoringText) {
+      up += '\nSCORING CRITERIA:\n' + scoringText + '\n';
+    }
+
+    up += '\nQUESTION TO ANSWER: ' + q.question;
+    if (q.scoring) { up += '\nScoring weight: ' + q.scoring; }
+    if (q.wordLimit) { up += '\nWord limit: ' + q.wordLimit + ' words — write as close to this limit as possible without exceeding it.'; }
+
+    up += '\n\nWrite the complete, high-quality tender response now. Be specific to this organisation and this tender. Use evidence and concrete examples throughout.';
 
     const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
