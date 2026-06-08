@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create Account — Tender Experts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:#0B1929; --navy-mid:#112236; --teal:#00C9E0; --teal-dk:#0099AA;
+    --amber:#F5A623; --white:#ffffff; --offwhite:#F4F6F9;
+    --muted:#6B8FA3; --border:rgba(11,25,41,0.09);
+    --error:#E53E3E; --success:#38A169;
+  }
+  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; display:flex; flex-direction:column; }
+
+  /* NAV */
+  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; border-bottom:1px solid rgba(255,255,255,0.06); }
+  .nav-logo { display:flex; align-items:baseline; gap:8px; text-decoration:none; }
+  .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
+  .nav-logo-main span { color:var(--teal); }
+  .nav-logo-by { font-size:0.7rem; color:rgba(255,255,255,0.35); letter-spacing:0.04em; }
+  .nav-right { font-size:0.85rem; color:rgba(255,255,255,0.55); }
+  .nav-right a { color:var(--teal); text-decoration:none; font-weight:500; }
+  .nav-right a:hover { text-decoration:underline; }
+
+  /* PAGE */
+  .page { flex:1; display:flex; align-items:center; justify-content:center; padding:3rem 1.5rem; }
+
+  /* CARD */
+  .auth-card { background:var(--white); border-radius:16px; border:1px solid var(--border); box-shadow:0 4px 32px rgba(11,25,41,0.07); width:100%; max-width:480px; padding:2.5rem; }
+  .auth-card-header { text-align:center; margin-bottom:2rem; }
+  .auth-badge { display:inline-flex; align-items:center; gap:7px; background:rgba(0,201,224,0.08); border:1px solid rgba(0,201,224,0.2); border-radius:999px; padding:5px 14px; font-size:0.74rem; color:var(--teal); font-weight:600; letter-spacing:0.05em; text-transform:uppercase; margin-bottom:1rem; }
+  .auth-card-header h1 { font-family:'Playfair Display',serif; font-size:1.75rem; color:var(--navy); margin-bottom:0.5rem; }
+  .auth-card-header p { font-size:0.88rem; color:var(--muted); line-height:1.6; }
+
+  /* FORM */
+  .form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:1.1rem; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+  .form-label { font-size:0.82rem; font-weight:600; color:var(--navy); }
+  .form-label span { font-weight:400; color:var(--muted); }
+  .form-input {
+    padding:11px 14px; border:1.5px solid var(--border); border-radius:9px;
+    font-size:0.92rem; font-family:'DM Sans',sans-serif; color:var(--navy);
+    outline:none; transition:border-color 0.2s; background:var(--white);
+    width:100%;
+  }
+  .form-input:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,201,224,0.08); }
+  .form-input.error { border-color:var(--error); }
+  .field-error { font-size:0.78rem; color:var(--error); display:none; }
+  .field-error.show { display:block; }
+
+  /* DIVIDER */
+  .form-divider { border:none; border-top:1px solid var(--border); margin:1.5rem 0; }
+
+  /* SECTION LABEL */
+  .form-section { font-size:0.74rem; font-weight:700; color:var(--muted); letter-spacing:0.07em; text-transform:uppercase; margin-bottom:1rem; margin-top:0.25rem; }
+
+  /* SUBMIT */
+  .btn-primary { width:100%; background:var(--navy); color:var(--white); border:none; border-radius:10px; padding:14px 24px; font-size:0.95rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.2s, transform 0.1s; margin-top:0.5rem; }
+  .btn-primary:hover { background:#1a3550; }
+  .btn-primary:active { transform:scale(0.99); }
+  .btn-primary:disabled { opacity:0.6; cursor:not-allowed; }
+
+  /* ALERT */
+  .alert { border-radius:9px; padding:12px 16px; font-size:0.87rem; margin-bottom:1.25rem; display:none; line-height:1.5; }
+  .alert.show { display:block; }
+  .alert-error { background:rgba(229,62,62,0.08); border:1px solid rgba(229,62,62,0.25); color:#c53030; }
+  .alert-success { background:rgba(56,161,105,0.08); border:1px solid rgba(56,161,105,0.25); color:#276749; }
+
+  /* FOOTER LINK */
+  .auth-footer { text-align:center; margin-top:1.5rem; font-size:0.87rem; color:var(--muted); }
+  .auth-footer a { color:var(--teal); text-decoration:none; font-weight:500; }
+  .auth-footer a:hover { text-decoration:underline; }
+
+  /* PASSWORD STRENGTH */
+  .pw-strength { margin-top:5px; height:4px; border-radius:4px; background:var(--border); overflow:hidden; }
+  .pw-strength-bar { height:100%; border-radius:4px; transition:width 0.3s, background 0.3s; width:0%; }
+
+  /* TERMS */
+  .terms-check { display:flex; align-items:flex-start; gap:10px; margin-top:1rem; }
+  .terms-check input[type=checkbox] { margin-top:3px; accent-color:var(--teal); width:15px; height:15px; flex-shrink:0; cursor:pointer; }
+  .terms-check label { font-size:0.83rem; color:var(--muted); line-height:1.5; cursor:pointer; }
+  .terms-check label a { color:var(--teal); text-decoration:none; }
+  .terms-check label a:hover { text-decoration:underline; }
+
+  /* SUCCESS STATE */
+  .success-state { text-align:center; padding:1rem 0; display:none; }
+  .success-state.show { display:block; }
+  .success-icon { width:64px; height:64px; background:rgba(56,161,105,0.1); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.25rem; font-size:1.75rem; }
+  .success-state h2 { font-family:'Playfair Display',serif; font-size:1.5rem; margin-bottom:0.75rem; color:var(--navy); }
+  .success-state p { font-size:0.9rem; color:var(--muted); line-height:1.7; }
+  .success-state .email-highlight { color:var(--navy); font-weight:600; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span class="nav-logo-main">Tender <span>Experts</span></span>
+    <span class="nav-logo-by">by ICONGRP</span>
+  </a>
+  <div class="nav-right">Already have an account? <a href="/login.html">Sign in</a></div>
+</nav>
+
+<div class="page">
+  <div class="auth-card">
+
+    <!-- FORM STATE -->
+    <div id="form-state">
+      <div class="auth-card-header">
+        <div class="auth-badge">✦ Create Account</div>
+        <h1>Get started today</h1>
+        <p>Create your free account and start winning more tenders with AI-powered bid writing.</p>
+      </div>
+
+      <div class="alert alert-error" id="error-alert"></div>
+
+      <p class="form-section">Your details</p>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="first-name">First name</label>
+          <input class="form-input" type="text" id="first-name" placeholder="Sarah" autocomplete="given-name">
+          <span class="field-error" id="err-first-name">Required</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="last-name">Last name</label>
+          <input class="form-input" type="text" id="last-name" placeholder="Johnson" autocomplete="family-name">
+          <span class="field-error" id="err-last-name">Required</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email">Email address</label>
+        <input class="form-input" type="email" id="email" placeholder="sarah@yourcompany.co.uk" autocomplete="email">
+        <span class="field-error" id="err-email">Please enter a valid email</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password">Password</label>
+        <input class="form-input" type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password">
+        <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
+        <span class="field-error" id="err-password">Password must be at least 8 characters</span>
+      </div>
+
+      <hr class="form-divider">
+      <p class="form-section">Your company</p>
+
+      <div class="form-group">
+        <label class="form-label" for="company-name">Company name</label>
+        <input class="form-input" type="text" id="company-name" placeholder="Sunrise Care Services Ltd" autocomplete="organization">
+        <span class="field-error" id="err-company">Required</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="job-title">Your job title <span>(optional)</span></label>
+        <input class="form-input" type="text" id="job-title" placeholder="Director / Manager / Bid Writer">
+      </div>
+
+      <div class="terms-check">
+        <input type="checkbox" id="terms">
+        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>. I understand my data is stored securely and used only to provide the Tender Experts service.</label>
+      </div>
+      <span class="field-error" id="err-terms">You must agree to the terms to continue</span>
+
+      <button class="btn-primary" id="register-btn" onclick="handleRegister()">Create my account →</button>
+
+      <div class="auth-footer">
+        Already have an account? <a href="/login.html">Sign in here</a>
+      </div>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-state" id="success-state">
+      <div class="success-icon">✉️</div>
+      <h2>Check your inbox</h2>
+      <p>We've sent a verification email to <span class="email-highlight" id="sent-to"></span>. Click the link in the email to activate your account and get started.</p>
+      <div style="margin-top:1.5rem; font-size:0.83rem; color:var(--muted);">
+        Didn't receive it? Check your spam folder or <a href="#" onclick="resendEmail()" style="color:var(--teal); text-decoration:none; font-weight:500;">resend the email</a>.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2MzA3ODcsImV4cCI6MjA1OTIwNjc4N30.m7MNnKFQxMVp8M50e7cMBhO-bBMDpJNIUoGvlPlZxBo';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // Password strength indicator
+  document.getElementById('password').addEventListener('input', function() {
+    var val = this.value;
+    var bar = document.getElementById('pw-bar');
+    var strength = 0;
+    if (val.length >= 8) strength++;
+    if (val.length >= 12) strength++;
+    if (/[A-Z]/.test(val)) strength++;
+    if (/[0-9]/.test(val)) strength++;
+    if (/[^A-Za-z0-9]/.test(val)) strength++;
+    var colors = ['','#E53E3E','#F5A623','#F5A623','#38A169','#38A169'];
+    var widths = ['0%','20%','40%','60%','80%','100%'];
+    bar.style.width = widths[strength] || '0%';
+    bar.style.background = colors[strength] || 'transparent';
+  });
+
+  function clearErrors() {
+    document.querySelectorAll('.field-error').forEach(function(el){ el.classList.remove('show'); });
+    document.querySelectorAll('.form-input').forEach(function(el){ el.classList.remove('error'); });
+    document.getElementById('error-alert').classList.remove('show');
+  }
+
+  function showError(id, inputId) {
+    var el = document.getElementById(id);
+    if (el) el.classList.add('show');
+    if (inputId) {
+      var inp = document.getElementById(inputId);
+      if (inp) inp.classList.add('error');
+    }
+  }
+
+  function showAlert(msg) {
+    var el = document.getElementById('error-alert');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  async function handleRegister() {
+    clearErrors();
+    var firstName = document.getElementById('first-name').value.trim();
+    var lastName  = document.getElementById('last-name').value.trim();
+    var email     = document.getElementById('email').value.trim();
+    var password  = document.getElementById('password').value;
+    var company   = document.getElementById('company-name').value.trim();
+    var jobTitle  = document.getElementById('job-title').value.trim();
+    var terms     = document.getElementById('terms').checked;
+
+    var valid = true;
+    if (!firstName) { showError('err-first-name','first-name'); valid=false; }
+    if (!lastName)  { showError('err-last-name','last-name'); valid=false; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('err-email','email'); valid=false; }
+    if (!password || password.length < 8) { showError('err-password','password'); valid=false; }
+    if (!company)   { showError('err-company','company-name'); valid=false; }
+    if (!terms)     { showError('err-terms'); valid=false; }
+    if (!valid) return;
+
+    var btn = document.getElementById('register-btn');
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    try {
+      // Create auth user
+      var { data, error } = await sb.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+            company_name: company,
+            job_title: jobTitle
+          }
+        }
+      });
+
+      if (error) throw error;
+
+      // Create company profile row
+      if (data.user) {
+        await sb.from('company_profiles').upsert({
+          user_id: data.user.id,
+          company_name: company,
+          contact_first_name: firstName,
+          contact_last_name: lastName,
+          contact_email: email,
+          contact_job_title: jobTitle,
+          profile_complete: false,
+          created_at: new Date().toISOString()
+        });
+      }
+
+      // Show success
+      document.getElementById('sent-to').textContent = email;
+      document.getElementById('form-state').style.display = 'none';
+      document.getElementById('success-state').classList.add('show');
+
+    } catch(err) {
+      var msg = err.message || 'Something went wrong. Please try again.';
+      if (msg.includes('already registered')) msg = 'An account with this email already exists. <a href="/login.html" style="color:var(--teal)">Sign in instead?</a>';
+      document.getElementById('error-alert').innerHTML = msg;
+      document.getElementById('error-alert').classList.add('show');
+      btn.disabled = false;
+      btn.textContent = 'Create my account →';
+    }
+  }
+
+  async function resendEmail() {
+    var email = document.getElementById('email').value.trim();
+    if (!email) return;
+    await sb.auth.resend({ type: 'signup', email: email });
+    alert('Verification email resent to ' + email);
+  }
+
+  // If already logged in, redirect to dashboard
+  sb.auth.getSession().then(function(r){
+    if (r.data.session) window.location.href = '/dashboard.html';
+  });
+</script>
+</body>
+</html>
