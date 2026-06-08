@@ -5,5 +5,8 @@
 [functions."stream-response"]
   timeout = 26
 
+[functions."generate-cana"]
+  timeout = 26
+
 [functions."generate-response"]
   timeout = 26
