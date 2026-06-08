@@ -334,9 +334,13 @@
         <input class="form-input" type="text" id="doc-label-input" placeholder="e.g. Public Liability Insurance 2025–2026">
       </div>
 
-      <div class="form-group">
-        <label class="form-label" id="date-label">Expiry date <span>(AI will extract automatically — override here if needed)</span></label>
+      <div class="form-group" id="expiry-group">
+        <label class="form-label">Expiry date <span>(AI will extract automatically — edit if needed)</span></label>
         <input class="form-input" type="text" id="doc-expiry-input" placeholder="DD/MM/YYYY">
+      </div>
+      <div class="form-group" id="review-group">
+        <label class="form-label">Review date <span>(AI will extract automatically — edit if needed)</span></label>
+        <input class="form-input" type="text" id="doc-review-input" placeholder="DD/MM/YYYY">
       </div>
 
       <!-- PROGRESS -->
@@ -419,10 +423,10 @@
     var exp = new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0]));
     var today = new Date(); today.setHours(0,0,0,0);
     var days = Math.ceil((exp - today) / (1000*60*60*24));
-    if (days < 0) return { label:'Expired', cls:'expired', days:days };
-    if (days <= 14) return { label:'Expires in '+days+'d', cls:'expired', days:days };
-    if (days <= 30) return { label:'Expires in '+days+'d', cls:'soon', days:days };
-    return { label:'Valid until '+expiryDate, cls:'valid', days:days };
+    if (days < 0) return { label: isReview ? 'Review overdue' : 'Expired', cls:'expired', days:days };
+    if (days <= 14) return { label: (isReview ? 'Review in ' : 'Expires in ') + days + 'd', cls:'expired', days:days };
+    if (days <= 30) return { label: (isReview ? 'Review in ' : 'Expires in ') + days + 'd', cls:'soon', days:days };
+    return { label: (isReview ? 'Review: ' : 'Valid until ') + dateToUse, cls:'valid', days:days };
   }
 
   function formatFileSize(bytes) {
@@ -472,7 +476,7 @@
     }
 
     grid.innerHTML = filtered.map(function(doc) {
-      var status = getExpiryStatus(doc.expiry_date, doc.doc_type);
+      var status = getExpiryStatus(doc.expiry_date, doc.doc_type, doc.review_date);
       var isImage = doc.file_name && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name);
       var cardCls = status.cls === 'expired' ? 'expired' : status.cls === 'soon' ? 'expiring' : '';
       var thumb = isImage
@@ -531,6 +535,7 @@
     document.getElementById('doc-type-select').value = '';
     document.getElementById('doc-label-input').value = '';
     document.getElementById('doc-expiry-input').value = '';
+    document.getElementById('doc-review-input').value = '';
     document.getElementById('upload-progress').classList.remove('show');
   }
 
@@ -542,22 +547,41 @@
   // Doc types with no date needed
   var NO_DATE_TYPES = ['case_study','reference_letter'];
 
-  document.getElementById('doc-type-select').addEventListener('change', function() {
-    var type = this.value;
-    var label = document.getElementById('date-label');
-    var dateGroup = label ? label.closest('.form-group') : null;
-    if (!label) return;
-    if (NO_DATE_TYPES.includes(type)) {
-      if (dateGroup) dateGroup.style.display = 'none';
-    } else {
-      if (dateGroup) dateGroup.style.display = '';
-      if (REVIEW_DATE_TYPES.includes(type)) {
-        label.innerHTML = 'Review date <span>(AI will extract automatically — override here if needed)</span>';
-      } else {
-        label.innerHTML = 'Expiry date <span>(AI will extract automatically — override here if needed)</span>';
-      }
+  function updateDateFields(type) {
+    var expiryGroup = document.getElementById('expiry-group');
+    var reviewGroup = document.getElementById('review-group');
+    if (!expiryGroup || !reviewGroup) return;
+    if (!type) {
+      // No type selected — show both dimmed
+      expiryGroup.style.opacity = '0.5';
+      reviewGroup.style.opacity = '0.5';
+      return;
     }
+    if (NO_DATE_TYPES.includes(type)) {
+      expiryGroup.style.display = 'none';
+      reviewGroup.style.display = 'none';
+    } else if (REVIEW_DATE_TYPES.includes(type)) {
+      // Policy — review date is primary, hide expiry
+      expiryGroup.style.display = 'none';
+      reviewGroup.style.display = '';
+      reviewGroup.style.opacity = '1';
+    } else {
+      // Insurance/regulatory — expiry is primary, hide review
+      expiryGroup.style.display = '';
+      reviewGroup.style.display = 'none';
+      expiryGroup.style.opacity = '1';
+    }
+  }
+
+  document.getElementById('doc-type-select').addEventListener('change', function() {
+    updateDateFields(this.value);
+    // Clear both date fields on type change
+    document.getElementById('doc-expiry-input').value = '';
+    document.getElementById('doc-review-input').value = '';
   });
+
+  // Init — show both dimmed on load
+  updateDateFields('');
 
   function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
   function handleDragLeave(e) { document.getElementById('drop-zone').classList.remove('drag-over'); }
@@ -638,7 +662,11 @@
             var result = await res.json();
             if (result.expiry_date) {
               extractedExpiry = result.expiry_date;
-              document.getElementById('doc-expiry-input').value = extractedExpiry;
+              if (isReviewType) {
+                document.getElementById('doc-review-input').value = extractedExpiry;
+              } else {
+                document.getElementById('doc-expiry-input').value = extractedExpiry;
+              }
             }
           }
         } catch(e) { /* extraction failed — no problem, just skip */ }
@@ -664,7 +692,7 @@
       btn.textContent = 'Upload & scan';
       await loadDocs();
       closeUploadModal();
-      showToast(extractedExpiry ? REVIEW_DATE_TYPES.includes(document.getElementById('doc-type-select').value) ? 'Document uploaded — review date: ' : 'Document uploaded — expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
+      showToast(extractedExpiry ? isReviewType ? 'Document uploaded — review date: ' : 'Document uploaded — expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
 
     } catch(err) {
       showToast('Upload failed: ' + (err.message||'Unknown error'), 'error');
@@ -690,7 +718,7 @@
     var url = data.signedUrl;
     var isImage = doc.file_name && /\.(jpg|jpeg|png|gif|webp)$/i.test(doc.file_name);
     document.getElementById('viewer-title').textContent = doc.doc_label || DOC_LABELS[doc.doc_type] || doc.file_name;
-    var status = getExpiryStatus(doc.expiry_date, doc.doc_type);
+    var status = getExpiryStatus(doc.expiry_date, doc.doc_type, doc.review_date);
     document.getElementById('viewer-meta').textContent = (doc.expiry_date ? 'Expires: ' + doc.expiry_date + ' · ' : '') + status.label;
     var dl = document.getElementById('viewer-download');
     dl.href = url; dl.download = doc.file_name || 'document';
