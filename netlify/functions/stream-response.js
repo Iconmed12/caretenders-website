@@ -34,92 +34,179 @@ exports.handler = async (event) => {
     const q = allQ[idx];
     if (!q) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Question not found' }) };
 
+    // ── SPEC EXTRACTION: pull relevant section per question ──
     const canaDocs = t.cana_docs || {};
     const specDocs = Array.isArray(canaDocs.spec) ? canaDocs.spec : (canaDocs.spec ? [canaDocs.spec] : []);
     const scoringDocs = Array.isArray(canaDocs.scoring) ? canaDocs.scoring : (canaDocs.scoring ? [canaDocs.scoring] : []);
-    const specText = specDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 3000);
-    const scoringText = scoringDocs.map(function(d){ return d.text || ''; }).join(' ').substring(0, 1500);
+    const fullSpecText = specDocs.map(function(d){ return d.text || ''; }).join('\n');
+    const fullScoringText = scoringDocs.map(function(d){ return d.text || ''; }).join('\n');
+
+    // Extract keywords from question to find relevant spec section
+    function extractRelevantSection(fullText, question, maxChars) {
+      if (!fullText || fullText.length <= maxChars) return fullText;
+      // Get keywords from question (words > 4 chars, ignore common words)
+      var stopWords = ['what','with','your','that','this','have','will','from','they','been','their','about','which','when','where','how','provide','please','describe','explain','detail','organisation','service','services'];
+      var keywords = question.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '')
+        .split(/\s+/)
+        .filter(function(w){ return w.length > 4 && !stopWords.includes(w); });
+
+      if (!keywords.length) return fullText.substring(0, maxChars);
+
+      // Split spec into paragraphs and score each by keyword matches
+      var paragraphs = fullText.split(/\n{2,}|\r\n{2,}/);
+      var scored = paragraphs.map(function(p, i) {
+        var pl = p.toLowerCase();
+        var score = keywords.reduce(function(s, kw) { return s + (pl.includes(kw) ? 1 : 0); }, 0);
+        return { text: p, score: score, index: i };
+      });
+
+      // Sort by score, take top paragraphs up to maxChars
+      scored.sort(function(a, b) { return b.score - a.score || a.index - b.index; });
+      var result = '';
+      for (var i = 0; i < scored.length; i++) {
+        if ((result + scored[i].text).length > maxChars) break;
+        result += scored[i].text + '\n\n';
+      }
+      return result.trim() || fullText.substring(0, maxChars);
+    }
+
+    var specText = extractRelevantSection(fullSpecText, q.question, 4000);
+    var scoringText = extractRelevantSection(fullScoringText, q.question, 2000);
+
+    // ── SCORING CRITERIA PARSING: extract themes to address ──
+    function extractScoringThemes(scoringText, question) {
+      if (!scoringText) return null;
+      // Look for numbered criteria, bullet points, or percentage weights near the question topic
+      var lines = scoringText.split('\n').filter(function(l){ return l.trim().length > 10; });
+      // Take up to 8 most relevant lines as scoring themes
+      var keywords = question.toLowerCase().split(/\s+/).filter(function(w){ return w.length > 4; });
+      var relevant = lines.filter(function(l){
+        var ll = l.toLowerCase();
+        return keywords.some(function(k){ return ll.includes(k); });
+      }).slice(0, 8);
+      if (!relevant.length) relevant = lines.slice(0, 6);
+      return relevant.length ? relevant.join('\n') : null;
+    }
+
+    var scoringThemes = extractScoringThemes(scoringText, q.question);
 
     const wordLimit = q.wordLimit ? parseInt(q.wordLimit) : 500;
-    // Allow generous token budget: words * ~1.5 tokens/word, plus 500 buffer, capped at 4000
     const maxTokens = Math.min(Math.ceil(wordLimit * 1.5) + 500, 7000);
 
     const co = companyDetails;
 
-    // Build system prompt
-    var sp = 'You are an expert UK public sector tender writer with 20 years experience winning care contracts. ';
-    sp += 'Write detailed, specific, evidence-based responses. Use concrete figures, percentages, and named processes. ';
-    sp += 'Never use vague language. Always stay within the word limit. Write in flowing, professional paragraphs. ';
-    sp += 'Do not use bullet points unless the question specifically asks for a list. ';
-    sp += 'Do not repeat or rephrase the question. Begin your response directly.';
+    // ── SYSTEM PROMPT ──
+    var sp = 'You are a senior UK public sector bid writer with 20 years of experience winning care and support contracts for local authorities and NHS commissioners.\n\n';
+    sp += 'WRITING RULES — follow these absolutely:\n';
+    sp += '1. Write in flowing professional paragraphs. No bullet points unless the question explicitly asks for a list.\n';
+    sp += '2. Never use vague phrases like "we are committed to", "we strive to", "we believe in", "we endeavour". Replace every vague phrase with a specific action, figure, or named process.\n';
+    sp += '3. Use concrete evidence: percentages, timescales, staff numbers, named policies, inspection outcomes, contract examples.\n';
+    sp += '4. Write directly to the scoring criteria — structure your answer so every scoring theme is explicitly addressed.\n';
+    sp += '5. Sound like an experienced human bid writer, not an AI. Vary sentence length. Use authoritative, confident language.\n';
+    sp += '6. Do not repeat or rephrase the question. Begin your answer immediately.\n';
+    sp += '7. Stay within the word limit. Write as close to it as possible without exceeding it.\n';
+    sp += '8. Be specific to this organisation and this tender — do not write generic responses.\n';
 
     if (kb.writing_style) {
-      sp += '\n\nWRITING STYLE INSTRUCTIONS: ' + kb.writing_style.replace(/\n/g, ' ');
+      sp += '\nHOUSE STYLE: ' + kb.writing_style.replace(/\n/g, ' ') + '\n';
     }
     if (kb.commissioner_preferences) {
-      sp += '\n\nCOMMISSIONER PRIORITIES: ' + kb.commissioner_preferences.replace(/\n/g, ' ');
+      sp += '\nWHAT THIS COMMISSIONER VALUES: ' + kb.commissioner_preferences.replace(/\n/g, ' ') + '\n';
     }
     if (kb.avoid_patterns_text) {
-      sp += '\n\nAVOID THESE PATTERNS: ' + kb.avoid_patterns_text.replace(/\n/g, ' ');
+      sp += '\nNEVER USE THESE PATTERNS: ' + kb.avoid_patterns_text.replace(/\n/g, ' ') + '\n';
     }
 
-    // Include winning examples with more content for better style modelling
     if (kb.winning_examples && kb.winning_examples.length) {
-      sp += '\n\nWINNING TENDER RESPONSE EXAMPLES (study these for tone, depth, and specificity):\n';
-      kb.winning_examples.forEach(function(w, i) {
-        var excerpt = (w.text || '').replace(/\n+/g, ' ').trim().substring(0, 1200);
-        sp += '\n--- Example ' + (i + 1) + ' (' + (w.name || 'Winning response') + ') ---\n' + excerpt + '\n';
+      sp += '\nWINNING RESPONSE EXAMPLES — match this quality, tone and depth:\n';
+      kb.winning_examples.slice(0, 3).forEach(function(w, i) {
+        var excerpt = (w.text || '').replace(/\n+/g, ' ').trim().substring(0, 1500);
+        sp += '\n[Example ' + (i + 1) + ' — ' + (w.name || 'Winning response') + ']\n' + excerpt + '\n';
       });
-      sp += '\n--- Use the above examples as your style and quality benchmark. ---';
+      sp += '\n[These examples show the required standard. Match their specificity and confidence.]\n';
     }
 
-    // Include commissioner feedback for quality awareness
     if (kb.feedback_examples && kb.feedback_examples.length) {
-      sp += '\n\nCOMMISSIONER FEEDBACK FROM PAST TENDERS (use this to understand what evaluators reward):\n';
-      kb.feedback_examples.forEach(function(f, i) {
-        var excerpt = (f.text || '').replace(/\n+/g, ' ').trim().substring(0, 600);
-        sp += '\n--- Feedback ' + (i + 1) + ': ' + excerpt + '\n';
+      sp += '\nCOMMISSIONER FEEDBACK (what evaluators reward and penalise):\n';
+      kb.feedback_examples.slice(0, 3).forEach(function(f, i) {
+        var excerpt = (f.text || '').replace(/\n+/g, ' ').trim().substring(0, 700);
+        sp += '[Feedback ' + (i + 1) + '] ' + excerpt + '\n';
       });
     }
 
-    // Build user prompt
-    var up = 'TENDER: ' + t.title + ' (' + (t.org || '') + ')\n\n';
+    // ── USER PROMPT ──
+    var up = 'TENDER: ' + t.title + '\n';
+    up += 'COMMISSIONER: ' + (t.org || 'Not specified') + '\n';
+    up += 'REGION: ' + (t.region || 'Not specified') + '\n\n';
+
     up += 'BIDDING ORGANISATION:\n';
-    up += '- Company: ' + co.name + '\n';
+    up += '- Name: ' + co.name + '\n';
     up += '- Founded: ' + co.founded + '\n';
-    up += '- Staff: ' + co.staff + '\n';
-    up += '- CQC rating: ' + co.cqc + '\n';
-    up += '- Services: ' + co.services + '\n';
-    up += '- Regions: ' + co.regions + '\n';
-    if (co.experience) { up += '- Additional experience: ' + co.experience + '\n'; }
+    up += '- Total staff: ' + co.staff + '\n';
+    up += '- CQC status: ' + co.cqc + '\n';
+    up += '- Services delivered: ' + co.services + '\n';
+    up += '- Operating regions: ' + co.regions + '\n';
+    if (co.achievements) { up += '- Key achievements / awards: ' + co.achievements + '\n'; }
+    if (co.policies) { up += '- Named policies and frameworks: ' + co.policies + '\n'; }
+    if (co.accreditations) { up += '- Accreditations / memberships: ' + co.accreditations + '\n'; }
+    if (co.kpis) { up += '- Performance KPIs: ' + co.kpis + '\n'; }
+    if (co.experience) { up += '- Contract experience: ' + co.experience + '\n'; }
 
     if (specText) {
-      up += '\nSPECIFICATION CONTEXT:\n' + specText + '\n';
+      up += '\nRELEVANT SPECIFICATION SECTION:\n' + specText + '\n';
     }
-    if (scoringText) {
+
+    if (scoringThemes) {
+      up += '\nSCORING CRITERIA FOR THIS QUESTION (your response MUST address each of these themes):\n' + scoringThemes + '\n';
+    } else if (scoringText) {
       up += '\nSCORING CRITERIA:\n' + scoringText + '\n';
     }
 
-    up += '\nQUESTION TO ANSWER: ' + q.question;
-    if (q.scoring) { up += '\nScoring weight: ' + q.scoring; }
-    if (q.wordLimit) { up += '\nWord limit: ' + q.wordLimit + ' words — write as close to this limit as possible without exceeding it.'; }
+    up += '\nQUESTION: ' + q.question + '\n';
+    if (q.scoring) { up += 'Scoring weight: ' + q.scoring + '\n'; }
+    if (q.wordLimit) { up += 'Word limit: ' + q.wordLimit + ' words\n'; }
 
-    up += '\n\nWrite the complete, high-quality tender response now. Be specific to this organisation and this tender. Use evidence and concrete examples throughout.';
+    up += '\nWrite the complete tender response now. Address every scoring theme explicitly. Use specific evidence from the organisation details above. Sound like an experienced human bid writer.';
 
-    const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: maxTokens,
-        system: sp,
-        messages: [{ role: 'user', content: up }]
-      })
-    });
+    // ── MODEL: try Sonnet first, fall back to Haiku if timeout ──
+    async function callModel(model, timeoutMs) {
+      const controller = new AbortController();
+      const timer = setTimeout(function(){ controller.abort(); }, timeoutMs);
+      try {
+        var res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': process.env.ANTHROPIC_API_KEY,
+            'anthropic-version': '2023-06-01'
+          },
+          body: JSON.stringify({
+            model: model,
+            max_tokens: maxTokens,
+            system: sp,
+            messages: [{ role: 'user', content: up }]
+          }),
+          signal: controller.signal
+        });
+        clearTimeout(timer);
+        return res;
+      } catch(e) {
+        clearTimeout(timer);
+        throw e;
+      }
+    }
+
+    var aiRes;
+    var modelUsed = 'claude-sonnet-4-6';
+    try {
+      // Try Sonnet with 22 second timeout (leaving buffer for Netlify's 26s limit)
+      aiRes = await callModel('claude-sonnet-4-6', 22000);
+    } catch(e) {
+      // Fall back to Haiku if Sonnet times out
+      modelUsed = 'claude-haiku-4-5-20251001';
+      aiRes = await callModel('claude-haiku-4-5-20251001', 20000);
+    }
 
     if (!aiRes.ok) {
       const errText = await aiRes.text();
@@ -140,7 +227,8 @@ exports.handler = async (event) => {
         question: q.question,
         answer: answer,
         questionIndex: idx,
-        totalQuestions: allQ.length
+        totalQuestions: allQ.length,
+        model: modelUsed
       })
     };
 
