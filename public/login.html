@@ -179,7 +179,16 @@
     } catch(err) {
       var msg = err.message || 'Sign in failed. Please try again.';
       if (msg.includes('Invalid login')) msg = 'Incorrect email or password. Please try again.';
-      if (msg.includes('Email not confirmed')) msg = 'Please verify your email before signing in. Check your inbox.';
+      if (msg.includes('Email not confirmed')) {
+        var resendEmail = document.getElementById('email').value.trim();
+        document.getElementById('error-alert').innerHTML =
+          'Please verify your email before signing in. ' +
+          '<a href="#" onclick="resendVerification(\'' + resendEmail + '\'); return false;" ' +
+          'style="color:var(--teal);font-weight:600;text-decoration:underline;">Resend verification email</a>';
+        document.getElementById('error-alert').classList.add('show');
+        btn.disabled = false; btn.textContent = 'Sign in to my account →';
+        return;
+      }
       document.getElementById('error-alert').textContent = msg;
       document.getElementById('error-alert').classList.add('show');
       btn.disabled = false;
@@ -212,6 +221,20 @@
     }
     btn.disabled = false;
     btn.textContent = 'Send reset link →';
+  }
+
+  async function resendVerification(email) {
+    try {
+      var { error } = await sb.auth.resend({ type: 'signup', email: email });
+      if (error) throw error;
+      document.getElementById('error-alert').innerHTML =
+        '✓ Verification email resent to <strong>' + email + '</strong>. Check your inbox and spam folder.';
+      document.getElementById('error-alert').style.background = 'rgba(56,161,105,0.08)';
+      document.getElementById('error-alert').style.borderColor = 'rgba(56,161,105,0.25)';
+      document.getElementById('error-alert').style.color = '#276749';
+    } catch(err) {
+      document.getElementById('error-alert').textContent = 'Could not resend email. Please try registering again.';
+    }
   }
 
   // If already logged in, redirect to dashboard
