@@ -47,8 +47,28 @@
         return;
       }
 
-      // Payment confirmed — show processing screen
+      // Payment confirmed — show processing screen immediately
       showProcessingScreen(data.jobId, data.email);
+
+      // Browser triggers background function directly (more reliable than function-to-function)
+      console.log('Triggering background function from browser for job:', data.jobId);
+      fetch('/.netlify/functions/generate-cana-background', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: data.jobId,
+          tenderId: data.tenderId || tenderId,
+          sessionId: sid,
+          includeSq: data.includeSq,
+          companyDetails: data.companyDetails || co
+        })
+      }).then(function(r){
+        console.log('Background function response status:', r.status);
+      }).catch(function(e){
+        console.error('Background function trigger failed:', e.message);
+      });
+
+      // Start polling for status updates
       pollJobStatus(data.jobId);
 
 } catch(e) {
