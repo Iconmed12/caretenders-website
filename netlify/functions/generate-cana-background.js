@@ -82,9 +82,14 @@ exports.handler = async (event) => {
     }
 
     var kbContext = '';
-    if (kb.writing_style)           kbContext += 'WRITING STYLE: ' + kb.writing_style + '\n';
-    if (kb.winning_examples)        kbContext += 'WINNING EXAMPLES: ' + kb.winning_examples.substring(0,800) + '\n';
-    if (kb.commissioner_preferences) kbContext += 'COMMISSIONER PREFERENCES: ' + kb.commissioner_preferences + '\n';
+    function kbStr(val) {
+      if (!val) return '';
+      if (Array.isArray(val)) return val.map(function(v){ return typeof v === 'object' ? JSON.stringify(v) : String(v); }).join(' | ');
+      return String(val);
+    }
+    if (kb.writing_style)            kbContext += 'WRITING STYLE: '            + kbStr(kb.writing_style).substring(0,400) + '\n';
+    if (kb.winning_examples)         kbContext += 'WINNING EXAMPLES: '         + kbStr(kb.winning_examples).substring(0,800) + '\n';
+    if (kb.commissioner_preferences) kbContext += 'COMMISSIONER PREFERENCES: ' + kbStr(kb.commissioner_preferences).substring(0,400) + '\n';
 
     var coCtx = 'Company: ' + clientName + '\n' +
       'CQC: ' + (co.cqc || '') + '\n' +
