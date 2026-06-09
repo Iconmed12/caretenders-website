@@ -226,9 +226,9 @@
       }
       // Always proceed to SQ step
       setStep(3);
-      populateSqStep();
       showState('sq');
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      await populateSqStep();
     } catch(err) {
       console.error('canaChContinue error:', err);
       // Still proceed even if something failed
@@ -243,126 +243,178 @@
   function canaChSkip() {
     window._chData = null;
     setStep(3);
-    try { populateSqStep(); } catch(e) { console.error('populateSqStep error:', e); }
     showState('sq');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    await populateSqStep();
   }
 
-  function populateSqStep() {
+  async function populateSqStep() {
+    var el = document.getElementById('sq-sections-cana');
+    if (!el) return;
+
+    // Show loading state immediately
+    el.innerHTML = '<div style="text-align:center;padding:2rem;color:#9ca3af;"><div style="font-size:1.5rem;margin-bottom:0.5rem;">⏳</div><div style="font-size:0.85rem;">Loading your SQ...</div></div>';
+
     var ch = window._chData || {};
     var co = window._companyDetails || {};
-    var sqData = (window._tenderData && window._tenderData.sq_data) || null;
 
-    // Set tender title in doc header
-    var tTitle = (window._tenderData && window._tenderData.title) || '';
-    var titleEl = document.getElementById('sq-doc-tender-title');
-    if (titleEl) titleEl.textContent = tTitle || 'Selection Questionnaire';
+    // Fetch fresh tender data to guarantee we have latest sq_data
+    var sqData = null;
+    try {
+      var td = window._tenderData;
+      if (td && td.id) {
+        var freshRes = await fetch('/.netlify/functions/get-tenders');
+        var freshAll = await freshRes.json();
+        var fresh = freshAll.find(function(t){ return t.id === td.id; });
+        if (fresh && fresh.sq_data) {
+          sqData = fresh.sq_data;
+          window._tenderData = fresh;
+        } else if (td.sq_data) {
+          sqData = td.sq_data;
+        }
+      }
+    } catch(e) {
+      if (window._tenderData && window._tenderData.sq_data) {
+        sqData = window._tenderData.sq_data;
+      }
+    }
 
-    // Company fields — CH data first, fallback to form fields
-    var coFields = [
-      { label:'Registered company name',   value: ch.company_name || co.name || '' },
-      { label:'Company number',            value: ch.company_number || '' },
-      { label:'Registered address',        value: ch.registered_address || '' },
-      { label:'Company type',              value: ch.company_type ? ch.company_type.replace(/-/g,' ') : 'Private limited company' },
-      { label:'Year incorporated',         value: ch.date_of_creation ? ch.date_of_creation.split('-')[0] : co.founded || '' },
-      { label:'Company status',            value: ch.company_status || 'Active' },
-      { label:'CQC registration',          value: co.cqc || '' },
-      { label:'Number of staff',           value: co.staff || '' },
-      { label:'SME status',               value: (parseInt(co.staff||'0') < 250) ? 'Yes — SME' : 'No' }
-    ].filter(function(f){ return f.value; });
+    // Set tender title
+    try {
+      var tTitle = (window._tenderData && window._tenderData.title) || '';
+      var titleEl = document.getElementById('sq-doc-tender-title');
+      if (titleEl) titleEl.textContent = tTitle || 'Selection Questionnaire';
+    } catch(e) {}
+
+    // Build company values — always have something
+    var companyName   = ch.company_name || co.name || '—';
+    var companyNum    = ch.company_number || '—';
+    var regAddress    = ch.registered_address || '—';
+    var companyType   = ch.company_type ? ch.company_type.replace(/-/g,' ') : 'Private limited company';
+    var yearInc       = ch.date_of_creation ? ch.date_of_creation.split('-')[0] : (co.founded || '—');
+    var coStatus      = ch.company_status || 'Active';
+    var cqcStatus     = co.cqc || '—';
+    var staffCount    = co.staff || '—';
+    var smeStatus     = (parseInt(co.staff||'0') < 250) ? 'Yes — SME' : 'No';
 
     var h = '';
 
-    // ── COMPANY SECTION ──
-    h += '<div style="margin-bottom:1.5rem;">';
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">';
-    h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;border-left:3px solid #00C9E0;padding-left:8px;">Company Information</div>';
+    // ── Determine sections from real SQ data ──
+    var visibleKeys = ['company_name','company_number','registered_address','company_type',
+                       'founded_year','directors','psc_details','company_status','sme_status',
+                       'cqc_status','contact_name','vat_number'];
+
+    var visibleSection = null;
+    var lockedSections = [];
+
+    if (sqData && sqData.sections && sqData.sections.length) {
+      sqData.sections.forEach(function(s) {
+        var fields = s.fields || [];
+        var isDecl = fields.length > 0 && fields.every(function(f){ return f.field_type === 'client_confirm'; });
+        if (isDecl) return;
+        var hasCompanyField = fields.some(function(f){
+          return f.field_type === 'auto_fill' && visibleKeys.indexOf(f.profile_key) !== -1;
+        });
+        if (hasCompanyField && !visibleSection) {
+          visibleSection = s;
+        } else {
+          lockedSections.push(s);
+        }
+      });
+    }
+
+    // ── VISIBLE SECTION: Company Info ──
+    var coFieldValues = {
+      company_name: companyName, company_number: companyNum,
+      registered_address: regAddress, company_type: companyType,
+      founded_year: yearInc, company_status: coStatus,
+      cqc_status: cqcStatus, sme_status: smeStatus,
+      contact_name: co.name || '', vat_number: co.vat || ''
+    };
+
+    var sectionTitle = visibleSection ? (visibleSection.section + ': ' + visibleSection.title) : 'Part 1: Supplier Information';
+    var sectionFields = visibleSection ? visibleSection.fields.filter(function(f){ return f.field_type !== 'client_confirm'; }) : [
+      { question:'Full registered name', profile_key:'company_name' },
+      { question:'Company registration number', profile_key:'company_number' },
+      { question:'Registered office address', profile_key:'registered_address' },
+      { question:'Company type', profile_key:'company_type' },
+      { question:'Year incorporated', profile_key:'founded_year' },
+      { question:'Company status', profile_key:'company_status' },
+      { question:'CQC registration', profile_key:'cqc_status' },
+      { question:'SME status', profile_key:'sme_status' }
+    ];
+
+    h += '<div style="margin-bottom:1.75rem;">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:2px solid #00C9E0;">';
+    h += '<div style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;">' + sectionTitle + '</div>';
     h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ Auto-filled</span>';
     h += '</div>';
     h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
-    coFields.forEach(function(f, i) {
+    sectionFields.forEach(function(f, i) {
+      var val = coFieldValues[f.profile_key] || '—';
       var bg = i % 2 === 0 ? '#fafafa' : '#fff';
       h += '<tr style="background:' + bg + ';">';
-      h += '<td style="padding:7px 10px;font-weight:600;color:#374151;width:45%;border-bottom:1px solid #f3f4f6;">' + f.label + '</td>';
-      h += '<td style="padding:7px 10px;color:#166534;font-weight:500;border-bottom:1px solid #f3f4f6;">✓ ' + f.value + '</td>';
+      h += '<td style="padding:8px 10px;font-weight:600;color:#374151;width:45%;border-bottom:1px solid #f3f4f6;">' + f.question + '</td>';
+      h += '<td style="padding:8px 10px;color:#166534;font-weight:500;border-bottom:1px solid #f3f4f6;">✓ ' + val + '</td>';
       h += '</tr>';
     });
     h += '</table></div>';
 
-    // ── DIRECTORS SECTION ──
-    var officers = (ch.officers || []).filter(function(o){ return !o.resigned_on; });
-    var pscs = ch.pscs || [];
+    // ── DIRECTORS ──
+    var officers = [];
+    var pscs = [];
+    try { officers = (ch.officers || []).filter(function(o){ return !o.resigned_on; }); } catch(e) {}
+    try { pscs = ch.pscs || []; } catch(e) {}
 
-    h += '<div style="margin-bottom:1.5rem;">';
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">';
-    h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;border-left:3px solid #00C9E0;padding-left:8px;">Directors &amp; Persons of Significant Control</div>';
+    h += '<div style="margin-bottom:1.75rem;">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:2px solid #00C9E0;">';
+    h += '<div style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;">Directors &amp; Persons of Significant Control</div>';
     h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ From Companies House</span>';
     h += '</div>';
-
+    h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
     if (officers.length || pscs.length) {
-      h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
       officers.forEach(function(o, i) {
-        var bg = i % 2 === 0 ? '#fafafa' : '#fff';
-        h += '<tr style="background:' + bg + ';">';
-        h += '<td style="padding:7px 10px;font-weight:600;color:#166534;border-bottom:1px solid #f3f4f6;">✓ ' + o.name + '</td>';
-        h += '<td style="padding:7px 10px;color:#374151;text-transform:capitalize;border-bottom:1px solid #f3f4f6;">' + (o.role||'Director') + '</td>';
-        h += '<td style="padding:7px 10px;border-bottom:1px solid #f3f4f6;"><span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 7px;border-radius:999px;">Director</span></td>';
+        h += '<tr style="background:' + (i%2===0?'#fafafa':'#fff') + ';">';
+        h += '<td style="padding:8px 10px;font-weight:600;color:#166534;border-bottom:1px solid #f3f4f6;width:45%;">✓ ' + o.name + '</td>';
+        h += '<td style="padding:8px 10px;color:#374151;text-transform:capitalize;border-bottom:1px solid #f3f4f6;">' + (o.role||'Director') + (o.appointed_on ? ' · ' + o.appointed_on : '') + '</td>';
+        h += '<td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:right;"><span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 7px;border-radius:999px;">Director</span></td>';
         h += '</tr>';
       });
       pscs.forEach(function(p, i) {
-        var bg = (officers.length + i) % 2 === 0 ? '#fafafa' : '#fff';
-        h += '<tr style="background:' + bg + ';">';
-        h += '<td style="padding:7px 10px;font-weight:600;color:#5b21b6;border-bottom:1px solid #f3f4f6;">✓ ' + p.name + '</td>';
-        h += '<td style="padding:7px 10px;color:#374151;border-bottom:1px solid #f3f4f6;" colspan="2">' + (p.nature_of_control||'PSC') + '</td>';
+        h += '<tr style="background:' + ((officers.length+i)%2===0?'#fafafa':'#fff') + ';">';
+        h += '<td style="padding:8px 10px;font-weight:600;color:#5b21b6;border-bottom:1px solid #f3f4f6;width:45%;">✓ ' + p.name + '</td>';
+        h += '<td style="padding:8px 10px;color:#374151;border-bottom:1px solid #f3f4f6;" colspan="2">' + (p.nature_of_control||'Person of Significant Control') + '</td>';
         h += '</tr>';
       });
-      h += '</table>';
     } else {
-      h += '<div style="background:#fafafa;border-radius:6px;padding:0.75rem 1rem;font-size:0.82rem;color:#9ca3af;font-style:italic;">No director data pulled yet — enter your Companies House number in Step 2 to auto-fill directors.</div>';
+      h += '<tr><td colspan="3" style="padding:10px;color:#9ca3af;font-style:italic;font-size:0.82rem;">No director data — complete Companies House lookup in Step 2 to auto-fill directors.</td></tr>';
     }
-    h += '</div>';
+    h += '</table></div>';
 
     // ── LOCKED SECTIONS ──
-    var lockedTitles = [];
-    if (sqData && sqData.sections) {
-      var visibleKeys = ['company_name','company_number','registered_address','company_type',
-                         'founded_year','directors','psc_details','company_status','sme_status','cqc_status'];
-      sqData.sections.forEach(function(s) {
-        var isCompany = (s.fields||[]).some(function(f){
-          return f.field_type === 'auto_fill' && visibleKeys.indexOf(f.profile_key) !== -1;
-        });
-        var isDecl = (s.fields||[]).every(function(f){ return f.field_type === 'client_confirm'; });
-        if (!isCompany && !isDecl) lockedTitles.push(s.title || s.section);
-      });
-    }
-    if (!lockedTitles.length) {
-      lockedTitles = ['Financial Standing','Technical Capability','Insurance & Compliance','Quality Assurance','Equal Opportunities'];
+    var lockTitles = lockedSections.map(function(s){ return s.section + ': ' + s.title; });
+    if (!lockTitles.length) {
+      lockTitles = ['Part 2: Exclusion Grounds', 'Part 3: Financial Standing', 'Part 4: Technical Capability', 'Part 5: Insurance & Compliance'];
     }
 
-    lockedTitles.forEach(function(title) {
+    lockTitles.forEach(function(title) {
       h += '<div style="margin-bottom:1rem;position:relative;">';
-      h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">';
-      h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;border-left:3px solid #e5e7eb;padding-left:8px;">' + title + '</div>';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;padding-bottom:0.5rem;border-bottom:1px solid #e5e7eb;">';
+      h += '<div style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;">' + title + '</div>';
       h += '<span style="font-size:0.69rem;font-weight:700;background:#f3f4f6;color:#9ca3af;padding:2px 9px;border-radius:999px;">🔒 Locked</span>';
       h += '</div>';
-      h += '<div style="position:relative;border-radius:8px;overflow:hidden;">';
-      h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;filter:blur(3px);pointer-events:none;user-select:none;opacity:0.3;">';
-      ['[Answer to be completed]','[Response required]','[See full report]'].forEach(function(text, i) {
-        h += '<tr style="background:' + (i%2===0?'#fafafa':'#fff') + ';"><td style="padding:7px 10px;border-bottom:1px solid #f3f4f6;width:45%;">Question ' + (i+1) + '</td><td style="padding:7px 10px;border-bottom:1px solid #f3f4f6;">' + text + '</td></tr>';
-      });
+      h += '<div style="position:relative;border-radius:6px;overflow:hidden;">';
+      h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;filter:blur(4px);pointer-events:none;user-select:none;">';
+      for (var i=0;i<3;i++) {
+        h += '<tr style="background:' + (i%2===0?'#fafafa':'#fff') + ';"><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;width:45%;">Question ' + (i+1) + '</td><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;">Response required</td></tr>';
+      }
       h += '</table>';
-      h += '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">';
-      h += '<span style="font-size:1.2rem;">🔒</span>';
-      h += '<span style="font-size:0.74rem;font-weight:700;color:#6b7280;">Completed in your full report</span>';
+      h += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,0.5);">';
+      h += '<span style="font-size:1.1rem;">🔒</span><span style="font-size:0.78rem;font-weight:700;color:#6b7280;">Completed in your full report after payment</span>';
       h += '</div></div></div>';
     });
 
-    var el = document.getElementById('sq-sections-cana');
-    if (el) {
-      el.innerHTML = h;
-    } else {
-      console.error('sq-sections-cana element not found');
-    }
+    el.innerHTML = h;
   }
 
 
