@@ -152,9 +152,13 @@ exports.handler = async (event) => {
 
     if (includeSq && tender.sq_data && sqStoragePath) {
       try {
-        var docRes = await fetch(sbUrl + '/storage/v1/object/sq-docs/' + sqStoragePath, {
+        // URL-encode path segments (handles spaces, parentheses in filenames)
+        var encodedSqPath = sqStoragePath.split('/').map(function(seg){ return encodeURIComponent(seg); }).join('/');
+        console.log('Fetching SQ from storage:', encodedSqPath);
+        var docRes = await fetch(sbUrl + '/storage/v1/object/sq-docs/' + encodedSqPath, {
           headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey }
         });
+        console.log('SQ storage fetch status:', docRes.status);
         if (docRes.ok) {
           var docBuf = Buffer.from(await docRes.arrayBuffer());
           var zip = await JSZip.loadAsync(docBuf);
