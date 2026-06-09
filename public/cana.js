@@ -158,13 +158,74 @@
   }
 
   // CH lookup functions
-  async function canaChLookup() {
+  var _chSearchTimer = null;
+
+  function canaChSearch(val) {
+    clearTimeout(_chSearchTimer);
+    var dropdown = document.getElementById('ch-dropdown-cana');
+    if (!val || val.trim().length < 2) { dropdown.style.display = 'none'; return; }
+    dropdown.style.display = 'block';
+    dropdown.innerHTML = '<div style="padding:12px 16px;font-size:0.83rem;color:#9ca3af;">Searching...</div>';
+    _chSearchTimer = setTimeout(function(){ runCanaChSearch(val.trim()); }, 350);
+  }
+
+  async function runCanaChSearch(query) {
+    var dropdown = document.getElementById('ch-dropdown-cana');
+    try {
+      var res = await fetch('/.netlify/functions/companies-house-lookup', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ query: query })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error);
+      var results = data.results || [];
+      if (!results.length) {
+        dropdown.innerHTML = '<div style="padding:12px 16px;font-size:0.83rem;color:#9ca3af;">No companies found — try a different name or number</div>';
+        return;
+      }
+      dropdown.innerHTML = results.map(function(c, i) {
+        var addr = c.registered_address || '';
+        var status = c.company_status || '';
+        var statusColor = status === 'active' ? '#166534' : '#9ca3af';
+        return '<div onclick="selectCanaChResult(' + i + ')" data-idx="' + i + '"' +
+          ' style="padding:10px 16px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background 0.15s;"' +
+          ' onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background=''">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
+            '<div style="font-weight:600;font-size:0.88rem;color:#0B1929;">' + escapeHtml(c.company_name) + '</div>' +
+            '<span style="font-size:0.7rem;font-weight:700;color:' + statusColor + ';flex-shrink:0;">' + status + '</span>' +
+          '</div>' +
+          '<div style="font-size:0.75rem;color:#6b7280;margin-top:2px;">' + escapeHtml(c.company_number) + (addr ? ' · ' + escapeHtml(addr.substring(0,50)) : '') + '</div>' +
+          '</div>';
+      }).join('');
+      window._chSearchResults = results;
+    } catch(e) {
+      dropdown.innerHTML = '<div style="padding:12px 16px;font-size:0.83rem;color:#c53030;">Search failed — try again</div>';
+    }
+  }
+
+  function selectCanaChResult(idx) {
+    var result = window._chSearchResults && window._chSearchResults[idx];
+    if (!result) return;
+    closeCanaChDropdown();
+    document.getElementById('ch-search-cana').value = result.company_name;
+    // Now fetch full details by company number
+    canaChLookupByNumber(result.company_number);
+  }
+
+  function closeCanaChDropdown() {
+    var d = document.getElementById('ch-dropdown-cana');
+    if (d) d.style.display = 'none';
+  }
+
+  function escapeHtml(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function canaChLookupByNumber(num) {
     var errEl = document.getElementById('ch-error-cana');
     errEl.style.display = 'none';
-    var num = document.getElementById('ch-num-cana').value.trim().replace(/\s/g,'');
-    if (!num) { errEl.textContent = 'Please enter your Companies House number'; errEl.style.display = 'block'; return; }
-    var btn = document.getElementById('ch-lookup-btn-cana');
-    btn.disabled = true; btn.textContent = 'Looking up...';
+    var input = document.getElementById('ch-search-cana');
+    if (input) { input.disabled = true; }
     try {
       var res = await fetch('/.netlify/functions/companies-house-lookup', {
         method:'POST', headers:{'Content-Type':'application/json'},
@@ -173,32 +234,47 @@
       var data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Not found');
       window._chData = data;
-
-      document.getElementById('ch-result-name-cana').textContent = data.company_name;
-      document.getElementById('ch-result-status-cana').textContent =
-        '● ' + (data.company_status||'') + (data.date_of_creation ? ' · Inc. ' + data.date_of_creation.split('-')[0] : '');
-
-      var fields = [
-        { label:'Company number', value: data.company_number },
-        { label:'Registered address', value: data.registered_address },
-        { label:'Type', value: (data.company_type||'').replace(/-/g,' ') },
-        { label:'Directors', value: data.officers && data.officers.length ? data.officers[0].name : '—' }
-      ];
-      document.getElementById('ch-result-grid-cana').innerHTML = fields.map(function(f){
-        return '<div style="background:#fff;border-radius:7px;padding:8px 10px;">' +
-          '<div style="font-size:0.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">'+f.label+'</div>' +
-          '<div style="font-size:0.82rem;font-weight:600;color:#166534;">'+(f.value||'—')+'</div></div>';
-      }).join('');
-
-      document.getElementById('ch-result-cana').style.display = 'block';
-      document.getElementById('ch-continue-btn-cana').style.display = 'block';
-
+      showCanaChResult(data);
     } catch(err) {
-      errEl.textContent = err.message || 'Could not find company. Check the number and try again.';
+      errEl.textContent = err.message || 'Could not find company. Try again.';
       errEl.style.display = 'block';
     }
-    btn.disabled = false; btn.textContent = 'Look up →';
+    if (input) input.disabled = false;
   }
+
+  // Keep canaChLookup as alias for direct number entry
+  async function canaChLookup() {
+    var input = document.getElementById('ch-search-cana');
+    var val = input ? input.value.trim() : '';
+    if (!val) return;
+    // If it looks like a company number, look up directly
+    if (/^[0-9A-Z]{6,8}$/.test(val.replace(/\s/g,''))) {
+      canaChLookupByNumber(val.replace(/\s/g,''));
+    } else {
+      runCanaChSearch(val);
+    }
+  }
+
+  function showCanaChResult(data) {
+    document.getElementById('ch-result-name-cana').textContent = data.company_name;
+    document.getElementById('ch-result-status-cana').textContent =
+      '● ' + (data.company_status||'') + (data.date_of_creation ? ' · Inc. ' + data.date_of_creation.split('-')[0] : '');
+    var fields = [
+      { label:'Company number',   value: data.company_number },
+      { label:'Registered address', value: data.registered_address },
+      { label:'Type',             value: (data.company_type||'').replace(/-/g,' ') },
+      { label:'Directors',        value: data.officers && data.officers.length ? data.officers[0].name : '—' }
+    ];
+    document.getElementById('ch-result-grid-cana').innerHTML = fields.map(function(f){
+      return '<div style="background:#fff;border-radius:7px;padding:8px 10px;">' +
+        '<div style="font-size:0.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">' + f.label + '</div>' +
+        '<div style="font-size:0.82rem;font-weight:600;color:#166534;">' + escapeHtml(f.value||'—') + '</div>' +
+        '</div>';
+    }).join('');
+    document.getElementById('ch-result-cana').style.display = 'block';
+    document.getElementById('ch-continue-btn-cana').style.display = 'block';
+  }
+
 
   async function canaChContinue() {
     var btn = document.getElementById('ch-continue-btn-cana');
