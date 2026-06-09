@@ -57,6 +57,10 @@
     <div class="section">
       <div class="section-title">Tell us about your organisation</div>
       <div id="form-error" class="error-msg" style="display:none;"></div>
+      <div id="prefill-badge" style="display:none;align-items:center;gap:8px;background:#e8f7ee;border:1px solid #9FE1CB;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:0.84rem;color:#166534;">
+        <span>✓</span><span>Form pre-filled from your company profile — check and update if needed</span>
+        <a href="/profile.html" style="margin-left:auto;color:#166534;font-weight:600;font-size:0.8rem;">Edit profile →</a>
+      </div>
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">Organisation name</label>
@@ -292,5 +296,12 @@
 
 <script src="/cana-core.js"></script>
 <script src="/cana-sq.js"></script>
+<script>
+  // Pre-fill form from profile on load
+  (async function() {
+    await new Promise(function(r){ window.addEventListener ? window.addEventListener('load', r) : r(); });
+    if (typeof prefillFromProfile === 'function') prefillFromProfile();
+  })();
+</script>
 </body>
 </html>
