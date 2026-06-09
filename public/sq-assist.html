@@ -10,6 +10,12 @@
 <link rel="stylesheet" href="/ch-onboarding.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="/sq-assist.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0B1929">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cana AI">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
 <div id="loading-screen"><div class="spinner"></div></div>
@@ -142,5 +148,10 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/sq-assist.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').then(function(r){ console.log('SW registered'); }).catch(function(){});
+    }
+  </script>
 </body>
 </html>
