@@ -237,9 +237,12 @@
     </div>
     <div class="section-body">
       <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:16px;margin-bottom:1.25rem;">
-        <label class="form-label" style="margin-bottom:8px;display:block;">🔍 Search CQC to auto-fill your rating</label>
-        <div style="display:flex;gap:8px;position:relative;">
-          <input class="form-input" type="text" id="cqc-search" placeholder="Type your care service name..." autocomplete="off" style="flex:1;" oninput="cqcSearchDebounced()">
+        <label class="form-label" style="margin-bottom:8px;display:block;">🔍 Enter your CQC Location ID to auto-fill your rating</label>
+        <p style="font-size:0.78rem;color:#6b7280;margin:0 0 8px;">Find your Location ID on your CQC certificate or at <a href="https://www.cqc.org.uk/search?query=find+service" target="_blank" style="color:#0369a1;">cqc.org.uk</a> — it starts with <strong>1-</strong></p>
+        <div style="display:flex;gap:8px;">
+          <input class="form-input" type="text" id="cqc-search" placeholder="e.g. 1-123456789" autocomplete="off" style="flex:1;" oninput="cqcSearchDebounced()">
+          <button type="button" onclick="lookupCqcById()" style="background:var(--navy);color:#fff;border:none;padding:0 16px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">Look up →</button>
+        </div>
         </div>
         <div id="cqc-results" style="margin-top:8px;display:none;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:240px;overflow-y:auto;"></div>
         <div id="cqc-selected" style="margin-top:10px;display:none;"></div>
