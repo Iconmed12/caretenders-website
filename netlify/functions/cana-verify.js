@@ -12,7 +12,7 @@ exports.handler = async (event) => {
     const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
     const sbKey     = process.env.SUPABASE_ANON_KEY;
     const sbUrl     = 'https://igpjfpncfuawikoyzfcd.supabase.co';
-    const siteUrl   = process.env.URL || 'https://caretenders-website.netlify.app';
+    const siteUrl   = 'https://caretenders-website.netlify.app';
 
     // ── Verify payment with Stripe ──
     const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions?limit=20', {
@@ -55,17 +55,20 @@ exports.handler = async (event) => {
     });
 
     // ── Trigger background function ──
+    var bgPayload = JSON.stringify({
+      jobId,
+      tenderId,
+      sessionId,
+      includeSq: !!includeSq,
+      companyDetails: { ...(companyDetails || {}), email: stripeEmail }
+    });
+    console.log('Triggering background function for job:', jobId);
     fetch(siteUrl + '/.netlify/functions/generate-cana-background', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        jobId,
-        tenderId,
-        sessionId,
-        includeSq: !!includeSq,
-        companyDetails: { ...(companyDetails || {}), email: stripeEmail }
-      })
-    }).catch(function(e){ console.log('Background trigger failed:', e.message); });
+      body: bgPayload
+    }).then(function(r){ console.log('Background triggered, status:', r.status); })
+      .catch(function(e){ console.log('Background trigger failed:', e.message); });
 
     return {
       statusCode: 200,
