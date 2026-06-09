@@ -116,13 +116,13 @@ function tiRender() {
           '<span style="background:' + statusBg + ';color:' + statusColor + ';font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;">' + statusLabel + '</span>' +
           (t.status === 'pending_review' ?
             '<div style="display:flex;gap:6px;">' +
-              '<button onclick="tiApprove(\'' + t.id + '\')"' style="background:#166534;color:#fff;border:none;padding:6px 14px;border-radius:7px;font-size:0.78rem;font-weight:700;cursor:pointer;">✓ Approve</button>' +
-              '<button onclick="tiReject('' + t.id + '')" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:6px 14px;border-radius:7px;font-size:0.78rem;font-weight:700;cursor:pointer;">✗ Reject</button>' +
+              '<button data-approve="' + t.id + '" style="background:#166534;color:#fff;border:none;padding:6px 14px;border-radius:7px;font-size:0.78rem;font-weight:700;cursor:pointer;">&#x2713; Approve</button>' +
+              '<button data-reject="' + t.id + '" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:6px 14px;border-radius:7px;font-size:0.78rem;font-weight:700;cursor:pointer;">&#x2717; Reject</button>' +
             '</div>'
           : t.status === 'live' ?
-            '<button onclick="tiReject('' + t.id + '')" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:5px 12px;border-radius:7px;font-size:0.75rem;cursor:pointer;">Remove</button>'
+            '<button data-reject="' + t.id + '" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:5px 12px;border-radius:7px;font-size:0.75rem;cursor:pointer;">Remove</button>'
           :
-            '<button onclick="tiApprove(\'' + t.id + '\')"' style="background:#e8f7ee;color:#166534;border:1px solid #9FE1CB;padding:5px 12px;border-radius:7px;font-size:0.75rem;cursor:pointer;">Re-approve</button>'
+            '<button data-approve="' + t.id + '" style="background:#e8f7ee;color:#166534;border:1px solid #9FE1CB;padding:5px 12px;border-radius:7px;font-size:0.75rem;cursor:pointer;">Re-approve</button>'
           ) +
         '</div>' +
       '</div>' +
