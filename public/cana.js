@@ -252,42 +252,32 @@
     var el = document.getElementById('sq-sections-cana');
     if (!el) return;
 
-    el.innerHTML = '<div style="text-align:center;padding:2.5rem;color:#9ca3af;"><div class="loading-spinner" style="margin:0 auto 1rem;"></div><div style="font-size:0.85rem;">Loading your SQ document...</div></div>';
-
     var ch = window._chData || {};
     var co = window._companyDetails || {};
-    var tenderId = window._tenderData && window._tenderData.id;
+    var td = window._tenderData;
 
-    // Set tender title in header
+    // Set tender title
     try {
       var tEl = document.getElementById('sq-doc-tender-title');
-      if (tEl && window._tenderData) tEl.textContent = window._tenderData.title || 'Selection Questionnaire';
+      if (tEl && td) tEl.textContent = td.title || 'Selection Questionnaire';
     } catch(e) {}
 
-    // Try to fetch the actual document preview
-    if (tenderId) {
-      try {
-        var res = await fetch('/.netlify/functions/preview-sq-doc', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tenderId: tenderId })
-        });
-        var data = await res.json();
+    // Use stored HTML preview — generated once at upload, instant here
+    var sqData = td && td.sq_data;
+    var htmlPreview = sqData && sqData.htmlPreview;
 
-        if (res.ok && data.sections && data.sections.length) {
-          renderRealDocument(data.sections, ch, co);
-          return;
-        }
-      } catch(e) {
-        console.log('Real doc preview failed, using fallback:', e.message);
-      }
+    if (htmlPreview) {
+      renderRealDocument(htmlPreview, ch, co, sqData);
+    } else if (sqData && sqData.sections) {
+      // No HTML preview stored yet — re-upload SQ in admin to generate it
+      renderFromSqData(sqData, ch, co);
+    } else {
+      renderFallbackSq(ch, co);
     }
-
-    // Fallback: render from sq_data fields
-    renderFallbackSq(ch, co);
   }
 
-  function renderRealDocument(sections, ch, co) {
+
+  function renderRealDocument(htmlPreview, ch, co, sqData) {
     var el = document.getElementById('sq-sections-cana');
     if (!el) return;
 
@@ -302,7 +292,7 @@
         '.sq-doc-section th { background:#f3f4f6; font-weight:600; }',
         '.sq-doc-section p { font-size:0.84rem; margin-bottom:0.4rem; line-height:1.6; color:#374151; }',
         '.sq-doc-section h2, .sq-doc-section h3 { font-size:0.9rem; font-weight:700; color:#0B1929; margin-bottom:0.5rem; }',
-        '.sq-locked { position:relative; }',
+        '.sq-doc-live table { width:100%; border-collapse:collapse; font-size:0.83rem; }','.sq-doc-live td, .sq-doc-live th { padding:6px 10px; border:1px solid #e5e7eb; vertical-align:top; word-break:break-word; }','.sq-doc-live tr:nth-child(even) { background:#fafafa; }','.sq-doc-live p { font-size:0.83rem; margin:0; line-height:1.5; }','.sq-locked { position:relative; }',
         '.sq-locked-inner { filter:blur(4px); pointer-events:none; user-select:none; opacity:0.35; }',
         '.sq-lock-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:8px; background:rgba(255,255,255,0.6); }',
       ].join('');
@@ -311,38 +301,35 @@
 
     var h = '';
 
-    sections.forEach(function(section, i) {
-      var isFirst = i === 0;
+    // Split HTML into tables — show first table, lock the rest
+    var tables = htmlPreview.split('</table>');
+    var firstTable = tables[0] + (tables.length > 1 ? '</table>' : '');
+    var restTables = tables.slice(1).map(function(t, i) {
+      return t + (i < tables.length - 2 ? '</table>' : '');
+    }).filter(function(t){ return t.trim(); });
 
-      h += '<div class="sq-doc-section" style="margin-bottom:1.5rem;">';
+    h += '<div style="margin-bottom:1.5rem;">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:2px solid #00C9E0;">';
+    h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#0B1929;">Supplier Information</div>';
+    h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ Reviewed &amp; auto-filled</span>';
+    h += '</div>';
+    h += '<div class="sq-doc-live">' + firstTable + '</div>';
+    h += buildDirectorsHtml(ch);
+    h += '</div>';
 
-      // Section header
-      h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;padding-bottom:0.5rem;border-bottom:2px solid ' + (isFirst ? '#00C9E0' : '#e5e7eb') + ';">';
-      h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:' + (isFirst ? '#0B1929' : '#9ca3af') + ';">' + escHtml(section.title) + '</div>';
-      if (isFirst) {
-        h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ Auto-filled from Companies House</span>';
-      } else {
-        h += '<span style="font-size:0.69rem;font-weight:700;background:#f3f4f6;color:#9ca3af;padding:2px 9px;border-radius:999px;">🔒 Completed in full report</span>';
-      }
+    // Lock all remaining tables/sections
+    if (restTables.length) {
+      h += '<div style="position:relative;border-radius:8px;overflow:hidden;margin-bottom:1rem;">';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:1px solid #e5e7eb;">';
+      h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#9ca3af;">Remaining sections</div>';
+      h += '<span style="font-size:0.69rem;font-weight:700;background:#f3f4f6;color:#9ca3af;padding:2px 9px;border-radius:999px;">🔒 Locked</span>';
       h += '</div>';
-
-      if (isFirst) {
-        // Show the real document HTML for first section
-        h += '<div>' + section.html + '</div>';
-        // Add director info below
-        h += buildDirectorsHtml(ch);
-      } else {
-        // Lock all other sections
-        h += '<div class="sq-locked" style="border-radius:8px;overflow:hidden;">';
-        h += '<div class="sq-locked-inner">' + section.html + '</div>';
-        h += '<div class="sq-lock-overlay">';
-        h += '<span style="font-size:1.1rem;">🔒</span>';
-        h += '<span style="font-size:0.78rem;font-weight:700;color:#374151;">Completed in your full report after payment</span>';
-        h += '</div></div>';
-      }
-
-      h += '</div>';
-    });
+      h += '<div style="filter:blur(4px);pointer-events:none;user-select:none;opacity:0.3;">' + restTables.join('') + '</div>';
+      h += '<div style="position:absolute;bottom:0;left:0;right:0;top:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,0.7);">';
+      h += '<span style="font-size:1.5rem;">🔒</span>';
+      h += '<span style="font-size:0.82rem;font-weight:700;color:#374151;text-align:center;">These sections are completed in your full report<br><span style="font-weight:400;color:#6b7280;">Unlock after payment</span></span>';
+      h += '</div></div>';
+    }
 
     el.innerHTML = h;
   }
@@ -366,6 +353,21 @@
     });
     h += '</table></div>';
     return h;
+  }
+
+  function renderFromSqData(sqData, ch, co) {
+    // Render from extracted field data — used when HTML preview not yet stored
+    // Admin should re-upload SQ to generate preview
+    var el = document.getElementById('sq-sections-cana');
+    if (!el) return;
+    var sections = sqData.sections || [];
+    var h = '<div style="background:#fff8ed;border:1px solid #fed7aa;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.8rem;color:#92400e;">⚠ Preview unavailable — ask your administrator to re-upload the SQ document to enable the full preview.</div>';
+    // Still show company info
+    h += '<div style="font-weight:700;font-size:0.85rem;margin-bottom:0.5rem;">Your confirmed details:</div>';
+    var coName = (ch.company_name || co.name || '—');
+    var coNum  = ch.company_number || '—';
+    h += '<div style="background:#f0fdf4;border-radius:6px;padding:0.75rem 1rem;font-size:0.83rem;"><div style="color:#166534;">✓ ' + escHtml(coName) + ' (' + escHtml(coNum) + ')</div></div>';
+    el.innerHTML = h;
   }
 
   function renderFallbackSq(ch, co) {
