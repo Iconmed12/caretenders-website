@@ -13,3 +13,6 @@
 
 [functions."check-vault-expiry"]
   schedule = "0 9 * * *"
+
+[functions."extract-sq"]
+  timeout = 26
