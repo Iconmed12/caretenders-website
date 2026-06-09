@@ -144,9 +144,13 @@ exports.handler = async (event) => {
     var sqDocBase64 = null;
     var sqFileName  = null;
 
-    if (includeSq && tender.sq_data && tender.sq_data.storagePath) {
+    // Resolve storagePath — might be missing if uploaded before storagePath was saved
+    var sqStoragePath = (tender.sq_data && tender.sq_data.storagePath) ||
+      (tender.sq_data && tender.sq_data.fileName ? tenderId + '/' + tender.sq_data.fileName : null);
+
+    if (includeSq && tender.sq_data && (sqStoragePath || tender.sq_data.sections)) {
       try {
-        var docRes = await fetch(sbUrl + '/storage/v1/object/sq-docs/' + tender.sq_data.storagePath, {
+        var docRes = await fetch(sbUrl + '/storage/v1/object/sq-docs/' + sqStoragePath, {
           headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey }
         });
         if (docRes.ok) {
