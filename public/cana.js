@@ -284,9 +284,8 @@
       setStep(3);
       showState('sq');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      populateSqStep();
-
       if (btn) { btn.disabled = false; btn.textContent = 'Next step →'; }
+      populateSqStep().catch(function(e){ console.warn('SQ populate warning:', e.message); });
     } catch(err) {
       console.error('canaChContinue error:', err.message);
       // Force show SQ anyway
@@ -411,7 +410,7 @@
   }
 
   function buildDirectorsHtml(ch) {
-    var officers = (ch.officers || []).filter(function(o){ return !o.resigned_on; });
+    var officers = (ch.officers || []).filter(function(o){ return o && !o.resigned_on; });
     var pscs = ch.pscs || [];
     if (!officers.length && !pscs.length) return '';
 
@@ -419,11 +418,13 @@
     h += '<div style="font-size:0.78rem;font-weight:700;color:#374151;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Directors &amp; Persons of Significant Control</div>';
     h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
     officers.forEach(function(o, i) {
+      if (!o) return;
       h += '<tr style="background:' + (i%2===0?'#fafafa':'#fff') + ';"><td style="padding:7px 10px;border:1px solid #e5e7eb;font-weight:600;color:#166534;">✓ ' + escHtml(o.name) + '</td>';
       h += '<td style="padding:7px 10px;border:1px solid #e5e7eb;text-transform:capitalize;">' + escHtml(o.role||'Director') + '</td>';
       h += '<td style="padding:7px 10px;border:1px solid #e5e7eb;"><span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 7px;border-radius:999px;">Director</span></td></tr>';
     });
     pscs.forEach(function(p, i) {
+      if (!p) return;
       h += '<tr style="background:' + ((officers.length+i)%2===0?'#fafafa':'#fff') + ';"><td style="padding:7px 10px;border:1px solid #e5e7eb;font-weight:600;color:#5b21b6;">✓ ' + escHtml(p.name) + '</td>';
       h += '<td style="padding:7px 10px;border:1px solid #e5e7eb;" colspan="2">' + escHtml(p.nature_of_control||'PSC') + '</td></tr>';
     });
