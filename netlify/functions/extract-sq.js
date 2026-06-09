@@ -48,8 +48,25 @@ exports.handler = async (event) => {
 
     const extractData = await extractRes.json();
     const rawText = extractData.content && extractData.content[0] ? extractData.content[0].text.trim() : '{}';
+    // Robust JSON extraction — handle Haiku sometimes adding text around JSON
     var clean = rawText.replace(/```json|```/g, '').trim();
-    var parsed = JSON.parse(clean);
+
+    // Extract just the JSON object if there's surrounding text
+    var jsonMatch = clean.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('AI did not return valid JSON structure');
+    clean = jsonMatch[0];
+
+    // Fix common JSON issues from AI output
+    // Remove trailing commas before } or ]
+    clean = clean.replace(/,(\s*[}\]])/g, '$1');
+    // Fix unescaped quotes inside string values (basic fix)
+    var parsed;
+    try {
+      parsed = JSON.parse(clean);
+    } catch(jsonErr) {
+      // Last resort: try to extract what we can
+      throw new Error('JSON parse failed: ' + jsonErr.message + ' — try uploading the SQ again');
+    }
 
     // Count field types
     var totalFields = 0, autoFill = 0, aiDraft = 0, clientConfirm = 0;
