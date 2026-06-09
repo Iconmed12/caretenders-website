@@ -278,50 +278,45 @@
 
   async function canaChContinue() {
     var btn = document.getElementById('ch-continue-btn-cana');
-    btn.disabled = true; btn.textContent = 'Loading...';
-    try {
-      // Save CH data to profile silently if supabase available
-      if (window.supabase && window._chData) {
-        try {
-          var sbClient = window.supabase.createClient(
-            'https://igpjfpncfuawikoyzfcd.supabase.co',
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
-          );
-          var sess = await sbClient.auth.getSession();
-          if (sess.data && sess.data.session) {
-            await sbClient.from('company_profiles').upsert({
-              user_id: sess.data.session.user.id,
-              company_name: window._chData.company_name,
-              company_number: window._chData.company_number,
-              registered_address: window._chData.registered_address,
-              ch_data: JSON.stringify(window._chData),
-              updated_at: new Date().toISOString()
-            }, { onConflict: 'user_id' });
-          }
-        } catch(saveErr) { console.log('Profile save skipped:', saveErr.message); }
-      }
-      // Always proceed to SQ step
-      setStep(3);
-      showState('sq');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      await populateSqStep();
-    } catch(err) {
-      console.error('canaChContinue error:', err);
-      // Still proceed even if something failed
-      setStep(3);
-      try { populateSqStep(); } catch(e) { console.error('populateSqStep error:', e); }
-      showState('sq');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    btn.disabled = false; btn.textContent = 'Next step →';
-  }
+    btn.disabled = true;
 
-  async function canaChSkip() {
-    window._chData = null;
+    // Show SQ immediately — no waiting
     setStep(3);
+    populateSqStep();
     showState('sq');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    await populateSqStep();
+    btn.disabled = false; btn.textContent = 'Next step →';
+
+    // Save profile in background — fire and forget
+    if (window.supabase && window._chData) {
+      try {
+        var sbClient = window.supabase.createClient(
+          'https://igpjfpncfuawikoyzfcd.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
+        );
+        var sess = await sbClient.auth.getSession();
+        if (sess.data && sess.data.session) {
+          sbClient.from('company_profiles').upsert({
+            user_id: sess.data.session.user.id,
+            company_name: window._chData.company_name,
+            company_number: window._chData.company_number,
+            registered_address: window._chData.registered_address,
+            ch_data: JSON.stringify(window._chData),
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'user_id' }).then(function(){
+            console.log('Profile saved silently');
+          }).catch(function(e){ console.log('Profile save skipped:', e.message); });
+        }
+      } catch(e) { console.log('Profile save skipped:', e.message); }
+    }
+  }
+
+  function canaChSkip() {
+    window._chData = null;
+    setStep(3);
+    populateSqStep();
+    showState('sq');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   async function populateSqStep() {
