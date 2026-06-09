@@ -1136,7 +1136,7 @@ function populateCanaTenderSelect(){
   if (!dropdown) return;
   var curVal = document.getElementById('canaTenderSelect').value;
 
-  dropdown.innerHTML = '<div class="custom-select-option" data-value="" onclick="selectCustomTender('',this)">' +
+  dropdown.innerHTML = '<div class="custom-select-option" data-value="" onclick="selectCustomTender(this.dataset.value,this)">' +
     '<span class="custom-select-option-name custom-select-option-placeholder">Choose a tender...</span>' +
     '</div>';
 
