@@ -1136,10 +1136,18 @@ document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });
       }
 
       statusEl.textContent = '⏳ Extracting SQ fields with AI...';
+      // Also send original file as base64 for storage
+      var fileBase64 = await new Promise(function(resolve, reject) {
+        var fr = new FileReader();
+        fr.onload = function(){ resolve(fr.result.split(',')[1]); };
+        fr.onerror = reject;
+        fr.readAsDataURL(sqSelectedFile);
+      });
+
       var res = await fetch('/.netlify/functions/extract-sq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenderId: tenderId, docText: docText, fileName: sqSelectedFile.name })
+        body: JSON.stringify({ tenderId: tenderId, docText: docText, base64Doc: fileBase64, fileName: sqSelectedFile.name })
       });
 
       var data = await res.json();
