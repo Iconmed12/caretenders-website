@@ -29,8 +29,16 @@
 
     try {
       var co = window._companyDetails || {};
+      // Restore from localStorage — Stripe redirect reloads the page and wipes in-memory state
+      if (!co.name && !co.email) {
+        try {
+          var saved = JSON.parse(localStorage.getItem('cana_company_details') || '{}');
+          if (saved && (saved.name || saved.email)) co = saved;
+        } catch(e) {}
+      }
       // Merge CH data so company name is always available
       var chData = window._chData || {};
+      if ((!chData || !chData.company_name) && co.chData) chData = co.chData;
       var mergedCo = Object.assign({}, co, {
         name: co.name || chData.company_name || '',
         company_name: co.name || chData.company_name || '',
