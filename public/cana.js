@@ -249,133 +249,108 @@
   }
 
   function populateSqStep() {
-    var ch   = window._chData || {};
-    var co   = window._companyDetails || {};
-    var sqData = window._tenderData && window._tenderData.sq_data;
+    var ch = window._chData || {};
+    var co = window._companyDetails || {};
+    var sqData = (window._tenderData && window._tenderData.sq_data) || null;
 
-    // Profile key → value from CH + company details
-    var profileMap = {
-      company_name:       ch.company_name || co.name || '',
-      company_number:     ch.company_number || '',
-      registered_address: ch.registered_address || '',
-      company_type:       ch.company_type ? ch.company_type.replace(/-/g,' ') : '',
-      founded_year:       ch.date_of_creation ? ch.date_of_creation.split('-')[0] : '',
-      company_status:     ch.company_status || 'Active',
-      cqc_status:         co.cqc || '',
-      sme_status:         parseInt(co.staff||'0') < 250 ? 'Yes' : 'No',
-      directors:          ch.officers ? ch.officers.filter(function(o){return !o.resigned_on;}).map(function(o){return o.name+' ('+o.role+')';}).join(', ') : '',
-      psc_details:        ch.pscs && ch.pscs.length ? ch.pscs[0].name+' — '+ch.pscs[0].nature_of_control : ''
-    };
+    var html = '';
 
-    // Keys that belong to company/director sections (VISIBLE)
-    var visibleKeys = ['company_name','company_number','registered_address','company_type',
-                       'founded_year','company_status','cqc_status','sme_status',
-                       'directors','psc_details','vat_number','ico_number','contact_name'];
+    // ── Company Information ──
+    var coFields = [
+      { label: 'Registered company name',   value: ch.company_name || co.name || '' },
+      { label: 'Company number',            value: ch.company_number || '' },
+      { label: 'Registered address',        value: ch.registered_address || '' },
+      { label: 'Company type',              value: ch.company_type ? ch.company_type.replace(/-/g,' ') : '' },
+      { label: 'Incorporated',              value: ch.date_of_creation ? ch.date_of_creation.split('-')[0] : '' },
+      { label: 'Company status',            value: ch.company_status || 'Active' },
+      { label: 'CQC status',                value: co.cqc || '' },
+      { label: 'SME status',                value: (parseInt(co.staff||'0') < 250) ? 'Yes — SME' : 'No' }
+    ].filter(function(f){ return f.value; });
 
-    var sectionsHtml = '';
+    html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
+    html += '<div style="background:#f0fdf4;padding:0.85rem 1.25rem;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">';
+    html += '<div style="font-weight:700;font-size:0.9rem;">🏢 Company Information</div>';
+    html += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 9px;border-radius:999px;">✓ Auto-filled</span>';
+    html += '</div>';
+    coFields.forEach(function(f, i) {
+      var border = i < coFields.length - 1 ? 'border-bottom:1px solid #f3f4f6;' : '';
+      html += '<div style="display:grid;grid-template-columns:1fr 1.2fr;gap:0.5rem;padding:0.65rem 1.25rem;' + border + '">';
+      html += '<div style="font-size:0.79rem;font-weight:600;color:#6b7280;">' + f.label + '</div>';
+      html += '<div style="font-size:0.82rem;font-weight:600;color:#166534;">✓ ' + f.value + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
 
-    if (sqData && sqData.sections && sqData.sections.length) {
-      // Use ACTUAL SQ document sections
-      sqData.sections.forEach(function(section) {
-        var fields = section.fields || [];
-        var isVisible = fields.some(function(f){
-          return f.field_type === 'auto_fill' && visibleKeys.indexOf(f.profile_key) !== -1;
-        });
-        var isDeclaration = fields.every(function(f){ return f.field_type === 'client_confirm'; });
+    // ── Directors & PSC ──
+    var officers = (ch.officers || []).filter(function(o){ return !o.resigned_on; });
+    var pscs = ch.pscs || [];
 
-        if (isDeclaration) return; // declarations handled separately below
+    html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
+    html += '<div style="background:#f0fdf4;padding:0.85rem 1.25rem;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">';
+    html += '<div style="font-weight:700;font-size:0.9rem;">👤 Directors &amp; Persons of Significant Control</div>';
+    html += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 9px;border-radius:999px;">✓ From Companies House</span>';
+    html += '</div>';
 
-        if (isVisible) {
-          // Show this section with auto-filled values
-          sectionsHtml += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
-          sectionsHtml += '<div style="background:#f8fafc;padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
-          sectionsHtml += '<div style="font-weight:700;font-size:0.88rem;">' + section.section + ': ' + section.title + '</div>';
-          sectionsHtml += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">✓ Auto-filled</span>';
-          sectionsHtml += '</div>';
-
-          fields.forEach(function(f, i) {
-            var val = f.field_type === 'auto_fill' ? (profileMap[f.profile_key] || '') : '';
-            var isLast = i === fields.length - 1;
-            sectionsHtml += '<div style="display:grid;grid-template-columns:1fr 1.2fr;gap:0.5rem;padding:0.65rem 1.25rem;' + (isLast ? '' : 'border-bottom:1px solid var(--border);') + '">';
-            sectionsHtml += '<div style="font-size:0.79rem;font-weight:600;color:#6b7280;">' + (f.id ? '<span style="opacity:0.6;">' + f.id + ' </span>' : '') + f.question + '</div>';
-            if (val) {
-              sectionsHtml += '<div style="font-size:0.82rem;font-weight:600;color:#166534;display:flex;align-items:flex-start;gap:4px;"><span style="flex-shrink:0;">✓</span>' + val + '</div>';
-            } else {
-              sectionsHtml += '<div style="font-size:0.79rem;color:#d97706;font-style:italic;">Not available</div>';
-            }
-            sectionsHtml += '</div>';
-          });
-          sectionsHtml += '</div>';
-
-        } else {
-          // LOCKED section
-          sectionsHtml += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;position:relative;">';
-          sectionsHtml += '<div style="background:#f8fafc;padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
-          sectionsHtml += '<div style="font-weight:700;font-size:0.88rem;color:#9ca3af;">' + section.section + ': ' + section.title + '</div>';
-          sectionsHtml += '<span style="background:#f3f4f6;color:#9ca3af;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">🔒 Locked</span>';
-          sectionsHtml += '</div>';
-          // Blurred preview rows
-          sectionsHtml += '<div style="padding:0.5rem 1.25rem;filter:blur(4px);pointer-events:none;user-select:none;opacity:0.4;">';
-          fields.slice(0,3).forEach(function(f) {
-            sectionsHtml += '<div style="padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.82rem;color:#374151;">' + f.question + '</div>';
-          });
-          sectionsHtml += '</div>';
-          // Lock overlay
-          sectionsHtml += '<div style="position:absolute;inset:0;top:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.6);gap:6px;">';
-          sectionsHtml += '<span style="font-size:1.5rem;">🔒</span>';
-          sectionsHtml += '<span style="font-size:0.78rem;font-weight:700;color:#6b7280;">Completed in your full report</span>';
-          sectionsHtml += '</div>';
-          sectionsHtml += '</div>';
-        }
+    if (officers.length || pscs.length) {
+      officers.forEach(function(o, i) {
+        var border = (i < officers.length - 1 || pscs.length) ? 'border-bottom:1px solid #f3f4f6;' : '';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.25rem;' + border + '">';
+        html += '<div><div style="font-size:0.85rem;font-weight:700;color:#166534;">✓ ' + o.name + '</div>';
+        html += '<div style="font-size:0.73rem;color:#6b7280;text-transform:capitalize;margin-top:2px;">' + (o.role || 'Director') + (o.appointed_on ? ' · Appointed ' + o.appointed_on : '') + '</div></div>';
+        html += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 8px;border-radius:999px;flex-shrink:0;">Director</span>';
+        html += '</div>';
+      });
+      pscs.forEach(function(p, i) {
+        var border = i < pscs.length - 1 ? 'border-bottom:1px solid #f3f4f6;' : '';
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.25rem;' + border + '">';
+        html += '<div><div style="font-size:0.85rem;font-weight:700;color:#5b21b6;">✓ ' + p.name + '</div>';
+        html += '<div style="font-size:0.73rem;color:#6b7280;margin-top:2px;">' + (p.nature_of_control || 'Person of Significant Control') + '</div></div>';
+        html += '<span style="font-size:0.69rem;font-weight:700;background:rgba(124,58,237,0.1);color:#5b21b6;padding:2px 8px;border-radius:999px;flex-shrink:0;">PSC</span>';
+        html += '</div>';
       });
     } else {
-      // No SQ uploaded — show CH data only in generic format
-      var coFields = [
-        { q:'Registered company name', v: profileMap.company_name },
-        { q:'Company registration number', v: profileMap.company_number },
-        { q:'Registered address', v: profileMap.registered_address },
-        { q:'Company type', v: profileMap.company_type },
-        { q:'Date of incorporation', v: profileMap.founded_year },
-        { q:'Company status', v: profileMap.company_status },
-        { q:'CQC status', v: profileMap.cqc_status },
-        { q:'SME status', v: profileMap.sme_status }
-      ].filter(function(f){ return f.v; });
+      html += '<div style="padding:1rem 1.25rem;font-size:0.83rem;color:#9ca3af;font-style:italic;">No director data — enter your Companies House number in the previous step to pull directors automatically.</div>';
+    }
+    html += '</div>';
 
-      sectionsHtml += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
-      sectionsHtml += '<div style="background:#f8fafc;padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
-      sectionsHtml += '<div style="font-weight:700;font-size:0.88rem;">Company Information</div>';
-      sectionsHtml += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">✓ Auto-filled</span></div>';
-      coFields.forEach(function(f,i) {
-        sectionsHtml += '<div style="display:grid;grid-template-columns:1fr 1.2fr;gap:0.5rem;padding:0.65rem 1.25rem;' + (i<coFields.length-1?'border-bottom:1px solid var(--border);':'') + '">';
-        sectionsHtml += '<div style="font-size:0.79rem;font-weight:600;color:#6b7280;">'+f.q+'</div>';
-        sectionsHtml += '<div style="font-size:0.82rem;font-weight:600;color:#166534;">✓ '+f.v+'</div></div>';
+    // ── Locked sections (from real SQ if available, otherwise generic) ──
+    var lockedSections = [];
+    if (sqData && sqData.sections) {
+      sqData.sections.forEach(function(s) {
+        var isCompany = (s.fields||[]).some(function(f){
+          return ['company_name','company_number','registered_address','company_type',
+                  'founded_year','directors','psc_details','company_status','sme_status','cqc_status'].indexOf(f.profile_key) !== -1;
+        });
+        var isDecl = (s.fields||[]).every(function(f){ return f.field_type === 'client_confirm'; });
+        if (!isCompany && !isDecl) lockedSections.push(s.title || s.section);
       });
-      sectionsHtml += '</div>';
-
-      // Directors
-      var directors = ch.officers ? ch.officers.filter(function(o){return !o.resigned_on;}) : [];
-      var pscs = ch.pscs || [];
-      if (directors.length || pscs.length) {
-        sectionsHtml += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
-        sectionsHtml += '<div style="background:#f8fafc;padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
-        sectionsHtml += '<div style="font-weight:700;font-size:0.88rem;">Directors & PSC</div>';
-        sectionsHtml += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">✓ Auto-filled</span></div>';
-        directors.forEach(function(d,i) {
-          sectionsHtml += '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.25rem;border-bottom:1px solid var(--border);">';
-          sectionsHtml += '<div><div style="font-size:0.85rem;font-weight:700;">✓ '+d.name+'</div><div style="font-size:0.74rem;color:#6b7280;text-transform:capitalize;">'+(d.role||'director')+(d.appointed_on?' · Appointed '+d.appointed_on:'')+'</div></div>';
-          sectionsHtml += '<span style="font-size:0.7rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 8px;border-radius:999px;">Director</span></div>';
-        });
-        pscs.forEach(function(p) {
-          sectionsHtml += '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.25rem;">';
-          sectionsHtml += '<div><div style="font-size:0.85rem;font-weight:700;">✓ '+p.name+'</div><div style="font-size:0.74rem;color:#6b7280;">'+(p.nature_of_control||'PSC')+'</div></div>';
-          sectionsHtml += '<span style="font-size:0.7rem;font-weight:700;background:rgba(124,58,237,0.1);color:#5b21b6;padding:2px 8px;border-radius:999px;">PSC</span></div>';
-        });
-        sectionsHtml += '</div>';
-      }
+    } else {
+      lockedSections = ['Financial Standing', 'Technical Capability', 'Insurance & Compliance',
+                        'Quality Assurance', 'Subcontracting', 'Additional Questions'];
     }
 
-    document.getElementById('sq-sections-cana').innerHTML = sectionsHtml;
+    lockedSections.forEach(function(title) {
+      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:1rem;position:relative;">';
+      html += '<div style="background:#f9fafb;padding:0.85rem 1.25rem;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">';
+      html += '<div style="font-weight:700;font-size:0.9rem;color:#9ca3af;">' + title + '</div>';
+      html += '<span style="background:#f3f4f6;color:#9ca3af;font-size:0.7rem;font-weight:700;padding:2px 9px;border-radius:999px;">🔒 Locked</span>';
+      html += '</div>';
+      html += '<div style="padding:0.75rem 1.25rem;filter:blur(3px);pointer-events:none;user-select:none;opacity:0.35;">';
+      html += '<div style="height:12px;background:#e5e7eb;border-radius:4px;margin-bottom:8px;width:80%;"></div>';
+      html += '<div style="height:12px;background:#e5e7eb;border-radius:4px;margin-bottom:8px;width:60%;"></div>';
+      html += '<div style="height:12px;background:#e5e7eb;border-radius:4px;width:70%;"></div>';
+      html += '</div>';
+      html += '<div style="position:absolute;inset:0;top:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;">';
+      html += '<span style="font-size:1.4rem;">🔒</span>';
+      html += '<span style="font-size:0.77rem;font-weight:700;color:#6b7280;">Completed in your full report</span>';
+      html += '</div>';
+      html += '</div>';
+    });
+
+    var el = document.getElementById('sq-sections-cana');
+    if (el) el.innerHTML = html;
   }
+
 
   async function sqContinue() {
     // Check declarations
