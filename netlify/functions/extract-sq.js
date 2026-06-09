@@ -1,7 +1,3 @@
-// Extracts all fields and questions from an uploaded SQ Word document
-// Classifies each field as: auto_fill, ai_draft, or client_confirm
-// Stores structured data in Supabase tenders table under sq_data column
-
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',
@@ -9,17 +5,28 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
-
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { tenderId, base64, fileName } = JSON.parse(event.body);
-    if (!tenderId || !base64) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing data' }) };
+    const { tenderId, docText, fileName } = JSON.parse(event.body);
+    if (!tenderId || !docText) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing data' }) };
 
     const sbKey = process.env.SUPABASE_ANON_KEY;
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
-    // Extract text from Word document using Claude's document understanding
+    // Truncate if very long — Claude context limit
+    var sqText = docText.length > 30000 ? docText.substring(0, 30000) + '\n...[document truncated]' : docText;
+
+    var prompt = 'Analyse this Selection Questionnaire (SQ) document text carefully. Extract every question and field that a bidder needs to complete.\n\n' +
+      'Classify each field as:\n' +
+      '- "auto_fill" — can be filled from company registration data (company name, address, company number, VAT, directors, PSC, CQC number/rating, insurance confirmations yes/no, SME status, incorporation date, trading name, website)\n' +
+      '- "ai_draft" — needs a written response AI can draft (contract examples, technical capability descriptions, GDPR policy confirmation details, experience narratives, social value statements)\n' +
+      '- "client_confirm" — must be personally confirmed by the client (exclusion declarations, fraud/bribery statements, debarment confirmation, embargo history, criminal conviction declarations)\n\n' +
+      'For auto_fill fields, include a "profile_key" from this list: company_name, company_number, registered_address, vat_number, company_type, founded_year, cqc_status, cqc_provider_id, contact_name, contact_email, sme_status, directors, psc_details, company_status, sic_codes, regulated_activities, services, regions, experience, accreditations, insurance_employers, insurance_public, insurance_professional, gdpr_policy, ico_number\n\n' +
+      'Return ONLY valid JSON, no other text:\n' +
+      '{"sq_title":"...","commissioner":"...","sections":[{"section":"Part 1","title":"...","fields":[{"id":"1.1a","question":"...","field_type":"auto_fill","profile_key":"company_name","hint":"..."}]}]}\n\n' +
+      'SQ DOCUMENT TEXT:\n' + sqText;
+
     const extractRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -30,57 +37,17 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 4000,
-        messages: [{
-          role: 'user',
-          content: [
-            {
-              type: 'document',
-              source: { type: 'base64', media_type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', data: base64 }
-            },
-            {
-              type: 'text',
-              text: `Analyse this Selection Questionnaire (SQ) document carefully. Extract every question, field and section that needs to be completed by a bidder.
-
-For each field/question, classify it as one of:
-- "auto_fill" — can be filled from company registration data (company name, address, company number, VAT, directors, PSC, CQC number, insurance confirmations, SME status, date of incorporation)
-- "ai_draft" — needs a written response that AI can draft (contract examples, technical capability, GDPR policy confirmation, experience narratives)
-- "client_confirm" — must be personally confirmed by the client (exclusion declarations, fraud declarations, bribery declarations, debarment confirmation, embargo history)
-
-Return ONLY a valid JSON object in this exact format, no other text:
-{
-  "sq_title": "name of the SQ document",
-  "commissioner": "name of the commissioning authority",
-  "sections": [
-    {
-      "section": "Part 1",
-      "title": "Potential Supplier Information",
-      "fields": [
-        {
-          "id": "1.1a",
-          "question": "Full name of the potential supplier",
-          "field_type": "auto_fill",
-          "profile_key": "company_name",
-          "hint": "Taken from Companies House registration"
-        }
-      ]
-    }
-  ]
-}`
-            }
-          ]
-        }]
+        messages: [{ role: 'user', content: prompt }]
       })
     });
 
     if (!extractRes.ok) {
       const errText = await extractRes.text();
-      throw new Error('AI extraction failed: ' + errText.substring(0, 200));
+      throw new Error('AI extraction failed: ' + errText.substring(0, 300));
     }
 
     const extractData = await extractRes.json();
     const rawText = extractData.content && extractData.content[0] ? extractData.content[0].text.trim() : '{}';
-
-    // Parse the JSON response
     var clean = rawText.replace(/```json|```/g, '').trim();
     var parsed = JSON.parse(clean);
 
@@ -91,11 +58,10 @@ Return ONLY a valid JSON object in this exact format, no other text:
         totalFields++;
         if (field.field_type === 'auto_fill') autoFill++;
         else if (field.field_type === 'ai_draft') aiDraft++;
-        else if (field.field_type === 'client_confirm') clientConfirm++;
+        else clientConfirm++;
       });
     });
 
-    // Save to Supabase tenders table
     var sqData = {
       ...parsed,
       fileName: fileName,
@@ -106,6 +72,7 @@ Return ONLY a valid JSON object in this exact format, no other text:
       clientConfirm: clientConfirm
     };
 
+    // Save to Supabase
     var saveRes = await fetch(sbUrl + '/rest/v1/tenders?id=eq.' + tenderId, {
       method: 'PATCH',
       headers: {
@@ -117,20 +84,14 @@ Return ONLY a valid JSON object in this exact format, no other text:
       body: JSON.stringify({ sq_data: sqData })
     });
 
-    if (!saveRes.ok) {
-      const saveErr = await saveRes.text();
-      throw new Error('Failed to save SQ data: ' + saveErr.substring(0, 200));
-    }
+    if (!saveRes.ok) throw new Error('Failed to save: ' + (await saveRes.text()).substring(0, 200));
 
     return {
       statusCode: 200,
       headers: cors,
       body: JSON.stringify({
         success: true,
-        totalFields: totalFields,
-        autoFill: autoFill,
-        aiDraft: aiDraft,
-        clientConfirm: clientConfirm,
+        totalFields, autoFill, aiDraft, clientConfirm,
         sqTitle: parsed.sq_title,
         commissioner: parsed.commissioner
       })
