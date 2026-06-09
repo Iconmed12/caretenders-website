@@ -121,20 +121,43 @@
   }
 
   async function pollJobStatus(jobId) {
-    var maxPolls = 60;
-    var polls    = 0;
+    if (!jobId) {
+      console.error('No jobId provided to pollJobStatus');
+      showJobComplete(null, false, 'Job ID missing — please contact consulting@icongrp.co.uk');
+      return;
+    }
+    var maxPolls = 72; // 6 minutes max
+    var polls = 0;
     showProcessingTracker('pending');
+    console.log('Polling job:', jobId);
 
     var interval = setInterval(async function() {
       polls++;
-      if (polls > maxPolls) { clearInterval(interval); showJobComplete(null, true); return; }
+      console.log('Poll', polls, 'for job', jobId);
+      if (polls > maxPolls) {
+        clearInterval(interval);
+        // Timed out — show success anyway (email might still arrive)
+        showJobComplete(null, false);
+        return;
+      }
       try {
-        var res = await fetch('/.netlify/functions/get-cana-result?jobId=' + jobId);
+        var res = await fetch('/.netlify/functions/get-cana-result?jobId=' + encodeURIComponent(jobId));
         var job = await res.json();
-        showProcessingTracker(job.status);
-        if (job.status === 'complete') { clearInterval(interval); showJobComplete(job, false); }
-        else if (job.status === 'error') { clearInterval(interval); showJobComplete(job, false, job.error); }
-      } catch(e) { console.log('Poll error:', e.message); }
+        console.log('Job status:', job.status);
+        showProcessingTracker(job.status || 'pending');
+        if (job.status === 'complete') {
+          clearInterval(interval);
+          showJobComplete(job, false);
+        } else if (job.status === 'error') {
+          clearInterval(interval);
+          // Show error details if available
+          var errMsg = job.error || null;
+          console.error('Job error:', errMsg);
+          showJobComplete(job, false, errMsg);
+        }
+      } catch(e) {
+        console.log('Poll fetch error:', e.message);
+      }
     }, 5000);
   }
 
