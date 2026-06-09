@@ -57,25 +57,18 @@ exports.handler = async (event) => {
     console.log('Job created:', jobRes.status, jobResText.substring(0, 200));
 
     // ── Trigger background function ──
-    var bgPayload = JSON.stringify({
-      jobId,
-      tenderId,
-      sessionId,
-      includeSq: !!includeSq,
-      companyDetails: { ...(companyDetails || {}), email: stripeEmail }
-    });
-    console.log('Triggering background function for job:', jobId);
-    fetch(siteUrl + '/.netlify/functions/generate-cana-background', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: bgPayload
-    }).then(function(r){ console.log('Background triggered, status:', r.status); })
-      .catch(function(e){ console.log('Background trigger failed:', e.message); });
-
+    // Return job details to browser — browser will trigger the background function directly
     return {
       statusCode: 200,
       headers: cors,
-      body: JSON.stringify({ paid: true, jobId, email: stripeEmail })
+      body: JSON.stringify({
+        paid: true,
+        jobId,
+        email: stripeEmail,
+        tenderId,
+        includeSq: !!includeSq,
+        companyDetails: { ...(companyDetails || {}), email: stripeEmail }
+      })
     };
 
   } catch(err) {
