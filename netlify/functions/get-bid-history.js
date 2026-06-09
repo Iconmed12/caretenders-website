@@ -9,8 +9,8 @@ exports.handler = async (event) => {
     if (!email) return { statusCode:400, headers:cors, body: JSON.stringify({ error:'Missing email' }) };
 
     var res = await fetch(
-      sbUrl + '/rest/v1/cana_jobs?client_email=eq.' + encodeURIComponent(email) +
-      '&status=eq.complete&select=id,tender_id,client_name,created_at,completed_at&order=created_at.desc&limit=20',
+      sbUrl + '/rest/v1/cana_jobs?client_email=ilike.' + encodeURIComponent(email) +
+      '&select=id,tender_id,client_name,status,created_at,completed_at&order=created_at.desc&limit=20',
       { headers: { apikey:sbKey, Authorization:'Bearer '+sbKey } }
     );
     var jobs = await res.json();
@@ -36,6 +36,7 @@ exports.handler = async (event) => {
         org: t.org || '',
         deadline: t.deadline || '',
         client_name: j.client_name,
+        status: j.status,
         created_at: j.created_at,
         completed_at: j.completed_at
       };
