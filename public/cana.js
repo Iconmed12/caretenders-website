@@ -389,7 +389,15 @@
     h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ Reviewed &amp; auto-filled</span>';
     h += '</div>';
     h += '<div class="sq-doc-live">' + firstTable + '</div>';
-    h += buildDirectorsHtml(ch);
+    // Only add directors if the SQ actually asks for them
+    if (sqData && sqData.sections) {
+      var asksDirs = (sqData.sections || []).some(function(s){
+        return (s.fields||[]).some(function(f){
+          return f.profile_key === 'directors' || f.profile_key === 'psc_details';
+        });
+      });
+      if (asksDirs) h += buildDirectorsHtml(ch);
+    }
     h += '</div>';
 
     // Lock all remaining tables/sections
