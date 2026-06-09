@@ -158,7 +158,7 @@
         <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
           <div style="flex:1;">
             <label style="font-size:0.78rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Select tender to manage</label>
-            <select id="canaTenderSelect" onchange="loadCanaDocs()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;color:var(--text);">
+            <select id="canaTenderSelect" onchange="localStorage.setItem('cana_last_tender', this.value); loadCanaDocs()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;color:var(--text);">
               <option value="">Choose a tender...</option>
             </select>
           </div>
