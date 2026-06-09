@@ -512,7 +512,7 @@ function renderCanaPanels() {
             '<div style="font-size:0.73rem;color:#2d6a4f;">' + (t.org||'') + '</div>' +
           '</div>' +
           '<span style="font-size:0.7rem;font-weight:700;color:#1a7a3f;background:#e8f7ee;padding:2px 8px;border-radius:999px;flex-shrink:0;">● Live</span>' +
-          '<button data-tid="' + t.id + '" data-title="' + t.title.replace(/"/g,"'") + '" onclick="removeTenderFromLive(this.dataset.tid, this.dataset.title)" style="background:none;border:none;color:#c53030;font-size:0.9rem;cursor:pointer;padding:2px 4px;flex-shrink:0;opacity:0.6;transition:opacity 0.2s;" title="Remove tender" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">✕</button>' +
+          '<button data-tid="' + t.id + '" data-title="' + t.title.replace(/"/g,"'") + '" onclick="removeTenderFromLive(this.dataset.tid, this.dataset.title)" style="background:none;border:none;color:#c53030;font-size:0.9rem;cursor:pointer;padding:2px 4px;flex-shrink:0;opacity:0.6;transition:opacity 0.2s;" title="Move back to Needs Attention" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">✕</button>' +
         '</div>';
       }).join('');
     }
@@ -534,7 +534,7 @@ function renderCanaPanels() {
             '<div style="font-size:0.85rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + item.tender.title + '</div>' +
             '<div style="font-size:0.73rem;color:var(--text-light);margin-top:2px;">Missing:' + missingBadges + '</div>' +
           '</div>' +
-          '<button data-tid="' + item.tender.id + '" data-title="' + item.tender.title.replace(/"/g,"'") + '" onclick="removeTenderFromLive(this.dataset.tid, this.dataset.title)" style="background:none;border:none;color:#c53030;font-size:0.9rem;cursor:pointer;padding:2px 4px;flex-shrink:0;opacity:0.6;transition:opacity 0.2s;" title="Delete tender" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">✕</button>' +
+          '<button data-tid="' + item.tender.id + '" data-title="' + item.tender.title.replace(/"/g,"'") + '" onclick="removeTenderFromLive(this.dataset.tid, this.dataset.title)" style="background:none;border:none;color:#c53030;font-size:0.9rem;cursor:pointer;padding:2px 4px;flex-shrink:0;opacity:0.6;transition:opacity 0.2s;" title="Move back to Needs Attention" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">✕</button>' +
         '</div>';
       }).join('');
     }
@@ -542,26 +542,23 @@ function renderCanaPanels() {
 }
 
 async function removeTenderFromLive(tenderId, tenderTitle) {
-  if (!confirm('Delete "' + tenderTitle + '"?\n\nThis will permanently remove this tender and all its documents. This cannot be undone.')) return;
+  if (!confirm('Move "' + tenderTitle + '" back to Needs Attention?\n\nThe SQ will be cleared so it needs re-uploading. All other documents and questions are kept.')) return;
   try {
-    var res = await fetch(API + '/save-tender', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: tenderId, _delete: true })
+    const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
+    var res = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/tenders?id=eq.' + tenderId, {
+      method: 'PATCH',
+      headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      body: JSON.stringify({ sq_data: null })
     });
-    // Fallback: delete directly via Supabase if save-tender doesn't support delete
-    if (!res.ok) {
-      showToast('Could not delete via API — please delete from the Care Tenders table instead', 'warn');
-      return;
-    }
-    allTenders = allTenders.filter(function(t){ return t.id !== tenderId; });
-    renderAll();
-    updateCounts();
+    if (!res.ok) throw new Error('Could not update tender');
+    // Update local allTenders
+    var t = allTenders.find(function(x){ return x.id === tenderId; });
+    if (t) t.sq_data = null;
     renderCanaPanels();
     populateCanaTenderSelect();
-    showToast('Tender deleted successfully', 'success');
+    showToast('"' + tenderTitle + '" moved back to Needs Attention', 'success');
   } catch(err) {
-    showToast('Delete failed: ' + (err.message||'Error'), 'error');
+    showToast('Failed: ' + (err.message||'Error'), 'error');
   }
 }
 
