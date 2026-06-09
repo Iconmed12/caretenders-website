@@ -656,6 +656,20 @@ async function init() {
   var { data: p } = await sb.from('company_profiles').select('*').eq('user_id', currentUser.id).single();
   profile = p || {};
 
+  // Auto-load stored Companies House data if available
+  if (profile.ch_data) {
+    try {
+      chData = typeof profile.ch_data === 'string' ? JSON.parse(profile.ch_data) : profile.ch_data;
+      // Hide the CH lookup banner since we already have the data
+      var chLookup = document.getElementById('ch-lookup');
+      if (chLookup) {
+        chLookup.style.background = 'rgba(56,161,105,0.05)';
+        chLookup.style.borderColor = 'rgba(56,161,105,0.25)';
+        chLookup.querySelector('p').innerHTML = '✅ <strong>' + (chData.company_name || profile.company_name || 'Company') + '</strong> — Companies House data loaded from your profile';
+      }
+    } catch(e) { /* ch_data parse failed, ignore */ }
+  }
+
   await loadTenders();
 
   document.getElementById('loading-screen').style.display = 'none';
