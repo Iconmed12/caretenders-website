@@ -11,10 +11,12 @@
 [functions."generate-response"]
   timeout = 26
 
-[functions."check-vault-expiry"]
-  schedule = "0 9 * * *"
-
 [functions."extract-sq"]
   timeout = 26
 
-# redeploy 041414
+[functions."check-vault-expiry"]
+  schedule = "0 9 * * *"
+
+[functions."generate-cana-background"]
+  timeout = 900
+
