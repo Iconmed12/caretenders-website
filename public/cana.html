@@ -137,18 +137,22 @@
 
       <div id="ch-error-cana" style="display:none;background:rgba(229,62,62,0.08);border:1px solid rgba(229,62,62,0.2);border-radius:9px;padding:12px 16px;font-size:0.87rem;color:#c53030;margin-bottom:1.25rem;"></div>
 
-      <div style="display:flex;gap:0.75rem;margin-bottom:1rem;">
-        <input type="text" id="ch-num-cana" placeholder="e.g. 12345678" maxlength="8"
-          style="flex:1;padding:13px 16px;border:1.5px solid var(--border);border-radius:9px;font-size:1rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;"
-          onkeydown="if(event.key==='Enter')canaChLookup()"
-          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
-        <button onclick="canaChLookup()" id="ch-lookup-btn-cana"
-          style="background:var(--accent);color:#fff;border:none;border-radius:9px;padding:13px 22px;font-size:0.95rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity 0.2s;">
-          Look up →
-        </button>
+      <!-- Search bar -->
+      <div style="position:relative;margin-bottom:0.75rem;">
+        <div style="display:flex;gap:0.75rem;">
+          <div style="flex:1;position:relative;">
+            <input type="text" id="ch-search-cana" placeholder="Search by company name or number..."
+              style="width:100%;padding:13px 16px 13px 44px;border:1.5px solid var(--border);border-radius:9px;font-size:0.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;"
+              oninput="canaChSearch(this.value)"
+              onkeydown="if(event.key==='Escape')closeCanaChDropdown()"
+              onfocus="this.style.borderColor='#00C9E0'" onblur="setTimeout(closeCanaChDropdown,200)">
+            <span style="position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:1rem;pointer-events:none;">🔍</span>
+          </div>
+        </div>
+        <!-- Results dropdown -->
+        <div id="ch-dropdown-cana" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1.5px solid #00C9E0;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.1);z-index:200;overflow:hidden;"></div>
       </div>
-
-      <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;margin-bottom:1.5rem;">Your 8-digit company number is on your Companies House certificate or at <a href="https://find-and-update.company-information.service.gov.uk" target="_blank" style="color:var(--accent);">find-and-update.company-information.service.gov.uk</a></p>
+      <p style="font-size:0.78rem;color:var(--muted);margin-bottom:1.5rem;">Type your company name or 8-digit Companies House number</p>
 
       <!-- Result card -->
       <div id="ch-result-cana" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
