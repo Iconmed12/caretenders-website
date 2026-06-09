@@ -34,8 +34,11 @@ exports.handler = async (event) => {
             body: docBytes
           }
         );
+        var storageBody = await storageRes.text();
+        console.log('Storage upload:', storageRes.status, storageBody.substring(0, 300));
         if (storageRes.ok) {
           storagePath = `${tenderId}/${fileName || 'sq.docx'}`;
+          console.log('storagePath set:', storagePath);
         }
       } catch(e) { console.log('Storage save failed:', e.message); }
     }
