@@ -165,6 +165,31 @@ function loadCanaDocs(){
     badge.textContent = '⚠ Missing: ' + missing.join(', ');
   }
   document.getElementById('canaDocSaved').style.display='none';
+
+  // Show already-uploaded SQ file if it exists in sq_data
+  var sqFilesEl = document.getElementById('sqDocFiles');
+  var sqStatusEl = document.getElementById('sqExtractStatus');
+  if (sqFilesEl) {
+    if (t && t.sq_data && t.sq_data.fileName) {
+      var fn = t.sq_data.fileName;
+      var fields = t.sq_data.totalFields || 0;
+      var uploaded = t.sq_data.extractedAt ? new Date(t.sq_data.extractedAt).toLocaleDateString('en-GB') : '';
+      sqFilesEl.innerHTML =
+        '<div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:#f0fdf4;border:1.5px solid #9FE1CB;border-radius:8px;">' +
+        '<span style="font-size:1.1rem;">✅</span>' +
+        '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:0.82rem;font-weight:700;color:#166534;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + fn + '</div>' +
+        '<div style="font-size:0.75rem;color:#4a7c59;">' + (fields ? fields + ' fields extracted' : 'Uploaded') + (uploaded ? ' · ' + uploaded : '') + '</div>' +
+        '</div>' +
+        '<button onclick="clearSqFile();loadCanaDocs();" style="background:none;border:none;cursor:pointer;color:#6b7280;font-size:1rem;padding:2px 6px;">↺</button>' +
+        '</div>';
+      if (sqStatusEl) sqStatusEl.style.display = 'none';
+    } else {
+      sqFilesEl.innerHTML = '';
+      if (sqStatusEl) sqStatusEl.style.display = 'none';
+    }
+  }
+
   // Load questions
   buildCanaQuestionRows(t && t.cana_questions ? t.cana_questions : []);
 }
