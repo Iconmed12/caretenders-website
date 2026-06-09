@@ -3,14 +3,13 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode:200, headers:cors, body:'' };
 
   const KEY  = process.env.CQC_API_KEY;
-  const BASE = 'https://api.cqc.org.uk/public/v1';
-  const PC   = 'partnerCode=Cana';
+  const BASE = 'https://api.service.cqc.org.uk';
 
   async function cqcFetch(path) {
-    var sep = path.includes('?') ? '&' : '?';
-    var res = await fetch(BASE + path + sep + PC, {
+    var res = await fetch(BASE + path, {
       headers: {
-        'Ocp-Apim-Subscription-Key': KEY || '',
+        'Authorization': 'Bearer ' + KEY,
+        'Ocp-Apim-Subscription-Key': KEY,
         'Accept': 'application/json',
         'User-Agent': 'Cana-Procurement/1.0'
       }
@@ -26,6 +25,7 @@ exports.handler = async (event) => {
   try {
     const { query, locationId } = JSON.parse(event.body || '{}');
 
+    // ── Mode 1: Full location details + ratings by ID ──
     if (locationId) {
       var loc = await cqcFetch('/locations/' + encodeURIComponent(locationId));
       var ratings = loc.currentRatings || {};
@@ -34,13 +34,12 @@ exports.handler = async (event) => {
       (overall.keyQuestionRatings || []).forEach(function(kq) { domains[kq.name] = kq.rating; });
 
       return { statusCode:200, headers:cors, body: JSON.stringify({
-        locationId:   loc.locationId,
-        name:         loc.name,
-        providerId:   loc.providerId,
-        address:      [loc.postalAddressLine1, loc.postalAddressTownCity, loc.postalCode].filter(Boolean).join(', '),
-        region:       loc.region || '',
-        serviceTypes: (loc.gacServiceTypes||[]).map(function(s){ return s.name; }),
-        regulatedActivities: (loc.regulatedActivities||[]).map(function(a){ return a.name; }),
+        locationId:    loc.locationId,
+        name:          loc.name,
+        providerId:    loc.providerId,
+        address:       [loc.postalAddressLine1, loc.postalAddressTownCity, loc.postalCode].filter(Boolean).join(', '),
+        region:        loc.region || '',
+        serviceTypes:  (loc.gacServiceTypes||[]).map(function(s){ return s.name; }),
         registrationDate: loc.registrationDate || '',
         overallRating: overall.rating || 'Not yet rated',
         ratingDate:    overall.reportDate || '',
@@ -52,41 +51,39 @@ exports.handler = async (event) => {
           wellLed:    domains['Well-led'] || ''
         },
         lastInspection: loc.lastInspection && loc.lastInspection.date || '',
-        numberOfBeds:  loc.numberOfBeds || 0,
+        numberOfBeds:   loc.numberOfBeds || 0,
         localAuthority: loc.localAuthority || ''
       })};
     }
 
+    // ── Mode 2: Search by name ──
     if (query) {
       var locations = [];
-      console.log('CQC search query:', query);
-      try {
-        var provRes = await cqcFetch('/providers?perPage=8&page=1&name=' + encodeURIComponent(query));
-        var providers = provRes.providers || [];
-        console.log('CQC providers found:', providers.length, JSON.stringify(providers).substring(0,300));
+      console.log('CQC search:', query);
 
-        for (var p of providers.slice(0, 3)) {
-          try {
-            var pDetail = await cqcFetch('/providers/' + encodeURIComponent(p.providerId));
-            var locIds = (pDetail.locationIds || []).slice(0, 5);
-            for (var lid of locIds) {
-              try {
-                var lDetail = await cqcFetch('/locations/' + encodeURIComponent(lid));
-                if (lDetail.registrationStatus === 'Registered') {
-                  locations.push({
-                    locationId: lDetail.locationId,
-                    name: lDetail.name,
-                    postcode: lDetail.postalCode || ''
-                  });
-                }
-              } catch(e) {}
-              if (locations.length >= 10) break;
-            }
-          } catch(e) {}
-          if (locations.length >= 10) break;
-        }
-      } catch(e) {
-        console.log('Provider search failed:', e.message);
+      var provRes = await cqcFetch('/providers?perPage=8&page=1&name=' + encodeURIComponent(query));
+      var providers = provRes.providers || [];
+      console.log('Providers found:', providers.length);
+
+      for (var p of providers.slice(0, 3)) {
+        try {
+          var pDetail = await cqcFetch('/providers/' + encodeURIComponent(p.providerId));
+          var locIds = (pDetail.locationIds || []).slice(0, 5);
+          for (var lid of locIds) {
+            try {
+              var lDetail = await cqcFetch('/locations/' + encodeURIComponent(lid));
+              if (lDetail.registrationStatus === 'Registered') {
+                locations.push({
+                  locationId: lDetail.locationId,
+                  name:       lDetail.name,
+                  postcode:   lDetail.postalCode || ''
+                });
+              }
+            } catch(e) {}
+            if (locations.length >= 10) break;
+          }
+        } catch(e) {}
+        if (locations.length >= 10) break;
       }
 
       return { statusCode:200, headers:cors, body: JSON.stringify({ locations }) };
