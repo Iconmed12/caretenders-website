@@ -153,43 +153,29 @@
   }
 
   async function pollJobStatus(jobId) {
-    if (!jobId) {
-      console.error('No jobId provided to pollJobStatus');
-      showJobComplete(null, false, 'Job ID missing — please contact consulting@icongrp.co.uk');
-      return;
-    }
-    var maxPolls = 72; // 6 minutes max
+    if (!jobId) return;
+    var maxPolls = 72;
     var polls = 0;
-    showProcessingTracker('pending');
-    console.log('Polling job:', jobId);
+    console.log('Polling job silently:', jobId);
 
     var interval = setInterval(async function() {
       polls++;
-      console.log('Poll', polls, 'for job', jobId);
       if (polls > maxPolls) {
         clearInterval(interval);
-        // Timed out — show success anyway (email might still arrive)
-        showJobComplete(null, false);
-        return;
+        return; // Simple message already showing — just stop polling
       }
       try {
         var res = await fetch('/.netlify/functions/get-cana-result?jobId=' + encodeURIComponent(jobId));
         var job = await res.json();
         console.log('Job status:', job.status);
-        showProcessingTracker(job.status || 'pending');
         if (job.status === 'complete') {
           clearInterval(interval);
           showJobComplete(job, false);
         } else if (job.status === 'error') {
           clearInterval(interval);
-          // Show error details if available
-          var errMsg = job.error || null;
-          console.error('Job error:', errMsg);
-          showJobComplete(job, false, errMsg);
+          showJobComplete(job, false, job.error || null);
         }
-      } catch(e) {
-        console.log('Poll fetch error:', e.message);
-      }
+      } catch(e) { console.log('Poll error:', e.message); }
     }, 5000);
   }
 
