@@ -236,18 +236,6 @@
       </div>
     </div>
     <div class="section-body">
-      <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:10px;padding:16px;margin-bottom:1.25rem;">
-        <label class="form-label" style="margin-bottom:8px;display:block;">🔍 Enter your CQC Location ID to auto-fill your rating</label>
-        <p style="font-size:0.78rem;color:#6b7280;margin:0 0 8px;">Find your Location ID on your CQC certificate or at <a href="https://www.cqc.org.uk/search?query=find+service" target="_blank" style="color:#0369a1;">cqc.org.uk</a> — it starts with <strong>1-</strong></p>
-        <div style="display:flex;gap:8px;">
-          <input class="form-input" type="text" id="cqc-search" placeholder="e.g. 1-123456789" autocomplete="off" style="flex:1;" oninput="cqcSearchDebounced()">
-          <button type="button" onclick="lookupCqcById()" style="background:var(--navy);color:#fff;border:none;padding:0 16px;border-radius:8px;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit;">Look up →</button>
-        </div>
-        </div>
-        <div id="cqc-results" style="margin-top:8px;display:none;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:240px;overflow-y:auto;"></div>
-        <div id="cqc-selected" style="margin-top:10px;display:none;"></div>
-        <p style="font-size:0.78rem;color:#0369a1;margin-top:8px;">We pull your live rating direct from the CQC register — overall and all five domains.</p>
-      </div>
       <div class="form-grid">
         <div class="form-group">
           <label class="form-label">CQC registration status</label>
@@ -587,129 +575,7 @@
     }
   </script>
 
-<script>
-  // ── CQC search & auto-fill ──
-  var cqcSearchTimer = null;
-  function cqcSearchDebounced() {
-    clearTimeout(cqcSearchTimer);
-    cqcSearchTimer = setTimeout(runCqcSearch, 350);
-  }
 
-  function lookupCqcById() {
-    var input = document.getElementById('cqc-search');
-    var val = (input ? input.value : '').trim();
-    if (!val) return;
-    // If it looks like an ID (starts with 1- or is purely numeric), look up directly
-    if (/^1-/.test(val) || /^[0-9-]+$/.test(val)) {
-      selectCqcLocation(val, { getAttribute: function(){ return val; } });
-    } else {
-      runCqcSearch();
-    }
-  }
-
-  async function runCqcSearch() {
-    var q = document.getElementById('cqc-search').value.trim();
-    var resultsEl = document.getElementById('cqc-results');
-    if (q.length < 3) { resultsEl.style.display = 'none'; return; }
-
-    try {
-      var res = await fetch('/.netlify/functions/cqc-lookup', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: q })
-      });
-      var data = await res.json();
-      var locs = data.locations || [];
-
-      if (!locs.length) {
-        resultsEl.innerHTML = '<div style="padding:12px;color:#9ca3af;font-size:0.85rem;">No matches found. Try a different spelling.</div>';
-        resultsEl.style.display = 'block';
-        return;
-      }
-
-      resultsEl.innerHTML = locs.map(function(l) {
-        return '<div onclick="selectCqcLocation(\'' + l.locationId + '\', this)" data-name="' + (l.name||'').replace(/"/g,'&quot;') + '" style="padding:10px 12px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:0.85rem;" onmouseover="this.style.background=\'#f0f9ff\'" onmouseout="this.style.background=\'#fff\'">' +
-          '<div style="font-weight:600;color:#0B1929;">' + (l.name||'') + '</div>' +
-          '<div style="font-size:0.75rem;color:#9ca3af;">' + (l.postcode||'') + ' · ' + l.locationId + '</div>' +
-        '</div>';
-      }).join('');
-      resultsEl.style.display = 'block';
-    } catch(e) {
-      resultsEl.innerHTML = '<div style="padding:12px;color:#dc2626;font-size:0.85rem;">Search error — please fill in manually below.</div>';
-      resultsEl.style.display = 'block';
-    }
-  }
-
-  async function selectCqcLocation(locationId, el) {
-    var name = el.getAttribute('data-name');
-    document.getElementById('cqc-results').style.display = 'none';
-    document.getElementById('cqc-search').value = name;
-    var selEl = document.getElementById('cqc-selected');
-    selEl.style.display = 'block';
-    selEl.innerHTML = '<div style="padding:10px;color:#6b7280;font-size:0.85rem;">⏳ Fetching CQC rating...</div>';
-
-    try {
-      var res = await fetch('/.netlify/functions/cqc-lookup', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ locationId: locationId })
-      });
-      var d = await res.json();
-      if (d.error) throw new Error(d.error);
-
-      // Auto-fill the form fields
-      var idEl = document.getElementById('f-cqc-id');
-      if (idEl) idEl.value = locationId;
-
-      // Map overall rating to the dropdown
-      var statusEl = document.getElementById('f-cqc-status');
-      if (statusEl) {
-        var map = {
-          'Outstanding': 'CQC Registered — Rated Outstanding',
-          'Good': 'CQC Registered — Rated Good',
-          'Requires improvement': 'CQC Registered — Requires Improvement',
-          'Inadequate': 'CQC Registered — Inadequate'
-        };
-        var target = map[d.overallRating] || 'CQC Registered';
-        for (var i=0;i<statusEl.options.length;i++) {
-          if (statusEl.options[i].text === target) { statusEl.selectedIndex = i; break; }
-        }
-      }
-
-      // Fill inspection date
-      var dateEl = document.getElementById('f-cqc-date');
-      if (dateEl && d.ratingDate) dateEl.value = d.ratingDate;
-
-      // Store full CQC data for the bid engine
-      window._cqcData = d;
-
-      // Show summary card
-      var ratingColor = { 'Outstanding':'#7c3aed','Good':'#166534','Requires improvement':'#d97706','Inadequate':'#dc2626' }[d.overallRating] || '#6b7280';
-      selEl.innerHTML = '<div style="background:#fff;border:1.5px solid ' + ratingColor + ';border-radius:10px;padding:14px;">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
-          '<div style="font-weight:700;color:#0B1929;">' + d.name + '</div>' +
-          '<span style="background:' + ratingColor + ';color:#fff;font-size:0.75rem;font-weight:700;padding:3px 10px;border-radius:999px;">' + d.overallRating + '</span>' +
-        '</div>' +
-        '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;font-size:0.7rem;text-align:center;">' +
-          cqcDomain('Safe', d.domains.safe) +
-          cqcDomain('Effective', d.domains.effective) +
-          cqcDomain('Caring', d.domains.caring) +
-          cqcDomain('Responsive', d.domains.responsive) +
-          cqcDomain('Well-led', d.domains.wellLed) +
-        '</div>' +
-        '<div style="font-size:0.72rem;color:#9ca3af;margin-top:10px;">✓ Pulled from CQC register' + (d.ratingDate ? ' · Last rated ' + d.ratingDate : '') + '</div>' +
-      '</div>';
-    } catch(e) {
-      selEl.innerHTML = '<div style="padding:10px;color:#dc2626;font-size:0.85rem;">Could not fetch rating: ' + e.message + '. Please select manually below.</div>';
-    }
-  }
-
-  function cqcDomain(label, rating) {
-    var c = { 'Outstanding':'#7c3aed','Good':'#166534','Requires improvement':'#d97706','Inadequate':'#dc2626' }[rating] || '#d1d5db';
-    return '<div style="background:#f9fafb;border-radius:6px;padding:6px 4px;">' +
-      '<div style="font-weight:600;color:#6b7280;margin-bottom:2px;">' + label + '</div>' +
-      '<div style="color:' + c + ';font-weight:700;">' + (rating || '—') + '</div>' +
-    '</div>';
-  }
-</script>
 
 </body>
 </html>
