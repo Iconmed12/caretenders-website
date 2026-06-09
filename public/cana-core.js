@@ -29,6 +29,13 @@
 
     try {
       var co = window._companyDetails || {};
+      // Merge CH data so company name is always available
+      var chData = window._chData || {};
+      var mergedCo = Object.assign({}, co, {
+        name: co.name || chData.company_name || '',
+        company_name: co.name || chData.company_name || '',
+        chData: chData
+      });
       var res = await fetch('/.netlify/functions/cana-verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -36,7 +43,7 @@
           sessionId: sid,
           tenderId: tenderId,
           includeSq: !!(window._tenderData && window._tenderData.sq_data && window._tenderData.sq_data.storagePath),
-          companyDetails: co
+          companyDetails: mergedCo
         })
       });
       var data = await res.json();
@@ -60,7 +67,7 @@
           tenderId: data.tenderId || tenderId,
           sessionId: sid,
           includeSq: data.includeSq,
-          companyDetails: data.companyDetails || co
+          companyDetails: data.companyDetails || mergedCo
         })
       }).then(function(r){
         console.log('Background function response status:', r.status);
