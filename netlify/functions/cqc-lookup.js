@@ -3,31 +3,27 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode:200, headers:cors, body:'' };
 
   const KEY  = process.env.CQC_API_KEY;
-  const BASE = 'https://api.service.cqc.org.uk';
+  // Old public API — no auth required, stable, works for direct lookups
+  const BASE = 'https://api.cqc.org.uk/public/v1';
 
   async function cqcFetch(path) {
-    var res = await fetch(BASE + path, {
-      headers: {
-        'Authorization': 'Bearer ' + KEY,
-        'Ocp-Apim-Subscription-Key': KEY,
-        'Accept': 'application/json',
-        'User-Agent': 'Cana-Procurement/1.0'
-      }
+    var res = await fetch(BASE + path + (path.includes('?') ? '&' : '?') + 'partnerCode=Cana', {
+      headers: { 'Accept': 'application/json', 'User-Agent': 'Cana-Procurement/1.0' }
     });
     if (!res.ok) {
       var body = await res.text();
-      console.log('CQC API error:', res.status, body.substring(0,300));
-      throw new Error('CQC ' + res.status + ': ' + body.substring(0,150));
+      console.log('CQC error:', res.status, body.substring(0,200));
+      throw new Error('CQC ' + res.status + ': ' + body.substring(0,100));
     }
     return res.json();
   }
 
   try {
-    const { query, locationId } = JSON.parse(event.body || '{}');
+    const { locationId, query } = JSON.parse(event.body || '{}');
 
-    // ── Mode 1: Full location details + ratings by ID ──
+    // ── Lookup by location ID (primary mode) ──
     if (locationId) {
-      var loc = await cqcFetch('/locations/' + encodeURIComponent(locationId));
+      var loc = await cqcFetch('/locations/' + encodeURIComponent(locationId.trim()));
       var ratings = loc.currentRatings || {};
       var overall = ratings.overall || {};
       var domains = {};
@@ -56,43 +52,34 @@ exports.handler = async (event) => {
       })};
     }
 
-    // ── Mode 2: Search by name ──
+    // ── Name search fallback: search by provider name via old API ──
     if (query) {
-      var locations = [];
-      console.log('CQC search:', query);
-
-      var provRes = await cqcFetch('/providers?perPage=8&page=1&name=' + encodeURIComponent(query));
-      var providers = provRes.providers || [];
-      console.log('Providers found:', providers.length);
-
-      for (var p of providers.slice(0, 3)) {
-        try {
-          var pDetail = await cqcFetch('/providers/' + encodeURIComponent(p.providerId));
-          var locIds = (pDetail.locationIds || []).slice(0, 5);
-          for (var lid of locIds) {
-            try {
-              var lDetail = await cqcFetch('/locations/' + encodeURIComponent(lid));
-              if (lDetail.registrationStatus === 'Registered') {
-                locations.push({
-                  locationId: lDetail.locationId,
-                  name:       lDetail.name,
-                  postcode:   lDetail.postalCode || ''
-                });
-              }
-            } catch(e) {}
-            if (locations.length >= 10) break;
-          }
-        } catch(e) {}
-        if (locations.length >= 10) break;
+      try {
+        // The old API doesn't support name search directly.
+        // We try inspectionDirectorate=Adult social care and page through
+        // first few pages looking for a match (limited but functional)
+        var matches = [];
+        var q = query.toLowerCase();
+        var res = await fetch(BASE + '/providers?page=1&perPage=100&inspectionDirectorate=Adult+social+care&partnerCode=Cana',
+          { headers: { 'Accept': 'application/json', 'User-Agent': 'Cana-Procurement/1.0' } });
+        if (res.ok) {
+          var data = await res.json();
+          (data.providers || []).forEach(function(p) {
+            if ((p.name || '').toLowerCase().includes(q)) {
+              matches.push({ locationId: p.providerId, name: p.name, postcode: p.postalCode || '' });
+            }
+          });
+        }
+        return { statusCode:200, headers:cors, body: JSON.stringify({ locations: matches.slice(0,10) }) };
+      } catch(e) {
+        return { statusCode:200, headers:cors, body: JSON.stringify({ locations: [] }) };
       }
-
-      return { statusCode:200, headers:cors, body: JSON.stringify({ locations }) };
     }
 
-    return { statusCode:400, headers:cors, body: JSON.stringify({ error:'Provide query or locationId' }) };
+    return { statusCode:400, headers:cors, body: JSON.stringify({ error:'Provide locationId or query' }) };
 
   } catch(e) {
-    console.error('CQC lookup error:', e.message);
+    console.error('CQC error:', e.message);
     return { statusCode:500, headers:cors, body: JSON.stringify({ error:e.message }) };
   }
 };
