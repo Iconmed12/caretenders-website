@@ -39,7 +39,7 @@ exports.handler = async (event) => {
     (responses || []).forEach(function(r, i) {
       children.push(new Paragraph({
         children: [new TextRun({ text: 'Question ' + (i + 1), bold: true, size: 26, color: 'FFFFFF', font: 'Arial' })],
-        spacing: { before: 400, after: 100 }, shading: { fill: '0B1929' }
+        spacing: { before: 400, after: 100 }, 
       }));
       children.push(new Paragraph({
         children: [new TextRun({ text: r.question || '', bold: true, size: 22, font: 'Arial', color: '0B1929' })],
@@ -63,9 +63,14 @@ exports.handler = async (event) => {
     }));
 
     var doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: children }] });
-    var docBuffer = await Packer.toBuffer(doc);
-    var docBase64 = docBuffer.toString('base64');
     var safeClientName = (clientName || 'Client').replace(/\s+/g, '_');
+    try {
+      var docBuffer = await Packer.toBuffer(doc);
+      docBase64 = docBuffer.toString('base64');
+    } catch(docErr) {
+      console.error('Word doc generation failed:', docErr.message);
+      // Continue — email will send without Word attachment
+    }
 
     // ── Build completion report HTML section ──
     var reportHtml = '';
@@ -151,9 +156,10 @@ exports.handler = async (event) => {
       '</div></div>';
 
     // ── Build attachments array ──
-    var attachments = [
-      { filename: 'Cana_AI_Tender_Responses.docx', content: docBase64 }
-    ];
+    var attachments = [];
+    if (docBase64) {
+      attachments.push({ filename: 'Cana_AI_Tender_Responses.docx', content: docBase64 });
+    }
     if (includeSq && sqDocBase64) {
       attachments.push({
         filename: sqFileName || 'Selection_Questionnaire_Completed.docx',
