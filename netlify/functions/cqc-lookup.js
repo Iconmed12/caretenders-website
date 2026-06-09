@@ -2,30 +2,35 @@ exports.handler = async (event) => {
   const cors = { 'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'*' };
   if (event.httpMethod === 'OPTIONS') return { statusCode:200, headers:cors, body:'' };
 
-  const KEY = process.env.CQC_API_KEY;
+  const KEY  = process.env.CQC_API_KEY;
   const BASE = 'https://api.cqc.org.uk/public/v1';
+  const PC   = 'partnerCode=Cana';
 
   async function cqcFetch(path) {
-    var res = await fetch(BASE + path, {
-      headers: { 'Ocp-Apim-Subscription-Key': KEY, 'Accept': 'application/json', 'User-Agent': 'Cana/1.0' }
+    var sep = path.includes('?') ? '&' : '?';
+    var res = await fetch(BASE + path + sep + PC, {
+      headers: {
+        'Ocp-Apim-Subscription-Key': KEY || '',
+        'Accept': 'application/json',
+        'User-Agent': 'Cana-Procurement/1.0'
+      }
     });
-    if (!res.ok) throw new Error('CQC API ' + res.status + ': ' + (await res.text()).substring(0,150));
+    if (!res.ok) {
+      var body = await res.text();
+      throw new Error('CQC ' + res.status + ': ' + body.substring(0,150));
+    }
     return res.json();
   }
 
   try {
     const { query, locationId } = JSON.parse(event.body || '{}');
 
-    // ── Mode 1: Fetch full location details + ratings by ID ──
     if (locationId) {
       var loc = await cqcFetch('/locations/' + encodeURIComponent(locationId));
-
       var ratings = loc.currentRatings || {};
       var overall = ratings.overall || {};
       var domains = {};
-      (overall.keyQuestionRatings || []).forEach(function(kq) {
-        domains[kq.name] = kq.rating;
-      });
+      (overall.keyQuestionRatings || []).forEach(function(kq) { domains[kq.name] = kq.rating; });
 
       return { statusCode:200, headers:cors, body: JSON.stringify({
         locationId:   loc.locationId,
@@ -46,20 +51,41 @@ exports.handler = async (event) => {
           wellLed:    domains['Well-led'] || ''
         },
         lastInspection: loc.lastInspection && loc.lastInspection.date || '',
-        website:       loc.website || ''
+        numberOfBeds:  loc.numberOfBeds || 0,
+        localAuthority: loc.localAuthority || ''
       })};
     }
 
-    // ── Mode 2: Search locations by name ──
     if (query) {
-      var results = await cqcFetch('/locations?partnerCode=Cana&perPage=10&page=1&name=' + encodeURIComponent(query));
-      var locations = (results.locations || []).map(function(l) {
-        return {
-          locationId: l.locationId,
-          name:       l.locationName || l.name,
-          postcode:   l.postalCode || ''
-        };
-      });
+      var locations = [];
+      try {
+        var provRes = await cqcFetch('/providers?perPage=8&page=1&name=' + encodeURIComponent(query));
+        var providers = provRes.providers || [];
+
+        for (var p of providers.slice(0, 3)) {
+          try {
+            var pDetail = await cqcFetch('/providers/' + encodeURIComponent(p.providerId));
+            var locIds = (pDetail.locationIds || []).slice(0, 5);
+            for (var lid of locIds) {
+              try {
+                var lDetail = await cqcFetch('/locations/' + encodeURIComponent(lid));
+                if (lDetail.registrationStatus === 'Registered') {
+                  locations.push({
+                    locationId: lDetail.locationId,
+                    name: lDetail.name,
+                    postcode: lDetail.postalCode || ''
+                  });
+                }
+              } catch(e) {}
+              if (locations.length >= 10) break;
+            }
+          } catch(e) {}
+          if (locations.length >= 10) break;
+        }
+      } catch(e) {
+        console.log('Provider search failed:', e.message);
+      }
+
       return { statusCode:200, headers:cors, body: JSON.stringify({ locations }) };
     }
 
