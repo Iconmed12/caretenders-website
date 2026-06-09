@@ -41,9 +41,9 @@ exports.handler = async (event) => {
     // ── Create job record ──
     var jobId = 'job_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
 
-    await fetch(sbUrl + '/rest/v1/cana_jobs', {
+    var jobRes = await fetch(sbUrl + '/rest/v1/cana_jobs', {
       method: 'POST',
-      headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=representation' },
       body: JSON.stringify({
         id: jobId,
         status: 'pending',
@@ -53,6 +53,8 @@ exports.handler = async (event) => {
         created_at: new Date().toISOString()
       })
     });
+    var jobResText = await jobRes.text();
+    console.log('Job created:', jobRes.status, jobResText.substring(0, 200));
 
     // ── Trigger background function ──
     var bgPayload = JSON.stringify({
