@@ -482,51 +482,7 @@
     await runGeneration(window._companyDetails);
   }
 
-  function populateSqStep(sqData, co) {
-    // Auto-fill summary
-    var autoFields = [
-      { label: 'Company name',   value: co.name },
-      { label: 'CQC status',     value: co.cqc },
-      { label: 'Staff',          value: co.staff },
-      { label: 'Services',       value: co.services ? co.services.substring(0,60)+'...' : '' },
-      { label: 'Regions',        value: co.regions },
-      { label: 'Founded',        value: co.founded }
-    ].filter(function(f){ return f.value; });
-
-    document.getElementById('sq-autofill-fields').innerHTML = autoFields.map(function(f) {
-      return '<div style="background:#fff;border-radius:6px;padding:6px 10px;">' +
-        '<div style="font-size:0.7rem;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">' + f.label + '</div>' +
-        '<div style="font-size:0.82rem;font-weight:600;color:#166534;">' + f.value + '</div>' +
-      '</div>';
-    }).join('');
-
-    // Extract declarations from sq_data
-    var declarations = [];
-    (sqData.sections || []).forEach(function(s) {
-      (s.fields || []).forEach(function(f) {
-        if (f.field_type === 'client_confirm') declarations.push(f);
-      });
-    });
-
-    // Default declarations if none extracted
-    if (!declarations.length) {
-      declarations = [
-        { id:'d1', question:'I confirm that our organisation is not on the debarment list and has not been subject to any mandatory or discretionary exclusion grounds.' },
-        { id:'d2', question:'I confirm that our organisation has no unspent criminal convictions relevant to this procurement.' },
-        { id:'d3', question:'I confirm that all information provided in this submission is accurate and complete to the best of my knowledge.' },
-        { id:'d4', question:'I confirm that our organisation has not been in administration, receivership or subject to insolvency proceedings in the last 3 years.' }
-      ];
-    }
-
-    document.getElementById('sq-declarations').innerHTML = declarations.map(function(d) {
-      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #fde68a;">' +
-        '<input type="checkbox" id="decl-' + d.id + '" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;width:16px;height:16px;">' +
-        '<label for="decl-' + d.id + '" style="font-size:0.83rem;color:#78350f;line-height:1.6;cursor:pointer;">' + d.question + '</label>' +
-      '</div>';
-    }).join('');
-  }
-
-  async function confirmSqAndGenerate() {
+async function confirmSqAndGenerate() {
     // Check all declarations ticked
     var declInputs = document.querySelectorAll('#sq-declarations input[type=checkbox]');
     var allChecked = Array.from(declInputs).every(function(cb){ return cb.checked; });
