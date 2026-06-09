@@ -80,7 +80,53 @@
           <label class="form-label">Number of staff</label>
           <input class="form-input" type="text" id="f-staff" placeholder="e.g. 45">
         </div>
-        
+        <div class="form-group">
+          <label class="form-label">CQC status</label>
+          <select class="form-select" id="f-cqc">
+            <option value="">Select...</option>
+            <option value="CQC Registered and Rated Good">CQC Registered and Rated Good</option>
+            <option value="CQC Registered and Rated Outstanding">CQC Registered and Rated Outstanding</option>
+            <option value="CQC Registered and Rated Requires Improvement">CQC Registered — Requires Improvement</option>
+            <option value="CQC Registered, awaiting first inspection">CQC Registered, awaiting first inspection</option>
+            <option value="Not yet CQC registered">Not yet CQC registered</option>
+            <option value="Not applicable (commercial)">Not applicable (commercial)</option>
+          </select>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Services you provide</label>
+          <textarea class="form-textarea" id="f-services" placeholder="e.g. Domiciliary care, supported living, personal care for adults with learning disabilities..."></textarea>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Regions you operate in</label>
+          <input class="form-input" type="text" id="f-regions" placeholder="e.g. West Midlands, Greater Manchester, London">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Email address <span style="color:#e53e3e;">*</span></label>
+          <input class="form-input" type="email" id="f-email" placeholder="e.g. info@yourcompany.co.uk">
+          <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Your full responses will be emailed here after payment</div>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Previous contract experience <span>(optional)</span></label>
+          <textarea class="form-textarea" id="f-experience" placeholder="e.g. We have delivered domiciliary care contracts for Birmingham City Council since 2019, supporting 120 service users across 3 localities..."></textarea>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Key achievements &amp; awards <span>(optional)</span></label>
+          <textarea class="form-textarea" id="f-achievements" placeholder="e.g. Named 'Outstanding Provider of the Year' at the West Midlands Care Awards 2023. Achieved 97% service user satisfaction in our 2024 annual survey. Zero safeguarding incidents in last 3 years..."></textarea>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Named policies &amp; frameworks you use <span>(optional)</span></label>
+          <textarea class="form-textarea" id="f-policies" placeholder="e.g. Care Act 2014 compliant assessment process, Mental Capacity Act framework, NICE guidelines for dementia care, MarketSoft care management system, monthly MDT review process..."></textarea>
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Accreditations &amp; memberships <span>(optional)</span></label>
+          <input class="form-input" type="text" id="f-accreditations" placeholder="e.g. UKHCA member, Investors in People Silver, ISO 9001, Skills for Care endorsed employer">
+        </div>
+        <div class="form-group form-full">
+          <label class="form-label">Performance KPIs &amp; outcomes data <span>(optional)</span></label>
+          <textarea class="form-textarea" id="f-kpis" placeholder="e.g. 98.7% on-time visit rate, average carer tenure 4.2 years, hospital admission rate 12% below local average, 94% of service users rated care as Good or Excellent..."></textarea>
+        </div>
+      </div>
+    </div>
 
     <button class="generate-btn" onclick="generateResponses()">
       ⚡ Generate my tender responses
@@ -268,7 +314,5 @@
       navigator.serviceWorker.register('/sw.js').then(function(r){ console.log('SW registered'); }).catch(function(){});
     }
   </script>
-
-
 </body>
 </html>
