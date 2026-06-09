@@ -14,9 +14,21 @@
 [functions."extract-sq"]
   timeout = 26
 
+[functions."import-tenders"]
+  schedule = "0 7 * * *"
+
 [functions."check-vault-expiry"]
   schedule = "0 9 * * *"
 
 [functions."generate-cana-background"]
   timeout = 900
 
+
+[functions."import-tenders"]
+  timeout = 300
+
+[functions."import-tenders"]
+  schedule = "0 7 * * *"
+
+[functions."check-vault-expiry"]
+  schedule = "0 9 * * *"
