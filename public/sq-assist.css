@@ -1,0 +1,29 @@
+
+  /* SQ specific additions */
+  .tender-select { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:9px; font-size:0.95rem; font-family:'DM Sans',sans-serif; color:var(--navy); outline:none; transition:border-color 0.2s; background:#fff; margin-bottom:1.25rem; }
+  .tender-select:focus { border-color:var(--teal); }
+  .sq-section { background:#fff; border:1px solid var(--border); border-radius:12px; margin-bottom:1rem; overflow:hidden; }
+  .sq-section-head { padding:0.9rem 1.25rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .sq-section-title { font-size:0.9rem; font-weight:700; }
+  .sq-section-badge { font-size:0.7rem; font-weight:700; padding:3px 10px; border-radius:999px; }
+  .sq-field { display:grid; grid-template-columns:1fr 1.2fr; gap:0.75rem; padding:0.75rem 1.25rem; border-bottom:1px solid var(--border); align-items:start; font-size:0.83rem; }
+  .sq-field:last-child { border-bottom:none; }
+  .sq-field-label { font-weight:600; color:var(--navy); }
+  .sq-field-hint { font-size:0.72rem; color:var(--muted); margin-top:2px; }
+  .sq-field-value { color:var(--success); font-weight:500; }
+  .sq-field-missing { color:var(--error); font-style:italic; font-size:0.8rem; }
+  .sq-field-textarea { width:100%; padding:8px 10px; border:1.5px solid rgba(124,58,237,0.3); border-radius:7px; font-size:0.82rem; font-family:'DM Sans',sans-serif; color:var(--navy); resize:vertical; min-height:60px; outline:none; background:rgba(124,58,237,0.02); }
+  .sq-field-textarea:focus { border-color:var(--purple,#7C3AED); }
+  .decl-row { display:flex; gap:10px; align-items:flex-start; padding:0.75rem 1.25rem; border-bottom:1px solid #fde68a; }
+  .decl-row:last-child { border-bottom:none; }
+  .decl-row input { margin-top:3px; flex-shrink:0; accent-color:#92400e; }
+  .decl-row label { font-size:0.82rem; color:#78350f; line-height:1.6; cursor:pointer; }
+  .progress-wrap { background:#fff; border:1px solid var(--border); border-radius:10px; padding:1rem 1.25rem; margin-bottom:1.5rem; display:flex; align-items:center; gap:1rem; }
+  .progress-track { flex:1; height:7px; background:var(--offwhite); border-radius:7px; overflow:hidden; }
+  .progress-fill { height:100%; background:linear-gradient(90deg,var(--teal),#7C3AED); border-radius:7px; transition:width 0.4s; }
+  .gap-box { background:rgba(229,62,62,0.06); border:1px solid rgba(229,62,62,0.2); border-radius:10px; padding:0.9rem 1.1rem; margin-bottom:1rem; font-size:0.82rem; color:#c53030; }
+  .gap-box strong { display:block; margin-bottom:4px; }
+  /* States */
+  .sq-state { display:none; }
+  .sq-state.active { display:block; }
+  @media(max-width:580px) { .sq-field { grid-template-columns:1fr; } }
