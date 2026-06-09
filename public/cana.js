@@ -25,38 +25,112 @@
     setStep(5);
     showState('loading');
     document.querySelector('.loading-state h3').textContent = 'Verifying your payment...';
-    document.querySelector('.loading-state p').textContent = 'Please wait while we confirm your payment with Stripe.';
+    document.querySelector('.loading-state p').textContent  = 'Please wait while we confirm your payment.';
+
     try {
-      const res = await fetch('/.netlify/functions/cana-verify', {
+      var co = window._companyDetails || {};
+      var res = await fetch('/.netlify/functions/cana-verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId: sid })
+        body: JSON.stringify({
+          sessionId: sid,
+          tenderId: tenderId,
+          includeSq: !!(window._tenderData && window._tenderData.sq_data && window._tenderData.sq_data.storagePath),
+          companyDetails: co
+        })
       });
-      const data = await res.json();
-      if (res.ok && data.paid && data.responses) {
-        generatedResponses = data.responses;
-        showUnlockedResponses(data.responses);
-      } else if (res.ok && data.paid && !data.responses) {
-        // Payment confirmed but responses not saved - show helpful message
-        showState('results');
-        document.getElementById('responses-list').innerHTML = '';
-        const paywall = document.getElementById('paywall-card');
-        if (paywall) {
-          paywall.innerHTML = '<h2 style="font-family:Playfair Display,serif;color:white;margin-bottom:1rem;">Payment Confirmed!</h2>' +
-            '<p style="color:rgba(255,255,255,0.8);line-height:1.8;margin-bottom:1rem;">' + (data.message || 'Your payment has been received. Our team will send your full bid responses to your email within 1 hour.') + '</p>' +
-            '<p style="color:rgba(255,255,255,0.6);font-size:0.85rem;">Reference: ' + sid + '</p>';
-        }
-      } else {
-        showState('form');
-        setStep(1);
+      var data = await res.json();
+
+      if (!res.ok || !data.paid) {
+        showState('form'); setStep(1);
         alert('Payment could not be verified: ' + (data.error || 'Please contact consulting@icongrp.co.uk'));
+        return;
       }
+
+      // Payment confirmed — show processing screen
+      showProcessingScreen(data.jobId, data.email);
+      pollJobStatus(data.jobId);
+
     } catch(e) {
-      showState('form');
-      setStep(1);
+      showState('form'); setStep(1);
       alert('Verification error: ' + e.message);
     }
   }
+
+  function showProcessingScreen(jobId, email) {
+    showState('loading');
+    document.querySelector('.loading-state h3').textContent = 'Payment confirmed — generating your documents';
+    document.querySelector('.loading-state p').innerHTML =
+      'Cana AI is writing your responses, completing your SQ and preparing your Word documents.<br>' +
+      '<span style="font-size:0.85em;color:var(--muted);">This takes 2–5 minutes. Everything will be sent to <strong>' + (email||'your email') + '</strong> as Word documents.</span>';
+    window._jobId = jobId;
+  }
+
+  async function pollJobStatus(jobId) {
+    var maxPolls = 60; // 5 mins max
+    var polls    = 0;
+
+    var interval = setInterval(async function() {
+      polls++;
+      if (polls > maxPolls) {
+        clearInterval(interval);
+        showJobComplete(null, true);
+        return;
+      }
+      try {
+        var res = await fetch('/.netlify/functions/get-cana-result?jobId=' + jobId);
+        var job = await res.json();
+
+        // Update status message
+        var messages = {
+          'pending':              'Preparing your documents...',
+          'processing':           'Cana AI is reading the tender specification...',
+          'generating_responses': 'Writing your bid responses...',
+          'completing_sq':        'Completing your Selection Questionnaire...',
+          'building_documents':   'Building your Word documents...',
+          'sending_email':        'Sending your documents by email...',
+          'complete':             'Done! Check your inbox.',
+          'error':                'There was an issue — our team has been notified.'
+        };
+        var msg = messages[job.status] || 'Processing...';
+        var p = document.querySelector('.loading-state p');
+        if (p) {
+          var emailLine = window._companyDetails && window._companyDetails.email
+            ? '<br><span style="font-size:0.85em;color:var(--muted);">Will be sent to <strong>' + window._companyDetails.email + '</strong></span>'
+            : '';
+          p.innerHTML = msg + emailLine;
+        }
+
+        if (job.status === 'complete') {
+          clearInterval(interval);
+          showJobComplete(job, false);
+        } else if (job.status === 'error') {
+          clearInterval(interval);
+          showJobComplete(job, false, job.error);
+        }
+      } catch(e) { console.log('Poll error:', e.message); }
+    }, 5000);
+  }
+
+  function showJobComplete(job, timedOut, errorMsg) {
+    var email = (window._companyDetails && window._companyDetails.email) || 'your email';
+    showState('loading');
+    var h3 = document.querySelector('.loading-state h3');
+    var p  = document.querySelector('.loading-state p');
+    var spinner = document.querySelector('.loading-state .loading-spinner');
+    if (spinner) spinner.style.display = 'none';
+
+    if (errorMsg) {
+      if (h3) h3.textContent = 'Something went wrong';
+      if (p)  p.innerHTML = 'Our team has been notified. Please email <strong>consulting@icongrp.co.uk</strong> with your payment reference and we will send your documents manually within 1 hour.';
+    } else {
+      if (h3) h3.innerHTML = '✅ Your documents are on their way';
+      if (p)  p.innerHTML =
+        'Your bid responses and completed SQ have been sent to <strong>' + email + '</strong> as Word documents.<br><br>' +
+        '<span style="font-size:0.85em;color:var(--muted);">Check your spam folder if you don\'t see it within 5 minutes. If you need help email consulting@icongrp.co.uk</span>';
+    }
+  }
+
 
   async function saveResponses(sid) {
     const res = await fetch('/.netlify/functions/save-cana-response', {
