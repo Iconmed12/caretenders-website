@@ -106,7 +106,7 @@ function selectCanaFromPanel(tenderId) {
 function populateCanaTenderSelect(){
   var sel=document.getElementById('canaTenderSelect');
   if(!sel) return;
-  var cur=sel.value;
+  var cur=sel.value||localStorage.getItem('cana_last_tender')||'';
   sel.innerHTML='<option value="">Choose a tender...</option>';
   allTenders.filter(function(t){return t.status!=='draft';}).forEach(function(t){
     var opt=document.createElement('option');
@@ -120,6 +120,7 @@ function populateCanaTenderSelect(){
   });
   if(cur) sel.value=cur;
   renderCanaPanels();
+  if(sel.value) { localStorage.setItem('cana_last_tender',sel.value); loadCanaDocs(); }
 }
 
 function loadCanaDocs(){
