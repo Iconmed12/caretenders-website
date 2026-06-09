@@ -595,6 +595,18 @@
     cqcSearchTimer = setTimeout(runCqcSearch, 350);
   }
 
+  function lookupCqcById() {
+    var input = document.getElementById('cqc-search');
+    var val = (input ? input.value : '').trim();
+    if (!val) return;
+    // If it looks like an ID (starts with 1- or is purely numeric), look up directly
+    if (/^1-/.test(val) || /^[0-9-]+$/.test(val)) {
+      selectCqcLocation(val, { getAttribute: function(){ return val; } });
+    } else {
+      runCqcSearch();
+    }
+  }
+
   async function runCqcSearch() {
     var q = document.getElementById('cqc-search').value.trim();
     var resultsEl = document.getElementById('cqc-results');
