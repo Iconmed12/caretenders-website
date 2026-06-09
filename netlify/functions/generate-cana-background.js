@@ -71,14 +71,12 @@ exports.handler = async (event) => {
     var clientName   = co.name  || co.company_name || '';
     var questions    = tender.cana_questions || [];
 
-    // ── 2. Build context ──
-    var specText = '';
+    // ── 2. Build context (full documents, no harsh truncation) ──
+    var specFull = '', qualityFull = '', scoringFull = '';
     if (tender.cana_docs) {
-      var specDocs = tender.cana_docs.spec || [];
-      var qualDocs = tender.cana_docs.quality || [];
-      var scoreDocs = tender.cana_docs.scoring || [];
-      specText = [...specDocs, ...qualDocs, ...scoreDocs]
-        .map(function(d){ return d.text||''; }).join('\n\n').substring(0, 4000);
+      specFull    = (tender.cana_docs.spec    || []).map(function(d){ return d.text||''; }).join('\n\n').substring(0, 30000);
+      qualityFull = (tender.cana_docs.quality || []).map(function(d){ return d.text||''; }).join('\n\n').substring(0, 12000);
+      scoringFull = (tender.cana_docs.scoring || []).map(function(d){ return d.text||''; }).join('\n\n').substring(0, 8000);
     }
 
     var kbContext = '';
@@ -87,9 +85,10 @@ exports.handler = async (event) => {
       if (Array.isArray(val)) return val.map(function(v){ return typeof v === 'object' ? JSON.stringify(v) : String(v); }).join(' | ');
       return String(val);
     }
-    if (kb.writing_style)            kbContext += 'WRITING STYLE: '            + kbStr(kb.writing_style).substring(0,400) + '\n';
-    if (kb.winning_examples)         kbContext += 'WINNING EXAMPLES: '         + kbStr(kb.winning_examples).substring(0,800) + '\n';
-    if (kb.commissioner_preferences) kbContext += 'COMMISSIONER PREFERENCES: ' + kbStr(kb.commissioner_preferences).substring(0,400) + '\n';
+    if (kb.writing_style)            kbContext += 'HOUSE WRITING STYLE:\n'        + kbStr(kb.writing_style).substring(0,800) + '\n\n';
+    if (kb.winning_examples)         kbContext += 'EXAMPLES FROM WINNING BIDS:\n' + kbStr(kb.winning_examples).substring(0,2500) + '\n\n';
+    if (kb.commissioner_preferences) kbContext += 'WHAT COMMISSIONERS WANT:\n'    + kbStr(kb.commissioner_preferences).substring(0,800) + '\n\n';
+    if (kb.avoid)                    kbContext += 'NEVER DO THIS:\n'              + kbStr(kb.avoid).substring(0,600) + '\n\n';
 
     var coCtx = 'Company: ' + clientName + '\n' +
       'CQC: ' + (co.cqc || '') + '\n' +
@@ -102,37 +101,116 @@ exports.handler = async (event) => {
       (co.policies ? 'Policies: ' + co.policies + '\n' : '') +
       (co.accreditations ? 'Accreditations: ' + co.accreditations + '\n' : '');
 
-    // ── 3. Generate responses — direct Anthropic API calls ──
+    // Derive word target from page/word limits in the question text
+    function wordTarget(qText) {
+      var pm = qText.match(/limit[:\s]+(\d+)\s*Page/i);
+      if (pm) return Math.round(parseInt(pm[1]) * 470); // ~470 words per A4 page at 11pt Arial 1.5 spacing
+      var wm = qText.match(/(\d{3,5})\s*word/i);
+      if (wm) return parseInt(wm[1]);
+      return 700;
+    }
+
+    // ── 3. Generate responses: DRAFT (Sonnet) → SELF-SCORE & REVISE (Sonnet) ──
     await setStatus(jobId, 'generating_responses');
     var responses = [];
+    var SONNET = 'claude-sonnet-4-5';
 
-    for (var i = 0; i < questions.length; i++) {
+    async function callSonnet(prompt, maxTokens) {
+      var res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': AI_KEY, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: SONNET, max_tokens: maxTokens || 3500, messages: [{ role: 'user', content: prompt }] })
+      });
+      var d = await res.json();
+      if (d.error) { console.log('Sonnet error:', JSON.stringify(d.error).substring(0,200)); throw new Error(d.error.message || 'AI error'); }
+      return d.content && d.content[0] ? d.content[0].text.trim() : '';
+    }
+
+    async function generateOne(i) {
       var q = questions[i];
       var qText = q.question || q.text || String(q);
-      console.log('Generating Q' + (i+1) + ' of ' + questions.length);
-      try {
-        var prompt =
-          'You are a highly experienced UK public sector bid writer specialising in health and social care contracts. ' +
-          'Your responses consistently score full marks because they are specific, evidence-based, and directly address the scoring criteria.\n\n' +
-          'COMPANY INFORMATION:\n' + coCtx + '\n' +
-          (specText ? 'TENDER SPECIFICATION (relevant extract):\n' + specText + '\n\n' : '') +
-          (kbContext ? kbContext + '\n' : '') +
-          'INSTRUCTIONS:\n' +
-          '- Write 450-600 words minimum\n' +
-          '- Use plain prose paragraphs — absolutely NO markdown, NO asterisks, NO hash symbols\n' +
-          '- Be specific to this company and this tender — never write generic statements\n' +
-          '- Reference the commissioner\'s stated requirements and outcomes directly\n' +
-          '- Use first-person plural (we/our) throughout\n' +
-          '- Write as a professional bid writer, not as an AI\n\n' +
-          'QUESTION ' + (i+1) + ':\n' + qText;
+      var target = wordTarget(qText);
+      console.log('Q' + (i+1) + ': target ' + target + ' words');
 
-        var ans = await callAI(prompt, 1800);
-        responses.push({ question: qText, answer: stripMarkdown(ans) });
-        console.log('Q' + (i+1) + ' done — ' + (ans||'').length + ' chars');
+      // STAGE A — Draft to the rubric
+      var draftPrompt =
+        'You are an elite UK public sector bid writer with a 90%+ win rate on local authority contracts. ' +
+        'You are writing one quality question response for a live tender.\n\n' +
+        '═══ THE SCORING RUBRIC (the evaluator will score 0-10 with this) ═══\n' + scoringFull + '\n\n' +
+        '═══ HOW TO SCORE 10/10 ═══\n' +
+        '1. Address EVERY bullet and sub-requirement in the question criteria below — evaluators tick them off; one missed bullet caps the score at 6.\n' +
+        '2. Evidence EVERY claim with specifics from the company evidence provided (real numbers, named roles, concrete processes). Generic assurances score 4.\n' +
+        '3. End with a short "added value" element: 2-4 concrete commitments that go beyond the stated requirements (this is the explicit difference between 8 and 10 in the rubric).\n' +
+        '4. Reference the specification sections the question points to, showing the requirements are understood and will be met in full.\n\n' +
+        '═══ COMPANY EVIDENCE (use ONLY this — never invent statistics, names, or accreditations) ═══\n' + coCtx + '\n' +
+        'If a needed specific is missing from the evidence above, write [INSERT: short description of what the client should add] rather than inventing it.\n\n' +
+        (kbContext ? '═══ KNOWLEDGE BASE ═══\n' + kbContext : '') +
+        '═══ SERVICE SPECIFICATION ═══\n' + specFull + '\n\n' +
+        '═══ FULL QUALITY QUESTION DOCUMENT (locate this question, its criteria bullets, weighting and page limit) ═══\n' + qualityFull + '\n\n' +
+        '═══ THE QUESTION TO ANSWER ═══\n' + qText + '\n\n' +
+        '═══ OUTPUT REQUIREMENTS ═══\n' +
+        '- Target length: ' + target + ' words. You MUST reach at least ' + Math.round(target*0.9) + ' words — submissions that underuse the page limit lose marks.\n' +
+        '- Plain flowing prose paragraphs with occasional short headed sections (plain text headings, no markdown symbols).\n' +
+        '- ABSOLUTELY NO markdown: no asterisks, no hashes, no bullet symbols. Use sentence-form lists.\n' +
+        '- First person plural (we/our). Confident, specific, human. Vary sentence length. No AI tells like "Moreover" chains, "delve", "tapestry", "Furthermore" repetition.\n' +
+        '- Write the response only — no preamble, no meta-commentary.';
+
+      var draft = await callSonnet(draftPrompt, 4000);
+
+      // STAGE B — Adversarial self-score and rewrite
+      var revisePrompt =
+        'You are the council evaluation panel scoring a tender response, then a bid director fixing it.\n\n' +
+        '═══ SCORING RUBRIC ═══\n' + scoringFull + '\n\n' +
+        '═══ THE QUESTION AND ITS CRITERIA ═══\n' + qText + '\n\n' +
+        '═══ FULL QUALITY QUESTION DOCUMENT (for the criteria bullets) ═══\n' + qualityFull.substring(0, 6000) + '\n\n' +
+        '═══ COMPANY EVIDENCE (the only permitted source of specifics) ═══\n' + coCtx + '\n\n' +
+        '═══ DRAFT RESPONSE ═══\n' + draft + '\n\n' +
+        '═══ YOUR TASK ═══\n' +
+        'Step 1 (do this silently): score the draft 0-10 against the rubric. Identify every criteria bullet that is missing, thin, unevidenced, or generic. Check the added-value element exists and is concrete.\n' +
+        'Step 2: rewrite the response fixing every identified gap. Keep it at ' + target + ' words (minimum ' + Math.round(target*0.9) + '). Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
+        'Output ONLY the final rewritten response — no scores, no commentary.';
+
+      var final;
+      try {
+        final = await callSonnet(revisePrompt, 4000);
+        if (!final || final.length < draft.length * 0.5) final = draft; // safety: revision collapsed
       } catch(e) {
-        console.log('Q' + (i+1) + ' failed:', e.message);
-        responses.push({ question: qText, answer: 'Response unavailable — please contact consulting@icongrp.co.uk' });
+        console.log('Q' + (i+1) + ' revision failed, using draft:', e.message);
+        final = draft;
       }
+
+      return { question: qText, answer: stripMarkdown(final) };
+    }
+
+    // Process in batches of 2 for speed within the 900s budget
+    for (var b = 0; b < questions.length; b += 2) {
+      var batch = [];
+      for (var j = b; j < Math.min(b + 2, questions.length); j++) batch.push(j);
+      var results = await Promise.all(batch.map(function(idx) {
+        return generateOne(idx).catch(function(e) {
+          console.log('Q' + (idx+1) + ' failed:', e.message);
+          var qq = questions[idx];
+          return { question: (qq.question || qq.text || String(qq)), answer: 'Response unavailable — please contact hello@cana.ai' };
+        });
+      }));
+      responses.push.apply(responses, results);
+      console.log('Batch done: ' + responses.length + '/' + questions.length);
+    }
+
+    // ── 3b. Attachment checklist (consultancy value: tell the client what to attach) ──
+    var attachmentNotes = [];
+    questions.forEach(function(q, i) {
+      var qt = (q.question || q.text || String(q));
+      var matches = qt.match(/(?:attach|upload)[^.]*?(policy|plan|document|statement)[^.]*\./gi);
+      if (matches) matches.forEach(function(m) {
+        attachmentNotes.push('Question ' + (i+1) + ': ' + m.trim());
+      });
+    });
+    if (attachmentNotes.length) {
+      responses.push({
+        question: 'IMPORTANT — Required attachments checklist',
+        answer: 'The tender requires the following documents to be attached to your submission. Cana cannot generate these for you — please ensure each is included before submitting:\n\n' + attachmentNotes.join('\n')
+      });
     }
 
     // ── 4. Complete SQ ──
