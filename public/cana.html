@@ -290,7 +290,7 @@
 
       <!-- Continue -->
       <button id="ch-continue-btn-cana" onclick="canaChContinue()" style="display:none;width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.75rem;">
-        Save &amp; generate my responses →
+        Next step →
       </button>
       <div style="text-align:center;">
         <button onclick="canaChSkip()" style="background:none;border:none;color:var(--muted);font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;">
@@ -617,7 +617,7 @@
         }, { onConflict: 'user_id' });
       }
     } catch(e) { console.log('Profile save non-fatal:', e.message); }
-    btn.disabled = false; btn.textContent = 'Save & generate my responses →';
+    btn.disabled = false; btn.textContent = 'Next step →';
     // Show SQ step
     setStep(3);
     populateSqStep();
