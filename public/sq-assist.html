@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQ Assist — Cana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --navy:#0B1929; --teal:#00C9E0; --teal-dk:#0099AA;
+    --amber:#F5A623; --white:#fff; --offwhite:#F4F6F9;
+    --muted:#6B8FA3; --border:rgba(11,25,41,0.09);
+    --success:#38A169; --warning:#D97706; --error:#E53E3E;
+    --purple:#7C3AED;
+  }
+  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; }
+
+  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; position:sticky; top:0; z-index:100; }
+  .nav-logo-main { font-size:1.15rem; font-weight:600; color:#fff; letter-spacing:-0.02em; }
+  .nav-logo-main span { color:var(--teal); }
+  .nav-links { display:flex; gap:1.75rem; list-style:none; }
+  .nav-links a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.88rem; }
+  .nav-links a:hover, .nav-links a.active { color:#fff; }
+  .nav-right { display:flex; align-items:center; gap:1rem; }
+  .nav-avatar { width:30px; height:30px; background:var(--teal); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; color:var(--navy); }
+  .nav-user { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,0.8); font-size:0.88rem; }
+  .nav-signout { font-size:0.82rem; color:rgba(255,255,255,0.4); cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif; }
+
+  #loading-screen { position:fixed; inset:0; background:var(--offwhite); display:flex; align-items:center; justify-content:center; z-index:999; }
+  .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--teal); border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .page { max-width:1000px; margin:0 auto; padding:2.5rem 1.5rem; }
+
+  .page-header { margin-bottom:2rem; }
+  .page-header h1 { font-family:'Playfair Display',serif; font-size:1.75rem; margin-bottom:0.4rem; }
+  .page-header p { font-size:0.9rem; color:var(--muted); line-height:1.6; }
+
+  /* TENDER SELECTOR */
+  .tender-select-card { background:#fff; border:1px solid var(--border); border-radius:13px; padding:1.5rem; margin-bottom:2rem; }
+  .tender-select-card label { font-size:0.82rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; display:block; margin-bottom:8px; }
+  .form-select { padding:11px 14px; border:1.5px solid var(--border); border-radius:9px; font-size:0.92rem; font-family:'DM Sans',sans-serif; color:var(--navy); outline:none; width:100%; background:#fff; }
+  .form-select:focus { border-color:var(--teal); }
+
+  /* PROGRESS BAR */
+  .sq-progress { background:#fff; border:1px solid var(--border); border-radius:13px; padding:1.25rem 1.5rem; margin-bottom:2rem; display:flex; align-items:center; gap:1.5rem; }
+  .sq-progress-label { font-size:0.82rem; font-weight:600; color:var(--muted); white-space:nowrap; }
+  .sq-progress-track { flex:1; height:8px; background:var(--offwhite); border-radius:8px; overflow:hidden; }
+  .sq-progress-fill { height:100%; background:linear-gradient(90deg,var(--teal),var(--purple)); border-radius:8px; transition:width 0.5s; }
+  .sq-progress-pct { font-size:1rem; font-weight:700; white-space:nowrap; }
+
+  /* STATS */
+  .sq-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:2rem; }
+  .sq-stat { background:#fff; border:1px solid var(--border); border-radius:12px; padding:1rem 1.25rem; text-align:center; }
+  .sq-stat-value { font-size:1.75rem; font-weight:700; line-height:1; margin-bottom:4px; }
+  .sq-stat-label { font-size:0.75rem; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; }
+
+  /* SECTION CARDS */
+  .sq-section { background:#fff; border:1px solid var(--border); border-radius:14px; margin-bottom:1.25rem; overflow:hidden; }
+  .sq-section-head { padding:1rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .sq-section-head-left { display:flex; align-items:center; gap:12px; }
+  .sq-section-icon { width:36px; height:36px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+  .sq-section-icon.green { background:rgba(56,161,105,0.1); }
+  .sq-section-icon.purple { background:rgba(124,58,237,0.1); }
+  .sq-section-icon.amber { background:rgba(245,166,35,0.1); }
+  .sq-section-icon.red { background:rgba(229,62,62,0.1); }
+  .sq-section-title { font-size:0.97rem; font-weight:700; }
+  .sq-section-subtitle { font-size:0.78rem; color:var(--muted); margin-top:2px; }
+  .sq-section-badge { font-size:0.72rem; font-weight:700; padding:3px 10px; border-radius:999px; }
+  .sq-section-body { padding:1.25rem 1.5rem; }
+
+  /* FIELD ROWS */
+  .field-row { display:grid; grid-template-columns:1fr 1.5fr; gap:1rem; align-items:start; padding:0.75rem 0; border-bottom:1px solid var(--border); }
+  .field-row:last-child { border-bottom:none; }
+  .field-label { font-size:0.83rem; font-weight:600; color:var(--navy); line-height:1.5; }
+  .field-id { font-size:0.72rem; color:var(--muted); font-weight:400; }
+  .field-hint { font-size:0.75rem; color:var(--muted); margin-top:3px; }
+  .field-value { font-size:0.85rem; color:var(--navy); line-height:1.6; }
+  .field-value.auto { color:var(--success); font-weight:500; }
+  .field-value.missing { color:var(--error); font-style:italic; }
+  .field-badge { display:inline-flex; align-items:center; gap:5px; font-size:0.7rem; font-weight:700; padding:2px 8px; border-radius:999px; margin-bottom:5px; }
+  .field-badge.auto { background:rgba(56,161,105,0.1); color:#276749; }
+  .field-badge.ai { background:rgba(124,58,237,0.1); color:#5b21b6; }
+  .field-badge.confirm { background:rgba(245,166,35,0.1); color:#92400e; }
+  .field-badge.missing { background:rgba(229,62,62,0.1); color:#c53030; }
+
+  /* EDITABLE TEXTAREA */
+  .field-textarea { width:100%; padding:10px 12px; border:1.5px solid var(--border); border-radius:8px; font-size:0.85rem; font-family:'DM Sans',sans-serif; color:var(--navy); line-height:1.6; resize:vertical; min-height:80px; outline:none; transition:border-color 0.2s; }
+  .field-textarea:focus { border-color:var(--purple); box-shadow:0 0 0 3px rgba(124,58,237,0.07); }
+  .field-textarea.ai-drafted { background:rgba(124,58,237,0.02); border-color:rgba(124,58,237,0.2); }
+
+  /* DECLARATION CHECKBOX */
+  .decl-row { display:flex; align-items:flex-start; gap:12px; padding:0.85rem 0; border-bottom:1px solid var(--border); }
+  .decl-row:last-child { border-bottom:none; }
+  .decl-checkbox { width:18px; height:18px; accent-color:var(--navy); flex-shrink:0; margin-top:3px; cursor:pointer; }
+  .decl-label { font-size:0.85rem; color:var(--navy); line-height:1.6; cursor:pointer; }
+  .decl-label strong { color:var(--error); }
+
+  /* GAP ALERT */
+  .gap-alert { background:rgba(229,62,62,0.06); border:1px solid rgba(229,62,62,0.2); border-radius:12px; padding:1rem 1.25rem; margin-bottom:1.25rem; }
+  .gap-alert h3 { font-size:0.9rem; font-weight:700; color:var(--error); margin-bottom:0.5rem; }
+  .gap-item { display:flex; align-items:center; gap:8px; font-size:0.83rem; color:#c53030; padding:4px 0; }
+
+  /* ACTION BAR */
+  .action-bar { position:sticky; bottom:0; background:#fff; border-top:1px solid var(--border); padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; box-shadow:0 -4px 20px rgba(11,25,41,0.06); z-index:50; }
+  .action-bar-left { font-size:0.85rem; color:var(--muted); }
+  .action-bar-left strong { color:var(--navy); }
+  .action-btns { display:flex; gap:0.75rem; }
+  .btn-report { background:var(--offwhite); border:1.5px solid var(--border); border-radius:9px; padding:10px 20px; font-size:0.88rem; font-weight:600; font-family:'DM Sans',sans-serif; cursor:pointer; color:var(--navy); transition:all 0.2s; }
+  .btn-report:hover { border-color:var(--navy); }
+  .btn-generate { background:var(--navy); color:#fff; border:none; border-radius:9px; padding:10px 24px; font-size:0.88rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.2s; }
+  .btn-generate:hover { background:#1a3550; }
+  .btn-generate:disabled { opacity:0.5; cursor:not-allowed; }
+
+  /* EMPTY STATE */
+  .empty-state { background:#fff; border:1px solid var(--border); border-radius:13px; padding:4rem 2rem; text-align:center; }
+  .empty-icon { font-size:3rem; margin-bottom:1rem; }
+  .empty-state h3 { font-size:1rem; font-weight:600; margin-bottom:0.5rem; }
+  .empty-state p { font-size:0.87rem; color:var(--muted); line-height:1.6; }
+
+  /* COMPANIES HOUSE LOOKUP */
+  .ch-lookup { background:rgba(0,201,224,0.04); border:1px solid rgba(0,201,224,0.2); border-radius:10px; padding:1rem 1.25rem; margin-bottom:1rem; display:flex; align-items:center; gap:1rem; flex-wrap:wrap; }
+  .ch-lookup p { font-size:0.83rem; color:var(--navy); flex:1; }
+  .ch-btn { background:var(--teal); color:var(--navy); border:none; border-radius:8px; padding:8px 16px; font-size:0.82rem; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; white-space:nowrap; }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:5rem; left:50%; transform:translateX(-50%); background:var(--navy); color:#fff; padding:12px 24px; border-radius:10px; font-size:0.88rem; font-weight:500; display:none; z-index:999; }
+  .toast.show { display:block; animation:fadeup 0.3s ease; }
+  .toast.success { background:#1a5c38; }
+  .toast.error { background:#c53030; }
+  @keyframes fadeup { from { opacity:0; transform:translateX(-50%) translateY(8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+
+  @media(max-width:768px) {
+    .sq-stats { grid-template-columns:repeat(2,1fr); }
+    .field-row { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+<div id="loading-screen"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<nav>
+  <span class="nav-logo-main">Cana <span>Tech</span></span>
+  <ul class="nav-links">
+    <li><a href="/dashboard.html">Dashboard</a></li>
+    <li><a href="/profile.html">My Profile</a></li>
+    <li><a href="/vault.html">Evidence Vault</a></li>
+    <li><a href="/sq-assist.html" class="active">SQ Assist</a></li>
+    <li><a href="/">Find Tenders</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span id="nav-name"></span>
+    </div>
+    <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page" id="main-page" style="display:none;">
+  <div class="page-header">
+    <h1>SQ Assist</h1>
+    <p>Select a tender below. Cana will auto-fill your Selection Questionnaire using your company profile, draft written sections using AI, and flag anything that needs your confirmation.</p>
+  </div>
+
+  <!-- TENDER SELECTOR -->
+  <div class="tender-select-card">
+    <label>Select tender</label>
+    <select class="form-select" id="tender-select" onchange="loadSqForTender()">
+      <option value="">Choose a tender with an SQ...</option>
+    </select>
+  </div>
+
+  <!-- COMPANIES HOUSE LOOKUP -->
+  <div class="ch-lookup" id="ch-lookup" style="display:none;">
+    <p>🏢 <strong>Boost auto-fill accuracy</strong> — enter your Companies House number to pull your registered details directly from the public register.</p>
+    <input type="text" id="ch-number-input" placeholder="e.g. 12345678" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:'DM Sans',sans-serif;outline:none;width:140px;">
+    <button class="ch-btn" onclick="lookupCompaniesHouse()">Look up →</button>
+  </div>
+
+  <!-- GAP ALERT -->
+  <div class="gap-alert" id="gap-alert" style="display:none;">
+    <h3>⚠️ Missing information — complete your profile to fill these gaps</h3>
+    <div id="gap-list"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="sq-progress" id="sq-progress" style="display:none;">
+    <span class="sq-progress-label">SQ completion</span>
+    <div class="sq-progress-track"><div class="sq-progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <span class="sq-progress-pct" id="progress-pct">0%</span>
+  </div>
+
+  <!-- STATS -->
+  <div class="sq-stats" id="sq-stats" style="display:none;">
+    <div class="sq-stat">
+      <div class="sq-stat-value" style="color:var(--success)" id="stat-auto">0</div>
+      <div class="sq-stat-label">Auto-filled</div>
+    </div>
+    <div class="sq-stat">
+      <div class="sq-stat-value" style="color:var(--purple)" id="stat-ai">0</div>
+      <div class="sq-stat-label">AI drafted</div>
+    </div>
+    <div class="sq-stat">
+      <div class="sq-stat-value" style="color:var(--warning)" id="stat-confirm">0</div>
+      <div class="sq-stat-label">Need confirmation</div>
+    </div>
+    <div class="sq-stat">
+      <div class="sq-stat-value" style="color:var(--error)" id="stat-gaps">0</div>
+      <div class="sq-stat-label">Gaps to fill</div>
+    </div>
+  </div>
+
+  <!-- SQ CONTENT -->
+  <div id="sq-content"></div>
+
+  <!-- EMPTY STATE -->
+  <div class="empty-state" id="empty-state">
+    <div class="empty-icon">📋</div>
+    <h3>Select a tender to begin</h3>
+    <p>Choose a tender from the dropdown above. If no tenders appear, ask your administrator to upload the SQ document for the tender you're bidding on.</p>
+  </div>
+
+</div>
+
+<!-- STICKY ACTION BAR -->
+<div class="action-bar" id="action-bar" style="display:none;">
+  <div class="action-bar-left">
+    <strong id="action-tender-name">SQ</strong> — review all sections before generating
+  </div>
+  <div class="action-btns">
+    <button class="btn-report" onclick="generateReport()">📄 View completion report</button>
+    <button class="btn-generate" id="generate-btn" onclick="generateSqPackage()">⚡ Generate SQ package</button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+var currentUser = null;
+var profile = null;
+var chData = null;
+var currentSqData = null;
+var currentTender = null;
+var fieldValues = {};
+var declarations = {};
+
+// Profile key to display value mapping
+function getProfileValue(key) {
+  if (!profile) return null;
+  var map = {
+    'company_name':       profile.company_name,
+    'company_number':     profile.company_number,
+    'registered_address': profile.registered_address,
+    'vat_number':         profile.vat_number,
+    'founded_year':       profile.founded_year,
+    'company_type':       profile.company_type,
+    'cqc_status':         profile.cqc_status,
+    'cqc_provider_id':    profile.cqc_provider_id,
+    'cqc_inspection_date':profile.cqc_inspection_date,
+    'ico_number':         profile.ico_number,
+    'total_staff':        profile.total_staff,
+    'turnover_range':     profile.turnover_range,
+    'services':           profile.services,
+    'regions':            profile.regions,
+    'experience':         profile.experience,
+    'achievements':       profile.achievements,
+    'kpis':               profile.kpis,
+    'policies':           profile.policies,
+    'accreditations':     profile.accreditations,
+    'social_value':       profile.social_value,
+    'contact_name':       (profile.contact_first_name||'') + ' ' + (profile.contact_last_name||''),
+    'contact_email':      profile.contact_email,
+    'contact_job_title':  profile.contact_job_title
+  };
+  // Also check Companies House data
+  if (chData) {
+    map['company_name']        = map['company_name'] || chData.company_name;
+    map['company_number']      = map['company_number'] || chData.company_number;
+    map['registered_address']  = map['registered_address'] || chData.registered_address;
+    map['company_type']        = map['company_type'] || chData.company_type;
+    map['founded_year']        = map['founded_year'] || (chData.date_of_creation ? chData.date_of_creation.split('-')[0] : null);
+    map['directors']           = chData.officers ? chData.officers.map(function(o){ return o.name + ' (' + o.role + ')'; }).join(', ') : null;
+    map['psc_details']         = chData.pscs ? chData.pscs.map(function(p){ return p.name + ' — ' + p.nature_of_control; }).join('; ') : null;
+    map['company_status']      = chData.company_status;
+    map['sic_codes']           = chData.sic_codes;
+  }
+  return map[key] || null;
+}
+
+function isSME() {
+  var staff = parseInt(profile && profile.total_staff || '0');
+  var turnover = profile && profile.turnover_range || '';
+  if (staff < 250 && !turnover.includes('Over £10m')) return 'Yes — SME';
+  return 'No';
+}
+
+function showToast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast show ' + (type||'');
+  setTimeout(function(){ t.classList.remove('show'); }, 3500);
+}
+
+async function loadTenders() {
+  var res = await sb.from('tenders').select('id,title,org,sq_data').not('sq_data','is',null).order('created_at', { ascending:false });
+  var tenders = res.data || [];
+  var sel = document.getElementById('tender-select');
+  sel.innerHTML = '<option value="">Choose a tender with an SQ...</option>';
+  tenders.forEach(function(t) {
+    var opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = t.title + (t.org ? ' — ' + t.org : '');
+    sel.appendChild(opt);
+  });
+  return tenders;
+}
+
+async function loadSqForTender() {
+  var tenderId = document.getElementById('tender-select').value;
+  if (!tenderId) {
+    document.getElementById('sq-content').innerHTML = '';
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('action-bar').style.display = 'none';
+    document.getElementById('sq-progress').style.display = 'none';
+    document.getElementById('sq-stats').style.display = 'none';
+    document.getElementById('ch-lookup').style.display = 'none';
+    document.getElementById('gap-alert').style.display = 'none';
+    return;
+  }
+
+  var res = await sb.from('tenders').select('*').eq('id', tenderId).single();
+  currentTender = res.data;
+  if (!currentTender || !currentTender.sq_data) {
+    showToast('No SQ document found for this tender', 'error');
+    return;
+  }
+
+  currentSqData = currentTender.sq_data;
+  fieldValues = {};
+  declarations = {};
+
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('ch-lookup').style.display = 'flex';
+  document.getElementById('sq-progress').style.display = 'flex';
+  document.getElementById('sq-stats').style.display = 'grid';
+  document.getElementById('action-bar').style.display = 'flex';
+  document.getElementById('action-tender-name').textContent = currentTender.title;
+
+  renderSq();
+}
+
+function renderSq() {
+  var sections = currentSqData.sections || [];
+  var content = document.getElementById('sq-content');
+  var autoCount = 0, aiCount = 0, confirmCount = 0, gapCount = 0;
+  var gaps = [];
+  var html = '';
+
+  sections.forEach(function(section) {
+    var fields = section.fields || [];
+    var sectionHtml = '';
+    var sectionIcon, sectionColor, sectionBadgeColor, sectionBadgeText;
+
+    // Determine section type by majority field type
+    var autoF = fields.filter(function(f){ return f.field_type==='auto_fill'; }).length;
+    var aiF   = fields.filter(function(f){ return f.field_type==='ai_draft'; }).length;
+    var confF = fields.filter(function(f){ return f.field_type==='client_confirm'; }).length;
+
+    if (confF >= autoF && confF >= aiF) {
+      sectionIcon = '⚠️'; sectionColor = 'amber';
+      sectionBadgeColor = 'background:rgba(245,166,35,0.1);color:#92400e;';
+      sectionBadgeText = 'Declarations required';
+    } else if (aiF >= autoF) {
+      sectionIcon = '🤖'; sectionColor = 'purple';
+      sectionBadgeColor = 'background:rgba(124,58,237,0.1);color:#5b21b6;';
+      sectionBadgeText = 'AI drafted';
+    } else {
+      sectionIcon = '✅'; sectionColor = 'green';
+      sectionBadgeColor = 'background:rgba(56,161,105,0.1);color:#276749;';
+      sectionBadgeText = 'Auto-filled';
+    }
+
+    sectionHtml += '<div class="sq-section">';
+    sectionHtml += '<div class="sq-section-head">';
+    sectionHtml += '<div class="sq-section-head-left">';
+    sectionHtml += '<div class="sq-section-icon ' + sectionColor + '">' + sectionIcon + '</div>';
+    sectionHtml += '<div><div class="sq-section-title">' + section.section + ': ' + section.title + '</div>';
+    sectionHtml += '<div class="sq-section-subtitle">' + fields.length + ' field' + (fields.length!==1?'s':'') + '</div></div>';
+    sectionHtml += '</div>';
+    sectionHtml += '<span class="sq-section-badge" style="' + sectionBadgeColor + '">' + sectionBadgeText + '</span>';
+    sectionHtml += '</div>';
+    sectionHtml += '<div class="sq-section-body">';
+
+    if (confF > 0) {
+      // Render as declaration checkboxes
+      fields.forEach(function(field) {
+        confirmCount++;
+        var fid = 'decl_' + field.id;
+        sectionHtml += '<div class="decl-row">';
+        sectionHtml += '<input type="checkbox" class="decl-checkbox" id="' + fid + '" onchange="updateDeclaration(\'' + field.id + '\',this.checked)">';
+        sectionHtml += '<label class="decl-label" for="' + fid + '">';
+        sectionHtml += '<strong>I confirm:</strong> ' + field.question;
+        if (field.hint) sectionHtml += '<br><span style="font-size:0.75rem;color:var(--muted);">' + field.hint + '</span>';
+        sectionHtml += '</label></div>';
+      });
+    } else {
+      // Render as field rows
+      fields.forEach(function(field) {
+        var value = null;
+        var badgeType = field.field_type;
+
+        if (field.field_type === 'auto_fill') {
+          value = getProfileValue(field.profile_key);
+          if (!value && field.profile_key === 'sme_status') value = isSME();
+          if (!value) { gapCount++; gaps.push(field.question); badgeType = 'missing'; }
+          else { autoCount++; fieldValues[field.id] = value; }
+        } else if (field.field_type === 'ai_draft') {
+          aiCount++;
+          value = fieldValues[field.id] || '';
+        }
+
+        sectionHtml += '<div class="field-row">';
+        sectionHtml += '<div>';
+        sectionHtml += '<div class="field-label">' + (field.id ? '<span class="field-id">' + field.id + ' </span>' : '') + field.question + '</div>';
+        if (field.hint) sectionHtml += '<div class="field-hint">' + field.hint + '</div>';
+        sectionHtml += '</div>';
+        sectionHtml += '<div>';
+
+        if (badgeType === 'auto_fill' && value) {
+          sectionHtml += '<div class="field-badge auto">✓ Auto-filled</div>';
+          sectionHtml += '<div class="field-value auto">' + value + '</div>';
+        } else if (badgeType === 'missing') {
+          sectionHtml += '<div class="field-badge missing">⚠ Missing</div>';
+          sectionHtml += '<div class="field-value missing">Not in your profile — <a href="/profile.html" style="color:var(--teal);">update profile</a></div>';
+        } else if (badgeType === 'ai_draft') {
+          sectionHtml += '<div class="field-badge ai">🤖 AI drafted</div>';
+          sectionHtml += '<textarea class="field-textarea ai-drafted" id="field_' + field.id + '" placeholder="AI will draft this section — click Generate SQ package to complete..." onchange="fieldValues[\'' + field.id + '\']=this.value">' + (value||'') + '</textarea>';
+        }
+
+        sectionHtml += '</div></div>';
+      });
+    }
+
+    sectionHtml += '</div></div>';
+    html += sectionHtml;
+  });
+
+  content.innerHTML = html;
+
+  // Update stats
+  document.getElementById('stat-auto').textContent = autoCount;
+  document.getElementById('stat-ai').textContent = aiCount;
+  document.getElementById('stat-confirm').textContent = confirmCount;
+  document.getElementById('stat-gaps').textContent = gapCount;
+
+  // Progress
+  var total = autoCount + aiCount + confirmCount + gapCount;
+  var done = autoCount;
+  var pct = total > 0 ? Math.round((done/total)*100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+
+  // Gap alert
+  if (gaps.length) {
+    document.getElementById('gap-alert').style.display = 'block';
+    document.getElementById('gap-list').innerHTML = gaps.slice(0,5).map(function(g){
+      return '<div class="gap-item">⚠ ' + g + '</div>';
+    }).join('') + (gaps.length>5 ? '<div class="gap-item">...and ' + (gaps.length-5) + ' more — <a href="/profile.html" style="color:var(--error);">complete your profile</a></div>' : '');
+  } else {
+    document.getElementById('gap-alert').style.display = 'none';
+  }
+}
+
+function updateDeclaration(fieldId, checked) {
+  declarations[fieldId] = checked;
+  updateProgress();
+}
+
+function updateProgress() {
+  var sections = currentSqData ? currentSqData.sections || [] : [];
+  var total = 0, done = 0;
+  sections.forEach(function(s) {
+    (s.fields||[]).forEach(function(f) {
+      total++;
+      if (f.field_type === 'auto_fill' && getProfileValue(f.profile_key)) done++;
+      else if (f.field_type === 'client_confirm' && declarations[f.id]) done++;
+      else if (f.field_type === 'ai_draft' && fieldValues[f.id]) done++;
+    });
+  });
+  var pct = total > 0 ? Math.round((done/total)*100) : 0;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-pct').textContent = pct + '%';
+}
+
+async function lookupCompaniesHouse() {
+  var num = document.getElementById('ch-number-input').value.trim();
+  if (!num) { showToast('Enter a Companies House number', 'error'); return; }
+
+  var btn = document.querySelector('.ch-btn');
+  btn.textContent = 'Looking up...'; btn.disabled = true;
+
+  try {
+    var res = await fetch('/.netlify/functions/companies-house-lookup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ companyNumber: num })
+    });
+    var data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error);
+    chData = data;
+    showToast('Companies House data loaded — ' + data.company_name, 'success');
+    renderSq();
+    document.getElementById('ch-lookup').style.background = 'rgba(56,161,105,0.05)';
+    document.getElementById('ch-lookup').style.borderColor = 'rgba(56,161,105,0.25)';
+    document.querySelector('.ch-lookup p').innerHTML = '✅ <strong>' + data.company_name + '</strong> — ' + data.company_status + ' — incorporated ' + data.date_of_creation;
+  } catch(err) {
+    showToast('Lookup failed: ' + (err.message||'Company not found'), 'error');
+  }
+  btn.textContent = 'Look up →'; btn.disabled = false;
+}
+
+async function generateSqPackage() {
+  var btn = document.getElementById('generate-btn');
+  btn.disabled = true; btn.textContent = 'Generating...';
+
+  try {
+    // Call complete-sq function to AI-draft all written sections
+    var res = await fetch('/.netlify/functions/complete-sq', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tenderId: currentTender.id,
+        sqData: currentSqData,
+        profile: profile,
+        chData: chData
+      })
+    });
+    var data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error);
+
+    // Fill in AI-drafted fields
+    if (data.draftedFields) {
+      Object.keys(data.draftedFields).forEach(function(fieldId) {
+        fieldValues[fieldId] = data.draftedFields[fieldId];
+        var el = document.getElementById('field_' + fieldId);
+        if (el) el.value = data.draftedFields[fieldId];
+      });
+    }
+    updateProgress();
+    showToast('SQ package generated — review all sections and download', 'success');
+    // Scroll to top of content
+    document.getElementById('sq-content').scrollIntoView({ behavior: 'smooth' });
+
+  } catch(err) {
+    showToast('Generation failed: ' + (err.message||'Error'), 'error');
+  }
+  btn.disabled = false; btn.textContent = '⚡ Generate SQ package';
+}
+
+function generateReport() {
+  if (!currentSqData || !currentTender) { showToast('Please select a tender first', 'error'); return; }
+
+  var sections = currentSqData.sections || [];
+  var autoFields = [], aiFields = [], confirmFields = [], gapFields = [], pendingDecl = [];
+
+  sections.forEach(function(s) {
+    (s.fields||[]).forEach(function(f) {
+      if (f.field_type === 'auto_fill') {
+        var val = getProfileValue(f.profile_key);
+        if (val) autoFields.push({ q: f.question, v: val });
+        else gapFields.push(f.question);
+      } else if (f.field_type === 'ai_draft') {
+        aiFields.push({ q: f.question, v: fieldValues[f.id] || 'Not yet generated' });
+      } else if (f.field_type === 'client_confirm') {
+        if (!declarations[f.id]) pendingDecl.push(f.question);
+        else confirmFields.push(f.question);
+      }
+    });
+  });
+
+  var reportHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+    '<title>SQ Completion Report — ' + currentTender.title + '</title>' +
+    '<style>body{font-family:Arial,sans-serif;max-width:800px;margin:40px auto;padding:0 20px;color:#0B1929;}' +
+    'h1{font-size:24px;margin-bottom:4px;}' +
+    '.meta{font-size:13px;color:#6B8FA3;margin-bottom:32px;}' +
+    'h2{font-size:15px;font-weight:700;margin:24px 0 12px;padding:8px 12px;border-radius:6px;}' +
+    '.auto-head{background:rgba(56,161,105,0.1);color:#276749;}' +
+    '.ai-head{background:rgba(124,58,237,0.1);color:#5b21b6;}' +
+    '.confirm-head{background:rgba(56,161,105,0.1);color:#276749;}' +
+    '.gap-head{background:rgba(229,62,62,0.1);color:#c53030;}' +
+    '.decl-head{background:rgba(245,166,35,0.1);color:#92400e;}' +
+    '.field{margin-bottom:12px;padding:10px;background:#f8f9fb;border-radius:6px;}' +
+    '.field-q{font-size:12px;font-weight:600;color:#6B8FA3;margin-bottom:4px;}' +
+    '.field-v{font-size:13px;color:#0B1929;}' +
+    '.gap-item{padding:8px 10px;background:rgba(229,62,62,0.06);border-radius:6px;font-size:13px;color:#c53030;margin-bottom:6px;}' +
+    '.decl-item{padding:8px 10px;background:rgba(245,166,35,0.06);border-radius:6px;font-size:13px;color:#92400e;margin-bottom:6px;}' +
+    '.note{background:#f0fdf4;border:1px solid #bbf7d0;padding:16px;border-radius:8px;font-size:13px;color:#166534;margin-top:32px;}' +
+    '@media print{body{margin:20px;}}</style></head><body>' +
+    '<h1>SQ Completion Report</h1>' +
+    '<div class="meta">' + currentTender.title + ' — ' + (currentTender.org||'') + ' — Generated ' + new Date().toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'}) + '</div>';
+
+  if (autoFields.length) {
+    reportHtml += '<h2 class="auto-head">✅ Auto-filled (' + autoFields.length + ' fields)</h2>';
+    autoFields.forEach(function(f){ reportHtml += '<div class="field"><div class="field-q">' + f.q + '</div><div class="field-v">' + f.v + '</div></div>'; });
+  }
+
+  if (aiFields.length) {
+    reportHtml += '<h2 class="ai-head">🤖 AI drafted (' + aiFields.length + ' sections)</h2>';
+    aiFields.forEach(function(f){ reportHtml += '<div class="field"><div class="field-q">' + f.q + '</div><div class="field-v">' + (f.v||'Pending generation') + '</div></div>'; });
+  }
+
+  if (confirmFields.length) {
+    reportHtml += '<h2 class="confirm-head">✅ Declarations confirmed (' + confirmFields.length + ')</h2>';
+    confirmFields.forEach(function(f){ reportHtml += '<div class="field"><div class="field-v">☑ ' + f + '</div></div>'; });
+  }
+
+  if (pendingDecl.length) {
+    reportHtml += '<h2 class="decl-head">⚠️ Declarations still needed (' + pendingDecl.length + ')</h2>';
+    pendingDecl.forEach(function(f){ reportHtml += '<div class="decl-item">☐ ' + f + '</div>'; });
+  }
+
+  if (gapFields.length) {
+    reportHtml += '<h2 class="gap-head">🔴 Gaps — missing from your profile (' + gapFields.length + ')</h2>';
+    gapFields.forEach(function(f){ reportHtml += '<div class="gap-item">⚠ ' + f + '</div>'; });
+    reportHtml += '<p style="font-size:13px;color:#6B8FA3;margin-top:8px;"><a href="/profile.html">Update your company profile</a> to fill these gaps automatically.</p>';
+  }
+
+  reportHtml += '<div class="note"><strong>Important:</strong> Review all AI-drafted sections carefully before submission. Confirm all declarations personally — by signing this document you are making legal statements about your organisation. Electronic or wet signatures must be added before submission.</div>';
+  reportHtml += '</body></html>';
+
+  var win = window.open('', '_blank');
+  win.document.write(reportHtml);
+  win.document.close();
+  setTimeout(function(){ win.print(); }, 500);
+}
+
+async function handleSignOut() { await sb.auth.signOut(); window.location.href = '/'; }
+
+async function init() {
+  var { data: { session } } = await sb.auth.getSession();
+  if (!session) { window.location.href = '/login.html?redirect=/sq-assist.html'; return; }
+  currentUser = session.user;
+
+  var meta = session.user.user_metadata || {};
+  var initials = ((meta.first_name||'?')[0]+(meta.last_name||'?')[0]).toUpperCase();
+  document.getElementById('nav-avatar').textContent = initials;
+  document.getElementById('nav-name').textContent = (meta.first_name||'')+' '+(meta.last_name||'');
+
+  // Load company profile
+  var { data: p } = await sb.from('company_profiles').select('*').eq('user_id', currentUser.id).single();
+  profile = p || {};
+
+  await loadTenders();
+
+  document.getElementById('loading-screen').style.display = 'none';
+  document.getElementById('main-page').style.display = 'block';
+}
+
+init();
+</script>
+</body>
+</html>
