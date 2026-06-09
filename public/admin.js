@@ -716,6 +716,7 @@ async function saveCanaDocs(){
     var data=await res.json();
     if(!res.ok||data.error)throw new Error(data.error);
     showToast('Cana AI saved successfully','success');
+    await loadTenders(); renderCanaPanels(); populateCanaTenderSelect();
     document.getElementById('canaDocSaved').style.display='inline';
     await loadTenders();
     populateCanaTenderSelect();
