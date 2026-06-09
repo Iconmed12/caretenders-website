@@ -165,7 +165,7 @@ exports.handler = async (event) => {
         '═══ FULL QUALITY QUESTION DOCUMENT (locate this question, its criteria bullets, weighting and page limit) ═══\n' + qualityFull + '\n\n' +
         '═══ THE QUESTION TO ANSWER ═══\n' + qText + '\n\n' +
         '═══ OUTPUT REQUIREMENTS ═══\n' +
-        '- Target length: ' + target + ' words. You MUST reach at least ' + Math.round(target*0.9) + ' words — submissions that underuse the page limit lose marks.\n' +
+        '- HARD LIMIT: ' + target + ' words — the council REDACTS everything beyond the page limit unread, so exceeding it destroys the response. Aim for ' + Math.round(target*0.92) + ' words. Minimum ' + Math.round(target*0.85) + '.\n' +
         '- Plain flowing prose paragraphs with occasional short headed sections (plain text headings, no markdown symbols).\n' +
         '- ABSOLUTELY NO markdown: no asterisks, no hashes, no bullet symbols. Use sentence-form lists.\n' +
         '- First person plural (we/our). Confident, specific, human. Vary sentence length. No AI tells like "Moreover" chains, "delve", "tapestry", "Furthermore" repetition.\n' +
@@ -194,6 +194,19 @@ exports.handler = async (event) => {
       } catch(e) {
         console.log('Q' + (i+1) + ' revision failed, using draft:', e.message);
         final = draft;
+      }
+
+      // Programmatic length enforcement: models can't count words; we can
+      var wc = final.split(/\s+/).length;
+      if (wc > target * 1.08) {
+        console.log('Q' + (i+1) + ' over limit (' + wc + '/' + target + ') — trim pass');
+        try {
+          var trimmed = await callSonnet(
+            'This tender response is ' + wc + ' words but the page limit allows only ' + target + '. ' +
+            'The council redacts everything beyond the limit unread. Cut it to ' + Math.round(target*0.95) + ' words by tightening prose and removing the weakest material — keep every response-criteria point, all evidence, all [INSERT] flags, and the added-value element. Plain prose, no markdown. Output only the trimmed response.\n\n' + final,
+            4000);
+          if (trimmed && trimmed.split(/\s+/).length < wc) final = trimmed;
+        } catch(e) { console.log('Trim failed:', e.message); }
       }
 
       return { question: qText, answer: stripMarkdown(final) };
