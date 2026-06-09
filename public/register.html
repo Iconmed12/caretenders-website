@@ -310,5 +310,17 @@
     if (r.data.session) window.location.href = '/dashboard.html';
   });
 </script>
+
+<script>
+  // Pre-fill email from URL (when coming from a purchase)
+  (function() {
+    var params = new URLSearchParams(window.location.search);
+    var email = params.get('email');
+    if (email) {
+      var emailEl = document.getElementById('email');
+      if (emailEl) emailEl.value = email;
+    }
+  })();
+</script>
 </body>
 </html>
