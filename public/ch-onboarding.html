@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Company Lookup — Cana</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/ch-onboarding.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div id="loading-screen"><div class="spinner"></div></div>
+
+<nav>
+  <span class="nav-logo-main">Cana <span>Tech</span></span>
+  <div style="display:flex;align-items:center;gap:1rem;">
+    <div class="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <span id="nav-name"></span>
+    </div>
+    <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page" id="main-page" style="display:none;">
+  <div class="card">
+
+    <!-- STEPS -->
+    <div class="steps">
+      <div class="step">
+        <div class="step-dot done">✓</div>
+        <span class="step-label">Account created</span>
+      </div>
+      <div class="step-line done"></div>
+      <div class="step">
+        <div class="step-dot active">2</div>
+        <span class="step-label active">Company lookup</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step">
+        <div class="step-dot pending">3</div>
+        <span class="step-label">SQ Assist</span>
+      </div>
+    </div>
+
+    <div class="card-header">
+      <div class="badge">✦ One step away</div>
+      <h1>Let's find your company</h1>
+      <p>Enter your Companies House number below. Cana will pull your registered details automatically — no manual typing needed. This fills in the majority of your Selection Questionnaire instantly.</p>
+    </div>
+
+    <div class="alert alert-error" id="error-alert"></div>
+
+    <!-- LOOKUP ROW -->
+    <div class="lookup-row">
+      <input class="lookup-input" type="text" id="ch-input"
+        placeholder="e.g. 12345678"
+        maxlength="8"
+        onkeydown="if(event.key==='Enter') lookupCompany()">
+      <button class="btn-lookup" id="lookup-btn" onclick="lookupCompany()">Look up →</button>
+    </div>
+    <p class="hint" style="margin-bottom:1.25rem;">
+      Your 8-digit company number is on your Companies House certificate or at
+      <a href="https://find-and-update.company-information.service.gov.uk" target="_blank">find-and-update.company-information.service.gov.uk</a>
+    </p>
+
+    <!-- RESULT -->
+    <div class="result-card" id="result-card">
+      <div class="result-card-head">
+        <div class="result-check">✅</div>
+        <div>
+          <div class="result-company" id="result-name"></div>
+          <div class="result-status" id="result-status"></div>
+        </div>
+      </div>
+      <div class="result-grid" id="result-grid"></div>
+    </div>
+
+    <!-- STILL NEEDED -->
+    <div class="still-needed" id="still-needed">
+      <h3>ℹ️ What Cana still needs from you</h3>
+      <p>After saving, you'll complete a few care-specific details that aren't on Companies House — your CQC number, services, regions and KPIs. These take about 3 minutes and make your SQ responses much more specific.</p>
+    </div>
+
+    <!-- SAVE BUTTON -->
+    <button class="btn-primary" id="save-btn" onclick="saveAndContinue()">Save &amp; continue to SQ Assist →</button>
+    <button class="btn-skip" id="skip-btn" onclick="skipToSq()">Skip for now — I'll add my company number later</button>
+
+  </div>
+</div>
+
+<script src="/ch-onboarding.js"></script>
+</body>
+</html>
