@@ -80,26 +80,30 @@
     var currentIdx = STAGES.findIndex(function(s){ return s.key === currentStatus; });
     if (currentIdx === -1) currentIdx = 0;
     var email = window._companyDetails && window._companyDetails.email || '';
+    var stage = STAGES[currentIdx];
+    var isComplete = currentStatus === 'complete';
+
+    // Mini progress dots
+    var dots = STAGES.map(function(s, i) {
+      var cls = i < currentIdx ? 'tracker-dot done' : (i === currentIdx ? 'tracker-dot active' : 'tracker-dot');
+      return '<div class="' + cls + '"></div>';
+    }).join('');
 
     var html = '<div class="cana-tracker">' +
-      '<div class="cana-tracker-title">Cana AI is preparing your documents</div>' +
-      '<div class="cana-tracker-email">Will be sent to <strong>' + email + '</strong> as Word documents</div>' +
-      '<div class="cana-tracker-stages">';
+      '<div class="cana-tracker-title">' + (isComplete ? '✅ Your documents are ready' : 'Cana AI is preparing your documents') + '</div>' +
+      '<div class="cana-tracker-email">' + (isComplete ? 'Sent to <strong>' + email + '</strong>' : 'Will be sent to <strong>' + email + '</strong> as Word documents') + '</div>' +
+      '<div class="tracker-dots">' + dots + '</div>' +
+      '<div class="tracker-current-stage ' + (isComplete ? 'stage-complete' : '') + '">' +
+        '<div class="tracker-current-icon">' + stage.icon + '</div>' +
+        '<div class="tracker-current-label">' + stage.label + '</div>' +
+        '<div class="tracker-current-step">Step ' + (currentIdx + 1) + ' of ' + STAGES.length + '</div>' +
+        (!isComplete ? '<div class="tracker-progress-bar"><div class="tracker-progress-fill"></div></div>' : '') +
+      '</div>' +
+      '<div class="tracker-completed-list">';
 
-    STAGES.forEach(function(stage, i) {
-      var done    = i < currentIdx;
-      var active  = i === currentIdx;
-      var pending = i > currentIdx;
-      var cls = done ? 'stage-done' : (active ? 'stage-active' : 'stage-pending');
-      html += '<div class="tracker-stage ' + cls + '">' +
-        '<div class="tracker-stage-icon">' + (done ? '✓' : stage.icon) + '</div>' +
-        '<div class="tracker-stage-label">' + stage.label + '</div>' +
-        (active ? '<div class="tracker-stage-bar"><div class="tracker-stage-bar-fill"></div></div>' : '') +
-      '</div>';
-      if (i < STAGES.length - 1) {
-        html += '<div class="tracker-connector ' + (done ? 'connector-done' : '') + '"></div>';
-      }
-    });
+    for (var i = 0; i < currentIdx; i++) {
+      html += '<div class="tracker-done-item">✓ ' + STAGES[i].label + '</div>';
+    }
 
     html += '</div></div>';
     return html;
