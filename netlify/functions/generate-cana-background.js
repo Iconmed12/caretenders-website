@@ -97,45 +97,36 @@ exports.handler = async (event) => {
       (co.policies ? 'Policies: ' + co.policies + '\n' : '') +
       (co.accreditations ? 'Accreditations: ' + co.accreditations + '\n' : '');
 
-    // ── 3. Generate responses (using stream-response for quality) ──
+    // ── 3. Generate responses — direct Anthropic API calls ──
     await setStatus(jobId, 'generating_responses');
     var responses = [];
 
     for (var i = 0; i < questions.length; i++) {
       var q = questions[i];
       var qText = q.question || q.text || String(q);
+      console.log('Generating Q' + (i+1) + ' of ' + questions.length);
       try {
-        // Try stream-response first (best quality)
-        var srRes = await fetch(SITE + '/.netlify/functions/stream-response', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tenderId, companyDetails: co, questionIndex: i })
-        });
-        var answer = '';
-        if (srRes.ok) {
-          answer = await srRes.text();
-          if (!answer || answer.length < 100) throw new Error('Empty stream-response');
-        } else {
-          throw new Error('stream-response failed: ' + srRes.status);
-        }
-        responses.push({ question: qText, answer: stripMarkdown(answer) });
+        var prompt =
+          'You are a highly experienced UK public sector bid writer specialising in health and social care contracts. ' +
+          'Your responses consistently score full marks because they are specific, evidence-based, and directly address the scoring criteria.\n\n' +
+          'COMPANY INFORMATION:\n' + coCtx + '\n' +
+          (specText ? 'TENDER SPECIFICATION (relevant extract):\n' + specText + '\n\n' : '') +
+          (kbContext ? kbContext + '\n' : '') +
+          'INSTRUCTIONS:\n' +
+          '- Write 450-600 words minimum\n' +
+          '- Use plain prose paragraphs — absolutely NO markdown, NO asterisks, NO hash symbols\n' +
+          '- Be specific to this company and this tender — never write generic statements\n' +
+          '- Reference the commissioner\'s stated requirements and outcomes directly\n' +
+          '- Use first-person plural (we/our) throughout\n' +
+          '- Write as a professional bid writer, not as an AI\n\n' +
+          'QUESTION ' + (i+1) + ':\n' + qText;
+
+        var ans = await callAI(prompt, 1800);
+        responses.push({ question: qText, answer: stripMarkdown(ans) });
+        console.log('Q' + (i+1) + ' done — ' + (ans||'').length + ' chars');
       } catch(e) {
-        // Fallback: direct AI call
-        console.log('stream-response fallback for Q' + (i+1) + ':', e.message);
-        try {
-          var prompt = 'You are an expert UK public sector bid writer.\n\n' +
-            'COMPANY:\n' + coCtx + '\n' +
-            (specText ? 'TENDER SPEC:\n' + specText + '\n\n' : '') +
-            (kbContext ? kbContext + '\n' : '') +
-            'Write a detailed professional response (400-600 words). ' +
-            'Use plain text only — NO markdown, NO asterisks, NO hash symbols, NO bullet dashes. ' +
-            'Write in continuous paragraphs. Be specific to the company and tender.\n\n' +
-            'QUESTION: ' + qText;
-          var ans = await callAI(prompt, 1500);
-          responses.push({ question: qText, answer: stripMarkdown(ans) });
-        } catch(e2) {
-          responses.push({ question: qText, answer: 'Response unavailable — please contact consulting@icongrp.co.uk' });
-        }
+        console.log('Q' + (i+1) + ' failed:', e.message);
+        responses.push({ question: qText, answer: 'Response unavailable — please contact consulting@icongrp.co.uk' });
       }
     }
 
