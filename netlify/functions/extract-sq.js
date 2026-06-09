@@ -1,3 +1,5 @@
+const mammoth = require('mammoth');
+
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',
@@ -20,12 +22,12 @@ exports.handler = async (event) => {
       try {
         var docBytes = Buffer.from(base64Doc, 'base64');
         var storageRes = await fetch(
-          sbUrl + '/storage/v1/object/sq-docs/' + tenderId + '/' + (fileName || 'sq.docx'),
+          `${sbUrl}/storage/v1/object/sq-docs/${tenderId}/${fileName || 'sq.docx'}`,
           {
             method: 'POST',
             headers: {
               apikey: sbKey,
-              Authorization: 'Bearer ' + sbKey,
+              Authorization: `Bearer ${sbKey}`,
               'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
               'x-upsert': 'true'
             },
@@ -33,30 +35,33 @@ exports.handler = async (event) => {
           }
         );
         if (storageRes.ok) {
-          storagePath = tenderId + '/' + (fileName || 'sq.docx');
-          console.log('SQ docx saved to storage:', storagePath);
-        } else {
-          console.log('Storage save failed:', await storageRes.text());
+          storagePath = `${tenderId}/${fileName || 'sq.docx'}`;
         }
-      } catch(e) {
-        console.log('Storage error:', e.message);
-      }
+      } catch(e) { console.log('Storage save failed:', e.message); }
     }
 
-    // ── 2. Extract fields with AI ──
+    // ── 2. Generate HTML preview from docx (store once, serve instantly) ──
+    var htmlPreview = null;
+    if (base64Doc) {
+      try {
+        var docBuf = Buffer.from(base64Doc, 'base64');
+        var mammothResult = await mammoth.convertToHtml({ buffer: docBuf });
+        htmlPreview = mammothResult.value;
+      } catch(e) { console.log('HTML preview generation failed:', e.message); }
+    }
+
+    // ── 3. Extract fields with AI ──
     var sqText = docText.length > 10000 ? docText.substring(0, 10000) : docText;
 
     var prompt = 'You are analysing a UK public sector Selection Questionnaire (SQ).\n\n' +
-      'Extract every field or question a bidder must complete. For each field classify it as:\n' +
-      '- "auto_fill" — company name, address, company number, VAT, directors, PSC, CQC details, insurance yes/no, SME status, incorporation date\n' +
-      '- "ai_draft" — written responses: contract examples, technical capability, GDPR details, experience narratives\n' +
+      'Extract every field or question a bidder must complete. Classify each as:\n' +
+      '- "auto_fill" — company name, address, company number, VAT, directors, PSC, CQC, insurance yes/no, SME status, incorporation date\n' +
+      '- "ai_draft" — written responses: contract examples, technical capability, GDPR, experience narratives\n' +
       '- "client_confirm" — personal declarations: exclusions, fraud, bribery, debarment, criminal convictions\n\n' +
-      'For auto_fill fields use profile_key from: company_name, company_number, registered_address, vat_number, company_type, founded_year, cqc_status, cqc_provider_id, contact_name, sme_status, directors, psc_details, services, experience, accreditations, insurance_employers, insurance_public, gdpr_policy, ico_number\n\n' +
-      'IMPORTANT: Return ONLY a JSON object. Start immediately with { — no preamble, no markdown.\n' +
-      'Use this exact structure:\n' +
+      'For auto_fill use profile_key from: company_name, company_number, registered_address, vat_number, company_type, founded_year, cqc_status, cqc_provider_id, contact_name, sme_status, directors, psc_details, services, experience, accreditations, insurance_employers, insurance_public, gdpr_policy, ico_number\n\n' +
+      'Return ONLY a JSON object starting with {:\n' +
       '{"sq_title":"...","commissioner":"...","sections":[{"section":"Part 1","title":"Supplier Information","fields":[{"id":"1.1a","question":"Full name","field_type":"auto_fill","profile_key":"company_name","hint":"From Companies House"}]}]}\n\n' +
-      'Keep field questions SHORT (under 60 chars). Do not include guidance text.\n\n' +
-      'SQ TEXT:\n' + sqText;
+      'Keep questions SHORT (under 60 chars).\n\nSQ TEXT:\n' + sqText;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -104,22 +109,28 @@ exports.handler = async (event) => {
 
     if (totalFields === 0) throw new Error('No fields extracted — check the document is a valid SQ');
 
+    // ── 4. Save everything to Supabase ──
     var sqData = {
       ...parsed,
-      fileName: fileName,
-      storagePath: storagePath,
+      fileName,
+      storagePath,
+      htmlPreview,          // stored once here, served instantly to clients
       extractedAt: new Date().toISOString(),
       totalFields, autoFill, aiDraft, clientConfirm
     };
 
-    var saveRes = await fetch(sbUrl + '/rest/v1/tenders?id=eq.' + tenderId, {
+    var saveRes = await fetch(`${sbUrl}/rest/v1/tenders?id=eq.${tenderId}`, {
       method: 'PATCH',
-      headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+      headers: { apikey: sbKey, Authorization: `Bearer ${sbKey}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify({ sq_data: sqData })
     });
     if (!saveRes.ok) throw new Error('Failed to save: ' + (await saveRes.text()).substring(0, 100));
 
-    return { statusCode: 200, headers: cors, body: JSON.stringify({ success: true, totalFields, autoFill, aiDraft, clientConfirm, sqTitle: parsed.sq_title, commissioner: parsed.commissioner, storagePath }) };
+    return {
+      statusCode: 200,
+      headers: cors,
+      body: JSON.stringify({ success: true, totalFields, autoFill, aiDraft, clientConfirm, sqTitle: parsed.sq_title, commissioner: parsed.commissioner, hasPreview: !!htmlPreview })
+    };
 
   } catch(err) {
     return { statusCode: 500, headers: cors, body: JSON.stringify({ error: err.message || 'Extraction failed' }) };
