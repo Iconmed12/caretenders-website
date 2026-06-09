@@ -192,3 +192,7 @@ tr:hover td{background:#fafafa}
 .cana-file-remove{background:none;border:none;color:#a32d2d;cursor:pointer;font-size:1rem;padding:0 2px;flex-shrink:0;font-weight:700}
 .cana-upload-btn{display:inline-flex;align-items:center;gap:6px;background:#F4F6F9;border:1.5px solid rgba(11,25,41,0.12);border-radius:8px;padding:7px 14px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:#6B8FA3;cursor:pointer;transition:all 0.2s;margin-top:6px}
 .cana-upload-btn:hover{border-color:#00C9E0;color:#0099AA}
+
+.cana-panel-row { cursor:pointer; border-radius:8px; margin-bottom:2px; transition:background 0.15s; }
+.cana-panel-row:hover { background:#f0fdf4; }
+.cana-panel-row.pending:hover { background:rgba(245,166,35,0.05); }
