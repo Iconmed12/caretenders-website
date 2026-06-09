@@ -8,13 +8,42 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { tenderId, docText, fileName } = JSON.parse(event.body);
+    const { tenderId, docText, base64Doc, fileName } = JSON.parse(event.body);
     if (!tenderId || !docText) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing data' }) };
 
     const sbKey = process.env.SUPABASE_ANON_KEY;
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
-    // Keep first 10000 chars — enough to capture all question types
+    // ── 1. Save original .docx to Supabase Storage ──
+    var storagePath = null;
+    if (base64Doc) {
+      try {
+        var docBytes = Buffer.from(base64Doc, 'base64');
+        var storageRes = await fetch(
+          sbUrl + '/storage/v1/object/sq-docs/' + tenderId + '/' + (fileName || 'sq.docx'),
+          {
+            method: 'POST',
+            headers: {
+              apikey: sbKey,
+              Authorization: 'Bearer ' + sbKey,
+              'Content-Type': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+              'x-upsert': 'true'
+            },
+            body: docBytes
+          }
+        );
+        if (storageRes.ok) {
+          storagePath = tenderId + '/' + (fileName || 'sq.docx');
+          console.log('SQ docx saved to storage:', storagePath);
+        } else {
+          console.log('Storage save failed:', await storageRes.text());
+        }
+      } catch(e) {
+        console.log('Storage error:', e.message);
+      }
+    }
+
+    // ── 2. Extract fields with AI ──
     var sqText = docText.length > 10000 ? docText.substring(0, 10000) : docText;
 
     var prompt = 'You are analysing a UK public sector Selection Questionnaire (SQ).\n\n' +
@@ -23,10 +52,10 @@ exports.handler = async (event) => {
       '- "ai_draft" — written responses: contract examples, technical capability, GDPR details, experience narratives\n' +
       '- "client_confirm" — personal declarations: exclusions, fraud, bribery, debarment, criminal convictions\n\n' +
       'For auto_fill fields use profile_key from: company_name, company_number, registered_address, vat_number, company_type, founded_year, cqc_status, cqc_provider_id, contact_name, sme_status, directors, psc_details, services, experience, accreditations, insurance_employers, insurance_public, gdpr_policy, ico_number\n\n' +
-      'Return ONLY a JSON object. Start immediately with { — no preamble, no markdown, no backticks.\n' +
-      'Use this exact structure with double quotes only:\n' +
+      'IMPORTANT: Return ONLY a JSON object. Start immediately with { — no preamble, no markdown.\n' +
+      'Use this exact structure:\n' +
       '{"sq_title":"...","commissioner":"...","sections":[{"section":"Part 1","title":"Supplier Information","fields":[{"id":"1.1a","question":"Full name","field_type":"auto_fill","profile_key":"company_name","hint":"From Companies House"}]}]}\n\n' +
-      'Keep field questions SHORT (under 60 chars). Do not include guidance text, only the actual question.\n\n' +
+      'Keep field questions SHORT (under 60 chars). Do not include guidance text.\n\n' +
       'SQ TEXT:\n' + sqText;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -49,37 +78,20 @@ exports.handler = async (event) => {
     var rawText = aiData.content && aiData.content[0] ? aiData.content[0].text.trim() : '';
     if (!rawText) throw new Error('AI returned empty response');
 
-    // Clean and repair the JSON
     var clean = rawText.replace(/```json|```/g, '').trim();
-
-    // Extract the JSON object
     var start = clean.indexOf('{');
     var end = clean.lastIndexOf('}');
-    if (start === -1) throw new Error('No JSON object found in response');
-
-    // If response was truncated, try to close open structures
-    if (end === -1 || end < start) {
-      clean = repairJson(clean.substring(start));
-    } else {
-      clean = clean.substring(start, end + 1);
-    }
-
-    // Remove trailing commas before } or ]
+    if (start === -1) throw new Error('No JSON found in response');
+    clean = end === -1 ? repairJson(clean.substring(start)) : clean.substring(start, end + 1);
     clean = clean.replace(/,(\s*[}\]])/g, '$1');
 
     var parsed;
-    try {
-      parsed = JSON.parse(clean);
-    } catch(e) {
-      // Try repair
-      try {
-        parsed = JSON.parse(repairJson(clean));
-      } catch(e2) {
-        throw new Error('JSON parse failed — the SQ document may be too complex. Try a shorter SQ or contact support. (' + e.message + ')');
-      }
+    try { parsed = JSON.parse(clean); }
+    catch(e) {
+      try { parsed = JSON.parse(repairJson(clean)); }
+      catch(e2) { throw new Error('JSON parse failed — try uploading again. (' + e.message + ')'); }
     }
 
-    // Count field types
     var totalFields = 0, autoFill = 0, aiDraft = 0, clientConfirm = 0;
     (parsed.sections || []).forEach(function(s) {
       (s.fields || []).forEach(function(f) {
@@ -95,11 +107,11 @@ exports.handler = async (event) => {
     var sqData = {
       ...parsed,
       fileName: fileName,
+      storagePath: storagePath,
       extractedAt: new Date().toISOString(),
       totalFields, autoFill, aiDraft, clientConfirm
     };
 
-    // Save to Supabase
     var saveRes = await fetch(sbUrl + '/rest/v1/tenders?id=eq.' + tenderId, {
       method: 'PATCH',
       headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
@@ -107,7 +119,7 @@ exports.handler = async (event) => {
     });
     if (!saveRes.ok) throw new Error('Failed to save: ' + (await saveRes.text()).substring(0, 100));
 
-    return { statusCode: 200, headers: cors, body: JSON.stringify({ success: true, totalFields, autoFill, aiDraft, clientConfirm, sqTitle: parsed.sq_title, commissioner: parsed.commissioner }) };
+    return { statusCode: 200, headers: cors, body: JSON.stringify({ success: true, totalFields, autoFill, aiDraft, clientConfirm, sqTitle: parsed.sq_title, commissioner: parsed.commissioner, storagePath }) };
 
   } catch(err) {
     return { statusCode: 500, headers: cors, body: JSON.stringify({ error: err.message || 'Extraction failed' }) };
@@ -115,7 +127,6 @@ exports.handler = async (event) => {
 };
 
 function repairJson(str) {
-  // Count unclosed brackets and braces, close them
   var opens = 0, arrOpens = 0;
   for (var i = 0; i < str.length; i++) {
     if (str[i] === '{') opens++;
@@ -123,9 +134,7 @@ function repairJson(str) {
     else if (str[i] === '[') arrOpens++;
     else if (str[i] === ']') arrOpens--;
   }
-  // Remove trailing comma if present
   str = str.replace(/,\s*$/, '');
-  // Close open structures
   while (arrOpens > 0) { str += ']'; arrOpens--; }
   while (opens > 0)    { str += '}'; opens--; }
   return str;
