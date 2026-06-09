@@ -79,10 +79,15 @@
 
   function showProcessingScreen(jobId, email) {
     showState('loading');
-    document.querySelector('.loading-state h3').textContent = 'Payment confirmed — generating your documents';
-    document.querySelector('.loading-state p').innerHTML =
-      'Cana AI is writing your responses, completing your SQ and preparing your Word documents.<br>' +
-      '<span style="font-size:0.85em;color:var(--muted);">This takes 2–5 minutes. Everything will be sent to <strong>' + (email||'your email') + '</strong> as Word documents.</span>';
+    var h3 = document.querySelector('.loading-state h3');
+    var p  = document.querySelector('.loading-state p');
+    var spinner = document.querySelector('.loading-state .loading-spinner');
+    if (spinner) spinner.style.display = 'none';
+    if (h3) { h3.innerHTML = '✅ Payment received — Cana AI is on it'; }
+    if (p)  { p.innerHTML =
+      'Your bid responses and completed SQ will be sent to <strong>' + (email||'your email') + '</strong> as Word documents.<br><br>' +
+      '<span style="color:var(--muted);font-size:0.88em;">Expect to receive your documents within 1 hour. ' +
+      'If you don\'t receive anything please email <strong>consulting@icongrp.co.uk</strong></span>'; }
     window._jobId = jobId;
   }
 
