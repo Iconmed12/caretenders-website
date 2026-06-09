@@ -689,6 +689,33 @@
       var tTitle = '';
       try { tTitle = (tenderData && tenderData.title) || sessionStorage.getItem('cana_tender_title') || 'Tender'; } catch(e){ tTitle = 'Tender'; }
 
+      // If SQ was included, generate the filled document before sending email
+      var sqDocBase64 = null;
+      var sqFileName = null;
+      var sqDataForEmail = null;
+
+      if (window._includeSq && window._tenderData && window._tenderData.sq_data && window._tenderData.sq_data.storagePath) {
+        try {
+          var sqFillRes = await fetch('/.netlify/functions/fill-sq-doc', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tenderId: tenderId,
+              companyDetails: window._companyDetails || {},
+              sqData: window._tenderData.sq_data
+            })
+          });
+          if (sqFillRes.ok) {
+            var sqFillData = await sqFillRes.json();
+            sqDocBase64 = sqFillData.docBase64;
+            sqFileName  = sqFillData.fileName;
+            sqDataForEmail = window._tenderData.sq_data;
+          }
+        } catch(e) {
+          console.log('SQ fill failed (non-fatal):', e.message);
+        }
+      }
+
       var res = await fetch('/.netlify/functions/send-responses', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -697,7 +724,11 @@
           clientEmail: clientEmail,
           clientName: clientName,
           tenderTitle: tTitle,
-          sessionId: currentSessionId || sessionStorage.getItem('cana_session') || ''
+          sessionId: currentSessionId || sessionStorage.getItem('cana_session') || '',
+          sqDocBase64: sqDocBase64,
+          sqFileName: sqFileName,
+          sqData: sqDataForEmail,
+          includeSq: !!(sqDocBase64)
         })
       });
       var result = await res.json();
