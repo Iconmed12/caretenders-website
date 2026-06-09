@@ -1592,6 +1592,98 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTenders();
   }
 });
+
+  // ── SELECTION QUESTIONNAIRE UPLOAD ──────────────────────────────
+  var sqSelectedFile = null;
+
+  function handleSqDrop(event) {
+    event.preventDefault();
+    document.getElementById('sqDrop').style.borderColor = '';
+    document.getElementById('sqDrop').style.background = '';
+    var file = event.dataTransfer.files[0];
+    if (file) validateAndSetSqFile(file);
+  }
+
+  function handleSqFileSelect(event) {
+    var file = event.target.files[0];
+    if (file) validateAndSetSqFile(file);
+  }
+
+  function validateAndSetSqFile(file) {
+    if (!file.name.endsWith('.docx')) {
+      showToast('Please upload a Word document (.docx) only', 'error');
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      showToast('File must be under 20MB', 'error');
+      return;
+    }
+    sqSelectedFile = file;
+    var filesDiv = document.getElementById('sqDocFiles');
+    filesDiv.innerHTML =
+      '<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(124,58,237,0.06);border-radius:7px;margin-top:8px;">' +
+        '<span>📄</span>' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-size:0.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + file.name + '</div>' +
+          '<div style="font-size:0.73rem;color:var(--text-light);">' + (file.size/1024).toFixed(0) + ' KB</div>' +
+        '</div>' +
+        '<button onclick="clearSqFile()" style="background:none;border:none;cursor:pointer;color:var(--text-light);">✕</button>' +
+      '</div>' +
+      '<button onclick="uploadSqDocument()" style="width:100%;margin-top:10px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:8px;padding:10px;font-size:0.85rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;">⚡ Upload & extract fields</button>';
+    document.getElementById('sqExtractStatus').style.display = 'none';
+  }
+
+  function clearSqFile() {
+    sqSelectedFile = null;
+    document.getElementById('sqDocFiles').innerHTML = '';
+    document.getElementById('sqDocInput').value = '';
+    document.getElementById('sqExtractStatus').style.display = 'none';
+  }
+
+  async function uploadSqDocument() {
+    var tenderId = document.getElementById('canaTenderSelect').value;
+    if (!tenderId) { showToast('Please select a tender first', 'error'); return; }
+    if (!sqSelectedFile) { showToast('Please select an SQ file first', 'error'); return; }
+
+    var statusEl = document.getElementById('sqExtractStatus');
+    statusEl.style.display = 'block';
+    statusEl.style.background = 'rgba(0,201,224,0.08)';
+    statusEl.style.color = '#0099AA';
+    statusEl.textContent = '⏳ Reading document and extracting fields...';
+
+    try {
+      var base64 = await new Promise(function(resolve, reject) {
+        var reader = new FileReader();
+        reader.onload = function(){ resolve(reader.result.split(',')[1]); };
+        reader.onerror = reject;
+        reader.readAsDataURL(sqSelectedFile);
+      });
+
+      var res = await fetch('/.netlify/functions/extract-sq', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenderId: tenderId, base64: base64, fileName: sqSelectedFile.name })
+      });
+
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Extraction failed');
+
+      statusEl.style.background = 'rgba(56,161,105,0.08)';
+      statusEl.style.color = '#1a7a3f';
+      statusEl.textContent = '✓ ' + data.totalFields + ' fields extracted — ' +
+        data.autoFill + ' auto-fillable, ' + data.aiDraft + ' AI-drafted, ' +
+        data.clientConfirm + ' need client confirmation';
+
+      showToast('SQ uploaded and extracted — ' + data.totalFields + ' fields', 'success');
+
+    } catch(err) {
+      statusEl.style.background = 'rgba(229,62,62,0.08)';
+      statusEl.style.color = '#c53030';
+      statusEl.textContent = '✗ ' + (err.message || 'Extraction failed — please try again');
+      showToast('SQ extraction failed: ' + (err.message||'Error'), 'error');
+    }
+  }
+
 </script>
 </body>
 </html>
