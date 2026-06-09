@@ -469,6 +469,86 @@ async function confirmDelete(){
 
 var canaDocData={quality:[],spec:[],scoring:[]};
 
+function renderCanaPanels() {
+  var live = [];
+  var pending = [];
+
+  allTenders.filter(function(t){ return t.status !== 'draft'; }).forEach(function(t) {
+    var hasSq      = !!(t.sq_data);
+    var hasQuality = !!(t.cana_docs && t.cana_docs.quality && t.cana_docs.quality.length);
+    var hasSpec    = !!(t.cana_docs && t.cana_docs.spec    && t.cana_docs.spec.length);
+    var hasScoring = !!(t.cana_docs && t.cana_docs.scoring && t.cana_docs.scoring.length);
+    var isLive = hasSq && hasQuality && hasSpec && hasScoring;
+
+    if (isLive) {
+      live.push(t);
+    } else {
+      var missing = [];
+      if (!hasSq)      missing.push('SQ');
+      if (!hasQuality) missing.push('Questions');
+      if (!hasSpec)    missing.push('Spec');
+      if (!hasScoring) missing.push('Scoring');
+      pending.push({ tender: t, missing: missing });
+    }
+  });
+
+  // Update counts
+  var liveCount    = document.getElementById('liveTenderCount');
+  var pendingCount = document.getElementById('pendingTenderCount');
+  if (liveCount)    liveCount.textContent    = live.length;
+  if (pendingCount) pendingCount.textContent = pending.length;
+
+  // Render live list
+  var liveList = document.getElementById('liveTenderList');
+  if (liveList) {
+    if (!live.length) {
+      liveList.innerHTML = '<div style="padding:12px;text-align:center;font-size:0.82rem;color:var(--text-light);">No live tenders yet</div>';
+    } else {
+      liveList.innerHTML = live.map(function(t) {
+        return '<div data-tid="' + t.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;margin-bottom:2px;" class="cana-panel-row">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:0.85rem;font-weight:600;color:#1a7a3f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + t.title + '</div>' +
+            '<div style="font-size:0.73rem;color:#2d6a4f;">' + (t.org||'') + '</div>' +
+          '</div>' +
+          '<span style="font-size:0.7rem;font-weight:700;color:#1a7a3f;background:#e8f7ee;padding:2px 8px;border-radius:999px;margin-left:8px;flex-shrink:0;">● Live</span>' +
+        '</div>';
+      }).join('');
+    }
+  }
+
+  // Render pending list
+  var pendingList = document.getElementById('pendingTenderList');
+  if (pendingList) {
+    if (!pending.length) {
+      pendingList.innerHTML = '<div style="padding:12px;text-align:center;font-size:0.82rem;color:var(--text-light);">All tenders are live ✓</div>';
+    } else {
+      pendingList.innerHTML = pending.map(function(item) {
+        var missingBadges = item.missing.map(function(m) {
+          return '<span style="font-size:0.68rem;font-weight:700;background:rgba(229,62,62,0.1);color:#c53030;padding:1px 6px;border-radius:4px;margin-left:3px;">' + m + '</span>';
+        }).join('');
+        return '<div data-tid="' + item.tender.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;margin-bottom:2px;" class="cana-panel-row pending">' +
+          '<div style="flex:1;min-width:0;">' +
+            '<div style="font-size:0.85rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + item.tender.title + '</div>' +
+            '<div style="font-size:0.73rem;color:var(--text-light);margin-top:2px;">Missing:' + missingBadges + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+  }
+}
+
+function selectCanaFromPanel(tenderId) {
+  // Select the tender in the dropdown and load it
+  var sel = document.getElementById('canaTenderSelect');
+  if (sel) {
+    sel.value = tenderId;
+    loadCanaDocs();
+    // Scroll to the doc area
+    var area = document.getElementById('canaDocArea');
+    if (area) setTimeout(function(){ area.scrollIntoView({ behavior:'smooth', block:'start' }); }, 300);
+  }
+}
+
 function populateCanaTenderSelect(){
   var sel=document.getElementById('canaTenderSelect');
   if(!sel) return;
@@ -485,6 +565,7 @@ function populateCanaTenderSelect(){
     sel.appendChild(opt);
   });
   if(cur) sel.value=cur;
+  renderCanaPanels();
 }
 
 function loadCanaDocs(){
@@ -1045,7 +1126,8 @@ document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });
         data.clientConfirm + ' need client confirmation';
 
       showToast('SQ uploaded and extracted — ' + data.totalFields + ' fields', 'success');
-      loadCanaDocs(); // refresh badge
+      loadCanaDocs();
+      renderCanaPanels();
 
     } catch(err) {
       statusEl.style.background = 'rgba(229,62,62,0.08)';
