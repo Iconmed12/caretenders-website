@@ -1,0 +1,400 @@
+1 
+ 
+Appendix 3   LIVING WELL AT HOME LOT 1 REGULATED CORE SPECIFICATION  
+  
+1.0  Introduction .................................................................................................... 2 
+2.0  Scope ............................................................................................................... 2 
+3.0  Service Requirements .................................................................................... 3 
+3.1. Regulatory and legal ................................................................. 3 
+3.2. Individuals who will be using the Service .................................. 4 
+3.3. Key principles ........................................................................... 5 
+3.4. Service outcomes ..................................................................... 5 
+3.5. Types of care and support tasks ............................................... 8 
+3.6. Service availability and flexibility ............................................. 10 
+3.7. Keeping Individuals informed and in control ........................... 11 
+3.8. Recording ............................................................................... 12 
+3.9. Out of hours service ................................................................ 13 
+3.10. Care and support planning and assessment ........................... 13 
+3.11. Risk assessment and management ........................................ 14 
+3.12. Health and safety .................................................................... 15 
+3.13. Health/medical care ................................................................ 15 
+3.14. Partnership working ................................................................ 16 
+3.15. Supporting the wider care system ........................................... 17 
+3.16. Emergency response .............................................................. 18 
+4.0  Workforce Requirements ............................................................................. 18 
+4.1. Data and intelligence .............................................................. 18 
+4.2. Planning and management ..................................................... 18 
+4.3. Staff supervision and annual appraisals ................................. 19 
+4.4. Leadership and management ................................................. 19 
+4.5. Enabling care and support ...................................................... 20 
+4.6. Core skills, induction, and the Care Certificate ....................... 20 
+4.7. Qualifications and learning ...................................................... 20 
+4.8. Specific skills and knowledge ................................................. 21 
+4.9. Business continuity management ........................................... 23 
+5.0  Quality and safeguarding ............................................................................ 24 
+5.1. Quality standards and assurance ........................................... 24 
+5.2. Complaints, concerns, and compliments ................................ 25 
+5.3. Safeguarding .......................................................................... 26 
+6.0  Delegated Health Tasks ............................................................................... 28 
+ 
+
+2 
+ 
+1.0  Introduction 
+1.1 Living Well at Home is care and support delivered to Individuals living in their 
+own accommodation  (with  their  own  front  door) whose occupation of  the 
+property is entirely independent of the care and support arrangements (which 
+remain  at  all  times  throughout  all  visiting  arrangements) unless specified 
+otherwise as part of the service contract. 
+ 
+1.2 This document sets  out  the  Core Specification for  the Living  Well  at  Home 
+Service  for Individuals with  care  and  support needs.  It describes  what  the 
+Authority requires from the Service Provider in delivering the Service and must 
+be considered alongside the Living Well at Home Pseudo Dynamic Purchasing 
+System  (PDPS)  Agreement,  Service Contract, and  Invitation To Participate 
+(ITP) document. 
+2.0  Scope 
+2.1 The Service will be provided to Individuals with care and support needs under 
+the following sublots:   
+ 
+1a.  Short Term Care at Home (Intermediate Care) 
+1b.  Homecare Services 
+1c.  Extra Care 
+ 
+2.2 The scope of this PDPS may develop further to include the following services 
+in the future: 
+ 
+a. Night-time care 
+b. Care provided in settings in which an Individual might be supported e.g., 
+Supported Living 
+ 
+Short Term Care at Home 
+ 
+2.3 Short Term Care at Home Service is a time limited service and will focus on the 
+needs of the Individual at that point in time, providing support in the following 
+situations: 
+ 
+a. Where an Individual requires  urgent  care  and  support  at  home  where 
+normal  living  arrangements  (including  unpaid/informal  care  and  Mental 
+Health hospital) have broken down unexpectedly or an urgent change in 
+circumstances has led to a need for urgent care and support without which 
+could lead to hospital or care home admission.  
+b. The service will support all planned discharges from acute and community 
+hospitals, Mental Health hospitals and bed-based care settings and will 
+focus on prevention, recuperation, and rehabilitation. The Service will also 
+receive referrals for Individuals living in the community which will focus on 
+prevention, recuperation, and rehabilitation. 
+ 
+Homecare Services 
+ 
+2.4 Homecare  Services  are  planned  care  services  and  will  be  provided  to 
+Individuals who: 
+ 
+
+3 
+ 
+a. Meet the national eligibility threshold for care and support as set out in the 
+Care and Support (Eligibility Criteria) Regulations 2015 for the Care Act 
+2014  
+b. Have unmet eligible needs and outcomes that could be met through the 
+provision of care and support at home; and  
+c. Are  deemed  to  be  ordinarily  resident  within  the  administrative  area  of 
+Lancashire County Council or for whom we are responsible under S117. 
+ 
+Extra Care Services 
+ 
+2.5 Extra care housing provides safe and secure self-contained accommodation for 
+older adults who require varying levels of care and support to enable them to 
+live independently in a home environment. 
+ 
+2.5.1 The  Service  is  the  delivery  of  care  and  support  within  an  extra  care  housing 
+setting including: 
+ 
+a. Onsite  staff  to  provide  Background  Care  and  Support  and  Emergency 
+Response Services.  This service  benefits  all Individuals (tenants  and 
+leaseholders) and is not allocated to any one person.  
+b. Planned  Care  for Individuals who  have  chosen  to  have  their  assessed 
+care needs met by the on-site Service Provider.  
+ 
+2.6 The  Service  may  also  be  provided  in  circumstances  where  the  Authority 
+exercises  its  powers,  under  Section  19(3)  of  the  Care  Act  2014,  to  meet  an 
+Individual's  urgent  care  and  support  needs  without  having first  conducted  a 
+needs assessment or eligibility determination. 
+ 
+2.7 The Service is predominantly aimed at people aged 18 or over or in cases where 
+a person over the age of 16 and is transitioning to an adult service or is in need 
+of  a  health  service.   Except  in  Extra  Care  scheme  where  the  Service  is 
+predominantly aimed at individuals over the age of 55. 
+ 
+2.8 The Service will be commissioned by the Authority or any organisation acting 
+on its behalf under the Authority's power to delegate its functions (in accordance 
+with the terms of the agreement between the Authority and that third party).  
+  
+2.9 The Service shall be available to all eligible Individuals. 
+ 
+2.10 The Service shall be delivered within Lancashire County Council's Boundaries 
+with specific requirements detailed at the point of Call-Off. However, there may 
+be  occasions  when  the  Service  Provider  is  requested  to  provide  the  Service 
+outside of these boundaries; for example, where an Individual is a Lancashire 
+resident but requires care in an alternative location outside of the defined areas. 
+ 
+3.0  Service Requirements  
+3.1. Regulatory and legal  
+ 
+The Service Provider must be registered to provide personal care with the Care 
+Quality  Commission  (CQC)  and  will  maintain  registration  throughout  the 
+duration  of  the  Service  Contract. Therefore,  the  regulations  required  for 
+registration  (and  their  associated  standards),  and  the  monitoring  of  the 
+
+4 
+ 
+achievement  of  those  regulations  and  standards  are  not  duplicated  in  this 
+specification. 
+ 
+The  Service  Provider must  comply  with  all  relevant  legislation  that  relates  to 
+the operation of their business.  
+ 
+The  Service  provided  under  this  Service  Contract  must  be  provided  in 
+accordance with (but not limited to) the requirements of:  
+ 
+a. The Care Act 2014  
+b. Care Standards Act 2000 (including any amendments, modifications, or 
+re-enactments)  
+c. The Health and Social Care Act 2008 (Regulated Activities) Regulations 
+2014  
+d. CQC  
+e. The National Minimum Standards for Domiciliary Care  
+f. The Domiciliary Care Agencies Regulations 2002  
+g. Mental Capacity Act 2005 (Deprivation of Liberty Safeguards) and any 
+related codes of practice 
+h. Equality Act 2010  
+i. Human Rights Act 1998  
+j. Autism Act 2009  
+k. Deprivation of Liberty Safeguards and, when implemented, the new 
+Liberty Protection Safeguards under the Mental Capacity (Amended) Act 
+2019  
+l. Counter Terrorism and Security Act 2015   
+m. Individuals  individual assessed needs and outcomes and any 
+subsequent assessment, Care and Support Plan or review 
+documentation  
+n. Any future legislative changes or changes to National Minimum 
+Standards that determine the standard of care to be delivered.  
+  
+3.2. Individuals who will be using the Service  
+  
+The primary Individuals served by this specification are:  
+  
+a. Older people  
+b. People with dementia  
+c. People with physical disabilities  
+d. People with learning disabilities and/or autism   
+e. People with mental health needs  
+ 
+Other Individuals which may receive this Service include Individuals who 
+have:  
+  
+a. Sensory impairment  
+b. Spinal injuries  
+c. Acquired brain injury  
+d. Neurological conditions 
+e. Alcohol/Substance dependent  
+f. Known risk factors i.e., Forensic history or under the restrictions of the 
+Ministry of Justice; or  
+g. Adults approaching the end of their life 
+ 
+
+5 
+ 
+The Authority may require from time to time for the Service to be delivered to 
+other Individuals that  fall  outside  of  the  scope  of  the  primary  and  other 
+Individuals detailed above and are to be determined at the sole discretion of 
+the Authority. 
+ 
+3.3. Key principles 
+ 
+The Service Provider must value an Individual's right to:   
+ 
+a. Be independent   
+b. Be regarded and treated as individuals   
+c. Make choices for themselves  
+d. Be treated in an equal and fair way  
+e. Be treated with respect, dignity, and confidentiality   
+f. Access specialist support to realise potential  
+g. Receive non-judgemental support. 
+ 
+In addition, the Service Provider must:  
+ 
+a. Acknowledge that all Care Workers are visitors in Individual's homes 
+and should act accordingly  
+b. Ensure Care Workers are able to provide the Service in a way that 
+acknowledges and respects Individuals and complies with the Equality 
+Act  
+c. Maximise an Individuals self-care abilities, independence, and wellbeing  
+d. Recognise individuality and personal preferences  
+e. Provide support for informal carers and recognise the rights and 
+involvement of other family members  
+f. Acknowledge that Individuals have the right to take risks in their lives 
+and to enjoy a lifestyle of their choosing  
+g. Provide protection to Individuals who need it, including a safe and caring 
+environment  
+h. Provide a consistent and high-quality Service which is person-centred, 
+flexible, reliable and responsive  
+i. Focus the Service towards maximising independence and minimising 
+whole life cost of care. 
+ 
+The Service model must be consistent with the five key principles of the Mental 
+Capacity Act 2005 and the associated code of practice, which are:   
+ 
+a. Principle 1: A presumption of capacity   
+b. Principle 2: People being supported to make their own decisions   
+c. Principle 3: A person is not to be treated as unable to make a decision 
+merely because they make an unwise decision   
+d. Principle 4: Best interests   
+e. Principle 5: Less restrictive option. 
+ 
+The Service Provider must adhere to any conditions of discharge imposed by a 
+Mental  Health  Review  Tribunal,  Ministry  of  Justice  and  MAPPA  and  seek 
+authority from the Secretary of State if a condition of discharge is to be varied. 
+  
+3.4. Service outcomes  
+ 
+The  focus  of  the  Service  must  be  firmly  on  promoting  choice,  control, 
+independent  living,  social inclusion, and  wellbeing  through  the  provision  of 
+
+6 
+ 
+quality care and support. To achieve the Service outcomes the Service Provider 
+will:  
+  
+3.4.1 Promote the independence of Individuals through an enabling approach 
+  
+a. Support Individuals to gain/regain skills and confidence to achieve greater 
+independence in their day-to-day living  
+b. Support Individuals to remain in the community and prevent, reduce, or 
+delay the need for more intensive care and support  
+c. Promote  independence both  within  Extra  Care  Schemes and  within the 
+community 
+d. Support  programmes  of  rehabilitation,  reablement,  recovery,  education, 
+training, and employment 
+e. Motivate and facilitate Individuals to develop or maintain skills related to 
+activities of daily living, for example washing, dressing, feeding, toileting, 
+bathing, and mobility 
+f. Encourage Individuals  to  acquire  or  maintain  skills  relating  to  areas  of 
+non-personal care, for example shopping, cooking, and cleaning  
+g. Support Individuals to access community resources and encourage best 
+use of assistive technology, such as community equipment and telecare 
+to support activities of daily living  
+h. Support flexible and innovative solutions for Individuals   
+i. Support Individuals to   develop   problem   solving   skills   and   coping 
+strategies.  
+j. The Service Provider must cooperate with the Authority in minimising the 
+provision of double-handed support through the use of specialist moving 
+and   handling   equipment   (e.g.   ceiling   track   hoists,   bed   positioning 
+systems) and techniques provided by the Authority or the NHS, where it 
+is  considered  safe  as  part  of  a  suitable  and  sufficient  individual  risk 
+assessment   undertaken   by   a Competent Person,   and   the Care 
+Worker has received the necessary training and is deemed competent to 
+safely carry out the moving and handling alone, or with a willing and able 
+informal carer. 
+k. As we move into an increasingly digital world, we want people who have 
+additional support needs to have every opportunity to feel connected and 
+immersed  with  a  digital  offer.  Service Providers  will  refer  people  to  the 
+TEC (Technology Enabled Care) service when appropriate and propose 
+creative  solutions  to  increase  independence,  connectivity with  health 
+providers, safety, privacy, choice, and control for people utilising the very 
+best in tech enabled support. Successful Service Providers will keep up 
+to  date  with  the  latest  innovations  and  will  proactively  promote  new 
+technology as it comes available.  
+ 
+3.4.2 Support Individuals to achieve the outcomes in their Care and Support 
+Plan and to maximise independence  
+  
+a. Support Individuals to achieve the outcomes identified within their Care 
+and Support Plan   
+b. Continuously  review  and  record  the  achievement  of,  and  progress 
+towards, outcomes, enabling Individuals to maintain and enhance levels 
+of independence 
+c. Work  with  families  and  other  services  so  that  they  understand  the 
+approach to maintaining and maximising independence  
+d. Support Individuals to carry out caring responsibilities they have for a child 
+where this is an eligible need.  
+
+7 
+ 
+ 
+3.4.3 Support Individuals to engage with family/friends, their interests and 
+community services  
+  
+a. Support Individuals to  sustain  significant  relationships,  including  with 
+family carers  
+b. Encourage and support Individuals to participate in their community and 
+to use community resources and facilities  
+c. Support Individuals to develop confidence in their own ability to engage 
+with  hobbies/interests  and  to  access  and  contribute  to  their  wider 
+community, e.g., employment, volunteering  
+d. Support Individuals to communicate and engage positively with others in 
+a  way  which  is  appropriate  to  their  personal  preferences,  lifestyle  and 
+needs  
+e. Support Individuals to  identify  and  report  hate  crime  and  to  develop 
+approaches to minimise the impact 
+ 
+3.4.4 Support Individuals to improve their health and wellbeing  
+  
+a. Support Individuals to maintain their health and personal hygiene  
+b. Promote healthy eating and hydration with Individuals 
+c. Support Individuals to access dentists, opticians, chiropodists, and other 
+healthcare services  
+d. Support Individuals   to   comply   with   medication   regimes,   including 
+supporting self-administration and use of over-the-counter medications in 
+accordance with agreed Service Provider protocols developed to adhere 
+to CQC guidance 
+e. Support Individuals  to  utilise  assistive  technology  such  as  Telecare  to 
+improve their health and wellbeing where the use of such technology is 
+deemed    appropriate   e.g.,   medication    prompting,   falls    detection, 
+prompting for food and fluid intake 
+f. Encourage Individuals to use self-care programmes for long term health 
+conditions  
+g. Support Individuals to make informed decisions about the management 
+of their care and treatment using appropriate information, including risks 
+and benefits  
+h. Support the early diagnosis and treatment of mental health needs, such 
+as dementia  
+i. Support Individuals to alleviate loneliness and isolation  
+j. Ensure Individuals with  learning  disabilities/autism  who  develop  mental 
+health needs are supported to access generic mental health services with 
+access to specialist support if needed  
+k. Make reasonable adjustments as part of the Equality Act and in relation 
+to delivering health care via health action plans, communication passports 
+and assistive technology.  
+l. Ensure Care Workers recognise the importance of risk assessment and 
+the concepts of hazard, risk, and control measures  
+m. Ensure  Care  Workers  know  where  to  report  their  concerns  should 
+Individual circumstances  change  in  a  way  that  may  require  a  risk 
+assessment  review  and  note  this  in  the  care  records  kept  in  the 
+Individual's home  
+n. Support Individuals and work with families to promote their understanding 
+of key hazards and control measures. 
+o. Support Individuals to meet their spiritual and faith-based needs  
+ 
+
+8 
+ 
+3.5. Types of care and support tasks  
+  
+The Service required will be set out in the Individuals Person-Centred Care and 
+Support Plan or via an initial telephone referral for Short Term Care at Home 
+Service. Therefore, the following list of types of care and support tasks required 
+is not intended to be exhaustive or needed in all cases and should not preclude 
+creative  solutions  which may  better  suit  an  individual  where  it  is  part of  their 
+agreed Care and Support Plan. Such requirements that the Service Provider 
+must provide may include:  
+ 
+3.5.1 Support Individual's to improve their health and wellbeing  
+ 
+Personal care and support is defined by the CQC as meaning physical 
+assistance given to an Individual and could be in connection to the following 
+types of tasks:  
+ 
+a. Direct assistance with or regular encouragement to perform tasks of 
+daily living  
+b. P
