@@ -1,3 +1,42 @@
+
+// ── Inject import page HTML on first load ──
+function buildImportPage() {
+  var el = document.getElementById('page-tenders-import');
+  if (!el || el.innerHTML.trim()) return; // already built
+  el.innerHTML = [
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:1.5rem;flex-wrap:wrap;">',
+      '<div>',
+        '<h2 style="font-size:1.3rem;font-weight:700;margin-bottom:4px;">Tender Import</h2>',
+        '<p style="color:var(--text-muted);font-size:0.875rem;">Auto-imported from Contracts Finder — review and approve before going live.</p>',
+      '</div>',
+      '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">',
+        '<button onclick="runManualImport()" id="ti-import-btn" style="background:var(--navy);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.84rem;">⬇ Import Now</button>',
+        '<span id="ti-import-status" style="font-size:0.8rem;color:var(--text-muted);"></span>',
+      '</div>',
+    '</div>',
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem;">',
+      '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Pending</div><div style="font-size:1.6rem;font-weight:700;color:var(--navy);" id="ti-count-pending">—</div></div>',
+      '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Approved</div><div style="font-size:1.6rem;font-weight:700;color:#166534;" id="ti-count-live">—</div></div>',
+      '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Rejected</div><div style="font-size:1.6rem;font-weight:700;color:#dc2626;" id="ti-count-rejected">—</div></div>',
+      '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Total</div><div style="font-size:1.6rem;font-weight:700;color:var(--navy);" id="ti-count-total">—</div></div>',
+    '</div>',
+    '<div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center;">',
+      '<button onclick="tiSetFilter('pending_review')" class="ti-tab active" id="ti-tab-pending">Pending</button>',
+      '<button onclick="tiSetFilter('live')" class="ti-tab" id="ti-tab-live">Approved</button>',
+      '<button onclick="tiSetFilter('rejected')" class="ti-tab" id="ti-tab-rejected">Rejected</button>',
+      '<button onclick="tiSetFilter('all')" class="ti-tab" id="ti-tab-all">All</button>',
+      '<input type="text" id="ti-search" placeholder="Search..." oninput="tiRender()" style="margin-left:auto;padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;width:170px;">',
+      '<select id="ti-cat-filter" onchange="tiRender()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;background:#fff;">',
+        '<option value="">All categories</option>',
+        '<option value="care">Care</option>',
+        '<option value="commercial">Commercial</option>',
+      '</select>',
+    '</div>',
+    '<div id="ti-list" style="display:flex;flex-direction:column;gap:10px;"></div>',
+    '<div id="ti-empty" style="display:none;text-align:center;padding:3rem;color:var(--text-muted);font-size:0.9rem;">No tenders yet. Click <strong>Import Now</strong> to fetch from Contracts Finder.</div>'
+  ].join('');
+}
+
 // ── Tender Import Panel ──
 var tiAllTenders = [];
 var tiCurrentFilter = 'pending_review';
@@ -12,6 +51,7 @@ async function sbFetch(path, opts) {
 }
 
 async function loadImportedTenders() {
+  buildImportPage();
   try {
     var res = await sbFetch('/rest/v1/tenders?source=eq.contracts_finder&select=*&order=created_at.desc&limit=200');
     var data = await res.json();
