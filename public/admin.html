@@ -202,6 +202,7 @@ tr:hover td{background:#fafafa}
 .cana-upload-btn{display:inline-flex;align-items:center;gap:6px;background:#F4F6F9;border:1.5px solid rgba(11,25,41,0.12);border-radius:8px;padding:7px 14px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:#6B8FA3;cursor:pointer;transition:all 0.2s;margin-top:6px}
 .cana-upload-btn:hover{border-color:#00C9E0;color:#0099AA}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 </head>
 <body>
 
@@ -1681,17 +1682,20 @@ document.addEventListener('DOMContentLoaded', function() {
     statusEl.textContent = '⏳ Reading document and extracting fields...';
 
     try {
-      var base64 = await new Promise(function(resolve, reject) {
-        var reader = new FileReader();
-        reader.onload = function(){ resolve(reader.result.split(',')[1]); };
-        reader.onerror = reject;
-        reader.readAsDataURL(sqSelectedFile);
-      });
+      // Extract text from Word doc using mammoth.js (avoids Claude PDF-only restriction)
+      statusEl.textContent = '⏳ Reading Word document...';
+      var arrayBuffer = await sqSelectedFile.arrayBuffer();
+      var mammothResult = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+      var docText = mammothResult.value;
+      if (!docText || docText.trim().length < 50) {
+        throw new Error('Could not read document text. Make sure it is a valid .docx file.');
+      }
 
+      statusEl.textContent = '⏳ Extracting SQ fields with AI...';
       var res = await fetch('/.netlify/functions/extract-sq', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tenderId: tenderId, base64: base64, fileName: sqSelectedFile.name })
+        body: JSON.stringify({ tenderId: tenderId, docText: docText, fileName: sqSelectedFile.name })
       });
 
       var data = await res.json();
