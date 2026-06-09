@@ -504,13 +504,14 @@ function renderCanaPanels() {
     if (!live.length) {
       liveList.innerHTML = '<div style="padding:12px;text-align:center;font-size:0.82rem;color:var(--text-light);">No live tenders yet</div>';
     } else {
-      liveList.innerHTML = live.map(function(t) {
-        return '<div data-tid="' + t.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;margin-bottom:2px;" class="cana-panel-row">' +
+      liveList.innerHTML = live.map(function(t, i) {
+        return '<div data-tid="' + t.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;margin-bottom:2px;" class="cana-panel-row">' +
+          '<span style="font-size:0.75rem;font-weight:700;color:#2d6a4f;min-width:18px;">' + (i+1) + ')</span>' +
           '<div style="flex:1;min-width:0;">' +
             '<div style="font-size:0.85rem;font-weight:600;color:#1a7a3f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + t.title + '</div>' +
             '<div style="font-size:0.73rem;color:#2d6a4f;">' + (t.org||'') + '</div>' +
           '</div>' +
-          '<span style="font-size:0.7rem;font-weight:700;color:#1a7a3f;background:#e8f7ee;padding:2px 8px;border-radius:999px;margin-left:8px;flex-shrink:0;">● Live</span>' +
+          '<span style="font-size:0.7rem;font-weight:700;color:#1a7a3f;background:#e8f7ee;padding:2px 8px;border-radius:999px;flex-shrink:0;">● Live</span>' +
         '</div>';
       }).join('');
     }
@@ -522,11 +523,12 @@ function renderCanaPanels() {
     if (!pending.length) {
       pendingList.innerHTML = '<div style="padding:12px;text-align:center;font-size:0.82rem;color:var(--text-light);">All tenders are live ✓</div>';
     } else {
-      pendingList.innerHTML = pending.map(function(item) {
+      pendingList.innerHTML = pending.map(function(item, i) {
         var missingBadges = item.missing.map(function(m) {
           return '<span style="font-size:0.68rem;font-weight:700;background:rgba(229,62,62,0.1);color:#c53030;padding:1px 6px;border-radius:4px;margin-left:3px;">' + m + '</span>';
         }).join('');
-        return '<div data-tid="' + item.tender.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;margin-bottom:2px;" class="cana-panel-row pending">' +
+        return '<div data-tid="' + item.tender.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;cursor:pointer;transition:background 0.15s;margin-bottom:2px;" class="cana-panel-row pending">' +
+          '<span style="font-size:0.75rem;font-weight:700;color:#92400e;min-width:18px;">' + (i+1) + ')</span>' +
           '<div style="flex:1;min-width:0;">' +
             '<div style="font-size:0.85rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + item.tender.title + '</div>' +
             '<div style="font-size:0.73rem;color:var(--text-light);margin-top:2px;">Missing:' + missingBadges + '</div>' +
