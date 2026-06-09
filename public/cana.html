@@ -153,9 +153,11 @@
 <div class="steps-bar">
   <div class="step active" id="step1"><div class="step-num">1</div> Your details</div>
   <div class="step-divider"></div>
-  <div class="step" id="step2"><div class="step-num">2</div> Preview responses</div>
+  <div class="step" id="step2"><div class="step-num">2</div> Company lookup</div>
   <div class="step-divider"></div>
-  <div class="step" id="step3"><div class="step-num">3</div> Unlock full bid</div>
+  <div class="step" id="step3"><div class="step-num">3</div> Preview responses</div>
+  <div class="step-divider"></div>
+  <div class="step" id="step4"><div class="step-num">4</div> Unlock full bid</div>
 </div>
 
 <div class="container">
@@ -247,7 +249,56 @@
 
   </div>
 
-  <!-- STEP 2: LOADING -->
+  <!-- STEP 2: COMPANY LOOKUP -->
+  <div class="state" id="state-ch">
+    <div class="section" style="max-width:520px;margin:0 auto;">
+      <div style="text-align:center;margin-bottom:2rem;">
+        <div style="font-size:2.5rem;margin-bottom:0.75rem;">🏢</div>
+        <div style="display:inline-flex;align-items:center;gap:7px;background:rgba(0,201,224,0.08);border:1px solid rgba(0,201,224,0.2);border-radius:999px;padding:5px 14px;font-size:0.74rem;color:#0099AA;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:1rem;">✦ One step away</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.75rem;margin-bottom:0.75rem;">Let's find your company</h2>
+        <p style="font-size:0.88rem;color:var(--muted);line-height:1.7;max-width:420px;margin:0 auto;">Enter your Companies House number below. Cana will pull your registered details automatically — no manual typing needed. This fills in the majority of your Selection Questionnaire instantly.</p>
+      </div>
+
+      <div id="ch-error-cana" style="display:none;background:rgba(229,62,62,0.08);border:1px solid rgba(229,62,62,0.2);border-radius:9px;padding:12px 16px;font-size:0.87rem;color:#c53030;margin-bottom:1.25rem;"></div>
+
+      <div style="display:flex;gap:0.75rem;margin-bottom:1rem;">
+        <input type="text" id="ch-num-cana" placeholder="e.g. 12345678" maxlength="8"
+          style="flex:1;padding:13px 16px;border:1.5px solid var(--border);border-radius:9px;font-size:1rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;"
+          onkeydown="if(event.key==='Enter')canaChLookup()"
+          onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor=''">
+        <button onclick="canaChLookup()" id="ch-lookup-btn-cana"
+          style="background:var(--accent);color:#fff;border:none;border-radius:9px;padding:13px 22px;font-size:0.95rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;transition:opacity 0.2s;">
+          Look up →
+        </button>
+      </div>
+
+      <p style="font-size:0.78rem;color:var(--muted);line-height:1.6;margin-bottom:1.5rem;">Your 8-digit company number is on your Companies House certificate or at <a href="https://find-and-update.company-information.service.gov.uk" target="_blank" style="color:var(--accent);">find-and-update.company-information.service.gov.uk</a></p>
+
+      <!-- Result card -->
+      <div id="ch-result-cana" style="display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+          <div style="width:32px;height:32px;background:rgba(56,161,105,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;">✅</div>
+          <div>
+            <div style="font-size:1rem;font-weight:700;color:#0B1929;" id="ch-result-name-cana"></div>
+            <div style="font-size:0.78rem;color:#16a34a;" id="ch-result-status-cana"></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;" id="ch-result-grid-cana"></div>
+      </div>
+
+      <!-- Continue -->
+      <button id="ch-continue-btn-cana" onclick="canaChContinue()" style="display:none;width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.75rem;">
+        Save &amp; generate my responses →
+      </button>
+      <div style="text-align:center;">
+        <button onclick="canaChSkip()" style="background:none;border:none;color:var(--muted);font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;">
+          Skip for now — I'll add my company number later
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: LOADING -->
   <div class="state" id="state-loading">
     <div class="section">
       <div class="loading-state">
@@ -316,7 +367,7 @@
   }
 
   async function verifyAndUnlock(sid) {
-    setStep(3);
+    setStep(4);
     showState('loading');
     document.querySelector('.loading-state h3').textContent = 'Verifying your payment...';
     document.querySelector('.loading-state p').textContent = 'Please wait while we confirm your payment with Stripe.';
@@ -408,7 +459,7 @@
   }
 
   function setStep(n) {
-    [1,2,3].forEach(i => {
+    [1,2,3,4].forEach(i => {
       const el = document.getElementById('step'+i);
       if (!el) return;
       el.classList.remove('active','done');
@@ -444,13 +495,83 @@
     }
     errEl.style.display = 'none';
 
+    // Show CH lookup step before generating
     setStep(2);
-    showState('loading');
+    showState('ch');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    window._companyDetails = { name, founded, staff, cqc, services, regions, experience, achievements, policies, accreditations, kpis, email };
+  }
 
-    const companyDetails = { name, founded, staff, cqc, services, regions, experience, achievements, policies, accreditations, kpis, email };
-    window._companyDetails = companyDetails;
-    await runGeneration(companyDetails);
+  // CH lookup functions
+  async function canaChLookup() {
+    var errEl = document.getElementById('ch-error-cana');
+    errEl.style.display = 'none';
+    var num = document.getElementById('ch-num-cana').value.trim().replace(/\s/g,'');
+    if (!num) { errEl.textContent = 'Please enter your Companies House number'; errEl.style.display = 'block'; return; }
+    var btn = document.getElementById('ch-lookup-btn-cana');
+    btn.disabled = true; btn.textContent = 'Looking up...';
+    try {
+      var res = await fetch('/.netlify/functions/companies-house-lookup', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ companyNumber: num })
+      });
+      var data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || 'Not found');
+      window._chData = data;
+
+      document.getElementById('ch-result-name-cana').textContent = data.company_name;
+      document.getElementById('ch-result-status-cana').textContent =
+        '● ' + (data.company_status||'') + (data.date_of_creation ? ' · Inc. ' + data.date_of_creation.split('-')[0] : '');
+
+      var fields = [
+        { label:'Company number', value: data.company_number },
+        { label:'Registered address', value: data.registered_address },
+        { label:'Type', value: (data.company_type||'').replace(/-/g,' ') },
+        { label:'Directors', value: data.officers && data.officers.length ? data.officers[0].name : '—' }
+      ];
+      document.getElementById('ch-result-grid-cana').innerHTML = fields.map(function(f){
+        return '<div style="background:#fff;border-radius:7px;padding:8px 10px;">' +
+          '<div style="font-size:0.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">'+f.label+'</div>' +
+          '<div style="font-size:0.82rem;font-weight:600;color:#166534;">'+(f.value||'—')+'</div></div>';
+      }).join('');
+
+      document.getElementById('ch-result-cana').style.display = 'block';
+      document.getElementById('ch-continue-btn-cana').style.display = 'block';
+
+    } catch(err) {
+      errEl.textContent = err.message || 'Could not find company. Check the number and try again.';
+      errEl.style.display = 'block';
+    }
+    btn.disabled = false; btn.textContent = 'Look up →';
+  }
+
+  async function canaChContinue() {
+    var btn = document.getElementById('ch-continue-btn-cana');
+    btn.disabled = true; btn.textContent = 'Saving...';
+    // Save CH data to profile if logged in
+    try {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && window._chData) {
+        await supabaseClient.from('company_profiles').upsert({
+          user_id: session.user.id,
+          company_name: window._chData.company_name,
+          company_number: window._chData.company_number,
+          registered_address: window._chData.registered_address,
+          ch_data: JSON.stringify(window._chData),
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' });
+      }
+    } catch(e) { console.log('Profile save non-fatal:', e.message); }
+    setStep(3);
+    showState('loading');
+    await runGeneration(window._companyDetails);
+  }
+
+  async function canaChSkip() {
+    window._chData = null;
+    setStep(3);
+    showState('loading');
+    await runGeneration(window._companyDetails);
   }
 
   function populateSqStep(sqData, co) {
