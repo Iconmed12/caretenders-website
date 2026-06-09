@@ -428,23 +428,92 @@
     var co = window._companyDetails || {};
     var td = window._tenderData;
 
-    // Set tender title
     try {
       var tEl = document.getElementById('sq-doc-tender-title');
       if (tEl && td) tEl.textContent = td.title || 'Selection Questionnaire';
     } catch(e) {}
 
-    // Use what's already in memory — no fetches
-    var sqData = td && td.sq_data;
-    var htmlPreview = sqData && sqData.htmlPreview;
+    var companyName = ch.company_name || co.name || '—';
 
-    if (htmlPreview) {
-      renderRealDocument(htmlPreview, ch, co, sqData);
-    } else if (sqData) {
-      renderFromSqData(sqData, ch, co);
-    } else {
-      renderFallbackSq(ch, co);
+    var h = '';
+
+    // ── 1. COMPANY NAME — visible, auto-filled ──
+    h += '<div style="margin-bottom:1.25rem;">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;padding-bottom:0.5rem;border-bottom:2px solid #00C9E0;">';
+    h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;">Supplier Name</div>';
+    h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ Auto-filled</span>';
+    h += '</div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
+    h += '<tr style="background:#fafafa;"><td style="padding:8px 10px;font-weight:600;color:#374151;width:45%;border-bottom:1px solid #f3f4f6;">Supplier name</td>';
+    h += '<td style="padding:8px 10px;color:#166534;font-weight:500;border-bottom:1px solid #f3f4f6;">✓ ' + escHtml(companyName) + '</td></tr>';
+    h += '<tr><td style="padding:8px 10px;font-weight:600;color:#374151;">Single supplier</td>';
+    h += '<td style="padding:8px 10px;color:#166534;font-weight:500;">✓ Yes</td></tr>';
+    h += '</table></div>';
+
+    // ── 2. GDPR — visible, pre-answered ──
+    var gdprLines = [
+      'Yes. We confirm that we have in place, and will maintain by the date of contract award, the human and technical resources to perform the contract in full compliance with the UK General Data Protection Regulation (UK GDPR) and to ensure the protection of the rights of all data subjects.',
+      '',
+      'Our technical and organisational measures include:',
+      '',
+      '\u2022 Confidentiality, integrity and resilience: All personal data is held on encrypted, access-controlled systems with regular security patching and monitoring. Access is restricted on a strict need-to-know basis.',
+      '',
+      '\u2022 Data subject rights: We have documented procedures to respond to subject access requests, right to erasure, rectification and portability within statutory timeframes.',
+      '',
+      '\u2022 Consent management: Where processing is consent-based, we obtain active, informed consent. All consents are recorded with timestamps and are fully auditable.',
+      '',
+      '\u2022 International transfers: We do not transfer personal data outside the UK unless appropriate safeguards are in place.',
+      '',
+      '\u2022 Records of processing: We maintain a comprehensive Record of Processing Activities (ROPA) reviewed quarterly.',
+      '',
+      '\u2022 Testing and evaluation: We conduct annual data protection impact assessments and periodic reviews of all technical and organisational measures.'
+    ];
+    var gdprAnswer = gdprLines.join('\n');
+
+    h += '<div style="margin-bottom:1.25rem;">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;padding-bottom:0.5rem;border-bottom:2px solid #00C9E0;">';
+    h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;">Data Protection &amp; GDPR</div>';
+    h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ Pre-answered</span>';
+    h += '</div>';
+    h += '<div style="background:#fafafa;border-radius:8px;padding:12px;font-size:0.82rem;color:#166534;line-height:1.7;white-space:pre-line;">' + gdprAnswer + '</div>';
+    h += '</div>';
+
+    // ── 3. ALL OTHER SECTIONS — locked ──
+    var lockedSections = [];
+    if (td && td.sq_data && td.sq_data.sections) {
+      td.sq_data.sections.forEach(function(s) {
+        var hasCompany = (s.fields||[]).some(function(f){
+          return ['company_name','company_number','sme_status'].indexOf(f.profile_key) !== -1;
+        });
+        var isGdpr = (s.fields||[]).some(function(f){
+          return (f.question||'').toLowerCase().includes('gdpr') || (f.question||'').toLowerCase().includes('data protection');
+        });
+        var isDecl = (s.fields||[]).every(function(f){ return f.field_type === 'client_confirm'; });
+        if (!hasCompany && !isGdpr && !isDecl) {
+          lockedSections.push(s.section + ': ' + s.title);
+        }
+      });
     }
+    if (!lockedSections.length) {
+      lockedSections = ['Part 2: Financial Standing', 'Part 3: Technical Capability', 'Part 4: Health & Safety', 'Part 5: Insurance & Compliance', 'Part 6: Organisational Standards'];
+    }
+
+    lockedSections.forEach(function(title) {
+      h += '<div style="margin-bottom:1rem;position:relative;">';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid #e5e7eb;">';
+      h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;">' + escHtml(title) + '</div>';
+      h += '<span style="font-size:0.69rem;font-weight:700;background:#f3f4f6;color:#9ca3af;padding:2px 9px;border-radius:999px;">🔒 Completed in full report</span>';
+      h += '</div>';
+      h += '<div style="position:relative;border-radius:6px;overflow:hidden;">';
+      h += '<div style="filter:blur(4px);pointer-events:none;user-select:none;opacity:0.25;background:#fafafa;padding:10px;">';
+      for (var i=0;i<3;i++) h += '<div style="height:10px;background:#e5e7eb;border-radius:4px;margin-bottom:7px;width:' + [80,60,70][i] + '%;"></div>';
+      h += '</div>';
+      h += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;">';
+      h += '<span style="font-size:1rem;">🔒</span><span style="font-size:0.76rem;font-weight:700;color:#6b7280;">Completed after payment</span>';
+      h += '</div></div></div>';
+    });
+
+    el.innerHTML = h;
   }
 
 
