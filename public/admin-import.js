@@ -1,3 +1,16 @@
+// ── Tender Import globals ──
+var tiAllTenders = [];
+var tiCurrentFilter = 'pending_review';
+var SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+var SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
+
+async function sbFetch(path, opts) {
+  var res = await fetch(SUPABASE_URL + path, Object.assign({
+    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' }
+  }, opts || {}));
+  return res;
+}
+
 
 async function loadImportedTenders() {
   try {
