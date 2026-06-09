@@ -153,9 +153,11 @@
 <div class="steps-bar">
   <div class="step active" id="step1"><div class="step-num">1</div> Your details</div>
   <div class="step-divider"></div>
-  <div class="step" id="step2"><div class="step-num">2</div> Preview responses</div>
+  <div class="step" id="step2"><div class="step-num">2</div> Selection Questionnaire</div>
   <div class="step-divider"></div>
-  <div class="step" id="step3"><div class="step-num">3</div> Unlock full bid</div>
+  <div class="step" id="step3"><div class="step-num">3</div> Preview responses</div>
+  <div class="step-divider"></div>
+  <div class="step" id="step4"><div class="step-num">4</div> Unlock full bid</div>
 </div>
 
 <div class="container">
@@ -247,7 +249,44 @@
 
   </div>
 
-  <!-- STEP 2: LOADING -->
+  <!-- STEP 2: SELECTION QUESTIONNAIRE -->
+  <div class="state" id="state-sq">
+    <div class="section">
+      <div style="text-align:center;margin-bottom:2rem;">
+        <div style="font-size:2.5rem;margin-bottom:0.75rem;">📋</div>
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.5rem;margin-bottom:0.5rem;">Your Selection Questionnaire</h2>
+        <p style="font-size:0.88rem;color:var(--muted);max-width:480px;margin:0 auto;line-height:1.7;">Cana has pre-filled your SQ using the details you provided. Confirm the declarations below and we'll include a completed SQ with your responses.</p>
+      </div>
+
+      <!-- AUTO-FILLED SUMMARY -->
+      <div id="sq-autofill-summary" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+        <div style="font-size:0.82rem;font-weight:700;color:#166534;margin-bottom:0.75rem;">✅ Auto-filled from your company details</div>
+        <div id="sq-autofill-fields" style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:0.82rem;"></div>
+      </div>
+
+      <!-- DECLARATIONS -->
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:1.25rem;margin-bottom:1.5rem;">
+        <div style="font-size:0.82rem;font-weight:700;color:#92400e;margin-bottom:0.75rem;">⚠️ Declarations — you must personally confirm each one</div>
+        <div id="sq-declarations"></div>
+        <div id="sq-decl-error" style="display:none;color:#c53030;font-size:0.8rem;margin-top:0.5rem;font-weight:600;">Please confirm all declarations before continuing</div>
+      </div>
+
+      <!-- WHAT AI WILL DRAFT -->
+      <div style="background:rgba(124,58,237,0.04);border:1px solid rgba(124,58,237,0.15);border-radius:12px;padding:1.25rem;margin-bottom:2rem;">
+        <div style="font-size:0.82rem;font-weight:700;color:#5b21b6;margin-bottom:0.5rem;">🤖 AI will draft for you</div>
+        <div style="font-size:0.82rem;color:#6b7280;line-height:1.6;">Contract examples, technical capability statements, GDPR compliance details and social value commitments will be drafted using your company information and included in your SQ document.</div>
+      </div>
+
+      <button class="generate-btn" id="sq-continue-btn" onclick="confirmSqAndGenerate()">
+        ⚡ Generate SQ &amp; responses
+      </button>
+      <div style="text-align:center;margin-top:0.75rem;">
+        <button onclick="skipSqAndGenerate()" style="background:none;border:none;color:var(--muted);font-size:0.8rem;cursor:pointer;font-family:'DM Sans',sans-serif;text-decoration:underline;">Skip SQ — generate responses only</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3: LOADING -->
   <div class="state" id="state-loading">
     <div class="section">
       <div class="loading-state">
@@ -377,6 +416,7 @@
       const res = await fetch('/.netlify/functions/get-tenders');
       const data = await res.json();
       tenderData = data.find(t => t.id === tenderId);
+      window._tenderData = tenderData;
 
       if (!tenderData) {
         document.getElementById('tender-title').textContent = 'Tender not found';
@@ -407,8 +447,9 @@
   }
 
   function setStep(n) {
-    [1,2,3].forEach(i => {
+    [1,2,3,4].forEach(i => {
       const el = document.getElementById('step'+i);
+      if (!el) return;
       el.classList.remove('active','done');
       if (i < n) el.classList.add('done');
       if (i === n) el.classList.add('active');
@@ -442,11 +483,92 @@
     }
     errEl.style.display = 'none';
 
-    setStep(2);
-    showState('loading');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
     const companyDetails = { name, founded, staff, cqc, services, regions, experience, achievements, policies, accreditations, kpis, email };
+    window._companyDetails = companyDetails;
+
+    // Check if tender has an SQ document uploaded
+    var tender = window._tenderData;
+    if (tender && tender.sq_data && tender.sq_data.sections && tender.sq_data.sections.length > 0) {
+      // Show SQ step first
+      setStep(2);
+      showState('sq');
+      populateSqStep(tender.sq_data, companyDetails);
+    } else {
+      // No SQ for this tender — skip straight to generation
+      setStep(3);
+      showState('loading');
+      runGeneration(companyDetails);
+    }
+  }
+
+  function populateSqStep(sqData, co) {
+    // Auto-fill summary
+    var autoFields = [
+      { label: 'Company name',   value: co.name },
+      { label: 'CQC status',     value: co.cqc },
+      { label: 'Staff',          value: co.staff },
+      { label: 'Services',       value: co.services ? co.services.substring(0,60)+'...' : '' },
+      { label: 'Regions',        value: co.regions },
+      { label: 'Founded',        value: co.founded }
+    ].filter(function(f){ return f.value; });
+
+    document.getElementById('sq-autofill-fields').innerHTML = autoFields.map(function(f) {
+      return '<div style="background:#fff;border-radius:6px;padding:6px 10px;">' +
+        '<div style="font-size:0.7rem;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;">' + f.label + '</div>' +
+        '<div style="font-size:0.82rem;font-weight:600;color:#166534;">' + f.value + '</div>' +
+      '</div>';
+    }).join('');
+
+    // Extract declarations from sq_data
+    var declarations = [];
+    (sqData.sections || []).forEach(function(s) {
+      (s.fields || []).forEach(function(f) {
+        if (f.field_type === 'client_confirm') declarations.push(f);
+      });
+    });
+
+    // Default declarations if none extracted
+    if (!declarations.length) {
+      declarations = [
+        { id:'d1', question:'I confirm that our organisation is not on the debarment list and has not been subject to any mandatory or discretionary exclusion grounds.' },
+        { id:'d2', question:'I confirm that our organisation has no unspent criminal convictions relevant to this procurement.' },
+        { id:'d3', question:'I confirm that all information provided in this submission is accurate and complete to the best of my knowledge.' },
+        { id:'d4', question:'I confirm that our organisation has not been in administration, receivership or subject to insolvency proceedings in the last 3 years.' }
+      ];
+    }
+
+    document.getElementById('sq-declarations').innerHTML = declarations.map(function(d) {
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid #fde68a;">' +
+        '<input type="checkbox" id="decl-' + d.id + '" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;width:16px;height:16px;">' +
+        '<label for="decl-' + d.id + '" style="font-size:0.83rem;color:#78350f;line-height:1.6;cursor:pointer;">' + d.question + '</label>' +
+      '</div>';
+    }).join('');
+  }
+
+  async function confirmSqAndGenerate() {
+    // Check all declarations ticked
+    var declInputs = document.querySelectorAll('#sq-declarations input[type=checkbox]');
+    var allChecked = Array.from(declInputs).every(function(cb){ return cb.checked; });
+    if (!allChecked) {
+      document.getElementById('sq-decl-error').style.display = 'block';
+      return;
+    }
+    document.getElementById('sq-decl-error').style.display = 'none';
+    window._includeSq = true;
+    setStep(3);
+    showState('loading');
+    runGeneration(window._companyDetails);
+  }
+
+  function skipSqAndGenerate() {
+    window._includeSq = false;
+    setStep(3);
+    showState('loading');
+    runGeneration(window._companyDetails);
+  }
+
+  async function runGeneration(companyDetails) {
 
     async function callOne(questionIndex) {
       const res = await fetch('/.netlify/functions/stream-response', {
