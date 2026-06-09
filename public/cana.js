@@ -240,7 +240,7 @@
     btn.disabled = false; btn.textContent = 'Next step →';
   }
 
-  function canaChSkip() {
+  async function canaChSkip() {
     window._chData = null;
     setStep(3);
     showState('sq');
