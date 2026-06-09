@@ -14,20 +14,22 @@ exports.handler = async (event) => {
     const sbKey = process.env.SUPABASE_ANON_KEY;
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
-    // Truncate if very long — Claude context limit
-    var sqText = docText.length > 12000 ? docText.substring(0, 12000) + '\n...[document truncated]' : docText;
+    // Keep first 10000 chars — enough to capture all question types
+    var sqText = docText.length > 10000 ? docText.substring(0, 10000) : docText;
 
-    var prompt = 'Analyse this Selection Questionnaire (SQ) document text carefully. Extract every question and field that a bidder needs to complete.\n\n' +
-      'Classify each field as:\n' +
-      '- "auto_fill" — can be filled from company registration data (company name, address, company number, VAT, directors, PSC, CQC number/rating, insurance confirmations yes/no, SME status, incorporation date, trading name, website)\n' +
-      '- "ai_draft" — needs a written response AI can draft (contract examples, technical capability descriptions, GDPR policy confirmation details, experience narratives, social value statements)\n' +
-      '- "client_confirm" — must be personally confirmed by the client (exclusion declarations, fraud/bribery statements, debarment confirmation, embargo history, criminal conviction declarations)\n\n' +
-      'For auto_fill fields, include a "profile_key" from this list: company_name, company_number, registered_address, vat_number, company_type, founded_year, cqc_status, cqc_provider_id, contact_name, contact_email, sme_status, directors, psc_details, company_status, sic_codes, regulated_activities, services, regions, experience, accreditations, insurance_employers, insurance_public, insurance_professional, gdpr_policy, ico_number\n\n' +
-      'Return ONLY valid JSON, no other text:\n' +
-      '{"sq_title":"...","commissioner":"...","sections":[{"section":"Part 1","title":"...","fields":[{"id":"1.1a","question":"...","field_type":"auto_fill","profile_key":"company_name","hint":"..."}]}]}\n\n' +
-      'SQ DOCUMENT TEXT:\n' + sqText;
+    var prompt = 'You are analysing a UK public sector Selection Questionnaire (SQ).\n\n' +
+      'Extract every field or question a bidder must complete. For each field classify it as:\n' +
+      '- "auto_fill" — company name, address, company number, VAT, directors, PSC, CQC details, insurance yes/no, SME status, incorporation date\n' +
+      '- "ai_draft" — written responses: contract examples, technical capability, GDPR details, experience narratives\n' +
+      '- "client_confirm" — personal declarations: exclusions, fraud, bribery, debarment, criminal convictions\n\n' +
+      'For auto_fill fields use profile_key from: company_name, company_number, registered_address, vat_number, company_type, founded_year, cqc_status, cqc_provider_id, contact_name, sme_status, directors, psc_details, services, experience, accreditations, insurance_employers, insurance_public, gdpr_policy, ico_number\n\n' +
+      'Return ONLY a JSON object. Start immediately with { — no preamble, no markdown, no backticks.\n' +
+      'Use this exact structure with double quotes only:\n' +
+      '{"sq_title":"...","commissioner":"...","sections":[{"section":"Part 1","title":"Supplier Information","fields":[{"id":"1.1a","question":"Full name","field_type":"auto_fill","profile_key":"company_name","hint":"From Companies House"}]}]}\n\n' +
+      'Keep field questions SHORT (under 60 chars). Do not include guidance text, only the actual question.\n\n' +
+      'SQ TEXT:\n' + sqText;
 
-    const extractRes = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -36,85 +38,95 @@ exports.handler = async (event) => {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2500,
+        max_tokens: 4000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
 
-    if (!extractRes.ok) {
-      const errText = await extractRes.text();
-      throw new Error('AI extraction failed: ' + errText.substring(0, 300));
-    }
+    if (!res.ok) throw new Error('AI call failed: ' + (await res.text()).substring(0, 200));
 
-    const extractData = await extractRes.json();
-    const rawText = extractData.content && extractData.content[0] ? extractData.content[0].text.trim() : '{}';
-    // Robust JSON extraction — handle Haiku sometimes adding text around JSON
+    const aiData = await res.json();
+    var rawText = aiData.content && aiData.content[0] ? aiData.content[0].text.trim() : '';
+    if (!rawText) throw new Error('AI returned empty response');
+
+    // Clean and repair the JSON
     var clean = rawText.replace(/```json|```/g, '').trim();
 
-    // Extract just the JSON object if there's surrounding text
-    var jsonMatch = clean.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error('AI did not return valid JSON structure');
-    clean = jsonMatch[0];
+    // Extract the JSON object
+    var start = clean.indexOf('{');
+    var end = clean.lastIndexOf('}');
+    if (start === -1) throw new Error('No JSON object found in response');
 
-    // Fix common JSON issues from AI output
+    // If response was truncated, try to close open structures
+    if (end === -1 || end < start) {
+      clean = repairJson(clean.substring(start));
+    } else {
+      clean = clean.substring(start, end + 1);
+    }
+
     // Remove trailing commas before } or ]
     clean = clean.replace(/,(\s*[}\]])/g, '$1');
-    // Fix unescaped quotes inside string values (basic fix)
+
     var parsed;
     try {
       parsed = JSON.parse(clean);
-    } catch(jsonErr) {
-      // Last resort: try to extract what we can
-      throw new Error('JSON parse failed: ' + jsonErr.message + ' — try uploading the SQ again');
+    } catch(e) {
+      // Try repair
+      try {
+        parsed = JSON.parse(repairJson(clean));
+      } catch(e2) {
+        throw new Error('JSON parse failed — the SQ document may be too complex. Try a shorter SQ or contact support. (' + e.message + ')');
+      }
     }
 
     // Count field types
     var totalFields = 0, autoFill = 0, aiDraft = 0, clientConfirm = 0;
-    (parsed.sections || []).forEach(function(section) {
-      (section.fields || []).forEach(function(field) {
+    (parsed.sections || []).forEach(function(s) {
+      (s.fields || []).forEach(function(f) {
         totalFields++;
-        if (field.field_type === 'auto_fill') autoFill++;
-        else if (field.field_type === 'ai_draft') aiDraft++;
+        if (f.field_type === 'auto_fill') autoFill++;
+        else if (f.field_type === 'ai_draft') aiDraft++;
         else clientConfirm++;
       });
     });
+
+    if (totalFields === 0) throw new Error('No fields extracted — check the document is a valid SQ');
 
     var sqData = {
       ...parsed,
       fileName: fileName,
       extractedAt: new Date().toISOString(),
-      totalFields: totalFields,
-      autoFill: autoFill,
-      aiDraft: aiDraft,
-      clientConfirm: clientConfirm
+      totalFields, autoFill, aiDraft, clientConfirm
     };
 
     // Save to Supabase
     var saveRes = await fetch(sbUrl + '/rest/v1/tenders?id=eq.' + tenderId, {
       method: 'PATCH',
-      headers: {
-        apikey: sbKey,
-        Authorization: 'Bearer ' + sbKey,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal'
-      },
+      headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
       body: JSON.stringify({ sq_data: sqData })
     });
+    if (!saveRes.ok) throw new Error('Failed to save: ' + (await saveRes.text()).substring(0, 100));
 
-    if (!saveRes.ok) throw new Error('Failed to save: ' + (await saveRes.text()).substring(0, 200));
-
-    return {
-      statusCode: 200,
-      headers: cors,
-      body: JSON.stringify({
-        success: true,
-        totalFields, autoFill, aiDraft, clientConfirm,
-        sqTitle: parsed.sq_title,
-        commissioner: parsed.commissioner
-      })
-    };
+    return { statusCode: 200, headers: cors, body: JSON.stringify({ success: true, totalFields, autoFill, aiDraft, clientConfirm, sqTitle: parsed.sq_title, commissioner: parsed.commissioner }) };
 
   } catch(err) {
     return { statusCode: 500, headers: cors, body: JSON.stringify({ error: err.message || 'Extraction failed' }) };
   }
 };
+
+function repairJson(str) {
+  // Count unclosed brackets and braces, close them
+  var opens = 0, arrOpens = 0;
+  for (var i = 0; i < str.length; i++) {
+    if (str[i] === '{') opens++;
+    else if (str[i] === '}') opens--;
+    else if (str[i] === '[') arrOpens++;
+    else if (str[i] === ']') arrOpens--;
+  }
+  // Remove trailing comma if present
+  str = str.replace(/,\s*$/, '');
+  // Close open structures
+  while (arrOpens > 0) { str += ']'; arrOpens--; }
+  while (opens > 0)    { str += '}'; opens--; }
+  return str;
+}
