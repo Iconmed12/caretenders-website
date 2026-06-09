@@ -320,6 +320,20 @@ async function confirmSqAndGenerate() {
         sessionStorage.setItem('cana_name', document.getElementById('f-name') ? document.getElementById('f-name').value : '');
         sessionStorage.setItem('cana_session', currentSessionId);
         sessionStorage.setItem('cana_tender_title', tenderData ? tenderData.title : '');
+        // Persist FULL company details across the Stripe redirect (page reload wipes window._companyDetails)
+        var fullCo = Object.assign({}, window._companyDetails || {}, {
+          name:       (document.getElementById('f-name')       || {}).value || (window._companyDetails||{}).name || '',
+          founded:    (document.getElementById('f-founded')    || {}).value || '',
+          staff:      (document.getElementById('f-staff')      || {}).value || '',
+          email:      (document.getElementById('f-email')      || {}).value || '',
+          cqc:        (document.getElementById('f-cqc')        || {}).value || '',
+          services:   (document.getElementById('f-services')   || {}).value || '',
+          regions:    (document.getElementById('f-regions')    || {}).value || '',
+          experience: (document.getElementById('f-experience') || {}).value || '',
+          achievements: (document.getElementById('f-achievements') || {}).value || '',
+          chData: window._chData || {}
+        });
+        localStorage.setItem('cana_company_details', JSON.stringify(fullCo));
       } catch(e) {}
 
       const res = await fetch('/.netlify/functions/cana-checkout', {
