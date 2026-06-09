@@ -338,14 +338,13 @@
       if (tEl && td) tEl.textContent = td.title || 'Selection Questionnaire';
     } catch(e) {}
 
-    // Use stored HTML preview — generated once at upload, instant here
+    // Use what's already in memory — no fetches
     var sqData = td && td.sq_data;
     var htmlPreview = sqData && sqData.htmlPreview;
 
     if (htmlPreview) {
       renderRealDocument(htmlPreview, ch, co, sqData);
-    } else if (sqData && sqData.sections) {
-      // No HTML preview stored yet — re-upload SQ in admin to generate it
+    } else if (sqData) {
       renderFromSqData(sqData, ch, co);
     } else {
       renderFallbackSq(ch, co);
