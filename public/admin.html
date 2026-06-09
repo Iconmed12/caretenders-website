@@ -666,8 +666,10 @@ let nextId = 1;
 
 function doLogin() {
   var p = document.getElementById('loginPass') ? document.getElementById('loginPass').value : '';
-  if (p === 'CareTenders2024!') {
+  var valid = ['CareTenders2024!', 'CanaAdmin2024!', 'Cana2024!'];
+  if (valid.includes(p)) {
     localStorage.setItem('adminLoggedIn', 'true');
+    sessionStorage.setItem('adminLoggedIn', 'true');
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('appScreen').style.display = 'block';
     loadTenders();
@@ -1584,7 +1586,8 @@ function showToast(msg,type){
 
 // Stay logged in across refreshes
 document.addEventListener('DOMContentLoaded', function() {
-  if (localStorage.getItem('adminLoggedIn') === 'true') {
+  var loggedIn = localStorage.getItem('adminLoggedIn') === 'true' || sessionStorage.getItem('adminLoggedIn') === 'true';
+  if (loggedIn) {
     var ls = document.getElementById('loginScreen');
     var as = document.getElementById('appScreen');
     if (ls) ls.style.display = 'none';
