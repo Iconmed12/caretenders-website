@@ -277,15 +277,21 @@
 
 
   async function canaChContinue() {
-    var btn = document.getElementById('ch-continue-btn-cana');
-    btn.disabled = true;
+    try {
+      var btn = document.getElementById('ch-continue-btn-cana');
+      if (btn) btn.disabled = true;
 
-    // Show SQ immediately — no waiting
-    setStep(3);
-    populateSqStep();
-    showState('sq');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    btn.disabled = false; btn.textContent = 'Next step →';
+      setStep(3);
+      showState('sq');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      populateSqStep();
+
+      if (btn) { btn.disabled = false; btn.textContent = 'Next step →'; }
+    } catch(err) {
+      console.error('canaChContinue error:', err.message);
+      // Force show SQ anyway
+      try { setStep(3); showState('sq'); } catch(e2) {}
+    }
 
     // Save profile in background — fire and forget
     if (window.supabase && window._chData) {
