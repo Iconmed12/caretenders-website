@@ -64,6 +64,9 @@ function autoDetectCategory(text) {
 }
 
 function showPage(page, btn) {
+  if (page === 'tenders-import' && typeof loadImportedTenders === 'function') {
+    setTimeout(loadImportedTenders, 100);
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
