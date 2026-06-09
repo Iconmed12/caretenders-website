@@ -1134,8 +1134,7 @@ function populateCanaTenderSelect(){
   allTenders.filter(function(t){return t.status!=='draft';}).forEach(function(t){
     var opt=document.createElement('option');
     opt.value=t.id;
-    var hasDocs=t.cana_docs&&((t.cana_docs.quality&&t.cana_docs.quality.length)||(t.cana_docs.spec&&t.cana_docs.spec.length)||(t.cana_docs.scoring&&t.cana_docs.scoring.length));
-    opt.textContent=t.title+(hasDocs?' (docs ready)':'');
+    opt.textContent=t.title+(t.org?' — '+t.org:'');
     sel.appendChild(opt);
   });
   if(cur) sel.value=cur;
