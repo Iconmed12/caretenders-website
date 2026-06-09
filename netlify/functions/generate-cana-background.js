@@ -165,7 +165,7 @@ exports.handler = async (event) => {
         '═══ FULL QUALITY QUESTION DOCUMENT (locate this question, its criteria bullets, weighting and page limit) ═══\n' + qualityFull + '\n\n' +
         '═══ THE QUESTION TO ANSWER ═══\n' + qText + '\n\n' +
         '═══ OUTPUT REQUIREMENTS ═══\n' +
-        '- HARD LIMIT: ' + target + ' words — the council REDACTS everything beyond the page limit unread, so exceeding it destroys the response. Aim for ' + Math.round(target*0.92) + ' words. Minimum ' + Math.round(target*0.85) + '.\n' +
+        '- HARD LIMIT: ' + target + ' words — the council REDACTS everything beyond the page limit unread, so exceeding it destroys the response. Write to ' + Math.round(target*0.78) + ' words. Do not exceed ' + Math.round(target*0.85) + ' words under any circumstances.\n' +
         '- Plain flowing prose paragraphs with occasional short headed sections (plain text headings, no markdown symbols).\n' +
         '- ABSOLUTELY NO markdown: no asterisks, no hashes, no bullet symbols. Use sentence-form lists.\n' +
         '- First person plural (we/our). Confident, specific, human. Vary sentence length. No AI tells like "Moreover" chains, "delve", "tapestry", "Furthermore" repetition.\n' +
@@ -184,7 +184,7 @@ exports.handler = async (event) => {
         '═══ YOUR TASK ═══\n' +
         'Step 1 (do this silently): score the draft 0-10 against the rubric. Identify every criteria bullet that is missing, thin, unevidenced, or generic. Check the added-value element exists and is concrete.\n' +
         'Step 2 (FABRICATION AUDIT — do this silently): list every specific claim in the draft — named individuals, numbers, percentages, years, counts, case examples, audit results. For each one, verify it appears in the COMPANY EVIDENCE above. Any claim NOT in the evidence must be replaced with [INSERT: what the client should provide] or rephrased without the invented specific. Be ruthless — invented facts disqualify bidders.\n' +
-        'Step 3: rewrite the response fixing every identified gap and every fabricated claim. Length is a hard constraint: target ' + target + ' words, minimum ' + Math.round(target*0.9) + ', maximum ' + Math.round(target*1.05) + ' — the council redacts everything beyond the page limit unread, and underusing the limit wastes scoring space. Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
+        'Step 3: rewrite the response fixing every identified gap and every fabricated claim. Length is a hard constraint: write to ' + Math.round(target*0.82) + ' words, never exceed ' + Math.round(target*0.9) + ' — the council redacts everything beyond the page limit unread. Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
         'Output ONLY the final rewritten response — no scores, no commentary.';
 
       var final;
@@ -197,16 +197,30 @@ exports.handler = async (event) => {
       }
 
       // Programmatic length enforcement: models can't count words; we can
-      var wc = final.split(/\s+/).length;
-      if (wc > target * 1.08) {
-        console.log('Q' + (i+1) + ' over limit (' + wc + '/' + target + ') — trim pass');
+      function countWords(s) { return s.trim().split(/\s+/).length; }
+      var attempts = 0;
+      while (countWords(final) > target * 1.02 && attempts < 2) {
+        attempts++;
+        var wc = countWords(final);
+        console.log('Q' + (i+1) + ' over limit (' + wc + '/' + target + ') — AI trim attempt ' + attempts);
         try {
           var trimmed = await callSonnet(
-            'This tender response is ' + wc + ' words but the page limit allows only ' + target + '. ' +
-            'The council redacts everything beyond the limit unread. Cut it to ' + Math.round(target*0.95) + ' words by tightening prose and removing the weakest material — keep every response-criteria point, all evidence, all [INSERT] flags, and the added-value element. Plain prose, no markdown. Output only the trimmed response.\n\n' + final,
+            'CRITICAL LENGTH VIOLATION. This tender response is ' + wc + ' words; the absolute page limit is ' + target + ' words; the council deletes everything past the limit unread.\n' +
+            'Rewrite it at EXACTLY ' + Math.round(target*0.88) + ' words or fewer. Cut adjectives, merge sentences, drop the weakest examples — but keep every response-criteria point, every piece of company evidence, every [INSERT] flag, and the added-value element.\n' +
+            'Plain prose, no markdown. Output only the rewritten response.\n\n' + final,
             4000);
-          if (trimmed && trimmed.split(/\s+/).length < wc) final = trimmed;
-        } catch(e) { console.log('Trim failed:', e.message); }
+          if (trimmed && countWords(trimmed) < wc) final = trimmed;
+          else break;
+        } catch(e) { console.log('Trim failed:', e.message); break; }
+      }
+      // Deterministic last resort: truncate at sentence boundary just under the limit
+      if (countWords(final) > target * 1.1) {
+        console.log('Q' + (i+1) + ' still over after trims — hard truncation');
+        var words = final.trim().split(/\s+/);
+        var cut = words.slice(0, Math.round(target * 1.0)).join(' ');
+        var lastStop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('.\n'));
+        if (lastStop > cut.length * 0.7) cut = cut.substring(0, lastStop + 1);
+        final = cut;
       }
 
       return { question: qText, answer: stripMarkdown(final) };
