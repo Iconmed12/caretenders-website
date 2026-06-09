@@ -469,3 +469,44 @@ async function confirmSqAndGenerate() {
       `;
     }).join('');
   }
+
+  // ── Profile pre-fill ──
+  async function prefillFromProfile() {
+    try {
+      var sb = window._supabase;
+      if (!sb) return;
+      var { data: { user } } = await sb.auth.getUser();
+      if (!user) return;
+      var { data: profile } = await sb.from('company_profiles').select('*').eq('user_id', user.id).single();
+      if (!profile) return;
+
+      function setVal(id, val) {
+        var el = document.getElementById(id);
+        if (el && val) el.value = val;
+      }
+      function setSelect(id, val) {
+        var el = document.getElementById(id);
+        if (!el || !val) return;
+        for (var i = 0; i < el.options.length; i++) {
+          if (el.options[i].value === val || el.options[i].text === val) { el.selectedIndex = i; break; }
+        }
+      }
+
+      setVal('f-name',           profile.company_name);
+      setVal('f-founded',        profile.founded_year);
+      setVal('f-staff',          profile.staff_count);
+      setVal('f-email',          profile.contact_email);
+      setVal('f-experience',     profile.experience);
+      setVal('f-achievements',   profile.achievements);
+      setVal('f-policies',       profile.policies);
+      setVal('f-accreditations', profile.accreditations);
+      setVal('f-regions',        profile.regions);
+      setVal('f-services',       profile.services);
+      setSelect('f-cqc',         profile.cqc_status);
+
+      // Show subtle badge
+      var badge = document.getElementById('prefill-badge');
+      if (badge) { badge.style.display = 'flex'; }
+      console.log('Profile pre-filled from company_profiles');
+    } catch(e) { console.log('Profile pre-fill skipped:', e.message); }
+  }
