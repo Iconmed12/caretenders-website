@@ -110,6 +110,21 @@ exports.handler = async (event) => {
       return 700;
     }
 
+    // Parse per-question limits from the quality document itself (stored questions often lack the limit line)
+    var qLimits = {};
+    (function() {
+      var segs = qualityFull.split(/Question\s+(\d+)/i);
+      for (var s = 1; s < segs.length; s += 2) {
+        var num = parseInt(segs[s]);
+        var seg = segs[s+1] || '';
+        var pm = seg.match(/limit\s+(\d+)\s*Page/i);
+        var wm = seg.match(/(\d{3,5})\s*word/i);
+        if (pm)      qLimits[num] = Math.round(parseInt(pm[1]) * 470);
+        else if (wm) qLimits[num] = parseInt(wm[1]);
+      }
+      console.log('Parsed question limits:', JSON.stringify(qLimits));
+    })();
+
     // ── 3. Generate responses: DRAFT (Sonnet) → SELF-SCORE & REVISE (Sonnet) ──
     await setStatus(jobId, 'generating_responses');
     var responses = [];
@@ -129,7 +144,7 @@ exports.handler = async (event) => {
     async function generateOne(i) {
       var q = questions[i];
       var qText = q.question || q.text || String(q);
-      var target = wordTarget(qText);
+      var target = qLimits[i+1] || wordTarget(qText);
       console.log('Q' + (i+1) + ': target ' + target + ' words');
 
       // STAGE A — Draft to the rubric
@@ -142,8 +157,9 @@ exports.handler = async (event) => {
         '2. Evidence EVERY claim with specifics from the company evidence provided (real numbers, named roles, concrete processes). Generic assurances score 4.\n' +
         '3. End with a short "added value" element: 2-4 concrete commitments that go beyond the stated requirements (this is the explicit difference between 8 and 10 in the rubric).\n' +
         '4. Reference the specification sections the question points to, showing the requirements are understood and will be met in full.\n\n' +
-        '═══ COMPANY EVIDENCE (use ONLY this — never invent statistics, names, or accreditations) ═══\n' + coCtx + '\n' +
-        'If a needed specific is missing from the evidence above, write [INSERT: short description of what the client should add] rather than inventing it.\n\n' +
+        '═══ ABSOLUTE RULE No. 1 — ZERO FABRICATION ═══\n' +
+        'You must NEVER invent: names of people, statistics, percentages, staff counts, years of experience, tenure figures, retention rates, case studies, client examples, audit results, or track-record claims. Every specific fact MUST appear in the COMPANY EVIDENCE below. Where evidence is missing, write [INSERT: short description of what the client should provide]. A response containing placeholder flags scores higher than one containing invented facts — fabricated claims get bidders disqualified and blacklisted. This rule overrides all style and persuasiveness goals.\n\n' +
+        '═══ COMPANY EVIDENCE (the ONLY permitted source of specific facts) ═══\n' + coCtx + '\n\n' +
         (kbContext ? '═══ KNOWLEDGE BASE ═══\n' + kbContext : '') +
         '═══ SERVICE SPECIFICATION ═══\n' + specFull + '\n\n' +
         '═══ FULL QUALITY QUESTION DOCUMENT (locate this question, its criteria bullets, weighting and page limit) ═══\n' + qualityFull + '\n\n' +
@@ -167,7 +183,8 @@ exports.handler = async (event) => {
         '═══ DRAFT RESPONSE ═══\n' + draft + '\n\n' +
         '═══ YOUR TASK ═══\n' +
         'Step 1 (do this silently): score the draft 0-10 against the rubric. Identify every criteria bullet that is missing, thin, unevidenced, or generic. Check the added-value element exists and is concrete.\n' +
-        'Step 2: rewrite the response fixing every identified gap. Keep it at ' + target + ' words (minimum ' + Math.round(target*0.9) + '). Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
+        'Step 2 (FABRICATION AUDIT — do this silently): list every specific claim in the draft — named individuals, numbers, percentages, years, counts, case examples, audit results. For each one, verify it appears in the COMPANY EVIDENCE above. Any claim NOT in the evidence must be replaced with [INSERT: what the client should provide] or rephrased without the invented specific. Be ruthless — invented facts disqualify bidders.\n' +
+        'Step 3: rewrite the response fixing every identified gap and every fabricated claim. Length is a hard constraint: target ' + target + ' words, minimum ' + Math.round(target*0.9) + ', maximum ' + Math.round(target*1.05) + ' — the council redacts everything beyond the page limit unread, and underusing the limit wastes scoring space. Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
         'Output ONLY the final rewritten response — no scores, no commentary.';
 
       var final;
