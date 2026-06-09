@@ -144,7 +144,13 @@ exports.handler = async (event) => {
     var sqStoragePath = (tender.sq_data && tender.sq_data.storagePath) ||
       (tender.sq_data && tender.sq_data.fileName ? tenderId + '/' + tender.sq_data.fileName : null);
 
-    if (includeSq && tender.sq_data && (sqStoragePath || tender.sq_data.sections)) {
+    console.log('SQ debug — includeSq:', includeSq,
+      '| sq_data exists:', !!(tender.sq_data),
+      '| storagePath:', tender.sq_data && tender.sq_data.storagePath,
+      '| fileName:', tender.sq_data && tender.sq_data.fileName,
+      '| resolved path:', sqStoragePath);
+
+    if (includeSq && tender.sq_data && sqStoragePath) {
       try {
         var docRes = await fetch(sbUrl + '/storage/v1/object/sq-docs/' + sqStoragePath, {
           headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey }
