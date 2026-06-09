@@ -1142,5 +1142,1148 @@ function populateCanaTenderSelect(){
     if (t.id === cur) opt.selected = true;
     sel.appendChild(opt);
   });
+}document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tender Experts — Admin · ICONGRP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+:root{--green:#1D9E75;--green-dark:#0F6E56;--green-light:#E1F5EE;--green-mid:#9FE1CB;--purple:#534AB7;--purple-dark:#26215C;--purple-light:#EEEDFE;--red:#dc2626;--red-light:#fee2e2;--text:#111827;--text-muted:#6b7280;--text-light:#9ca3af;--border:#e5e7eb;--border-light:#f3f4f6;--bg:#f9fafb;--sidebar-bg:#0a2a1e;--radius:8px;--radius-lg:12px;--radius-xl:16px;--shadow:0 1px 3px rgba(0,0,0,0.06);--shadow-md:0 4px 12px rgba(0,0,0,0.08);--shadow-lg:0 12px 32px rgba(0,0,0,0.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased}
+#loginScreen{position:fixed;inset:0;background:linear-gradient(160deg,#064e3b,#065f46 50%,#047857);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-card{background:#fff;border-radius:var(--radius-xl);padding:2.5rem;width:100%;max-width:400px;box-shadow:var(--shadow-lg)}
+.login-logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
+.login-logo-mark{width:42px;height:42px;background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.login-logo-text{font-family:'DM Serif Display',serif;font-size:22px}
+.login-logo-text span{color:var(--green)}
+.login-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px}
+.login-input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius);padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;margin-bottom:14px}
+.login-input:focus{border-color:var(--green)}
+.login-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:13px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.login-btn:hover{background:var(--green-dark)}
+.login-error{background:var(--red-light);color:var(--red);font-size:13px;padding:10px 14px;border-radius:var(--radius);margin-bottom:14px;display:none;align-items:center;gap:8px}
+.login-hint{font-size:12px;color:var(--text-light);text-align:center;margin-top:16px}
+#appScreen{display:none}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:240px;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:40}
+.sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sidebar-logo-inner{display:flex;align-items:center;gap:9px}
+.sidebar-logo-mark{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.sidebar-logo-text{font-family:'DM Serif Display',serif;font-size:17px;color:#fff}
+.sidebar-logo-text span{color:#6ee7b7}
+.sidebar-section{padding:1.25rem 1rem 0.5rem;font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em}
+.sidebar-nav{padding:0 0.75rem}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius);color:rgba(255,255,255,0.65);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;font-family:'DM Sans',sans-serif}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:#fff}
+.nav-item.active{background:var(--green);color:#fff}
+.nav-item i{font-size:16px;width:20px;text-align:center}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,0.15);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px}
+.nav-item.active .nav-badge{background:rgba(255,255,255,0.25)}
+.sidebar-footer{margin-top:auto;padding:1rem;border-top:1px solid rgba(255,255,255,0.06)}
+.sidebar-user{display:flex;align-items:center;gap:10px}
+.user-avatar{width:34px;height:34px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500;color:#fff}
+.user-role{font-size:11px;color:rgba(255,255,255,0.45)}
+.logout-btn{background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:16px;padding:4px;margin-left:auto}
+.logout-btn:hover{color:#fff}
+.main-content{margin-left:240px;flex:1;display:flex;flex-direction:column}
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30;box-shadow:var(--shadow)}
+.topbar-title{font-size:16px;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.topbar-btn{display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:var(--radius);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:'DM Sans',sans-serif;transition:all 0.15s}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:hover{background:var(--green-dark)}
+.btn-ghost{background:none;border:1.5px solid var(--border);color:var(--text-muted)}
+.btn-ghost:hover{border-color:var(--green);color:var(--green)}
+.btn-ai{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff}
+.page{display:none;padding:2rem;animation:fadeIn 0.2s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem 1.5rem;box-shadow:var(--shadow)}
+.stat-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px}
+.stat-value{font-family:'DM Serif Display',serif;font-size:32px;letter-spacing:-0.02em;margin-bottom:4px}
+.stat-sub{font-size:12px;color:var(--text-muted);display:flex;align-items:center;gap:4px}
+.stat-sub.up{color:#16a34a}
+.stat-sub.warn{color:var(--amber,#BA7517)}
+.table-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow);overflow:hidden}
+.table-header{padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+.table-header h2{font-size:15px;font-weight:600}
+.table-search{display:flex;align-items:center;gap:8px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:7px 12px;min-width:220px}
+.table-search input{border:none;background:transparent;outline:none;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);width:100%}
+table{width:100%;border-collapse:collapse}
+thead{background:var(--bg)}
+th{padding:10px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:14px 16px;border-bottom:1px solid var(--border-light);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafafa}
+.td-title{font-weight:600;color:var(--text)}
+.td-org{color:var(--text-muted);font-size:12px;margin-top:2px}
+.td-badge{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.badge-open{background:#dcfce7;color:#166534}
+.badge-closing{background:#fef3c7;color:#92400e}
+.badge-urgent{background:#fee2e2;color:#991b1b}
+.badge-new{background:var(--purple-light);color:var(--purple-dark)}
+.badge-draft{background:var(--bg);color:var(--text-muted);border:1px solid var(--border)}
+.action-btns{display:flex;align-items:center;gap:6px}
+.action-btn{border:none;background:none;cursor:pointer;padding:6px;border-radius:6px;color:var(--text-muted);font-size:16px;transition:all 0.15s;display:flex;align-items:center}
+.action-btn.edit:hover{color:var(--green);background:var(--green-light)}
+.action-btn.del:hover{color:var(--red);background:var(--red-light)}
+.empty-state{padding:3rem;text-align:center;color:var(--text-muted)}
+.empty-state i{font-size:36px;display:block;margin-bottom:10px;opacity:0.4}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:150;align-items:center;justify-content:center;padding:1rem;backdrop-filter:blur(3px)}
+.overlay.open{display:flex}
+.ai-modal{background:#fff;border-radius:var(--radius-xl);width:100%;max-width:580px;box-shadow:var(--shadow-lg);overflow:hidden;max-height:90vh;display:flex;flex-direction:column}
+.ai-modal-header{padding:1.5rem 1.75rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.ai-modal-title{display:flex;align-items:center;gap:10px}
+.ai-title-icon{width:38px;height:38px;background:linear-gradient(135deg,#7c3aed,#4f46e5);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:19px;flex-shrink:0}
+.ai-modal-title h3{font-size:16px;font-weight:600;margin-bottom:2px}
+.ai-modal-title p{font-size:12px;color:var(--text-muted)}
+.modal-x{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text-muted);font-size:15px;flex-shrink:0}
+.ai-modal-body{padding:1.75rem;overflow-y:auto;flex:1}
+.ai-modal-footer{padding:1.25rem 1.75rem;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;background:#fff}
+.upload-zone{border:2px dashed var(--border);border-radius:var(--radius-lg);padding:2.5rem 1.5rem;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;background:var(--bg)}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--green);background:var(--green-light)}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-icon{width:52px;height:52px;background:#fff;border:1.5px solid var(--border);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:24px;color:var(--text-muted)}
+.upload-zone h4{font-size:15px;font-weight:600;margin-bottom:6px}
+.upload-zone p{font-size:13px;color:var(--text-muted);line-height:1.6}
+.file-types{font-size:11px;color:var(--text-light);margin-top:8px;background:#fff;border:1px solid var(--border);border-radius:20px;display:inline-block;padding:3px 12px}
+.file-selected-bar{display:none;align-items:center;gap:12px;background:var(--green-light);border:1.5px solid var(--green-mid);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.25rem}
+.file-icon{width:40px;height:40px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px;flex-shrink:0}
+.file-name{font-size:14px;font-weight:600;color:#085041}
+.file-size{font-size:12px;color:var(--green-dark);margin-top:2px}
+.file-remove{margin-left:auto;background:none;border:none;color:var(--green-dark);cursor:pointer;font-size:18px;padding:2px;display:flex}
+.processing-state{display:none;text-align:center;padding:1rem 0}
+.spinner{width:52px;height:52px;border:3px solid var(--border);border-top-color:#7c3aed;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-steps{display:flex;flex-direction:column;gap:6px;margin-top:1.25rem;text-align:left}
+.proc-step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-muted);padding:8px 12px;border-radius:var(--radius);background:var(--bg)}
+.proc-step.done{color:var(--green-dark);background:var(--green-light)}
+.proc-step.active{color:#4f46e5;background:#ede9fe;font-weight:500}
+.proc-step i{font-size:15px;width:18px;flex-shrink:0}
+.preview-pane{display:none}
+.preview-banner{background:linear-gradient(135deg,#ede9fe,#e0e7ff);border:1px solid #c4b5fd;border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:10px}
+.preview-banner-text{font-size:13px;color:#3730a3;line-height:1.5}
+.preview-banner-text strong{display:block;font-weight:600;margin-bottom:2px}
+.preview-fields{display:flex;flex-direction:column;gap:8px}
+.pf{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px}
+.pf-label{font-size:10px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.ai-tag{background:#ede9fe;color:#7c3aed;font-size:9px;padding:1px 6px;border-radius:20px;font-weight:700}
+.conf{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:1px 7px;border-radius:20px;font-weight:600;margin-left:auto}
+.conf-high{background:#dcfce7;color:#166534}
+.pf-value{font-size:13px;color:var(--text);line-height:1.5;font-weight:500}
+.pf-value.multi{white-space:pre-line;font-weight:400;font-size:12px}
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:100;backdrop-filter:blur(2px)}
+.drawer-overlay.open{display:flex;align-items:flex-start;justify-content:flex-end}
+.drawer{background:#fff;width:100%;max-width:580px;height:100vh;overflow-y:auto;box-shadow:var(--shadow-lg);display:flex;flex-direction:column}
+.drawer-header{padding:1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:#fff;z-index:1}
+.drawer-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.ai-badge{background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;display:none;align-items:center;gap:4px}
+.drawer-close{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text-muted)}
+.drawer-body{padding:1.5rem;flex:1}
+.drawer-footer{padding:1.25rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:10px;position:sticky;bottom:0;background:#fff}
+.form-section{margin-bottom:1.5rem}
+.fsect-title{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid var(--border-light)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-row.single{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:12px;font-weight:600;color:var(--text)}
+.form-label .req{color:var(--red)}
+.form-input,.form-select,.form-textarea{border:1.5px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;background:#fff;width:100%}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--green)}
+.form-textarea{resize:vertical;min-height:100px;line-height:1.6}
+.form-hint{font-size:11px;color:var(--text-light);margin-top:2px}
+.ai-filled{border-color:#7c3aed !important;background:#faf5ff !important}
+.ai-filled-note{font-size:11px;color:#7c3aed;margin-top:3px;display:none;align-items:center;gap:4px}
+.pricing-builder{border:1.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;margin-bottom:4px}
+.price-row{display:grid;grid-template-columns:1fr 100px auto;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border-light);align-items:center}
+.price-row:last-child{border-bottom:none}
+.price-row input{border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.price-row input:focus{border-color:var(--green)}
+.rm-price{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:16px;padding:2px;border-radius:4px;display:flex}
+.rm-price:hover{color:var(--red)}
+.add-price-row{border:none;background:var(--bg);width:100%;padding:9px;font-size:13px;color:var(--green);cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;border-top:1px solid var(--border-light);display:flex;align-items:center;justify-content:center;gap:5px}
+.add-price-row:hover{background:var(--green-light)}
+.price-total{background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 12px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.price-total span:first-child{font-size:12px;font-weight:500;color:var(--text-muted)}
+.price-total span:last-child{font-size:15px;font-weight:600;color:var(--green)}
+.elig-list{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
+.elig-item{display:flex;align-items:center;gap:8px}
+.elig-item input{flex:1;border:1.5px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:13px;font-family:'DM Sans',sans-serif;outline:none}
+.elig-item input:focus{border-color:var(--green)}
+.rm-elig{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:16px;padding:4px;border-radius:4px;display:flex}
+.rm-elig:hover{color:var(--red)}
+.add-elig{border:1.5px dashed var(--border);background:transparent;border-radius:var(--radius);padding:8px 14px;font-size:13px;color:var(--text-muted);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px;width:100%;justify-content:center;transition:all 0.15s}
+.add-elig:hover{border-color:var(--green);color:var(--green);background:var(--green-light)}
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;align-items:center;justify-content:center}
+.confirm-overlay.open{display:flex}
+.confirm-card{background:#fff;border-radius:var(--radius-xl);padding:2rem;width:100%;max-width:380px;box-shadow:var(--shadow-lg);text-align:center}
+.confirm-icon{width:52px;height:52px;background:var(--red-light);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;font-size:24px;color:var(--red)}
+.confirm-title{font-size:17px;font-weight:600;margin-bottom:8px}
+.confirm-text{font-size:14px;color:var(--text-muted);margin-bottom:1.5rem;line-height:1.6}
+.confirm-btns{display:flex;gap:10px;justify-content:center}
+.btn-danger{background:var(--red);color:#fff;border:none;padding:10px 24px;border-radius:var(--radius);font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
+.btn-cancel{background:var(--bg);color:var(--text);border:1.5px solid var(--border);padding:10px 24px;border-radius:var(--radius);font-size:14px;cursor:pointer;font-family:'DM Sans',sans-serif}
+.toast{position:fixed;bottom:2rem;right:2rem;color:#fff;padding:12px 20px;border-radius:var(--radius-lg);font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);z-index:999;display:none;align-items:center;gap:10px}
+.toast.show{display:flex}
+.toast.success{background:#166534}
+.toast.error{background:var(--red)}
+.toast.ai{background:linear-gradient(135deg,#7c3aed,#4f46e5)}
+.saving-spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite}
+.cana-drop-zone{border:2px dashed rgba(11,25,41,0.15);border-radius:10px;padding:1.25rem;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center}
+.cana-drop-zone.drag-over{border-color:#00C9E0;background:rgba(0,201,224,0.04)}
+.cana-files-list{display:flex;flex-direction:column;gap:6px;margin-top:0.75rem}
+.cana-file-item{display:flex;align-items:center;gap:8px;background:#e8f7ee;border:1.5px solid #9FE1CB;border-radius:8px;padding:8px 12px;font-size:0.82rem;color:#1a7a3f}
+.cana-file-item i{color:#1a7a3f;flex-shrink:0}
+.cana-file-item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.cana-file-remove{background:none;border:none;color:#a32d2d;cursor:pointer;font-size:1rem;padding:0 2px;flex-shrink:0;font-weight:700}
+.cana-upload-btn{display:inline-flex;align-items:center;gap:6px;background:#F4F6F9;border:1.5px solid rgba(11,25,41,0.12);border-radius:8px;padding:7px 14px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:#6B8FA3;cursor:pointer;transition:all 0.2s;margin-top:6px}
+.cana-upload-btn:hover{border-color:#00C9E0;color:#0099AA}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" style="display:none;">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="login-logo-mark"><i class="ti ti-heart-handshake"></i></div>
+      <span class="login-logo-text">Tender <span>Experts</span></span>
+    </div>
+    <div style="margin-bottom:1.5rem"><div style="font-size:20px;font-weight:600;margin-bottom:4px">Admin panel</div><div style="font-size:13px;color:var(--text-muted)">Sign in to manage your tender listings</div></div>
+    <div id="loginError" class="login-error"><i class="ti ti-alert-circle" style="font-size:15px"></i> Incorrect password</div>
+    <label class="login-label">Password</label>
+    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Sign in to admin panel</button>
+    <div class="login-hint">Use the password you set up</div>
+  </div>
+</div>
+
+<div id="appScreen" style="display:block;">
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-logo"><div class="sidebar-logo-inner"><div class="sidebar-logo-mark"><i class="ti ti-heart-handshake"></i></div><span class="sidebar-logo-text">Tender <span>Experts</span></span></div></div>
+    <div class="sidebar-section">Main</div>
+    <div class="sidebar-nav">
+      <button class="nav-item active" onclick="showPage('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+      <button class="nav-item" onclick="showPage('care',this)"><i class="ti ti-heart-handshake"></i> Care tenders <span class="nav-badge" id="sbCare">0</span></button>
+      <button class="nav-item" onclick="showPage('commercial',this)"><i class="ti ti-building"></i> Commercial <span class="nav-badge" id="sbCommercial">0</span></button>
+      <button class="nav-item" onclick="showPage('noncqc',this)"><i class="ti ti-certificate"></i> Non-CQC listings <span class="nav-badge" id="sbNonCqc">0</span></button>
+    </div>
+    <div class="sidebar-section">System</div>
+    <div class="sidebar-nav">
+      <button class="nav-item" onclick="showPage('cana',this)"><i class="ti ti-sparkles"></i> Cana AI <span class="nav-badge" id="sbCana">0</span></button>
+<button class="nav-item" onclick="showPage('knowledge',this)"><i class="ti ti-brain"></i> Knowledge Base</button>
+      <button class="nav-item" onclick="showPage('settings',this)"><i class="ti ti-settings"></i> Settings</button>
+      <button class="nav-item" onclick="window.open('index.html','_blank')"><i class="ti ti-external-link"></i> View live site</button>
+    </div>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar">AD</div>
+        <div style="flex:1;min-width:0"><div class="user-name">Admin User</div><div class="user-role">Administrator</div></div>
+        <button class="logout-btn" onclick="doLogout()"><i class="ti ti-logout"></i></button>
+      </div>
+    </div>
+  </aside>
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div class="topbar-right">
+        <button class="topbar-btn btn-ai" id="aiUploadBtn" style="display:none" onclick="openAiModal('care')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload &amp; auto-fill</button>
+        <button class="topbar-btn btn-primary" id="addTenderBtn" style="display:none" onclick="openDrawer(null,'care')"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
+        <button class="topbar-btn btn-ai" id="aiCommercialBtn" style="display:none" onclick="openAiModal('commercial')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload &amp; auto-fill</button>
+        <button class="topbar-btn btn-primary" id="addCommercialBtn" style="display:none" onclick="openDrawer(null,'commercial')"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
+        <button class="topbar-btn btn-ai" id="aiNonCqcBtn" style="display:none" onclick="openAiModal('noncqc')"><i class="ti ti-sparkles" style="font-size:14px"></i> Upload &amp; auto-fill</button>
+        <button class="topbar-btn btn-primary" id="addNonCqcBtn" style="display:none" onclick="openDrawer(null,'noncqc')"><i class="ti ti-plus" style="font-size:14px"></i> Add manually</button>
+      </div>
+    </div>
+
+    <div class="page active" id="page-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Total listings</div><div class="stat-value" id="statTotal">0</div><div class="stat-sub up"><i class="ti ti-trending-up" style="font-size:13px"></i> Live from database</div></div>
+        <div class="stat-card"><div class="stat-label">Live &amp; open</div><div class="stat-value" id="statOpen">0</div><div class="stat-sub up"><i class="ti ti-circle-check" style="font-size:13px"></i> Accepting applications</div></div>
+        <div class="stat-card"><div class="stat-label">Closing soon</div><div class="stat-value" id="statClosing">0</div><div class="stat-sub warn"><i class="ti ti-alert-triangle" style="font-size:13px"></i> Within 14 days</div></div>
+        <div class="stat-card"><div class="stat-label">Non-CQC listings</div><div class="stat-value" id="statNonCqc">0</div><div class="stat-sub" style="color:var(--purple)"><i class="ti ti-certificate" style="font-size:13px"></i> Pre-registration</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h2>All listings</h2></div>
+        <table><thead><tr><th>Tender</th><th>Value</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="dashboardTable"></tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-care">
+      <div style="background:#e8f7ee;border:1px solid #9FE1CB;border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:13px;color:#085041;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
+        <span>If a care tender has <strong>no CQC rating requirement</strong> in its eligibility, it will automatically also appear under <strong>Non-CQC listings</strong> for new providers.</span>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h2>Care tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="careCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="careSearch" placeholder="Search..." oninput="renderCareTable()"></div></div>
+        <table><thead><tr><th>Tender</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Non-CQC?</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="careTable"></tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-commercial">
+      <div class="table-card">
+        <div class="table-header"><h2>Commercial tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="commercialCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="commercialSearch" placeholder="Search..." oninput="renderCommercialTable()"></div></div>
+        <table><thead><tr><th>Tender</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="commercialTable"></tbody></table>
+      </div>
+    </div>
+
+    <div class="page" id="page-noncqc">
+      <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:13px;color:#4c1d95;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
+        <span>This list is <strong>auto-populated</strong> from care tenders where no CQC rating is required. You can also add them manually.</span>
+      </div>
+      <div class="table-card">
+        <div class="table-header"><h2>Non-CQC listings <span style="color:var(--text-light);font-weight:400;font-size:13px" id="nonCqcCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="nonCqcSearch" placeholder="Search..." oninput="renderNonCqcTable()"></div></div>
+        <table><thead><tr><th>Listing</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Auto-detected</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="nonCqcTable"></tbody></table>
+      </div>
+    </div>
+
+    <!-- CANA AI PAGE -->
+    <div class="page" id="page-cana">
+      <div style="background:rgba(0,201,224,0.06);border:1px solid rgba(0,201,224,0.2);border-radius:8px;padding:10px 16px;margin-bottom:1.25rem;font-size:13px;color:#0099AA;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-sparkles" style="font-size:16px;flex-shrink:0;"></i>
+        <span>Upload documents for each tender so Cana AI knows exactly how to write the responses. You can upload multiple files per section.</span>
+      </div>
+      <div class="table-card" style="margin-bottom:1.25rem;padding:1.25rem;">
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+          <div style="flex:1;">
+            <label style="font-size:0.78rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Select tender</label>
+            <select id="canaTenderSelect" onchange="loadCanaDocs()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;color:var(--text);">
+              <option value="">Choose a tender...</option>
+            </select>
+          </div>
+          <div id="canaDocStatus" style="display:none;border-radius:8px;padding:8px 14px;font-size:0.82rem;font-weight:500;white-space:nowrap;"></div>
+        </div>
+      </div>
+      <div id="canaDocArea" style="display:none;">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:1.25rem;">
+
+          <!-- SELECTION QUESTIONNAIRE CARD — first -->
+          <div class="table-card" style="padding:1.25rem;border:1.5px solid rgba(124,58,237,0.2);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+              <div style="width:36px;height:36px;background:rgba(124,58,237,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">📋</div>
+              <div>
+                <div style="font-weight:600;font-size:0.9rem;">Selection Questionnaire</div>
+                <div style="font-size:0.75rem;color:var(--text-light);">Commissioner's SQ document (.docx) — Cana will extract all fields</div>
+              </div>
+            </div>
+            <div class="cana-drop-zone" id="sqDrop"
+              ondragover="canaDragOver(event,'sqDrop')"
+              ondragleave="canaDragLeave('sqDrop')"
+              ondrop="handleSqDrop(event)">
+              <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
+              <div style="font-size:0.82rem;color:var(--text-light);margin-top:4px;">Drag the SQ here or</div>
+              <label class="cana-upload-btn"><i class="ti ti-upload" style="font-size:13px;"></i> Browse files
+                <input type="file" id="sqDocInput" accept=".docx" style="display:none;" onchange="handleSqFileSelect(event)">
+              </label>
+            </div>
+            <div id="sqDocFiles" class="cana-files-list"></div>
+            <div id="sqExtractStatus" style="display:none;margin-top:0.75rem;padding:8px 12px;border-radius:8px;font-size:0.8rem;font-weight:600;"></div>
+          </div>
+
+          <div class="table-card" style="padding:1.25rem;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+              <div style="width:36px;height:36px;background:rgba(0,201,224,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">?</div>
+              <div><div style="font-weight:600;font-size:0.9rem;">Quality Questions</div><div style="font-size:0.75rem;color:var(--text-light);">The questions the tender requires answering</div></div>
+            </div>
+            <div class="cana-drop-zone" id="qualityDrop" ondragover="canaDragOver(event,'qualityDrop')" ondragleave="canaDragLeave('qualityDrop')" ondrop="canaOnDrop(event,'quality')">
+              <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
+              <div style="font-size:0.82rem;color:var(--text-light);margin-top:4px;">Drag files here or</div>
+              <label class="cana-upload-btn"><i class="ti ti-upload" style="font-size:13px;"></i> Browse files<input type="file" id="qualityInput" accept=".pdf,.doc,.docx,.txt" multiple style="display:none;" onchange="handleCanaDoc('quality',this.files)"></label>
+            </div>
+            <div id="qualityFiles" class="cana-files-list"></div>
+          </div>
+          <div class="table-card" style="padding:1.25rem;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+              <div style="width:36px;height:36px;background:rgba(245,166,35,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">📋</div>
+              <div><div style="font-weight:600;font-size:0.9rem;">Service Specification</div><div style="font-size:0.75rem;color:var(--text-light);">What the commissioner expects to be delivered</div></div>
+            </div>
+            <div class="cana-drop-zone" id="specDrop" ondragover="canaDragOver(event,'specDrop')" ondragleave="canaDragLeave('specDrop')" ondrop="canaOnDrop(event,'spec')">
+              <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
+              <div style="font-size:0.82rem;color:var(--text-light);margin-top:4px;">Drag files here or</div>
+              <label class="cana-upload-btn"><i class="ti ti-upload" style="font-size:13px;"></i> Browse files<input type="file" id="specInput" accept=".pdf,.doc,.docx,.txt" multiple style="display:none;" onchange="handleCanaDoc('spec',this.files)"></label>
+            </div>
+            <div id="specFiles" class="cana-files-list"></div>
+          </div>
+          <div class="table-card" style="padding:1.25rem;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
+              <div style="width:36px;height:36px;background:rgba(99,91,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🎯</div>
+              <div><div style="font-weight:600;font-size:0.9rem;">Scoring Criteria</div><div style="font-size:0.75rem;color:var(--text-light);">How responses will be evaluated and marked</div></div>
+            </div>
+            <div class="cana-drop-zone" id="scoringDrop" ondragover="canaDragOver(event,'scoringDrop')" ondragleave="canaDragLeave('scoringDrop')" ondrop="canaOnDrop(event,'scoring')">
+              <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
+              <div style="font-size:0.82rem;color:var(--text-light);margin-top:4px;">Drag files here or</div>
+              <label class="cana-upload-btn"><i class="ti ti-upload" style="font-size:13px;"></i> Browse files<input type="file" id="scoringInput" accept=".pdf,.doc,.docx,.txt" multiple style="display:none;" onchange="handleCanaDoc('scoring',this.files)"></label>
+            </div>
+            <div id="scoringFiles" class="cana-files-list"></div>
+          </div>
+
+        </div>
+        <!-- QUESTIONS ENTRY -->
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <div>
+              <div style="font-weight:600;font-size:0.95rem;">Tender Questions</div>
+              <div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">Type or paste each question below. Cana AI will write a full response to every one.</div>
+            </div>
+            <button onclick="addCanaQuestion()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
+              <i class="ti ti-plus" style="font-size:13px;"></i> Add question
+            </button>
+          </div>
+          <div id="canaQuestionsBuilder" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
+          <div id="canaQuestionsEmpty" style="text-align:center;padding:1.5rem;color:var(--text-light);font-size:0.85rem;background:var(--bg);border-radius:8px;">
+            No questions added yet — click "Add question" to start
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-sparkles" style="font-size:14px;"></i> Save &amp; train Cana AI
+          </button>
+          <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved — Cana is ready for this tender</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- KNOWLEDGE BASE PAGE -->
+    <div class="page" id="page-knowledge">
+      <div style="margin-bottom:1.5rem;">
+        <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:4px;">Knowledge Base</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;">Train Cana AI with winning examples, writing style, and commissioner preferences. Applies to every tender automatically.</p>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;">
+        <div style="font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><i class="ti ti-pencil" style="color:#2563eb;"></i> Writing Style &amp; Structure</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;">Tell Cana exactly how to write — tone, structure, what to include in every answer</div>
+        <textarea id="kb-writing-style" style="width:100%;min-height:150px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:DM Sans,sans-serif;resize:vertical;line-height:1.6;outline:none;" placeholder="e.g. Always open with a strong statement of commitment. Use specific figures and percentages. Reference CQC ratings early. End each answer with a forward-looking commitment..."></textarea>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;">
+        <div style="font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><i class="ti ti-star" style="color:#d97706;"></i> What Commissioners Look For</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;">Key themes and priorities that score highly with UK care commissioners</div>
+        <textarea id="kb-commissioner-prefs" style="width:100%;min-height:150px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:DM Sans,sans-serif;resize:vertical;line-height:1.6;outline:none;" placeholder="e.g. Commissioners want person-centred care, co-production, clear safeguarding, staff retention, data and outcomes, partnership working with NHS..."></textarea>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;">
+        <div style="font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><i class="ti ti-ban" style="color:#dc2626;"></i> What to Avoid</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;">Patterns from failed tenders Cana should never use</div>
+        <textarea id="kb-avoid" style="width:100%;min-height:120px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:DM Sans,sans-serif;resize:vertical;line-height:1.6;outline:none;" placeholder="e.g. Never use vague phrases like we will endeavour to. Never copy the question back. Never make unsubstantiated claims..."></textarea>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-weight:600;display:flex;align-items:center;gap:8px;"><i class="ti ti-trophy" style="color:#059669;"></i> Winning Examples</div>
+          <label style="background:#059669;color:white;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-upload"></i> Upload
+            <input type="file" multiple accept=".pdf,.docx,.doc,.txt" style="display:none;" onchange="handleKbUpload('winning',this.files)">
+          </label>
+        </div>
+        <div 
+        ondragover="event.preventDefault();this.style.background='#f0fdf4';" 
+        ondragleave="this.style.background='';" 
+        ondrop="event.preventDefault();this.style.background='';handleKbUpload('winning',event.dataTransfer.files);"
+        style="border:2px dashed var(--border);border-radius:8px;padding:12px;margin-bottom:8px;text-align:center;font-size:0.78rem;color:var(--text-muted);cursor:pointer;">
+        Drag files here or use Upload button above
+      </div>
+      <div id="kb-winning-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div id="kb-winning-empty" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.82rem;background:var(--bg);border-radius:8px;">No winning examples uploaded yet</div>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-weight:600;display:flex;align-items:center;gap:8px;"><i class="ti ti-file-x" style="color:#dc2626;"></i> Failed Examples</div>
+          <label style="background:#dc2626;color:white;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-upload"></i> Upload
+            <input type="file" multiple accept=".pdf,.docx,.doc,.txt" style="display:none;" onchange="handleKbUpload('failed',this.files)">
+          </label>
+        </div>
+        <div 
+        ondragover="event.preventDefault();this.style.background='#f0fdf4';" 
+        ondragleave="this.style.background='';" 
+        ondrop="event.preventDefault();this.style.background='';handleKbUpload('failed',event.dataTransfer.files);"
+        style="border:2px dashed var(--border);border-radius:8px;padding:12px;margin-bottom:8px;text-align:center;font-size:0.78rem;color:var(--text-muted);cursor:pointer;">
+        Drag files here or use Upload button above
+      </div>
+      <div id="kb-failed-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div id="kb-failed-empty" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.82rem;background:var(--bg);border-radius:8px;">No failed examples uploaded yet</div>
+      </div>
+      <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div>
+            <div style="font-weight:600;display:flex;align-items:center;gap:8px;"><i class="ti ti-message-2" style="color:#7c3aed;"></i> Commissioner Feedback</div>
+            <div style="font-size:0.78rem;color:var(--text-muted);margin-top:3px;">Upload score sheets, feedback letters or evaluator comments from past tenders</div>
+          </div>
+          <label style="background:#7c3aed;color:white;border-radius:8px;padding:7px 14px;font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;">
+            <i class="ti ti-upload"></i> Upload
+            <input type="file" multiple accept=".pdf,.docx,.doc,.txt" style="display:none;" onchange="handleKbUpload('feedback',this.files)">
+          </label>
+        </div>
+        <div 
+        ondragover="event.preventDefault();this.style.background='#f0fdf4';" 
+        ondragleave="this.style.background='';" 
+        ondrop="event.preventDefault();this.style.background='';handleKbUpload('feedback',event.dataTransfer.files);"
+        style="border:2px dashed var(--border);border-radius:8px;padding:12px;margin-bottom:8px;text-align:center;font-size:0.78rem;color:var(--text-muted);cursor:pointer;">
+        Drag files here or use Upload button above
+      </div>
+      <div id="kb-feedback-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <div id="kb-feedback-empty" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.82rem;background:var(--bg);border-radius:8px;">No commissioner feedback uploaded yet</div>
+      </div>
+            <button onclick="saveKnowledgeBase()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:12px 28px;font-size:0.9rem;font-weight:600;font-family:DM Sans,sans-serif;cursor:pointer;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-brain"></i> Save Knowledge Base
+      </button>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div class="page" id="page-settings">
+      <div style="max-width:640px;">
+        <h2 style="font-size:1.1rem;font-weight:600;margin-bottom:0.25rem;">Integrations</h2>
+        <p style="font-size:0.85rem;color:var(--text-light);margin-bottom:1.75rem;">Your connected services and integration status.</p>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+            <div style="width:42px;height:42px;background:#635BFF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">💳</div>
+            <div style="flex:1;"><div style="font-weight:600;font-size:0.95rem;">Stripe Payments</div><div style="font-size:0.78rem;color:var(--text-light);">Clients pay directly from the tender modal</div></div>
+            <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">Connected</div>
+          </div>
+          <div style="background:#F4F6F9;border-radius:8px;padding:1rem;font-size:0.81rem;color:var(--text-light);line-height:1.9;">
+            <div><strong style="color:var(--text);">Publishable key:</strong> pk_live_51RxX99...cJxL1</div>
+            <div><strong style="color:var(--text);">Secret key:</strong> Stored in Netlify as <code style="background:#e2e8f0;padding:1px 6px;border-radius:4px;">STRIPE_SECRET_KEY</code></div>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+            <div style="width:42px;height:42px;background:#006BFF;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">📅</div>
+            <div style="flex:1;"><div style="font-weight:600;font-size:0.95rem;">Calendly</div><div style="font-size:0.78rem;color:var(--text-light);">Clients book a consultant call from the tender modal</div></div>
+            <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">Connected</div>
+          </div>
+          <div style="background:#F4F6F9;border-radius:8px;padding:1rem;font-size:0.81rem;color:var(--text-light);">
+            <strong style="color:var(--text);">Booking link:</strong> <a href="https://calendly.com/icongrp" target="_blank" style="color:#006BFF;">https://calendly.com/icongrp</a>
+          </div>
+        </div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.5rem;">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
+            <div style="width:42px;height:42px;background:#0B1929;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">⚡</div>
+            <div style="flex:1;"><div style="font-weight:600;font-size:0.95rem;">Cana AI Writing Knowledge</div><div style="font-size:0.78rem;color:var(--text-light);">Teach Cana how to write winning tenders</div></div>
+            <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">Active</div>
+          </div>
+          <textarea id="canaKnowledge" style="width:100%;min-height:180px;padding:0.85rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);line-height:1.6;resize:vertical;outline:none;" placeholder="Write your tender guidance here..."></textarea>
+          <button onclick="saveCanaKnowledge()" style="margin-top:0.75rem;background:#0B1929;color:white;border:none;border-radius:8px;padding:9px 20px;font-size:0.85rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Save knowledge</button>
+          <span id="canaKnowledgeSaved" style="display:none;margin-left:10px;font-size:0.8rem;color:#1a7a3f;">Saved!</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- AI MODAL -->
+<div class="overlay" id="aiOverlay" onclick="maybeCloseAi(event)">
+  <div class="ai-modal">
+    <div class="ai-modal-header">
+      <div class="ai-modal-title"><div class="ai-title-icon"><i class="ti ti-sparkles"></i></div><div><h3>AI document upload</h3><p>Upload a tender document and we will read it and fill all fields</p></div></div>
+      <div class="modal-x" onclick="closeAiModal()"><i class="ti ti-x"></i></div>
+    </div>
+    <div class="ai-modal-body">
+      <div id="aiStep1">
+        <div class="upload-zone" id="uploadZone" ondragover="handleDrag(event)" ondragleave="handleDragLeave()" ondrop="handleDrop(event)">
+          <input type="file" id="fileInput" accept=".pdf,.doc,.docx,.txt" onchange="handleFileSelect(event)">
+          <div class="upload-icon"><i class="ti ti-cloud-upload"></i></div>
+          <h4>Drop your tender document here</h4>
+          <p>or click to browse your files</p>
+          <div class="file-types">PDF · Word (.docx) · Text (.txt)</div>
+        </div>
+        <div class="file-selected-bar" id="fileSelectedBar">
+          <div class="file-icon"><i class="ti ti-file-text"></i></div>
+          <div><div class="file-name" id="selectedFileName"></div><div class="file-size" id="selectedFileSize"></div></div>
+          <button class="file-remove" onclick="clearFile()"><i class="ti ti-x"></i></button>
+        </div>
+        <div style="margin-top:1rem;background:#faf5ff;border:1px solid #ddd6fe;border-radius:var(--radius);padding:12px 14px;font-size:13px;color:#4c1d95;display:flex;gap:8px;align-items:flex-start">
+          <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0;margin-top:1px"></i>
+          <span>The AI reads your document via our secure server and extracts all tender details automatically. Review everything before publishing.</span>
+        </div>
+      </div>
+      <div class="processing-state" id="aiStep2">
+        <div class="spinner"></div>
+        <div style="font-size:15px;font-weight:600;color:#4f46e5">Analysing your document...</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">This usually takes 5 to 15 seconds</div>
+        <div class="proc-steps">
+          <div class="proc-step" id="ps1"><i class="ti ti-file-text"></i> Reading document content</div>
+          <div class="proc-step" id="ps2"><i class="ti ti-brain"></i> Extracting key tender details</div>
+          <div class="proc-step" id="ps3"><i class="ti ti-list-check"></i> Identifying eligibility requirements</div>
+          <div class="proc-step" id="ps4"><i class="ti ti-check"></i> Preparing form fields</div>
+        </div>
+      </div>
+      <div class="preview-pane" id="aiStep3">
+        <div class="preview-banner">
+          <i class="ti ti-sparkles" style="font-size:20px;color:#7c3aed;flex-shrink:0"></i>
+          <div class="preview-banner-text"><strong>Extraction complete — all fields ready</strong>Click "Open in form" to load everything into the editor. Fields highlighted in purple were auto-filled — check before publishing.</div>
+        </div>
+        <div class="preview-fields" id="previewFields"></div>
+      </div>
+    </div>
+    <div class="ai-modal-footer">
+      <button class="topbar-btn btn-ai" id="aiAnalyseBtn" style="display:none" onclick="runAiExtraction()"><i class="ti ti-sparkles" style="font-size:14px"></i> Analyse document</button>
+      <button class="topbar-btn btn-primary" id="aiOpenFormBtn" style="display:none" onclick="openInForm()"><i class="ti ti-arrow-right" style="font-size:14px"></i> Open in form &amp; review</button>
+      <button class="topbar-btn btn-ghost" onclick="closeAiModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="maybeCloseDrawer(event)">
+  <div class="drawer">
+    <div class="drawer-header">
+      <div class="drawer-title" id="drawerTitleText">Add tender <span class="ai-badge" id="aiBadge"><i class="ti ti-sparkles" style="font-size:10px"></i> AI filled</span></div>
+      <div class="drawer-close" onclick="closeDrawer()"><i class="ti ti-x"></i></div>
+    </div>
+    <div class="drawer-body">
+      <input type="hidden" id="editId">
+      <input type="hidden" id="editIsNonCqc">
+      <div class="form-section">
+        <div class="fsect-title">Tender details</div>
+        <div class="form-row single"><div class="form-group"><label class="form-label">Title <span class="req">*</span></label><input class="form-input" type="text" id="fTitle" placeholder="e.g. Domiciliary Care Services" oninput="tryAutoCategory()"><div class="ai-filled-note" id="hintTitle"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Organisation <span class="req">*</span></label><input class="form-input" type="text" id="fOrg" placeholder="e.g. Durham County Council"><div class="ai-filled-note" id="hintOrg"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
+          <div class="form-group"><label class="form-label">Region <span class="req">*</span></label><input class="form-input" type="text" id="fRegion" placeholder="e.g. North East"><div class="ai-filled-note" id="hintRegion"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Contract value <span class="req">*</span></label><input class="form-input" type="text" id="fValue" placeholder="e.g. £3,100,000"><div class="ai-filled-note" id="hintValue"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
+          <div class="form-group"><label class="form-label">Duration <span class="req">*</span></label><input class="form-input" type="text" id="fDuration" placeholder="e.g. 3 years"><div class="ai-filled-note" id="hintDuration"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">Deadline <span class="req">*</span></label><input class="form-input" type="date" id="fDeadline"><div class="ai-filled-note" id="hintDeadline"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
+          <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="fStatus"><option value="open">Open</option><option value="closing">Closing soon</option><option value="urgent">Urgent</option><option value="new">New opportunity</option><option value="draft">Draft</option></select></div>
+        </div>
+        <div class="form-row" id="categoryRow">
+          <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="fCategory"><optgroup label="Care"><option value="Domiciliary care">Domiciliary care</option><option value="Residential">Residential</option><option value="Nursing">Nursing</option><option value="Supported living">Supported living</option><option value="Mental health">Mental health</option><option value="Hospital discharge">Hospital discharge</option></optgroup><optgroup label="Commercial"><option value="Construction">Construction</option><option value="Facilities">Facilities</option><option value="Cleaning">Cleaning</option><option value="Consultancy">Consultancy</option><option value="IT & Digital">IT &amp; Digital</option><option value="Logistics">Logistics</option><option value="Other">Other</option></optgroup></select></div>
+          <div class="form-group"><label class="form-label">Submission link</label><input class="form-input" type="url" id="fLink" placeholder="https://..."><div class="ai-filled-note" id="hintLink"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div>
+        </div>
+        <div class="form-row single">
+          <div class="form-group"><label class="form-label">Stripe payment link <span style="color:var(--text-light);font-weight:400;font-size:11px;">(clients click Pay Now)</span></label><input class="form-input" type="url" id="fStripeLink" placeholder="https://buy.stripe.com/..."></div>
+        </div>
+        <div class="form-row single" id="whyCqcRow" style="display:none"><div class="form-group"><label class="form-label">Why this works for new providers</label><textarea class="form-textarea" id="fWhyCqc" style="min-height:80px" placeholder="Explain why this is suitable for unregistered providers..."></textarea></div></div>
+        <div class="form-row single"><div class="form-group"><label class="form-label">Description <span class="req">*</span></label><textarea class="form-textarea" id="fDesc" placeholder="Describe the tender scope..." oninput="tryAutoCategory()"></textarea><div class="ai-filled-note" id="hintDesc"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div></div>
+      </div>
+      <div class="form-section">
+        <div class="fsect-title">Our pricing breakdown</div>
+        <div class="pricing-builder" id="pricingBuilder"></div>
+        <button class="add-price-row" onclick="addPriceRow()"><i class="ti ti-plus" style="font-size:14px"></i> Add line item</button>
+        <div class="price-total"><span>Total fee</span><span id="priceTotalPreview">£0</span></div>
+        <div class="form-row single" style="margin-top:1rem"><div class="form-group"><label class="form-label">Fee note</label><input class="form-input" type="text" id="fPricingNote" value="One-off fee. No hidden charges. Payable on engagement."></div></div>
+      </div>
+      <div class="form-section">
+        <div class="fsect-title">Eligibility requirements</div>
+        <div class="elig-list" id="eligList"></div>
+        <button class="add-elig" onclick="addEligRow()"><i class="ti ti-plus" style="font-size:14px"></i> Add requirement</button>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="topbar-btn btn-primary" id="publishBtn" onclick="saveTender()"><div class="saving-spinner" id="savingSpinner"></div><i class="ti ti-check" style="font-size:14px" id="saveIcon"></i> <span id="saveLabel">Publish tender</span></button>
+      <button class="topbar-btn btn-ghost" onclick="closeDrawer()">Cancel</button>
+      <button style="background:none;border:1.5px solid var(--border);color:var(--text-muted);font-size:13px;padding:8px 14px;border-radius:var(--radius);cursor:pointer;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:6px" onclick="saveDraft()"><i class="ti ti-device-floppy" style="font-size:14px"></i> Save draft</button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-card">
+    <div class="confirm-icon"><i class="ti ti-trash"></i></div>
+    <div class="confirm-title">Delete this listing?</div>
+    <div class="confirm-text">This will permanently remove it from the live site and database. This cannot be undone.</div>
+    <div class="confirm-btns"><button class="btn-danger" onclick="confirmDelete()">Yes, delete it</button><button class="btn-cancel" onclick="document.getElementById('confirmOverlay').classList.remove('open')">Cancel</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><i class="ti ti-check" style="font-size:16px" id="toastIcon"></i><span id="toastMsg"></span></div>
+
+<script>
+const API = '/.netlify/functions';
+const ADMIN_PASSWORD = 'CareTenders2024!';
+let allTenders = [];
+let deleteTarget = { id: null };
+let currentSection = 'care';
+let extractedData = null;
+let selectedFile = null;
+let nextId = 1;
+
+function doLogin() {
+  var p = document.getElementById('loginPass') ? document.getElementById('loginPass').value : '';
+  var valid = ['CareTenders2024!', 'CanaAdmin2024!', 'Cana2024!'];
+  if (valid.includes(p)) {
+    localStorage.setItem('adminLoggedIn', 'true');
+    sessionStorage.setItem('adminLoggedIn', 'true');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appScreen').style.display = 'block';
+    loadTenders();
+  } else if (p !== '') {
+    document.getElementById('loginError').style.display = 'flex';
+  }
+}
+function doLogout() {
+  localStorage.removeItem('adminLoggedIn');
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+const CARE_CATS = ['domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
+const COMMERCIAL_CATS = ['construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','logistics','other','it & services'];
+
+function isCare(t) {
+  const cat = (t.category||'').toLowerCase().trim();
+  if (!cat) return !!t.is_non_cqc;
+  if (COMMERCIAL_CATS.includes(cat)) return false;
+  if (CARE_CATS.includes(cat)) return true;
+  if (['construction','facilit','cleaning','consultanc','logistic'].some(k => cat.includes(k))) return false;
+  return true;
+}
+
+function requiresCqcRating(t) {
+  const reqs = (t.eligibility||[]).join(' ').toLowerCase();
+  return reqs.includes('cqc rating') || reqs.includes('good or outstanding') || reqs.includes('cqc rated') || reqs.includes('cqc inspection') || reqs.includes('rated by cqc');
+}
+
+function isNonCqcEligible(t) { return isCare(t) && !requiresCqcRating(t); }
+
+function autoDetectCategory(text) {
+  const t = (text||'').toLowerCase();
+  if (/construction|refurb|build|contractor|civil engineer|structural/.test(t)) return 'Construction';
+  if (/facilit|estate management|hard fm|soft fm/.test(t)) return 'Facilities';
+  if (/clean|janitorial|hygiene service|washroom/.test(t)) return 'Cleaning';
+  if (/consult|advisory|professional service|strategy/.test(t)) return 'Consultancy';
+  if (/it service|digital|software|cyber|data|technology|ict/.test(t)) return 'IT & Digital';
+  if (/logistic|transport|courier|supply chain|delivery/.test(t)) return 'Logistics';
+  if (/domiciliary|home care|homecare|personal care/.test(t)) return 'Domiciliary care';
+  if (/residential|care home|nursing home/.test(t)) return 'Residential';
+  if (/nursing|clinical care|registered nurse/.test(t)) return 'Nursing';
+  if (/supported living|supported accommodation/.test(t)) return 'Supported living';
+  if (/mental health|psychiatric|wellbeing/.test(t)) return 'Mental health';
+  if (/hospital discharge|step.?down|reablement/.test(t)) return 'Hospital discharge';
+  return null;
+}
+
+function showPage(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  btn.classList.add('active');
+  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana AI', knowledge:'Knowledge Base', settings:'Settings' };
+  document.getElementById('topbarTitle').textContent = titles[page] || page;
+  ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(function(id) {
+    var el = document.getElementById(id); if(el) el.style.display = 'none';
+  });
+  if (page === 'care') { document.getElementById('aiUploadBtn').style.display='flex'; document.getElementById('addTenderBtn').style.display='flex'; renderCareTable(); }
+  if (page === 'commercial') { document.getElementById('aiCommercialBtn').style.display='flex'; document.getElementById('addCommercialBtn').style.display='flex'; renderCommercialTable(); }
+  if (page === 'noncqc') { document.getElementById('aiNonCqcBtn').style.display='flex'; document.getElementById('addNonCqcBtn').style.display='flex'; renderNonCqcTable(); }
+  if (page === 'knowledge') { loadKnowledgeBase(); }
+  if (page === 'cana') { populateCanaTenderSelect(); }
+}
+
+function calcTotal(items) { return (items||[]).reduce(function(s,i){ return s+(parseFloat(i.price)||0); },0); }
+function fmtDate(d) { if(!d) return ''; try { return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); } catch(e){ return d; } }
+function badgeHtml(s) {
+  var map={open:'badge-open',closing:'badge-closing',urgent:'badge-urgent',new:'badge-new',draft:'badge-draft'};
+  var lbl={open:'Open',closing:'Closing soon',urgent:'Urgent',new:'New opportunity',draft:'Draft'};
+  return '<span class="td-badge '+(map[s]||'badge-draft')+'">'+(lbl[s]||s)+'</span>';
+}
+
+function updateCounts() {
+  var care=allTenders.filter(isCare);
+  var commercial=allTenders.filter(function(t){return !isCare(t);});
+  var nc=allTenders.filter(function(t){return isNonCqcEligible(t)||t.is_non_cqc;});
+  var withDocs=allTenders.filter(function(t){return t.cana_docs&&(
+    (t.cana_docs.quality&&t.cana_docs.quality.length)||
+    (t.cana_docs.spec&&t.cana_docs.spec.length)||
+    (t.cana_docs.scoring&&t.cana_docs.scoring.length));});
+  document.getElementById('sbCare').textContent=care.length;
+  document.getElementById('sbCommercial').textContent=commercial.length;
+  document.getElementById('sbNonCqc').textContent=nc.length;
+  document.getElementById('sbCana').textContent=withDocs.length;
+  document.getElementById('statTotal').textContent=allTenders.length;
+  document.getElementById('statOpen').textContent=allTenders.filter(function(t){return t.status==='open';}).length;
+  document.getElementById('statClosing').textContent=allTenders.filter(function(t){return t.status==='closing'||t.status==='urgent';}).length;
+  document.getElementById('statNonCqc').textContent=nc.length;
+}
+
+function renderAll() { updateCounts(); renderDashboard(); renderCareTable(); renderCommercialTable(); renderNonCqcTable(); }
+
+function renderDashboard() {
+  var rows=allTenders.slice(0,10);
+  document.getElementById('dashboardTable').innerHTML=rows.length?rows.map(function(t){return '<tr><td><div class="td-title">'+t.title+'</div><div class="td-org">'+(t.org||'')+'</div></td><td style="font-weight:600">'+(t.value||'')+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted)">'+fmtDate(t.deadline)+'</td><td><div class="action-btns"><button class="action-btn edit" onclick="openDrawer(\''+t.id+'\',\'care\')" title="Edit"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')" title="Delete"><i class="ti ti-trash"></i></button></div></td></tr>';}).join(''):'<tr><td colspan="5"><div class="empty-state"><i class="ti ti-file-off"></i>No listings yet</div></td></tr>';
+}
+
+function feeStr(t) {
+  var p=t.pricing||{};
+  if(p.total) return typeof p.total==='number'?'£'+p.total.toLocaleString()+'+VAT':p.total;
+  if(Array.isArray(p.items)&&p.items.length){var s=p.items.reduce(function(a,i){return a+(parseFloat(i.price)||0);},0);return s>0?'£'+s.toLocaleString()+'+VAT':'—';}
+  return '—';
+}
+
+function renderCareTable() {
+  var q=(document.getElementById('careSearch').value||'').toLowerCase();
+  var rows=allTenders.filter(function(t){return isCare(t)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  document.getElementById('careCountLabel').textContent='('+rows.length+')';
+  var tb=document.getElementById('careTable');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><i class="ti ti-file-off"></i>No care tenders yet</div></td></tr>';return;}
+  tb.innerHTML=rows.map(function(t){
+    var nc=isNonCqcEligible(t);
+    var ncBadge=nc?'<span class="td-badge" style="background:#e8f7ee;color:#085041;font-size:10px">Auto</span>':'<span style="color:var(--text-light)">—</span>';
+    var publishBtn=t.status==='draft'?'<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;" onclick="publishDraft(\''+t.id+'\')" title="Publish"><i class="ti ti-send"></i></button>':'';
+    return '<tr><td><div class="td-title">'+(t.title||'Untitled')+'</div><div class="td-org">'+(t.org||'')+'</div></td><td>'+(t.organisation||t.org||'')+'</td><td>'+(t.value||'')+'</td><td style="color:var(--green);font-weight:600">'+feeStr(t)+'</td><td>'+ncBadge+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted);font-size:12px">'+fmtDate(t.deadline)+'</td><td><div class="action-btns">'+publishBtn+'<button class="action-btn edit" onclick="openDrawerById(\''+t.id+'\',\'care\')"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')"><i class="ti ti-trash"></i></button></div></td></tr>';
+  }).join('');
+}
+
+function renderCommercialTable() {
+  var q=(document.getElementById('commercialSearch').value||'').toLowerCase();
+  var rows=allTenders.filter(function(t){return !isCare(t)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  document.getElementById('commercialCountLabel').textContent='('+rows.length+')';
+  var tb=document.getElementById('commercialTable');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="ti ti-building-off"></i>No commercial tenders yet</div></td></tr>';return;}
+  tb.innerHTML=rows.map(function(t){
+    var publishBtn=t.status==='draft'?'<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;" onclick="publishDraft(\''+t.id+'\')" title="Publish"><i class="ti ti-send"></i></button>':'';
+    return '<tr><td><div class="td-title">'+(t.title||'Untitled')+'</div><div class="td-org">'+(t.org||'')+'</div></td><td>'+(t.organisation||t.org||'')+'</td><td>'+(t.value||'')+'</td><td style="color:var(--green);font-weight:600">'+feeStr(t)+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted);font-size:12px">'+fmtDate(t.deadline)+'</td><td><div class="action-btns">'+publishBtn+'<button class="action-btn edit" onclick="openDrawerById(\''+t.id+'\',\'commercial\')"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')"><i class="ti ti-trash"></i></button></div></td></tr>';
+  }).join('');
+}
+
+function renderNonCqcTable() {
+  var q=(document.getElementById('nonCqcSearch').value||'').toLowerCase();
+  var rows=allTenders.filter(function(t){return (isNonCqcEligible(t)||t.is_non_cqc)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  document.getElementById('nonCqcCountLabel').textContent='('+rows.length+')';
+  var tb=document.getElementById('nonCqcTable');
+  if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="ti ti-certificate"></i>No non-CQC listings yet</div></td></tr>';return;}
+  tb.innerHTML=rows.map(function(t){
+    var isAuto=isNonCqcEligible(t)&&!t.is_non_cqc;
+    return '<tr><td><div class="td-title">'+(t.title||'')+'</div><div class="td-org">'+(t.org||'')+'</div></td><td>'+(t.organisation||t.org||'')+'</td><td>'+(t.value||'')+'</td><td style="color:var(--green);font-weight:600">'+feeStr(t)+'</td><td>'+(isAuto?'<span class="td-badge" style="background:#e8f7ee;color:#085041;font-size:10px">Auto</span>':'<span style="color:var(--text-light)">Manual</span>')+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted);font-size:12px">'+fmtDate(t.deadline)+'</td><td><div class="action-btns"><button class="action-btn edit" onclick="openDrawerById(\''+t.id+'\',\'noncqc\')"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')"><i class="ti ti-trash"></i></button></div></td></tr>';
+  }).join('');
+}
+
+// AI MODAL
+function openAiModal(sectionType) {
+  currentSection=sectionType; extractedData=null; selectedFile=null;
+  document.getElementById('aiStep1').style.display='block';
+  document.getElementById('aiStep2').style.display='none';
+  document.getElementById('aiStep3').style.display='none';
+  document.getElementById('fileInput').value='';
+  document.getElementById('fileSelectedBar').style.display='none';
+  document.getElementById('uploadZone').style.display='block';
+  document.getElementById('aiAnalyseBtn').style.display='none';
+  document.getElementById('aiOpenFormBtn').style.display='none';
+  document.getElementById('aiOverlay').classList.add('open');
+}
+function closeAiModal(){document.getElementById('aiOverlay').classList.remove('open');}
+function maybeCloseAi(e){if(e.target===document.getElementById('aiOverlay'))closeAiModal();}
+function handleDrag(e){e.preventDefault();document.getElementById('uploadZone').classList.add('dragover');}
+function handleDragLeave(){document.getElementById('uploadZone').classList.remove('dragover');}
+function handleDrop(e){e.preventDefault();document.getElementById('uploadZone').classList.remove('dragover');var f=e.dataTransfer.files[0];if(f)setFile(f);}
+function handleFileSelect(e){var f=e.target.files[0];if(f)setFile(f);}
+function setFile(file){
+  selectedFile=file;
+  document.getElementById('selectedFileName').textContent=file.name;
+  document.getElementById('selectedFileSize').textContent=(file.size/1024).toFixed(1)+' KB · Ready to analyse';
+  document.getElementById('fileSelectedBar').style.display='flex';
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('aiAnalyseBtn').style.display='flex';
+}
+function clearFile(){
+  selectedFile=null;document.getElementById('fileInput').value='';
+  document.getElementById('fileSelectedBar').style.display='none';
+  document.getElementById('uploadZone').style.display='block';
+  document.getElementById('aiAnalyseBtn').style.display='none';
+}
+
+async function runAiExtraction() {
+  if(!selectedFile) return;
+  document.getElementById('aiStep1').style.display='none';
+  document.getElementById('aiStep2').style.display='block';
+  document.getElementById('aiAnalyseBtn').style.display='none';
+  var steps=['ps1','ps2','ps3','ps4'];
+  for(var i=0;i<steps.length;i++){
+    await delay(700);
+    if(i>0) document.getElementById(steps[i-1]).className='proc-step done';
+    document.getElementById(steps[i]).className='proc-step active';
+  }
+  try {
+    var isPdf=selectedFile.type==='application/pdf'||selectedFile.name.toLowerCase().endsWith('.pdf');
+    var payload;
+    if(isPdf){
+      var base64=await readFileAsBase64(selectedFile);
+      payload={base64:base64,mimetype:'application/pdf',filename:selectedFile.name};
+    } else {
+      var text=await readFileAsText(selectedFile);
+      payload={text:text,filename:selectedFile.name};
+    }
+    var res=await fetch(API+'/extract-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var rawText=await res.text();
+    if(!rawText||rawText.trim()==='') throw new Error('Empty response from server (status '+res.status+')');
+    var data;
+    try{data=JSON.parse(rawText);}catch(e){throw new Error('Bad response: '+rawText.substring(0,200));}
+    if(!res.ok||data.error) throw new Error(data.error||'Server error '+res.status);
+    extractedData=data;
+    document.getElementById('ps4').className='proc-step done';
+    await delay(400);
+    document.getElementById('aiStep2').style.display='none';
+    document.getElementById('aiStep3').style.display='block';
+    renderPreview(data);
+    document.getElementById('aiOpenFormBtn').style.display='flex';
+  } catch(err) {
+    document.getElementById('aiStep2').style.display='none';
+    document.getElementById('aiStep1').style.display='block';
+    document.getElementById('fileSelectedBar').style.display='flex';
+    document.getElementById('uploadZone').style.display='none';
+    document.getElementById('aiAnalyseBtn').style.display='flex';
+    showToast('Extraction failed: '+err.message,'error');
+  }
+}
+
+function readFileAsBase64(file){
+  return new Promise(function(res,rej){
+    var reader=new FileReader();
+    reader.onload=function(e){res(e.target.result.split(',')[1]);};
+    reader.onerror=rej;
+    reader.readAsDataURL(file);
+  });
+}
+function readFileAsText(file){
+  return new Promise(function(res,rej){
+    var reader=new FileReader();
+    reader.onload=function(e){res(e.target.result);};
+    reader.onerror=rej;
+    reader.readAsText(file);
+  });
+}
+
+function renderPreview(data) {
+  var ch='<span class="conf conf-high"><i class="ti ti-check" style="font-size:10px"></i> Extracted</span>';
+  var fields=[
+    {l:'Tender title',v:data.title||'Not found'},
+    {l:'Organisation',v:data.org||'Not found'},
+    {l:'Region',v:data.region||'Not found'},
+    {l:'Contract value',v:data.value||'Not found'},
+    {l:'Duration',v:data.duration||'Not found'},
+    {l:'Deadline',v:data.deadline||'Not found'},
+    {l:'Our price (from doc)',v:data.our_price||'Not stated'},
+    {l:'Description',v:data.description||'Not found',multi:true},
+    {l:'Eligibility',v:(data.eligibility||[]).join('\n'),multi:true},
+  ];
+  document.getElementById('previewFields').innerHTML=fields.map(function(f){return '<div class="pf"><div class="pf-label"><span class="ai-tag">AI</span>'+f.l+ch+'</div><div class="pf-value'+(f.multi?' multi':'')+'">'+(f.v||'')+'</div></div>';}).join('');
+}
+
+function openInForm(){closeAiModal();openDrawer(null,currentSection,extractedData);}
+function delay(ms){return new Promise(function(r){setTimeout(r,ms);});}
+
+function openDrawerById(id,section){
+  var t=allTenders.find(function(x){return x.id===id;});
+  if(t) openDrawer(t,section);
+}
+
+function openDrawer(tOrId,sectionType,aiData){
+  currentSection=sectionType||'care';
+  var isNc=sectionType==='noncqc';
+  var isCommercial=sectionType==='commercial';
+  document.getElementById('editIsNonCqc').value=isNc?'1':'0';
+  document.getElementById('categoryRow').style.display=isNc?'none':'grid';
+  document.getElementById('whyCqcRow').style.display=isNc?'flex':'none';
+  document.getElementById('aiBadge').style.display=aiData?'inline-flex':'none';
+  ['Title','Org','Region','Value','Duration','Deadline','Desc','Link'].forEach(function(f){
+    var el=document.getElementById('f'+f);if(el)el.classList.remove('ai-filled');
+    var hint=document.getElementById('hint'+f);if(hint)hint.style.display='none';
+  });
+  var t=null;
+  if(tOrId&&typeof tOrId==='object') t=tOrId;
+  else if(tOrId&&typeof tOrId==='string') t=allTenders.find(function(x){return x.id===tOrId;});
+  if(t){
+    document.getElementById('editId').value=t.id||'';
+    document.getElementById('drawerTitleText').childNodes[0].textContent='Edit tender ';
+    document.getElementById('saveLabel').textContent='Save changes';
+    document.getElementById('fTitle').value=t.title||'';
+    document.getElementById('fOrg').value=t.org||t.organisation||'';
+    document.getElementById('fRegion').value=t.region||'';
+    document.getElementById('fValue').value=t.value||'';
+    document.getElementById('fDuration').value=t.duration||'';
+    document.getElementById('fDeadline').value=t.deadline||'';
+    document.getElementById('fStatus').value=t.status||'open';
+    document.getElementById('fDesc').value=t.description||'';
+    document.getElementById('fLink').value=t.link||t.submission_link||'';
+    document.getElementById('fStripeLink').value=t.stripe_link||'';
+    document.getElementById('fPricingNote').value=(t.pricing||{}).note||'';
+    if(!isNc) document.getElementById('fCategory').value=t.category||(isCommercial?'Construction':'Domiciliary care');
+    if(isNc) document.getElementById('fWhyCqc').value=t.why_cqc||'';
+    buildPriceRows((t.pricing||{}).items||[]);
+    buildEligRows(Array.isArray(t.eligibility)?t.eligibility:[]);
+  } else if(aiData){
+    document.getElementById('editId').value='';
+    document.getElementById('drawerTitleText').childNodes[0].textContent='Review AI-extracted tender ';
+    document.getElementById('saveLabel').textContent='Publish tender';
+    [['fTitle',aiData.title,'hintTitle'],['fOrg',aiData.org,'hintOrg'],['fRegion',aiData.region,'hintRegion'],
+     ['fValue',aiData.value,'hintValue'],['fDuration',aiData.duration,'hintDuration'],
+     ['fDeadline',aiData.deadline,'hintDeadline'],['fDesc',aiData.description,'hintDesc'],['fLink',aiData.link,'hintLink']
+    ].forEach(function(arr){
+      var el=document.getElementById(arr[0]);el.value=arr[1]||'';
+      if(arr[1]){el.classList.add('ai-filled');var h=document.getElementById(arr[2]);if(h)h.style.display='flex';}
+    });
+    document.getElementById('fStatus').value='open';
+    document.getElementById('fPricingNote').value='One-off fee. No hidden charges. Payable on engagement.';
+    if(!isNc){
+      var aiCat=aiData.category||autoDetectCategory((aiData.title||'')+' '+(aiData.description||''))||(isCommercial?'Construction':'Domiciliary care');
+      document.getElementById('fCategory').value=aiCat;
+    }
+    var priceItems=aiData.our_price
+      ?[{label:'Bid writing and strategy (from document)',price:aiData.our_price.replace(/[^0-9.]/g,'')}]
+      :[{label:'Bid writing and strategy',price:''},{label:'Compliance review',price:''},{label:'Submission support',price:''}];
+    buildPriceRows(priceItems);
+    buildEligRows(aiData.eligibility&&aiData.eligibility.length?aiData.eligibility:['']);
+  } else {
+    document.getElementById('editId').value='';
+    document.getElementById('drawerTitleText').childNodes[0].textContent='Add '+(isNc?'listing ':isCommercial?'commercial tender ':'care tender ');
+    document.getElementById('saveLabel').textContent=isNc?'Publish listing':'Publish tender';
+    ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink','fStripeLink'].forEach(function(f){
+      var el=document.getElementById(f);if(el){el.value='';el.classList.remove('ai-filled');}
+    });
+    document.getElementById('fDeadline').value='';
+    document.getElementById('fStatus').value='open';
+    document.getElementById('fPricingNote').value='One-off fee. No hidden charges. Payable on engagement.';
+    if(!isNc) document.getElementById('fCategory').value=isCommercial?'Construction':'Domiciliary care';
+    buildPriceRows([{label:'Bid writing and strategy',price:''},{label:'Compliance review',price:''},{label:'Submission support',price:''}]);
+    buildEligRows(['']);
+  }
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+
+function closeDrawer(){document.getElementById('drawerOverlay').classList.remove('open');}
+function maybeCloseDrawer(e){if(e.target===document.getElementById('drawerOverlay'))closeDrawer();}
+
+var prc=0;
+function buildPriceRows(items){prc=0;document.getElementById('pricingBuilder').innerHTML='';items.forEach(function(i){_addPR(i.label,i.price);});updatePriceTotal();}
+function _addPR(label,price){
+  var b=document.getElementById('pricingBuilder');
+  var d=document.createElement('div');d.className='price-row';d.id='pr'+prc;
+    // Build price row using DOM to avoid quote escaping issues
+  var inp1=document.createElement('input');inp1.type='text';inp1.placeholder='e.g. Bid writing';inp1.value=label||'';inp1.oninput=updatePriceTotal;
+  var inp2=document.createElement('input');inp2.type='number';inp2.placeholder='Amount';inp2.value=price||'';inp2.oninput=updatePriceTotal;
+  var btn=document.createElement('button');btn.className='rm-price';btn.type='button';
+  btn.innerHTML='<i class="ti ti-x"></i>';
+  var n=prc;btn.onclick=function(){document.getElementById('pr'+n).remove();updatePriceTotal();};
+  d.appendChild(inp1);d.appendChild(inp2);d.appendChild(btn);
+  b.appendChild(d);prc++;
+}
+function addPriceRow(){_addPR('','');updatePriceTotal();}
+function updatePriceTotal(){var t=Array.from(document.querySelectorAll('#pricingBuilder input[type=number]')).reduce(function(s,i){return s+(parseFloat(i.value)||0);},0);document.getElementById('priceTotalPreview').textContent=t>0?'£'+t.toLocaleString()+'+VAT':'£0';}
+function getPriceItems(){return Array.from(document.querySelectorAll('#pricingBuilder .price-row')).map(function(r){var ins=r.querySelectorAll('input');return{label:ins[0].value,price:ins[1].value};}).filter(function(i){return i.label||i.price;});}
+
+var ec=0;
+function buildEligRows(items){ec=0;document.getElementById('eligList').innerHTML='';items.forEach(function(v){addEligRow(v);});}
+function addEligRow(val){
+  val=val||'';
+  var list=document.getElementById('eligList');
+  var d=document.createElement('div');d.className='elig-item';d.id='el'+ec;
+  var inp=document.createElement('input');inp.type='text';inp.placeholder='e.g. CQC registration required';inp.value=val;
+  var btn=document.createElement('button');btn.className='rm-elig';btn.innerHTML='<i class="ti ti-x"></i>';
+  btn.onclick=function(){d.remove();};
+  d.appendChild(inp);d.appendChild(btn);
+  list.appendChild(d);ec++;
+}
+function getEligItems(){return Array.from(document.querySelectorAll('#eligList input')).map(function(i){return i.value;}).filter(function(v){return v.trim();});}
+
+function tryAutoCategory(){
+  var title=document.getElementById('fTitle').value;
+  var desc=document.getElementById('fDesc').value;
+  var detected=autoDetectCategory(title+' '+desc);
+  if(detected){var sel=document.getElementById('fCategory');if(sel)sel.value=detected;}
+}
+
+async function saveTender(draft){
+  draft=draft||false;
+  var isNonCqc=document.getElementById('editIsNonCqc').value==='1';
+  var id=document.getElementById('editId').value;
+  var pItems=getPriceItems();
+  var total=pItems.reduce(function(s,i){return s+(parseFloat(i.price)||0);},0);
+  var deadline=document.getElementById('fDeadline').value;
+  var cat=document.getElementById('fCategory').value||null;
+  var commercialCats=['Construction','Facilities','Cleaning','Consultancy','IT & Digital','Logistics','Other'];
+  var tender={
+    id:id||(isNonCqc?'NC':'T')+'-2026-'+String(nextId++).padStart(3,'0'),
+    status:draft?'draft':document.getElementById('fStatus').value,
+    title:document.getElementById('fTitle').value,
+    org:document.getElementById('fOrg').value,
+    region:document.getElementById('fRegion').value,
+    value:document.getElementById('fValue').value,
+    duration:document.getElementById('fDuration').value,
+    deadline:deadline||null,
+    days_left:deadline?Math.max(0,Math.round((new Date(deadline)-new Date())/(1000*60*60*24))):0,
+    link:document.getElementById('fLink').value,
+    stripe_link:document.getElementById('fStripeLink').value||null,
+    description:document.getElementById('fDesc').value,
+    pricing:{items:pItems.map(function(i){return{label:i.label,price:parseFloat(i.price)||0};}),total:total,note:document.getElementById('fPricingNote').value},
+    eligibility:getEligItems(),
+    is_non_cqc:commercialCats.includes(cat)?false:(isNonCqc||isNonCqcEligible({category:cat,eligibility:getEligItems()})),
+    why_cqc:isNonCqc?document.getElementById('fWhyCqc').value:null,
+    category:cat,
+  };
+  document.getElementById('savingSpinner').style.display='block';
+  document.getElementById('saveIcon').style.display='none';
+  document.getElementById('publishBtn').disabled=true;
+  try {
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:tender})});
+    var data=await res.json();
+    if(data.error) throw new Error(data.error);
+    var idx=allTenders.findIndex(function(x){return x.id===tender.id;});
+    if(idx>-1) allTenders[idx]=tender; else allTenders.unshift(tender);
+    closeDrawer();renderAll();
+    showToast(draft?'Draft saved':'Tender published to live site','success');
+  } catch(err){
+    showToast('Save failed: '+err.message,'error');
+  } finally {
+    document.getElementById('savingSpinner').style.display='none';
+    document.getElementById('saveIcon').style.display='inline';
+    document.getElementById('publishBtn').disabled=false;
+  }
+}
+function saveDraft(){saveTender(true);}
+
+async function publishDraft(id){
+  var t=allTenders.find(function(x){return x.id===id;});
+  if(!t) return;
+  t.status='open';
+  try {
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:t})});
+    var data=await res.json();
+    if(!res.ok||data.error) throw new Error(data.error);
+    showToast('Tender published to live site','success');
+    await loadTenders();
+  } catch(e){showToast('Publish failed: '+e.message,'error');}
+}
+
+function askDelete(id){deleteTarget={id:id};document.getElementById('confirmOverlay').classList.add('open');}
+async function confirmDelete(){
+  var id=deleteTarget.id;
+  document.getElementById('confirmOverlay').classList.remove('open');
+  try {
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',tender:{id:id}})});
+    var data=await res.json();
+    if(data.error) throw new Error(data.error);
+    allTenders=allTenders.filter(function(x){return x.id!==id;});
+    renderAll();showToast('Listing deleted','error');
+  } catch(err){showToast('Delete failed: '+err.message,'error');}
+}
+
+var canaDocData={quality:[],spec:[],scoring:[]};
+
+function populateCanaTenderSelect(){
+  var sel = document.getElementById('canaTenderSelect');
+  if (!sel) return;
+  var cur = sel.value;
+  sel.innerHTML = '<option value="">Choose a tender...</option>';
+  allTenders.filter(function(t){ return t.status !== 'draft'; }).forEach(function(t) {
+    var hasSq = !!(t.sq_data);
+    var hasAllDocs = hasSq &&
+      t.cana_docs && t.cana_docs.quality && t.cana_docs.quality.length &&
+      t.cana_docs.spec && t.cana_docs.spec.length &&
+      t.cana_docs.scoring && t.cana_docs.scoring.length;
+    var opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = (hasAllDocs ? '✓ ' : '') + t.title + (t.org ? ' — ' + t.org : '');
+    if (t.id === cur) opt.selected = true;
+    sel.appendChild(opt);
+  });
 }>
-<script>document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });</script>
