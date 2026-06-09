@@ -474,7 +474,7 @@ function renderCanaPanels() {
   var pending = [];
 
   allTenders.filter(function(t){ return t.status !== 'draft'; }).forEach(function(t) {
-    var hasSq      = !!(t.sq_data);
+    var hasSq      = !!(t.sq_data && t.sq_data.sections && t.sq_data.sections.length > 0);
     var hasQuality = !!(t.cana_docs && t.cana_docs.quality && t.cana_docs.quality.length);
     var hasSpec    = !!(t.cana_docs && t.cana_docs.spec    && t.cana_docs.spec.length);
     var hasScoring = !!(t.cana_docs && t.cana_docs.scoring && t.cana_docs.scoring.length);
@@ -582,7 +582,7 @@ function loadCanaDocs(){
     canaDocData[type]=Array.isArray(docs[type])?docs[type]:(docs[type]?[docs[type]]:[]);
     renderCanaFiles(type);
   });
-  var hasSq = !!(t && t.sq_data);
+  var hasSq = !!(t && t.sq_data && t.sq_data.sections && t.sq_data.sections.length > 0);
   var hasQuality = canaDocData.quality.length > 0;
   var hasSpec = canaDocData.spec.length > 0;
   var hasScoring = canaDocData.scoring.length > 0;
