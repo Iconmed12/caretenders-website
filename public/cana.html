@@ -310,23 +310,8 @@
         <p style="font-size:0.88rem;color:var(--muted);line-height:1.7;max-width:460px;margin:0 auto;">We've filled in your company and director details using Companies House data. Review everything below and confirm the declarations.</p>
       </div>
 
-      <!-- COMPANY INFORMATION -->
-      <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;">
-        <div style="background:#f8fafc;padding:0.9rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <div style="font-weight:700;font-size:0.9rem;">🏢 Company Information</div>
-          <span style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;" id="sq-company-badge">Auto-filled</span>
-        </div>
-        <div style="padding:0;" id="sq-company-fields"></div>
-      </div>
-
-      <!-- DIRECTORS -->
-      <div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1.25rem;" id="sq-directors-section">
-        <div style="background:#f8fafc;padding:0.9rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-          <div style="font-weight:700;font-size:0.9rem;">👤 Directors &amp; Persons of Significant Control</div>
-          <span style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;">From Companies House</span>
-        </div>
-        <div style="padding:0;" id="sq-directors-fields"></div>
-      </div>
+      <!-- DYNAMIC SQ SECTIONS -->
+      <div id="sq-sections-cana"></div>
 
       <!-- DECLARATIONS -->
       <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:14px;overflow:hidden;margin-bottom:1.5rem;">
@@ -649,64 +634,132 @@
   }
 
   function populateSqStep() {
-    var ch = window._chData || {};
-    var co = window._companyDetails || {};
+    var ch   = window._chData || {};
+    var co   = window._companyDetails || {};
+    var sqData = window._tenderData && window._tenderData.sq_data;
 
-    // Build company fields
-    var companyFields = [
-      { label: 'Registered company name', value: ch.company_name || co.name || '' },
-      { label: 'Company registration number', value: ch.company_number || '' },
-      { label: 'Registered address', value: ch.registered_address || '' },
-      { label: 'Company type', value: ch.company_type ? ch.company_type.replace(/-/g,' ').replace(/\w/g,function(c){return c.toUpperCase();}) : '' },
-      { label: 'Date of incorporation', value: ch.date_of_creation || '' },
-      { label: 'Company status', value: ch.company_status || 'Active' },
-      { label: 'CQC registration status', value: co.cqc || '' },
-      { label: 'VAT registered', value: 'Yes' },
-      { label: 'SME status', value: parseInt(co.staff||'0') < 250 ? 'Yes — SME' : 'No' }
-    ].filter(function(f){ return f.value; });
+    // Profile key → value from CH + company details
+    var profileMap = {
+      company_name:       ch.company_name || co.name || '',
+      company_number:     ch.company_number || '',
+      registered_address: ch.registered_address || '',
+      company_type:       ch.company_type ? ch.company_type.replace(/-/g,' ') : '',
+      founded_year:       ch.date_of_creation ? ch.date_of_creation.split('-')[0] : '',
+      company_status:     ch.company_status || 'Active',
+      cqc_status:         co.cqc || '',
+      sme_status:         parseInt(co.staff||'0') < 250 ? 'Yes' : 'No',
+      directors:          ch.officers ? ch.officers.filter(function(o){return !o.resigned_on;}).map(function(o){return o.name+' ('+o.role+')';}).join(', ') : '',
+      psc_details:        ch.pscs && ch.pscs.length ? ch.pscs[0].name+' — '+ch.pscs[0].nature_of_control : ''
+    };
 
-    document.getElementById('sq-company-fields').innerHTML = companyFields.map(function(f) {
-      return '<div style="display:grid;grid-template-columns:1fr 1.3fr;gap:0.5rem;padding:0.7rem 1.25rem;border-bottom:1px solid var(--border);">' +
-        '<div style="font-size:0.8rem;font-weight:600;color:var(--text-muted,#6b7280);">' + f.label + '</div>' +
-        '<div style="font-size:0.83rem;font-weight:500;color:#166534;display:flex;align-items:center;gap:5px;">✓ ' + f.value + '</div>' +
-      '</div>';
-    }).join('').replace(/border-bottom:1px solid var\(--border\);">\s*<\/div>\s*$/, '">');
+    // Keys that belong to company/director sections (VISIBLE)
+    var visibleKeys = ['company_name','company_number','registered_address','company_type',
+                       'founded_year','company_status','cqc_status','sme_status',
+                       'directors','psc_details','vat_number','ico_number','contact_name'];
 
-    // Build directors fields
-    var directors = ch.officers ? ch.officers.filter(function(o){ return !o.resigned_on; }) : [];
-    var pscs = ch.pscs || [];
+    var sectionsHtml = '';
 
-    var dirHtml = '';
-    if (directors.length) {
-      directors.forEach(function(d) {
-        dirHtml += '<div style="padding:0.75rem 1.25rem;border-bottom:1px solid var(--border);">' +
-          '<div style="display:flex;align-items:center;justify-content:space-between;">' +
-            '<div>' +
-              '<div style="font-size:0.85rem;font-weight:700;">✓ ' + d.name + '</div>' +
-              '<div style="font-size:0.75rem;color:#6b7280;text-transform:capitalize;margin-top:2px;">' + (d.role||'director') + (d.appointed_on ? ' · Appointed ' + d.appointed_on : '') + '</div>' +
-            '</div>' +
-            '<span style="font-size:0.7rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 8px;border-radius:999px;">Director</span>' +
-          '</div>' +
-        '</div>';
+    if (sqData && sqData.sections && sqData.sections.length) {
+      // Use ACTUAL SQ document sections
+      sqData.sections.forEach(function(section) {
+        var fields = section.fields || [];
+        var isVisible = fields.some(function(f){
+          return f.field_type === 'auto_fill' && visibleKeys.indexOf(f.profile_key) !== -1;
+        });
+        var isDeclaration = fields.every(function(f){ return f.field_type === 'client_confirm'; });
+
+        if (isDeclaration) return; // declarations handled separately below
+
+        if (isVisible) {
+          // Show this section with auto-filled values
+          sectionsHtml += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
+          sectionsHtml += '<div style="background:#f8fafc;padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
+          sectionsHtml += '<div style="font-weight:700;font-size:0.88rem;">' + section.section + ': ' + section.title + '</div>';
+          sectionsHtml += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">✓ Auto-filled</span>';
+          sectionsHtml += '</div>';
+
+          fields.forEach(function(f, i) {
+            var val = f.field_type === 'auto_fill' ? (profileMap[f.profile_key] || '') : '';
+            var isLast = i === fields.length - 1;
+            sectionsHtml += '<div style="display:grid;grid-template-columns:1fr 1.2fr;gap:0.5rem;padding:0.65rem 1.25rem;' + (isLast ? '' : 'border-bottom:1px solid var(--border);') + '">';
+            sectionsHtml += '<div style="font-size:0.79rem;font-weight:600;color:#6b7280;">' + (f.id ? '<span style="opacity:0.6;">' + f.id + ' </span>' : '') + f.question + '</div>';
+            if (val) {
+              sectionsHtml += '<div style="font-size:0.82rem;font-weight:600;color:#166534;display:flex;align-items:flex-start;gap:4px;"><span style="flex-shrink:0;">✓</span>' + val + '</div>';
+            } else {
+              sectionsHtml += '<div style="font-size:0.79rem;color:#d97706;font-style:italic;">Not available</div>';
+            }
+            sectionsHtml += '</div>';
+          });
+          sectionsHtml += '</div>';
+
+        } else {
+          // LOCKED section
+          sectionsHtml += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;position:relative;">';
+          sectionsHtml += '<div style="background:#f8fafc;padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
+          sectionsHtml += '<div style="font-weight:700;font-size:0.88rem;color:#9ca3af;">' + section.section + ': ' + section.title + '</div>';
+          sectionsHtml += '<span style="background:#f3f4f6;color:#9ca3af;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">🔒 Locked</span>';
+          sectionsHtml += '</div>';
+          // Blurred preview rows
+          sectionsHtml += '<div style="padding:0.5rem 1.25rem;filter:blur(4px);pointer-events:none;user-select:none;opacity:0.4;">';
+          fields.slice(0,3).forEach(function(f) {
+            sectionsHtml += '<div style="padding:0.5rem 0;border-bottom:1px solid var(--border);font-size:0.82rem;color:#374151;">' + f.question + '</div>';
+          });
+          sectionsHtml += '</div>';
+          // Lock overlay
+          sectionsHtml += '<div style="position:absolute;inset:0;top:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(255,255,255,0.6);gap:6px;">';
+          sectionsHtml += '<span style="font-size:1.5rem;">🔒</span>';
+          sectionsHtml += '<span style="font-size:0.78rem;font-weight:700;color:#6b7280;">Completed in your full report</span>';
+          sectionsHtml += '</div>';
+          sectionsHtml += '</div>';
+        }
       });
-    }
-    if (pscs.length) {
-      pscs.forEach(function(p) {
-        dirHtml += '<div style="padding:0.75rem 1.25rem;border-bottom:1px solid var(--border);">' +
-          '<div style="display:flex;align-items:center;justify-content:space-between;">' +
-            '<div>' +
-              '<div style="font-size:0.85rem;font-weight:700;">✓ ' + p.name + '</div>' +
-              '<div style="font-size:0.75rem;color:#6b7280;margin-top:2px;">' + (p.nature_of_control||'Person of Significant Control') + '</div>' +
-            '</div>' +
-            '<span style="font-size:0.7rem;font-weight:700;background:rgba(124,58,237,0.1);color:#5b21b6;padding:2px 8px;border-radius:999px;">PSC</span>' +
-          '</div>' +
-        '</div>';
+    } else {
+      // No SQ uploaded — show CH data only in generic format
+      var coFields = [
+        { q:'Registered company name', v: profileMap.company_name },
+        { q:'Company registration number', v: profileMap.company_number },
+        { q:'Registered address', v: profileMap.registered_address },
+        { q:'Company type', v: profileMap.company_type },
+        { q:'Date of incorporation', v: profileMap.founded_year },
+        { q:'Company status', v: profileMap.company_status },
+        { q:'CQC status', v: profileMap.cqc_status },
+        { q:'SME status', v: profileMap.sme_status }
+      ].filter(function(f){ return f.v; });
+
+      sectionsHtml += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
+      sectionsHtml += '<div style="background:#f8fafc;padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
+      sectionsHtml += '<div style="font-weight:700;font-size:0.88rem;">Company Information</div>';
+      sectionsHtml += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">✓ Auto-filled</span></div>';
+      coFields.forEach(function(f,i) {
+        sectionsHtml += '<div style="display:grid;grid-template-columns:1fr 1.2fr;gap:0.5rem;padding:0.65rem 1.25rem;' + (i<coFields.length-1?'border-bottom:1px solid var(--border);':'') + '">';
+        sectionsHtml += '<div style="font-size:0.79rem;font-weight:600;color:#6b7280;">'+f.q+'</div>';
+        sectionsHtml += '<div style="font-size:0.82rem;font-weight:600;color:#166534;">✓ '+f.v+'</div></div>';
       });
+      sectionsHtml += '</div>';
+
+      // Directors
+      var directors = ch.officers ? ch.officers.filter(function(o){return !o.resigned_on;}) : [];
+      var pscs = ch.pscs || [];
+      if (directors.length || pscs.length) {
+        sectionsHtml += '<div style="background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
+        sectionsHtml += '<div style="background:#f8fafc;padding:0.85rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">';
+        sectionsHtml += '<div style="font-weight:700;font-size:0.88rem;">Directors & PSC</div>';
+        sectionsHtml += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">✓ Auto-filled</span></div>';
+        directors.forEach(function(d,i) {
+          sectionsHtml += '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.25rem;border-bottom:1px solid var(--border);">';
+          sectionsHtml += '<div><div style="font-size:0.85rem;font-weight:700;">✓ '+d.name+'</div><div style="font-size:0.74rem;color:#6b7280;text-transform:capitalize;">'+(d.role||'director')+(d.appointed_on?' · Appointed '+d.appointed_on:'')+'</div></div>';
+          sectionsHtml += '<span style="font-size:0.7rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 8px;border-radius:999px;">Director</span></div>';
+        });
+        pscs.forEach(function(p) {
+          sectionsHtml += '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.25rem;">';
+          sectionsHtml += '<div><div style="font-size:0.85rem;font-weight:700;">✓ '+p.name+'</div><div style="font-size:0.74rem;color:#6b7280;">'+(p.nature_of_control||'PSC')+'</div></div>';
+          sectionsHtml += '<span style="font-size:0.7rem;font-weight:700;background:rgba(124,58,237,0.1);color:#5b21b6;padding:2px 8px;border-radius:999px;">PSC</span></div>';
+        });
+        sectionsHtml += '</div>';
+      }
     }
-    if (!dirHtml) {
-      dirHtml = '<div style="padding:1rem 1.25rem;font-size:0.83rem;color:#6b7280;font-style:italic;">No director information available — enter your company number in the previous step to pull directors automatically.</div>';
-    }
-    document.getElementById('sq-directors-fields').innerHTML = dirHtml;
+
+    document.getElementById('sq-sections-cana').innerHTML = sectionsHtml;
   }
 
   async function sqContinue() {
