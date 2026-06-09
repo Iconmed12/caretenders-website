@@ -312,9 +312,14 @@ tr:hover td{background:#fafafa}
         <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
           <div style="flex:1;">
             <label style="font-size:0.78rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Select tender</label>
-            <select id="canaTenderSelect" onchange="loadCanaDocs()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;color:var(--text);">
-              <option value="">Choose a tender...</option>
-            </select>
+            <div class="custom-select-wrap" id="canaTenderSelectWrap">
+              <div class="custom-select-trigger" id="canaTenderTrigger" onclick="toggleCustomSelect()">
+                <span class="custom-select-trigger-text" id="canaTenderTriggerText">Choose a tender...</span>
+                <span class="custom-select-trigger-arrow">▼</span>
+              </div>
+              <div class="custom-select-dropdown" id="canaTenderDropdown"></div>
+            </div>
+            <input type="hidden" id="canaTenderSelect" value="">
           </div>
           <div id="canaDocStatus" style="display:none;border-radius:8px;padding:8px 14px;font-size:0.82rem;font-weight:500;white-space:nowrap;"></div>
         </div>
@@ -1127,17 +1132,79 @@ async function confirmDelete(){
 var canaDocData={quality:[],spec:[],scoring:[]};
 
 function populateCanaTenderSelect(){
-  var sel=document.getElementById('canaTenderSelect');
-  if(!sel) return;
-  var cur=sel.value;
-  sel.innerHTML='<option value="">Choose a tender...</option>';
-  allTenders.filter(function(t){return t.status!=='draft';}).forEach(function(t){
-    var opt=document.createElement('option');
-    opt.value=t.id;
-    opt.textContent=t.title+(t.org?' — '+t.org:'');
-    sel.appendChild(opt);
+  var dropdown = document.getElementById('canaTenderDropdown');
+  if (!dropdown) return;
+  var curVal = document.getElementById('canaTenderSelect').value;
+
+  dropdown.innerHTML = '<div class="custom-select-option" data-value="" onclick="selectCustomTender('',this)">' +
+    '<span class="custom-select-option-name custom-select-option-placeholder">Choose a tender...</span>' +
+    '</div>';
+
+  allTenders.filter(function(t){ return t.status !== 'draft'; }).forEach(function(t) {
+    var hasSq = !!(t.sq_data);
+    var hasDocs = t.cana_docs && (
+      (t.cana_docs.quality && t.cana_docs.quality.length) ||
+      (t.cana_docs.spec && t.cana_docs.spec.length) ||
+      (t.cana_docs.scoring && t.cana_docs.scoring.length)
+    );
+    var isLive = hasSq && hasDocs &&
+      t.cana_docs.quality && t.cana_docs.quality.length &&
+      t.cana_docs.spec && t.cana_docs.spec.length &&
+      t.cana_docs.scoring && t.cana_docs.scoring.length;
+
+    var badge = isLive
+      ? '<span class="live-badge">● Live</span>'
+      : '<span class="pending-badge">○ Pending</span>';
+
+    var org = t.org ? '<div class="custom-select-option-org">' + t.org + '</div>' : '';
+
+    dropdown.innerHTML += '<div class="custom-select-option' + (t.id === curVal ? ' selected' : '') + '" data-value="' + t.id + '" onclick="selectCustomTender('' + t.id + '',this)">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div class="custom-select-option-name">' + t.title + '</div>' +
+        org +
+      '</div>' +
+      badge +
+      '</div>';
   });
-  if(cur) sel.value=cur;
+}
+
+function toggleCustomSelect() {
+  var trigger = document.getElementById('canaTenderTrigger');
+  var dropdown = document.getElementById('canaTenderDropdown');
+  var isOpen = dropdown.classList.contains('open');
+  dropdown.classList.toggle('open', !isOpen);
+  trigger.classList.toggle('open', !isOpen);
+  if (!isOpen) {
+    document.addEventListener('click', closeCustomSelectOnOutside, { once: true });
+  }
+}
+
+function closeCustomSelectOnOutside(e) {
+  var wrap = document.getElementById('canaTenderSelectWrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('canaTenderDropdown').classList.remove('open');
+    document.getElementById('canaTenderTrigger').classList.remove('open');
+  }
+}
+
+function selectCustomTender(val, el) {
+  document.getElementById('canaTenderSelect').value = val;
+  var triggerText = document.getElementById('canaTenderTriggerText');
+  if (!val) {
+    triggerText.textContent = 'Choose a tender...';
+  } else {
+    var t = allTenders.find(function(x){ return x.id === val; });
+    triggerText.textContent = t ? t.title + (t.org ? ' — ' + t.org : '') : val;
+  }
+  // Mark selected
+  document.querySelectorAll('#canaTenderDropdown .custom-select-option').forEach(function(o){
+    o.classList.toggle('selected', o.dataset.value === val);
+  });
+  // Close dropdown
+  document.getElementById('canaTenderDropdown').classList.remove('open');
+  document.getElementById('canaTenderTrigger').classList.remove('open');
+  // Trigger load
+  loadCanaDocs();
 }
 
 function loadCanaDocs(){
