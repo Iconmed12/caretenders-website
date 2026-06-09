@@ -1,0 +1,449 @@
+SERVICE SPECIFICATION
+
+for
+
+TARGETED SHORT BREAKS
+
+Date: 31/12/2025
+
+Contents
+
+1.	Introduction	3
+
+2.	Background	4
+
+Commissioning context	4
+
+Existing Services in Reading	5
+
+Data	5
+
+3.	Scope	6
+
+4.	Requirements	7
+
+Essential requirements	7
+
+Service standards	8
+
+Staff standards	8
+
+Social Value	9
+
+Delivery	9
+
+Session Fees	10
+
+Safeguarding	10
+
+Reporting requirements	10
+
+5.	Contract management	11
+
+Change control	12
+
+Complaints	12
+
+6.	Definitions	12
+
+Introduction
+
+The Services outlined in this specification and its appendices are part of a range of short break Services required to support Reading Borough Council s (RBC) meet its statutory obligations to:
+
+provide a range of short breaks Services;
+
+give families the choice to either access a short breaks Services or use a direct payments to purchase the services they need;
+
+Local authorities should ensure that:
+
+short breaks are reliable and regular to best meet families  needs;
+
+local authorities should try to reach groups of parents who may be more difficult to engage;
+
+parents are engaged in the design of local short breaks Services;
+
+short breaks can build on and be offered by universal Service Providers;
+
+short breaks promote greater levels of confidence and competence for young people moving towards adult life;
+
+local authorities should ensure that those who use short breaks Services have the chance to: 
+
+shape the development of those Services; and
+
+they continue to develop their workforce in relation to short breaks Services.
+
+RBC requires Service Provider(s) to deliver activity sessions of at least 3-hour duration per session for children and young people with Special Educational Needs and Disabilities (SEND). These sessions are to be available at weekends and during the school holidays.
+
+RBC has a firm, clear and robust commitment to commission a co-ordinated and high-quality Short Breaks service to support children and young people with Special Educational Needs and Disabilities (SEND) and their families living in RBC s area.  
+
+RBC drive is to increase the reach and quality of service and to ensure that eligible children and young people, living in Reading, and their families have access to safe and fun Short Break activities, and that parent/carers have a break from their caring responsibilities.
+
+Reading Family Information Service (FIS) has been recognised with national awards in 2021, 2023 and 2025 for the quality of support offered, and the way that the Family Information Service promotes the participation of parents and carers and children and young people.
+
+Background
+
+Commissioning context
+
+Provision of Short Breaks is a statutory duty. The Breaks for Carers of Disabled Children Regulations (2011) placed a duty on local authorities to provide Short Breaks to children and young people with disabilities and their families. 
+
+Short Breaks provide opportunities for children and young people with disabilities to spend time away from their primary carers. These include day, evening, overnight or weekend activities and take place in the child s own home, the home of an approved carer, a residential or community setting. 
+
+Targeted Short Breaks form part of RBC s Tier provision and support our early intervention work for children and young people with disabilities, including complex needs, and their families.
+
+RBC has a duty to provide Short Breaks Services and to ensure that there is sufficient provision of Short Breaks available in the RBC area. RBC recognises that each Family s needs are different and for this reason will commission a range of Services to meet these varied needs. 
+
+The Service Provider(s) must deliver appropriate interventions that improve outcomes for children and young people with SEND (i.e. inclusion, physical health, overcoming barriers, creating new personal experiences, etc).
+
+RBC recognises that some children and young people have very complex needs that will require the Service Provider(s) to have extensive knowledge and skilled Staff. 
+
+The eligibility criteria used to access Short Breaks is published by RBC as part of the Short Breaks statement.
+
+In October 2024, during the development of the Reading Area SEND Self-Evaluation, the following feedback has been received from families:
+
+Strengths:
+
+A comprehensive Local Offer website, newsletter, further information on the BFfC website and use of social media accounts provide families with information about available activities.
+
+Reading Family Information Service (FIS) has been recognised with national awards in 2021 and 2023 for the quality of support offered, and the way that the Family Information Service promotes the participation of parents and carers and children and young people.
+
+The SEND Local Offer (LO), which is co-produced in collaboration with local Family forums, other parents through the SEND Local Offer network. Involving children and their families has increased awareness and usage of the Local Offer.
+
+In response to feedback from families, a simplified  Roadmap  of the SEND offer has been co-designed with families. An intentionally EDI (equity, diversity and inclusion) humble approach has been taken to reach out to families of diverse heritage and identity in the co-design of these materials.
+
+Co-production with young people is also really important in Reading, this has including working in partnership with forums lead by young people to help improve information and access to local Services, as well as blogs from every event.
+
+A range of specialist short breaks are available including after school and holiday clubs, weekend activities, youth clubs 
+
+Support is also available from local short breaks Service Provider(s) for children to attend mainstream activities in the community.
+
+There is a local cultural offer.
+
+Areas for development:
+
+There is a shortage of short breaks provision for children with more complex needs
+
+There is a shortage of short breaks provision for young people over 16
+
+Existing Services in Reading
+
+RBC currently commission four Service Provider(s) to deliver Targeted Short Breaks, providing predominantly sports and performing arts activities.
+
+RBC requires a broader range of activities to meet the activity preferences of eligible children and young people.
+
+The current Services are booked on a  first come first served  basis, this has resulted in a number of families not being able to access Services as they are not able to access a phone or go online during working hours. 
+
+To support the equity of access RBC has introduced a booking system. This will allow RBC to limit the number of sessions a Family can book at one time and provide others with limited access to the current booking methods with an opportunity to book Services. 
+
+Data
+
+The eligibility criteria to access Targeted Short Breaks is that a child or young person must have an Education, Health and Care Plan (EHCP) in place and/or in receipt of either Disability Living Allowance (DLA) or Personal Independence Payment (PIP).
+
+Based on the lasted DWP figures there are approximately 2,500 children and young people living in the boundaries of RBC who are in receipt of either DLA or PIP, and therefore eligible to access Targeted Short Breaks.
+
+Not all those eligible will require the enhanced support of a Targeted Short Break and currently only 165 children and young people are access the sessions available.
+
+Scope
+
+The Objectives of these Services are:
+
+For Targeted Short Breaks to be available for all eligible children and Young People with SEND living in RBC area.
+
+Promoting the health, safety and wellbeing of children and young people with disabilities, ensuring they can fully participate in Family and community life, enjoying themselves with friends and making decisions about their lives
+
+Preventing Family crisis through the provision of the right level of support at the right time
+
+The need to be fair, clear and equitable.
+
+The Aims are:
+
+To deliver a broad range of Short Break group Sessions for children and young people with SEND and disabilities aged 5 to their 18th birthday.  They will be able to enjoy activities and spend time away from their parents/carers so that they are able to have a break from caring.
+
+To provide high quality Services that ensure RBC meets its statutory obligations and provides children and young people with SEND with a safe and simulating environment.
+
+The strategic aims of the service are to: 
+
+reduce the number of children and young people with SEND becoming looked after due to their disability and their Family s inability to cope;
+
+Support parents to support their children with the transition into adulthood;
+
+increase the choice and control over the Services families receive which may facilitate a growing interest in self-directed Personal Budgets, replacing Services provided by RBC; 
+
+reduced spot purchasing of agency workers in favour of a mixed Short Break package including Direct Payments and Short Break activities.
+
+The service should contribute to the following outcomes for children and young people with SEND:
+
+physical health through physical activities; 
+
+emotional health and well-being through stimulating experiences;
+
+developing independence through challenging and social learning experiences; 
+
+move into adulthood with new life skills, travel training and activities within maturing social groups; 
+
+activities and experiences that generate self-confidence and independence.
+
+The service should contribute to the following outcomes for the parents / carers:
+
+emotional well-being by learning coping strategies and their participation in some Short Break activity;
+
+having time to do other things as result of regular breaks (leisure, study and time with other children); 
+
+calm and sustainable Family settings by providing a reliable support with competent staff within home/community;
+
+improved quality of life for parent and Family by working in partnership with families, sharing information, child experience feedback and regular future planning. 
+
+The supplier must at all times keep in mind RBC s own policies and priorities relevant to the project, such that the supplier highlights any recommendations which may contradict RBC s strategic direction as soon as possible,.
+
+Requirements
+
+Essential requirements
+
+The Service Provider(s) on the framework will provide a range of Targeted Short Break activities Sessions for children and young people with SEND away from their home, as part of a continuum of Services, to ensure they can be supported within their families and local communities wherever possible, encouraging community integration and participation.
+
+The Sessions will be for a minimum of 3 hours and will be delivered at weekends and in the school holidays and must consider parents and carers that work allowing them to drop off and collect at appropriate times.
+
+These Breaks will enable children and young people to have fun and time with their peers, while at the same time giving a break to parents from their caring role. Targeted Short Breaks enable children and young people to try out new activities, gain new experiences and have more opportunities with and without their families. Short Breaks can include day, evening, weekend or holiday activities.
+
+RBC will provide the online booking system for Parents and Carers to book sessions. All Service Provider(s) must use this system, and only this system, to manage bookings.
+
+The Framework will be split into lots to encourage a broad range of Services, these lots are:
+
+Lot 1: Multi activity session offering a range of activities during the 3-hour session such as cookery, board and console games and trips;
+
+Lot 2: Sports sessions;
+
+Lot 3: Performing arts sessions;
+
+Lot 4: Arts and Craft Sessions;
+
+Lot 5: Preparing for adulthood sessions through life skills training and experiences;
+
+Service standards
+
+The Service Provider(s) must:
+
+be appropriately registered for the service and activities they are providing;
+
+maintain a high standard of provision as assessed by the necessary regulatory body for their service provision; 
+
+ensure all children and young people in their care are appropriately and effectively safeguarded throughout the Short Break;
+
+where deficiencies against regulations or standards are identified, either by the Service Provider(s) itself or following an inspection by CQC/Ofsted, the Service Provider(s) shall notify RBC immediately and take measures to rectify these deficiencies without delay; 
+
+comply with the applicable policies and procedures of RBC and the CCG, including compliance with health and safety standards;
+
+must create and update their service offer on the SEND Local Offer.
+
+Staff standards
+
+The Service Provider(s) will:
+
+the Service is fully staffed and operational to ensure service levels are maintained during staff holidays, or absences due to sickness, training or any other absence;
+
+ensure all staff/volunteers involved in delivering this Service from within the Service Provider(s) or subcontracted providers will:
+
+have detailed knowledge and experience of the subject and associated areas.
+
+be experienced and sufficiently skilled in working with SEND and vulnerable children, young people and families.
+
+have relevant safeguarding training (minimum level 2). 
+
+be adequately DBS checked.
+
+have sufficient support, supervision and the opportunity for Continued Professional Development.
+
+ensure that all the activities are delivered by personnel (staff/volunteers/sub-contractors) who have the capacity and capability to deliver the Service/ activity safely and to high quality;
+
+provide workforce development training for all staff both permeant staff and volunteers;
+
+ensure the whole service is compliant with RBC s safeguarding policies and training guidelines ensuring safe delivery of this programme.
+
+Where RBC has undertaken a risk assessment and identified that a child or young person requires additional support to safely access a Short Break, (beyond the Short Break staffing already in place), the Service Provider(s) will ensure:
+
+specially trained and experienced support staff are available to enable access to activities. This may include increased staffing ratios e.g. 1:1 or 2:1 basis; 
+
+those with the most complex needs are sufficiently supported by appropriately trained staff to meet all of their complex needs, e.g. health needs such as peg feeds, administration of medicine and that staff are trained 1:1 for specific children;
+
+support staff are matched effectively with the children and families who access the Short Breaks, reflecting the Short Break risk assessment;
+
+support staff can effectively engage and communicate with children/young people and their siblings, and to understand, be supportive and sensitive to their specialist needs;
+
+plans are in place to ensure continuity of staff where practicable;
+
+support staff could be on a paid or voluntary basis ensuring that the experience and competence of all workers meet the requirements of this Service Specification and the needs of the child/ young person.
+
+Social Value 
+
+The Public Services (Social Value) Act 2012 requires all contracting authorities to include Social Value when commissioning contracts. RBC has a Social Value Policy document that Suppliers are requested to review and understand this and is included as part of the ITT.  
+
+The Policy document includes reference to delivering its Social Value commitments through its procurement activities and using a reporting standard for measuring any delivered Social Value. RBC has opted to use the Local Social Value Matrix for this purpose as it provides an easy-to-use solution that can be applied to any project.  As part of this contract, we have selected a range of social/economic and environmental measures in the attached Appendix  Local Social Value Matrix .  Suppliers are to choose which Social Value outcomes that you would deliver and must fulfil as part of your contract.  
+
+Delivery
+
+Sessions must be primarily delivered at the Service Provider(s) premises.
+
+All premises used must be accessible to all potential Attendees including but not limited to, children and young people:
+
+In wheelchairs, 
+
+using walking aids, 
+
+visually impaired.
+
+Session Fees
+
+Parents/carers will pay a contribution towards the sessions booked, the amount of this contribution is currently £10 per 3-hour sessions and will be reviewed on an annual basis.
+
+RBC will pay the Service Provider(s) the agreed session cost for all Attendees.
+
+RBC will pay 50% of the agreed session fee for No Shows. 
+
+Safeguarding
+
+The Service Provider(s) will operate within all safeguarding procedures and policies as outlined in law, and by stipulations outlined by Berkshire West Children s Safeguarding Board https://www.berkshirewestsafeguardingchildrenpartnership.org.uk/scp  
+
+The Service Provider(s) must ensure its staff and volunteers are familiar with and comply with all statutory legislation procedures protocols and associated documents as well as have in place internal policies and procedures on safeguarding children, as appropriate to the Services they deliver. There must be a designated lead for safeguarding.
+
+Reporting requirements
+
+As part of this contract, the Service Provider(s) is expected to provide the following data as part of their delivery in order to permit effective monitoring:
+
+The Annual Report covering: 
+
+Review of the past years  service delivery;
+
+Service plan for next years  service delivery;
+
+Summary of spend;
+
+Review of KPIs.
+
+Monitoring Reports:
+
+For Service Provider(s) delivering weekend Sessions a quarterly monitoring reports will cover:
+
+Attendance 
+
+Attendee and Family feedback/survey reports and statistics 
+
+Any issues or concerns and any action taken 
+
+Good news stories
+
+Performance against the KPIs
+
+At least one case study to demonstrate how the desired outcomes of a child was achieved during their Short Break
+
+For Service Provider(s) delivering Sessions in the school holidays a monitoring report will be required at the end of each holiday period cover:
+
+Attendance 
+
+Attendee and Family feedback/survey reports and statistics 
+
+Any issues or concerns and any action taken 
+
+Good news stories
+
+Performance against the KPIs
+
+At least one case study to demonstrate how the desired outcomes of a child was achieved during their Short Break
+
+Contract management
+
+The following are the proposed Key Performance Indicators (KPIs) for this contract:
+
+KPI
+
+Indicator
+
+Target
+
+Failure
+
+Measurement Method
+
+Child and Young Persons Experience
+
+(Attendee)
+
+% of children who respond positively to the service
+
+90%
+
+75% or less
+
+Observation and activity-based participation
+
+Parents and Carers Experience
+
+% of parents who are positive about the service.  50% of families attending must respond to the request for feedback.
+
+75%
+
+50% or less
+
+Annual parent/carer feedback
+
+Increased opportunities to develop skills
+
+Service successfully addresses outcomes
+
+90%
+
+75% or less
+
+Child/ young person s review
+
+Personalised Care Planning
+
+Parents report that service provided at time most beneficial to them
+
+75%
+
+50% or less
+
+Annual parent/carer feedback
+
+Outcomes monitoring and service delivery
+
+Reduction in Strengths & Difficulties Questionnaire (SDQ) scores or other agreed measurement method
+
+N/A
+
+N/A
+
+Baseline Strengths & Difficulties Questionnaire (SDQ) or other agreed measurement method.
+
+6-month follow-up (Parent/Carer, Social Worker)
+
+Staff turnover rates
+
+%
+
+Less than 15%
+
+25% or more
+
+Quarterly contract monitoring form 
+
+DBS Checks
+
+%
+
+100%
+
+99.9% or less
+
+Regulatory Inspections
+
+Inspection Outcome
+
+Remain Good or above
+
+Regulatory Inspection Outcome Notification
+
+Failure to achieve at or above target level will trigger a collaborative solutioning between the supplier and RBC through CM meetings and/or improvement plans being initiated. Failure to achieve above the  failure threshold  will result in use of remedial measures as outlined within the contract being applied.
+
+Change control
+
+The supplier will be direct
