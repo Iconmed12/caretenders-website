@@ -163,54 +163,91 @@ exports.handler = async (event) => {
           var docBuf = Buffer.from(await docRes.arrayBuffer());
           var zip = await JSZip.loadAsync(docBuf);
           var xml = await zip.file('word/document.xml').async('string');
-
-          // Build auto-fill map
           var chData = co.chData || {};
-          var fillMap = {
-            company_name: clientName,
+
+          // ── Simple placeholder replacement ──
+          // Replaces [Insert X] style placeholders AND empty table cells
+          var fillData = {
+            name:           clientName,
+            company_name:   clientName,
             company_number: chData.company_number || co.company_number || '',
-            registered_address: chData.registered_address || '',
-            cqc_status: co.cqc || '',
-            sme_status: parseInt(co.staff||'0') < 250 ? 'Yes' : 'No',
-            single_supplier: 'Yes',
-            debarment: 'No'
+            address:        chData.registered_address || '',
+            cqc:            co.cqc || '',
+            email:          clientEmail,
+            staff:          co.staff || ''
           };
 
-          // Fill table cells
+          // 1. Replace [Insert name] / [Insert company name] style placeholders
+          xml = xml.replace(/\[Insert(?:\s+(?:your\s+)?(?:company\s+)?name)?\]/gi, function() {
+            return clientName || '[Company Name]';
+          });
+          xml = xml.replace(/\[Insert(?:\s+company)?\s+number\]/gi, fillData.company_number || '');
+          xml = xml.replace(/\[Insert(?:\s+registered)?\s+address\]/gi, fillData.address || '');
+          xml = xml.replace(/\[Insert\s+Yes\s+or\s+No\]/gi, 'Yes');
+          xml = xml.replace(/\[Insert\s+information\]/gi, 'See attached supporting documentation.');
+          xml = xml.replace(/\[Insert\s+date\]/gi, new Date().toLocaleDateString('en-GB'));
+          xml = xml.replace(/\[Insert\s+CQC[^\]]*\]/gi, fillData.cqc || '');
+
+          // 2. Row-by-row fill for labelled table cells
           var rowPat = /(<w:tr[ >][\s\S]*?<\/w:tr>)/g;
           xml = xml.replace(rowPat, function(row) {
+            // Extract all text from row
+            var rowText = ''; var tm; var tPat = /<w:t[^>]*>([^<]*)<\/w:t>/g;
+            while ((tm = tPat.exec(row)) !== null) rowText += tm[1] + ' ';
+            rowText = rowText.toLowerCase();
+
+            var ans = null;
+
+            // Supplier / company name
+            if (!ans && (rowText.includes('supplier name') || rowText.includes('company name') || rowText.includes('organisation name'))) ans = clientName;
+            // Company number
+            if (!ans && (rowText.includes('company number') || rowText.includes('registration number'))) ans = fillData.company_number;
+            // Address
+            if (!ans && (rowText.includes('registered address') || rowText.includes('principal address'))) ans = fillData.address;
+            // Single supplier
+            if (!ans && rowText.includes('single supplier')) ans = 'Yes';
+            // SME
+            if (!ans && rowText.includes('sme')) ans = parseInt(co.staff||'0') < 250 ? 'Yes' : 'No';
+            // Debarment
+            if (!ans && (rowText.includes('debarment') || rowText.includes('debarred') || rowText.includes('exclusion list'))) ans = 'No';
+            // Employers liability
+            if (!ans && rowText.includes("employers' liability") || rowText.includes('employers liability')) ans = 'Yes — Employers Liability Insurance held.';
+            // Public liability
+            if (!ans && rowText.includes('public liability')) ans = 'Yes — Public Liability Insurance held.';
+            // Safeguarding
+            if (!ans && rowText.includes('safeguarding')) ans = 'Yes — Comprehensive Safeguarding Policy in place, reviewed annually.';
+            // Equality
+            if (!ans && (rowText.includes('equality') && rowText.includes('diversity'))) ans = 'Yes — Equality & Diversity Policy in place, reviewed annually.';
+            // Modern slavery
+            if (!ans && rowText.includes('modern slavery')) ans = 'Yes — Modern Slavery Policy in place.';
+            // GDPR / data protection
+            if (!ans && (rowText.includes('gdpr') || rowText.includes('data protection'))) ans = 'Yes — UK GDPR compliant. Full details available on request.';
+            // Health & safety
+            if (!ans && rowText.includes('health') && rowText.includes('safety')) ans = 'Yes — Health & Safety Policy in place, reviewed annually.';
+            // CQC
+            if (!ans && rowText.includes('cqc')) ans = fillData.cqc || 'Registered with CQC';
+            // Email
+            if (!ans && rowText.includes('email')) ans = clientEmail;
+
+            if (!ans) return row;
+
+            // Find cells
             var cells = []; var cp; var cPat = /<w:tc[ >][\s\S]*?<\/w:tc>/g;
             while ((cp = cPat.exec(row)) !== null) cells.push(cp[0]);
             if (cells.length < 2) return row;
-            var qText = ''; var tm; var tPat = /<w:t[^>]*>([^<]*)<\/w:t>/g;
-            for (var ci = 0; ci < cells.length-1; ci++) {
-              while ((tm = tPat.exec(cells[ci])) !== null) qText += tm[1] + ' ';
-              tPat.lastIndex = 0;
-            }
-            qText = qText.toLowerCase().trim();
-            var ans = null;
 
-            // Check field mappings
-            (tender.sq_data.sections||[]).forEach(function(s){
-              (s.fields||[]).forEach(function(f){
-                if (ans) return;
-                var kws = (f.question||'').toLowerCase().split(/\s+/).filter(function(w){return w.length>3;});
-                var score = kws.filter(function(kw){return qText.includes(kw);}).length;
-                if (score < 2) return;
-                if (f.field_type==='auto_fill' && fillMap[f.profile_key]) ans = fillMap[f.profile_key];
-                if (f.field_type==='client_confirm') ans = 'Yes — confirmed by authorised signatory';
-              });
-            });
-
-            if (!ans) return row;
             var lastCell = cells[cells.length-1];
             var cs = row.lastIndexOf(lastCell);
             var tcPrM = lastCell.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
             var tcPr = tcPrM ? tcPrM[0] : '';
-            var safe = ans.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            var paras = safe.split('\n').map(function(l){ return '<w:p><w:r><w:t xml:space="preserve">'+l+'</w:t></w:r></w:p>'; }).join('');
+            var safe = String(ans).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            var paras = safe.split('\n').map(function(l){
+              return '<w:p><w:pPr><w:jc w:val="left"/></w:pPr><w:r><w:rPr><w:sz w:val="20"/></w:rPr><w:t xml:space="preserve">'+l+'</w:t></w:r></w:p>';
+            }).join('');
             return row.substring(0,cs) + '<w:tc>' + tcPr + paras + '</w:tc>' + row.substring(cs+lastCell.length);
           });
+
+          console.log('SQ fill complete');
 
           zip.file('word/document.xml', xml);
           sqDocBase64 = (await zip.generateAsync({ type:'nodebuffer', compression:'DEFLATE' })).toString('base64');
