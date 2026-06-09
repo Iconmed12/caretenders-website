@@ -80,6 +80,12 @@
           <label class="form-label">Number of staff</label>
           <input class="form-input" type="text" id="f-staff" placeholder="e.g. 45">
         </div>
+        <div class="form-group" style="grid-column:1/-1;">
+          <label class="form-label">🔍 Search CQC to auto-fill your rating</label>
+          <input class="form-input" type="text" id="cana-cqc-search" placeholder="Type your care service name..." autocomplete="off" oninput="canaCqcSearchDebounced()">
+          <div id="cana-cqc-results" style="margin-top:6px;display:none;background:#fff;border:1px solid #e5e7eb;border-radius:8px;max-height:200px;overflow-y:auto;"></div>
+          <div id="cana-cqc-selected" style="margin-top:8px;display:none;"></div>
+        </div>
         <div class="form-group">
           <label class="form-label">CQC status</label>
           <select class="form-select" id="f-cqc">
@@ -314,5 +320,61 @@
       navigator.serviceWorker.register('/sw.js').then(function(r){ console.log('SW registered'); }).catch(function(){});
     }
   </script>
+
+<script>
+  var canaCqcTimer = null;
+  function canaCqcSearchDebounced() { clearTimeout(canaCqcTimer); canaCqcTimer = setTimeout(runCanaCqcSearch, 350); }
+  async function runCanaCqcSearch() {
+    var q = document.getElementById('cana-cqc-search').value.trim();
+    var rEl = document.getElementById('cana-cqc-results');
+    if (q.length < 3) { rEl.style.display='none'; return; }
+    try {
+      var res = await fetch('/.netlify/functions/cqc-lookup', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ query:q }) });
+      var data = await res.json();
+      var locs = data.locations || [];
+      if (!locs.length) { rEl.innerHTML='<div style="padding:10px;color:#9ca3af;font-size:0.84rem;">No matches found.</div>'; rEl.style.display='block'; return; }
+      rEl.innerHTML = locs.map(function(l){
+        return '<div onclick="selectCanaCqc(\'' + l.locationId + '\',this)" data-name="' + (l.name||'').replace(/"/g,'&quot;') + '" style="padding:9px 11px;cursor:pointer;border-bottom:1px solid #f3f4f6;font-size:0.84rem;" onmouseover="this.style.background=\'#f0f9ff\'" onmouseout="this.style.background=\'#fff\'">' +
+          '<div style="font-weight:600;color:#0B1929;">' + (l.name||'') + '</div>' +
+          '<div style="font-size:0.74rem;color:#9ca3af;">' + (l.postcode||'') + '</div></div>';
+      }).join('');
+      rEl.style.display='block';
+    } catch(e) { rEl.innerHTML='<div style="padding:10px;color:#dc2626;font-size:0.84rem;">Search error.</div>'; rEl.style.display='block'; }
+  }
+  async function selectCanaCqc(locationId, el) {
+    var name = el.getAttribute('data-name');
+    document.getElementById('cana-cqc-results').style.display='none';
+    document.getElementById('cana-cqc-search').value = name;
+    var sEl = document.getElementById('cana-cqc-selected');
+    sEl.style.display='block';
+    sEl.innerHTML='<div style="padding:8px;color:#6b7280;font-size:0.84rem;">⏳ Fetching rating...</div>';
+    try {
+      var res = await fetch('/.netlify/functions/cqc-lookup', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ locationId:locationId }) });
+      var d = await res.json();
+      if (d.error) throw new Error(d.error);
+      window._cqcData = d;
+      // Set CQC dropdown
+      var statusEl = document.getElementById('f-cqc');
+      if (statusEl) {
+        var map = { 'Outstanding':'CQC Registered and Rated Outstanding','Good':'CQC Registered and Rated Good','Requires improvement':'CQC Registered and Rated Requires Improvement' };
+        var target = map[d.overallRating];
+        if (target) for (var i=0;i<statusEl.options.length;i++) if (statusEl.options[i].value===target){ statusEl.selectedIndex=i; break; }
+      }
+      var rc = { 'Outstanding':'#7c3aed','Good':'#166534','Requires improvement':'#d97706','Inadequate':'#dc2626' }[d.overallRating] || '#6b7280';
+      sEl.innerHTML='<div style="background:#fff;border:1.5px solid ' + rc + ';border-radius:10px;padding:12px;">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><span style="font-weight:700;color:#0B1929;font-size:0.88rem;">' + d.name + '</span>' +
+        '<span style="background:' + rc + ';color:#fff;font-size:0.72rem;font-weight:700;padding:2px 9px;border-radius:999px;">' + d.overallRating + '</span></div>' +
+        '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:5px;font-size:0.68rem;text-align:center;">' +
+        ['Safe','Effective','Caring','Responsive','Well-led'].map(function(dom){
+          var key = dom.toLowerCase().replace('-','');
+          var keyMap = {'safe':'safe','effective':'effective','caring':'caring','responsive':'responsive','wellled':'wellLed'};
+          var val = d.domains[keyMap[key]] || '—';
+          var c = { 'Outstanding':'#7c3aed','Good':'#166534','Requires improvement':'#d97706','Inadequate':'#dc2626' }[val] || '#d1d5db';
+          return '<div style="background:#f9fafb;border-radius:5px;padding:5px 3px;"><div style="font-weight:600;color:#6b7280;">' + dom + '</div><div style="color:' + c + ';font-weight:700;">' + val + '</div></div>';
+        }).join('') + '</div>' +
+        '<div style="font-size:0.7rem;color:#9ca3af;margin-top:8px;">✓ Live from CQC register</div></div>';
+    } catch(e) { sEl.innerHTML='<div style="padding:8px;color:#dc2626;font-size:0.84rem;">Could not fetch — select manually.</div>'; }
+  }
+</script>
 </body>
 </html>
