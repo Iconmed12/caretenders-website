@@ -128,28 +128,29 @@
 
 .ch-result-item:hover { background:#f0fdf4; }
 
-/* ── Cana Processing Tracker ── */
-.cana-tracker { padding: 1.5rem 1rem; }
-.cana-tracker-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 700; color: var(--navy); text-align: center; margin-bottom: 0.4rem; }
-.cana-tracker-email { font-size: 0.85rem; color: var(--muted); text-align: center; margin-bottom: 2rem; }
-.cana-tracker-stages { display: flex; align-items: flex-start; justify-content: center; gap: 0; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 0.5rem; }
-.tracker-stage { display: flex; flex-direction: column; align-items: center; min-width: 80px; max-width: 100px; text-align: center; }
-.tracker-stage-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; margin-bottom: 0.4rem; border: 2px solid; flex-shrink: 0; }
-.stage-done .tracker-stage-icon { background: #e8f7ee; border-color: #38a169; color: #38a169; font-weight: 700; }
-.stage-active .tracker-stage-icon { background: var(--navy); border-color: var(--navy); color: #fff; animation: pulse-icon 1.5s infinite; }
-.stage-pending .tracker-stage-icon { background: #f9fafb; border-color: #e5e7eb; color: #9ca3af; }
-@keyframes pulse-icon { 0%,100% { box-shadow: 0 0 0 0 rgba(0,201,224,0.4); } 50% { box-shadow: 0 0 0 8px rgba(0,201,224,0); } }
-.tracker-stage-label { font-size: 0.72rem; font-weight: 500; line-height: 1.3; }
-.stage-done .tracker-stage-label { color: #38a169; }
-.stage-active .tracker-stage-label { color: var(--navy); font-weight: 700; }
-.stage-pending .tracker-stage-label { color: #9ca3af; }
-.tracker-stage-bar { width: 60px; height: 3px; background: #e5e7eb; border-radius: 3px; margin-top: 6px; overflow: hidden; }
-.tracker-stage-bar-fill { height: 100%; width: 60%; background: linear-gradient(90deg, var(--accent), var(--navy)); border-radius: 3px; animation: slide-bar 1.5s ease-in-out infinite; }
-@keyframes slide-bar { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }
-.tracker-connector { width: 24px; height: 2px; background: #e5e7eb; margin-top: 21px; flex-shrink: 0; }
-.connector-done { background: #38a169; }
-@media (max-width: 600px) {
-  .tracker-stage { min-width: 60px; }
-  .tracker-stage-label { font-size: 0.65rem; }
-  .tracker-connector { width: 12px; }
-}
+
+/* ── Cana Sequential Tracker ── */
+.cana-tracker { padding:2rem 1rem; text-align:center; max-width:480px; margin:0 auto; }
+.cana-tracker-title { font-family:'Playfair Display',serif; font-size:1.5rem; font-weight:700; color:var(--navy); margin-bottom:0.4rem; }
+.cana-tracker-email { font-size:0.84rem; color:var(--muted); margin-bottom:1.75rem; }
+
+/* Progress dots */
+.tracker-dots { display:flex; align-items:center; justify-content:center; gap:6px; margin-bottom:2rem; }
+.tracker-dot { width:8px; height:8px; border-radius:50%; background:#e5e7eb; transition:all 0.4s; }
+.tracker-dot.done { background:#38a169; transform:scale(1); }
+.tracker-dot.active { background:var(--navy); width:24px; border-radius:4px; }
+
+/* Current stage card */
+.tracker-current-stage { background:#fff; border:1.5px solid #e5e7eb; border-radius:16px; padding:2rem 1.5rem; margin-bottom:1.25rem; transition:all 0.5s; }
+.tracker-current-stage.stage-complete { border-color:#38a169; background:#f0fdf4; }
+.tracker-current-icon { font-size:2.5rem; margin-bottom:0.75rem; animation:bounce-in 0.4s ease; }
+@keyframes bounce-in { 0% { transform:scale(0.5); opacity:0; } 60% { transform:scale(1.1); } 100% { transform:scale(1); opacity:1; } }
+.tracker-current-label { font-size:1.1rem; font-weight:700; color:var(--navy); margin-bottom:0.3rem; }
+.tracker-current-step { font-size:0.78rem; color:var(--muted); margin-bottom:1rem; }
+.tracker-progress-bar { height:4px; background:#f3f4f6; border-radius:4px; overflow:hidden; margin:0 1rem; }
+.tracker-progress-fill { height:100%; background:linear-gradient(90deg,#00C9E0,var(--navy)); border-radius:4px; animation:progress-slide 2s ease-in-out infinite; }
+@keyframes progress-slide { 0% { width:0%; margin-left:0; } 50% { width:60%; } 100% { width:0%; margin-left:100%; } }
+
+/* Completed list */
+.tracker-completed-list { display:flex; flex-direction:column; gap:4px; }
+.tracker-done-item { font-size:0.82rem; color:#38a169; font-weight:500; }
