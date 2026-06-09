@@ -147,6 +147,12 @@
   .bh-badge { display:inline-flex; align-items:center; gap:4px; background:#e8f7ee; color:#166534; font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:8px; }
   .bh-empty { text-align:center; padding:3rem 1rem; color:#9ca3af; font-size:0.9rem; }
   </style>
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#0B1929">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cana AI">
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
 
@@ -452,6 +458,11 @@
       }).join('');
     } catch(e) { console.log('Bid history error:', e.message); }
   })();
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').then(function(r){ console.log('SW registered'); }).catch(function(){});
+    }
   </script>
 </body>
 </html>
