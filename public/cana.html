@@ -176,49 +176,63 @@
 
   <!-- STEP 3: SQ — COMPANY & DIRECTORS -->
   <div class="state" id="state-sq">
-    <div class="section" style="max-width:580px;margin:0 auto;">
+    <div class="section" style="max-width:680px;margin:0 auto;">
 
-      <div style="text-align:center;margin-bottom:2rem;">
-        <div style="font-size:2.5rem;margin-bottom:0.75rem;">📋</div>
-        <h2 style="font-family:'Playfair Display',serif;font-size:1.75rem;margin-bottom:0.5rem;">Your Selection Questionnaire</h2>
-        <p style="font-size:0.88rem;color:var(--muted);line-height:1.7;max-width:460px;margin:0 auto;">We've filled in your company and director details using Companies House data. Review everything below and confirm the declarations.</p>
+      <div style="text-align:center;margin-bottom:1.5rem;">
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.6rem;margin-bottom:0.4rem;">Your Selection Questionnaire</h2>
+        <p style="font-size:0.87rem;color:var(--muted);max-width:460px;margin:0 auto;line-height:1.6;">Review your auto-filled sections below. All other sections are completed in your full report after payment.</p>
       </div>
 
-      <!-- DYNAMIC SQ SECTIONS -->
-      <div id="sq-sections-cana"></div>
+      <!-- DOCUMENT PREVIEW -->
+      <div style="background:#fff;border-radius:4px;box-shadow:0 4px 24px rgba(0,0,0,0.12),0 1px 4px rgba(0,0,0,0.08);margin-bottom:1.5rem;overflow:hidden;">
+
+        <!-- Document header -->
+        <div style="background:#0B1929;padding:1.25rem 1.75rem;display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div style="color:#00C9E0;font-size:0.72rem;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">Selection Questionnaire</div>
+            <div style="color:#fff;font-size:1rem;font-weight:600;" id="sq-doc-tender-title">Loading...</div>
+          </div>
+          <div style="background:rgba(0,201,224,0.15);border:1px solid rgba(0,201,224,0.3);border-radius:6px;padding:6px 14px;font-size:0.78rem;font-weight:700;color:#00C9E0;">DRAFT PREVIEW</div>
+        </div>
+
+        <!-- Document body -->
+        <div style="padding:1.5rem 1.75rem;font-family:'DM Sans',sans-serif;">
+          <div id="sq-sections-cana"></div>
+        </div>
+      </div>
 
       <!-- DECLARATIONS -->
-      <div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:14px;overflow:hidden;margin-bottom:1.5rem;">
-        <div style="padding:0.9rem 1.25rem;border-bottom:1px solid #fde68a;">
-          <div style="font-weight:700;font-size:0.9rem;color:#92400e;">⚠️ Declarations — tick each one personally</div>
-          <div style="font-size:0.77rem;color:#a16207;margin-top:3px;">By ticking you are making a legal declaration about your organisation</div>
+      <div style="background:#fff;border:1.5px solid #fde68a;border-radius:12px;overflow:hidden;margin-bottom:1.25rem;">
+        <div style="background:#fffbeb;padding:0.85rem 1.25rem;border-bottom:1px solid #fde68a;">
+          <div style="font-weight:700;font-size:0.9rem;color:#92400e;">⚠️ Personal declarations — tick each one to confirm</div>
+          <div style="font-size:0.75rem;color:#a16207;margin-top:2px;">By ticking you are making a legal declaration. You must confirm these personally.</div>
         </div>
-        <div style="padding:0.25rem 0;">
+        <div>
           <label style="display:flex;align-items:flex-start;gap:12px;padding:0.75rem 1.25rem;border-bottom:1px solid #fde68a;cursor:pointer;">
-            <input type="checkbox" id="decl1" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;">
-            <span style="font-size:0.83rem;color:#78350f;line-height:1.6;">I confirm that our organisation is not on the debarment list and has not been subject to any mandatory or discretionary exclusion grounds under the Procurement Act 2023.</span>
+            <input type="checkbox" id="decl1" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;width:16px;height:16px;">
+            <span style="font-size:0.82rem;color:#78350f;line-height:1.6;">Our organisation is not on the debarment list and has not been subject to any mandatory or discretionary exclusion grounds under the Procurement Act 2023.</span>
           </label>
           <label style="display:flex;align-items:flex-start;gap:12px;padding:0.75rem 1.25rem;border-bottom:1px solid #fde68a;cursor:pointer;">
-            <input type="checkbox" id="decl2" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;">
-            <span style="font-size:0.83rem;color:#78350f;line-height:1.6;">I confirm that no director or person of significant control has any unspent criminal convictions relevant to this procurement.</span>
+            <input type="checkbox" id="decl2" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;width:16px;height:16px;">
+            <span style="font-size:0.82rem;color:#78350f;line-height:1.6;">No director or person of significant control has any unspent criminal convictions relevant to this procurement.</span>
           </label>
           <label style="display:flex;align-items:flex-start;gap:12px;padding:0.75rem 1.25rem;border-bottom:1px solid #fde68a;cursor:pointer;">
-            <input type="checkbox" id="decl3" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;">
-            <span style="font-size:0.83rem;color:#78350f;line-height:1.6;">I confirm that our organisation has not been in administration, receivership or subject to insolvency proceedings in the last 3 years.</span>
+            <input type="checkbox" id="decl3" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;width:16px;height:16px;">
+            <span style="font-size:0.82rem;color:#78350f;line-height:1.6;">Our organisation has not been in administration, receivership or subject to insolvency proceedings in the last 3 years.</span>
           </label>
           <label style="display:flex;align-items:flex-start;gap:12px;padding:0.75rem 1.25rem;cursor:pointer;">
-            <input type="checkbox" id="decl4" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;">
-            <span style="font-size:0.83rem;color:#78350f;line-height:1.6;">I confirm that all information provided in this SQ is accurate and complete to the best of my knowledge and I understand that providing false information is a criminal offence.</span>
+            <input type="checkbox" id="decl4" style="margin-top:3px;accent-color:#92400e;flex-shrink:0;width:16px;height:16px;">
+            <span style="font-size:0.82rem;color:#78350f;line-height:1.6;">All information provided in this SQ is accurate and complete to the best of my knowledge.</span>
           </label>
         </div>
       </div>
 
       <div id="sq-decl-error" style="display:none;background:rgba(229,62,62,0.08);border:1px solid rgba(229,62,62,0.2);border-radius:8px;padding:10px 14px;font-size:0.83rem;color:#c53030;margin-bottom:1rem;font-weight:600;">
-        Please confirm all four declarations before continuing
+        Please confirm all four declarations before continuing.
       </div>
 
-      <button onclick="sqContinue()" style="width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.75rem;">
-        ⚡ Confirm &amp; generate my responses
+      <button onclick="sqContinue()" style="width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.75rem;transition:background 0.2s;">
+        ✓ Confirmed — generate my responses →
       </button>
       <div style="text-align:center;">
         <button onclick="setStep(2);showState('ch');" style="background:none;border:none;color:var(--muted);font-size:0.83rem;cursor:pointer;font-family:'DM Sans',sans-serif;">← Back to company lookup</button>
@@ -227,7 +241,7 @@
     </div>
   </div>
 
-  <!-- STEP 4: LOADING -->
+  <!-- STEP 4: LOADING -->  <!-- STEP 4: LOADING -->
   <div class="state" id="state-loading">
     <div class="section">
       <div class="loading-state">
