@@ -5,7 +5,7 @@ exports.handler = async (event) => {
   const sbKey  = process.env.SUPABASE_ANON_KEY;
   const sbUrl  = 'https://igpjfpncfuawikoyzfcd.supabase.co';
   const RESEND = process.env.RESEND_API_KEY;
-  const FROM   = process.env.RESEND_FROM_EMAIL || 'noreply@icongrp.co.uk';
+  const FROM   = 'cana@icongrp.co.uk';
   const AI_KEY = process.env.ANTHROPIC_API_KEY;
 
   async function sbPatch(path, body) {
