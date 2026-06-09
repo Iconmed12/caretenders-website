@@ -17,6 +17,7 @@ exports.handler = async (event) => {
     });
     if (!res.ok) {
       var body = await res.text();
+      console.log('CQC API error:', res.status, body.substring(0,300));
       throw new Error('CQC ' + res.status + ': ' + body.substring(0,150));
     }
     return res.json();
@@ -58,9 +59,11 @@ exports.handler = async (event) => {
 
     if (query) {
       var locations = [];
+      console.log('CQC search query:', query);
       try {
         var provRes = await cqcFetch('/providers?perPage=8&page=1&name=' + encodeURIComponent(query));
         var providers = provRes.providers || [];
+        console.log('CQC providers found:', providers.length, JSON.stringify(providers).substring(0,300));
 
         for (var p of providers.slice(0, 3)) {
           try {
