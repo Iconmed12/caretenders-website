@@ -205,7 +205,7 @@ tr:hover td{background:#fafafa}
 </head>
 <body>
 
-<div id="loginScreen" style="display:flex;">
+<div id="loginScreen" style="display:none;">
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-mark"><i class="ti ti-heart-handshake"></i></div>
@@ -220,7 +220,7 @@ tr:hover td{background:#fafafa}
   </div>
 </div>
 
-<div id="appScreen" style="display:none;">
+<div id="appScreen" style="display:block;">
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-logo"><div class="sidebar-logo-inner"><div class="sidebar-logo-mark"><i class="ti ti-heart-handshake"></i></div><span class="sidebar-logo-text">Tender <span>Experts</span></span></div></div>
@@ -1143,3 +1143,4 @@ function populateCanaTenderSelect(){
     sel.appendChild(opt);
   });
 }>
+<script>document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });</script>
