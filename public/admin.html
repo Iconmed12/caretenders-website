@@ -1158,7 +1158,7 @@ function populateCanaTenderSelect(){
 
     var org = t.org ? '<div class="custom-select-option-org">' + t.org + '</div>' : '';
 
-    dropdown.innerHTML += '<div class="custom-select-option' + (t.id === curVal ? ' selected' : '') + '" data-value="' + t.id + '" onclick="selectCustomTender('' + t.id + '',this)">' +
+    dropdown.innerHTML += '<div class="custom-select-option' + (t.id === curVal ? ' selected' : '') + '" data-value="' + t.id + '" onclick="selectCustomTender(this.dataset.value,this)">' +
       '<div style="flex:1;min-width:0;">' +
         '<div class="custom-select-option-name">' + t.title + '</div>' +
         org +
