@@ -66,48 +66,70 @@
     window._jobId = jobId;
   }
 
+  var STAGES = [
+    { key: 'pending',              label: 'Payment confirmed',           icon: '💳' },
+    { key: 'processing',           label: 'Reading tender specification', icon: '📄' },
+    { key: 'generating_responses', label: 'Writing bid responses',        icon: '✍️' },
+    { key: 'completing_sq',        label: 'Completing your SQ',           icon: '📋' },
+    { key: 'building_documents',   label: 'Building Word documents',      icon: '📝' },
+    { key: 'sending_email',        label: 'Sending to your email',        icon: '📧' },
+    { key: 'complete',             label: 'Done!',                        icon: '✅' }
+  ];
+
+  function renderTracker(currentStatus) {
+    var currentIdx = STAGES.findIndex(function(s){ return s.key === currentStatus; });
+    if (currentIdx === -1) currentIdx = 0;
+    var email = window._companyDetails && window._companyDetails.email || '';
+
+    var html = '<div class="cana-tracker">' +
+      '<div class="cana-tracker-title">Cana AI is preparing your documents</div>' +
+      '<div class="cana-tracker-email">Will be sent to <strong>' + email + '</strong> as Word documents</div>' +
+      '<div class="cana-tracker-stages">';
+
+    STAGES.forEach(function(stage, i) {
+      var done    = i < currentIdx;
+      var active  = i === currentIdx;
+      var pending = i > currentIdx;
+      var cls = done ? 'stage-done' : (active ? 'stage-active' : 'stage-pending');
+      html += '<div class="tracker-stage ' + cls + '">' +
+        '<div class="tracker-stage-icon">' + (done ? '✓' : stage.icon) + '</div>' +
+        '<div class="tracker-stage-label">' + stage.label + '</div>' +
+        (active ? '<div class="tracker-stage-bar"><div class="tracker-stage-bar-fill"></div></div>' : '') +
+      '</div>';
+      if (i < STAGES.length - 1) {
+        html += '<div class="tracker-connector ' + (done ? 'connector-done' : '') + '"></div>';
+      }
+    });
+
+    html += '</div></div>';
+    return html;
+  }
+
+  function showProcessingTracker(status) {
+    var loadingState = document.querySelector('.loading-state');
+    if (!loadingState) return;
+    var spinner = loadingState.querySelector('.loading-spinner');
+    if (spinner) spinner.style.display = 'none';
+    var h3 = loadingState.querySelector('h3');
+    var p  = loadingState.querySelector('p');
+    if (h3) h3.style.display = 'none';
+    if (p)  p.innerHTML = renderTracker(status);
+  }
+
   async function pollJobStatus(jobId) {
-    var maxPolls = 60; // 5 mins max
+    var maxPolls = 60;
     var polls    = 0;
+    showProcessingTracker('pending');
 
     var interval = setInterval(async function() {
       polls++;
-      if (polls > maxPolls) {
-        clearInterval(interval);
-        showJobComplete(null, true);
-        return;
-      }
+      if (polls > maxPolls) { clearInterval(interval); showJobComplete(null, true); return; }
       try {
         var res = await fetch('/.netlify/functions/get-cana-result?jobId=' + jobId);
         var job = await res.json();
-
-        // Update status message
-        var messages = {
-          'pending':              'Preparing your documents...',
-          'processing':           'Cana AI is reading the tender specification...',
-          'generating_responses': 'Writing your bid responses...',
-          'completing_sq':        'Completing your Selection Questionnaire...',
-          'building_documents':   'Building your Word documents...',
-          'sending_email':        'Sending your documents by email...',
-          'complete':             'Done! Check your inbox.',
-          'error':                'There was an issue — our team has been notified.'
-        };
-        var msg = messages[job.status] || 'Processing...';
-        var p = document.querySelector('.loading-state p');
-        if (p) {
-          var emailLine = window._companyDetails && window._companyDetails.email
-            ? '<br><span style="font-size:0.85em;color:var(--muted);">Will be sent to <strong>' + window._companyDetails.email + '</strong></span>'
-            : '';
-          p.innerHTML = msg + emailLine;
-        }
-
-        if (job.status === 'complete') {
-          clearInterval(interval);
-          showJobComplete(job, false);
-        } else if (job.status === 'error') {
-          clearInterval(interval);
-          showJobComplete(job, false, job.error);
-        }
+        showProcessingTracker(job.status);
+        if (job.status === 'complete') { clearInterval(interval); showJobComplete(job, false); }
+        else if (job.status === 'error') { clearInterval(interval); showJobComplete(job, false, job.error); }
       } catch(e) { console.log('Poll error:', e.message); }
     }, 5000);
   }
@@ -558,10 +580,13 @@
       return;
     }
     document.getElementById('sq-decl-error').style.display = 'none';
+    // Skip preview — go straight to paywall
     setStep(4);
-    showState('loading');
+    showState('results');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    await runGeneration(window._companyDetails);
+    // Update paywall to show SQ is included
+    var pNote = document.querySelector('.paywall-note');
+    if (pNote) pNote.textContent = 'Secure payment via Stripe · Responses + completed SQ delivered to your email as Word documents';
   }
 
 async function confirmSqAndGenerate() {
