@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
     // Truncate if very long — Claude context limit
-    var sqText = docText.length > 30000 ? docText.substring(0, 30000) + '\n...[document truncated]' : docText;
+    var sqText = docText.length > 12000 ? docText.substring(0, 12000) + '\n...[document truncated]' : docText;
 
     var prompt = 'Analyse this Selection Questionnaire (SQ) document text carefully. Extract every question and field that a bidder needs to complete.\n\n' +
       'Classify each field as:\n' +
@@ -35,8 +35,8 @@ exports.handler = async (event) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 4000,
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 2500,
         messages: [{ role: 'user', content: prompt }]
       })
     });
