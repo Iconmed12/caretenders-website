@@ -1151,8 +1151,11 @@ document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });
         data.clientConfirm + ' need client confirmation';
 
       showToast('SQ uploaded and extracted — ' + data.totalFields + ' fields', 'success');
+      // Reload fresh data so sq_data is in allTenders and panels update correctly
+      await loadTenders();
       loadCanaDocs();
       renderCanaPanels();
+      populateCanaTenderSelect();
 
     } catch(err) {
       statusEl.style.background = 'rgba(229,62,62,0.08)';
