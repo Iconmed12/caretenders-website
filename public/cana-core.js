@@ -42,7 +42,7 @@
         body: JSON.stringify({
           sessionId: sid,
           tenderId: tenderId,
-          includeSq: !!(window._tenderData && window._tenderData.sq_data && window._tenderData.sq_data.storagePath),
+          includeSq: !!(window._tenderData && window._tenderData.sq_data),
           companyDetails: mergedCo
         })
       });
