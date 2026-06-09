@@ -252,169 +252,138 @@
     var el = document.getElementById('sq-sections-cana');
     if (!el) return;
 
-    // Show loading state immediately
-    el.innerHTML = '<div style="text-align:center;padding:2rem;color:#9ca3af;"><div style="font-size:1.5rem;margin-bottom:0.5rem;">⏳</div><div style="font-size:0.85rem;">Loading your SQ...</div></div>';
+    el.innerHTML = '<div style="text-align:center;padding:2.5rem;color:#9ca3af;"><div class="loading-spinner" style="margin:0 auto 1rem;"></div><div style="font-size:0.85rem;">Loading your SQ document...</div></div>';
 
     var ch = window._chData || {};
     var co = window._companyDetails || {};
+    var tenderId = window._tenderData && window._tenderData.id;
 
-    // Fetch fresh tender data to guarantee we have latest sq_data
-    var sqData = null;
+    // Set tender title in header
     try {
-      var td = window._tenderData;
-      if (td && td.id) {
-        var freshRes = await fetch('/.netlify/functions/get-tenders');
-        var freshAll = await freshRes.json();
-        var fresh = freshAll.find(function(t){ return t.id === td.id; });
-        if (fresh && fresh.sq_data) {
-          sqData = fresh.sq_data;
-          window._tenderData = fresh;
-        } else if (td.sq_data) {
-          sqData = td.sq_data;
+      var tEl = document.getElementById('sq-doc-tender-title');
+      if (tEl && window._tenderData) tEl.textContent = window._tenderData.title || 'Selection Questionnaire';
+    } catch(e) {}
+
+    // Try to fetch the actual document preview
+    if (tenderId) {
+      try {
+        var res = await fetch('/.netlify/functions/preview-sq-doc', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenderId: tenderId })
+        });
+        var data = await res.json();
+
+        if (res.ok && data.sections && data.sections.length) {
+          renderRealDocument(data.sections, ch, co);
+          return;
         }
-      }
-    } catch(e) {
-      if (window._tenderData && window._tenderData.sq_data) {
-        sqData = window._tenderData.sq_data;
+      } catch(e) {
+        console.log('Real doc preview failed, using fallback:', e.message);
       }
     }
 
-    // Set tender title
-    try {
-      var tTitle = (window._tenderData && window._tenderData.title) || '';
-      var titleEl = document.getElementById('sq-doc-tender-title');
-      if (titleEl) titleEl.textContent = tTitle || 'Selection Questionnaire';
-    } catch(e) {}
+    // Fallback: render from sq_data fields
+    renderFallbackSq(ch, co);
+  }
 
-    // Build company values — always have something
-    var companyName   = ch.company_name || co.name || '—';
-    var companyNum    = ch.company_number || '—';
-    var regAddress    = ch.registered_address || '—';
-    var companyType   = ch.company_type ? ch.company_type.replace(/-/g,' ') : 'Private limited company';
-    var yearInc       = ch.date_of_creation ? ch.date_of_creation.split('-')[0] : (co.founded || '—');
-    var coStatus      = ch.company_status || 'Active';
-    var cqcStatus     = co.cqc || '—';
-    var staffCount    = co.staff || '—';
-    var smeStatus     = (parseInt(co.staff||'0') < 250) ? 'Yes — SME' : 'No';
+  function renderRealDocument(sections, ch, co) {
+    var el = document.getElementById('sq-sections-cana');
+    if (!el) return;
+
+    // Add document styles
+    if (!document.getElementById('sq-doc-styles')) {
+      var style = document.createElement('style');
+      style.id = 'sq-doc-styles';
+      style.textContent = [
+        '.sq-doc-section { margin-bottom:1.5rem; }',
+        '.sq-doc-section table { width:100%; border-collapse:collapse; font-size:0.84rem; }',
+        '.sq-doc-section td, .sq-doc-section th { padding:7px 10px; border:1px solid #e5e7eb; vertical-align:top; }',
+        '.sq-doc-section th { background:#f3f4f6; font-weight:600; }',
+        '.sq-doc-section p { font-size:0.84rem; margin-bottom:0.4rem; line-height:1.6; color:#374151; }',
+        '.sq-doc-section h2, .sq-doc-section h3 { font-size:0.9rem; font-weight:700; color:#0B1929; margin-bottom:0.5rem; }',
+        '.sq-locked { position:relative; }',
+        '.sq-locked-inner { filter:blur(4px); pointer-events:none; user-select:none; opacity:0.35; }',
+        '.sq-lock-overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; gap:8px; background:rgba(255,255,255,0.6); }',
+      ].join('');
+      document.head.appendChild(style);
+    }
 
     var h = '';
 
-    // ── Determine sections from real SQ data ──
-    var visibleKeys = ['company_name','company_number','registered_address','company_type',
-                       'founded_year','directors','psc_details','company_status','sme_status',
-                       'cqc_status','contact_name','vat_number'];
+    sections.forEach(function(section, i) {
+      var isFirst = i === 0;
 
-    var visibleSection = null;
-    var lockedSections = [];
+      h += '<div class="sq-doc-section" style="margin-bottom:1.5rem;">';
 
-    if (sqData && sqData.sections && sqData.sections.length) {
-      sqData.sections.forEach(function(s) {
-        var fields = s.fields || [];
-        var isDecl = fields.length > 0 && fields.every(function(f){ return f.field_type === 'client_confirm'; });
-        if (isDecl) return;
-        var hasCompanyField = fields.some(function(f){
-          return f.field_type === 'auto_fill' && visibleKeys.indexOf(f.profile_key) !== -1;
-        });
-        if (hasCompanyField && !visibleSection) {
-          visibleSection = s;
-        } else {
-          lockedSections.push(s);
-        }
-      });
-    }
-
-    // ── VISIBLE SECTION: Company Info ──
-    var coFieldValues = {
-      company_name: companyName, company_number: companyNum,
-      registered_address: regAddress, company_type: companyType,
-      founded_year: yearInc, company_status: coStatus,
-      cqc_status: cqcStatus, sme_status: smeStatus,
-      contact_name: co.name || '', vat_number: co.vat || ''
-    };
-
-    var sectionTitle = visibleSection ? (visibleSection.section + ': ' + visibleSection.title) : 'Part 1: Supplier Information';
-    var sectionFields = visibleSection ? visibleSection.fields.filter(function(f){ return f.field_type !== 'client_confirm'; }) : [
-      { question:'Full registered name', profile_key:'company_name' },
-      { question:'Company registration number', profile_key:'company_number' },
-      { question:'Registered office address', profile_key:'registered_address' },
-      { question:'Company type', profile_key:'company_type' },
-      { question:'Year incorporated', profile_key:'founded_year' },
-      { question:'Company status', profile_key:'company_status' },
-      { question:'CQC registration', profile_key:'cqc_status' },
-      { question:'SME status', profile_key:'sme_status' }
-    ];
-
-    h += '<div style="margin-bottom:1.75rem;">';
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:2px solid #00C9E0;">';
-    h += '<div style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;">' + sectionTitle + '</div>';
-    h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ Auto-filled</span>';
-    h += '</div>';
-    h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
-    sectionFields.forEach(function(f, i) {
-      var val = coFieldValues[f.profile_key] || '—';
-      var bg = i % 2 === 0 ? '#fafafa' : '#fff';
-      h += '<tr style="background:' + bg + ';">';
-      h += '<td style="padding:8px 10px;font-weight:600;color:#374151;width:45%;border-bottom:1px solid #f3f4f6;">' + f.question + '</td>';
-      h += '<td style="padding:8px 10px;color:#166534;font-weight:500;border-bottom:1px solid #f3f4f6;">✓ ' + val + '</td>';
-      h += '</tr>';
-    });
-    h += '</table></div>';
-
-    // ── DIRECTORS ──
-    var officers = [];
-    var pscs = [];
-    try { officers = (ch.officers || []).filter(function(o){ return !o.resigned_on; }); } catch(e) {}
-    try { pscs = ch.pscs || []; } catch(e) {}
-
-    h += '<div style="margin-bottom:1.75rem;">';
-    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:2px solid #00C9E0;">';
-    h += '<div style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;">Directors &amp; Persons of Significant Control</div>';
-    h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ From Companies House</span>';
-    h += '</div>';
-    h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
-    if (officers.length || pscs.length) {
-      officers.forEach(function(o, i) {
-        h += '<tr style="background:' + (i%2===0?'#fafafa':'#fff') + ';">';
-        h += '<td style="padding:8px 10px;font-weight:600;color:#166534;border-bottom:1px solid #f3f4f6;width:45%;">✓ ' + o.name + '</td>';
-        h += '<td style="padding:8px 10px;color:#374151;text-transform:capitalize;border-bottom:1px solid #f3f4f6;">' + (o.role||'Director') + (o.appointed_on ? ' · ' + o.appointed_on : '') + '</td>';
-        h += '<td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;text-align:right;"><span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 7px;border-radius:999px;">Director</span></td>';
-        h += '</tr>';
-      });
-      pscs.forEach(function(p, i) {
-        h += '<tr style="background:' + ((officers.length+i)%2===0?'#fafafa':'#fff') + ';">';
-        h += '<td style="padding:8px 10px;font-weight:600;color:#5b21b6;border-bottom:1px solid #f3f4f6;width:45%;">✓ ' + p.name + '</td>';
-        h += '<td style="padding:8px 10px;color:#374151;border-bottom:1px solid #f3f4f6;" colspan="2">' + (p.nature_of_control||'Person of Significant Control') + '</td>';
-        h += '</tr>';
-      });
-    } else {
-      h += '<tr><td colspan="3" style="padding:10px;color:#9ca3af;font-style:italic;font-size:0.82rem;">No director data — complete Companies House lookup in Step 2 to auto-fill directors.</td></tr>';
-    }
-    h += '</table></div>';
-
-    // ── LOCKED SECTIONS ──
-    var lockTitles = lockedSections.map(function(s){ return s.section + ': ' + s.title; });
-    if (!lockTitles.length) {
-      lockTitles = ['Part 2: Exclusion Grounds', 'Part 3: Financial Standing', 'Part 4: Technical Capability', 'Part 5: Insurance & Compliance'];
-    }
-
-    lockTitles.forEach(function(title) {
-      h += '<div style="margin-bottom:1rem;position:relative;">';
-      h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;padding-bottom:0.5rem;border-bottom:1px solid #e5e7eb;">';
-      h += '<div style="font-size:0.82rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;">' + title + '</div>';
-      h += '<span style="font-size:0.69rem;font-weight:700;background:#f3f4f6;color:#9ca3af;padding:2px 9px;border-radius:999px;">🔒 Locked</span>';
-      h += '</div>';
-      h += '<div style="position:relative;border-radius:6px;overflow:hidden;">';
-      h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;filter:blur(4px);pointer-events:none;user-select:none;">';
-      for (var i=0;i<3;i++) {
-        h += '<tr style="background:' + (i%2===0?'#fafafa':'#fff') + ';"><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;width:45%;">Question ' + (i+1) + '</td><td style="padding:8px 10px;border-bottom:1px solid #f3f4f6;">Response required</td></tr>';
+      // Section header
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;padding-bottom:0.5rem;border-bottom:2px solid ' + (isFirst ? '#00C9E0' : '#e5e7eb') + ';">';
+      h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:' + (isFirst ? '#0B1929' : '#9ca3af') + ';">' + escHtml(section.title) + '</div>';
+      if (isFirst) {
+        h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ Auto-filled from Companies House</span>';
+      } else {
+        h += '<span style="font-size:0.69rem;font-weight:700;background:#f3f4f6;color:#9ca3af;padding:2px 9px;border-radius:999px;">🔒 Completed in full report</span>';
       }
-      h += '</table>';
-      h += '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:8px;background:rgba(255,255,255,0.5);">';
-      h += '<span style="font-size:1.1rem;">🔒</span><span style="font-size:0.78rem;font-weight:700;color:#6b7280;">Completed in your full report after payment</span>';
-      h += '</div></div></div>';
+      h += '</div>';
+
+      if (isFirst) {
+        // Show the real document HTML for first section
+        h += '<div>' + section.html + '</div>';
+        // Add director info below
+        h += buildDirectorsHtml(ch);
+      } else {
+        // Lock all other sections
+        h += '<div class="sq-locked" style="border-radius:8px;overflow:hidden;">';
+        h += '<div class="sq-locked-inner">' + section.html + '</div>';
+        h += '<div class="sq-lock-overlay">';
+        h += '<span style="font-size:1.1rem;">🔒</span>';
+        h += '<span style="font-size:0.78rem;font-weight:700;color:#374151;">Completed in your full report after payment</span>';
+        h += '</div></div>';
+      }
+
+      h += '</div>';
     });
 
     el.innerHTML = h;
+  }
+
+  function buildDirectorsHtml(ch) {
+    var officers = (ch.officers || []).filter(function(o){ return !o.resigned_on; });
+    var pscs = ch.pscs || [];
+    if (!officers.length && !pscs.length) return '';
+
+    var h = '<div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #f3f4f6;">';
+    h += '<div style="font-size:0.78rem;font-weight:700;color:#374151;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Directors &amp; Persons of Significant Control</div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
+    officers.forEach(function(o, i) {
+      h += '<tr style="background:' + (i%2===0?'#fafafa':'#fff') + ';"><td style="padding:7px 10px;border:1px solid #e5e7eb;font-weight:600;color:#166534;">✓ ' + escHtml(o.name) + '</td>';
+      h += '<td style="padding:7px 10px;border:1px solid #e5e7eb;text-transform:capitalize;">' + escHtml(o.role||'Director') + '</td>';
+      h += '<td style="padding:7px 10px;border:1px solid #e5e7eb;"><span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 7px;border-radius:999px;">Director</span></td></tr>';
+    });
+    pscs.forEach(function(p, i) {
+      h += '<tr style="background:' + ((officers.length+i)%2===0?'#fafafa':'#fff') + ';"><td style="padding:7px 10px;border:1px solid #e5e7eb;font-weight:600;color:#5b21b6;">✓ ' + escHtml(p.name) + '</td>';
+      h += '<td style="padding:7px 10px;border:1px solid #e5e7eb;" colspan="2">' + escHtml(p.nature_of_control||'PSC') + '</td></tr>';
+    });
+    h += '</table></div>';
+    return h;
+  }
+
+  function renderFallbackSq(ch, co) {
+    var el = document.getElementById('sq-sections-cana');
+    if (!el) return;
+    var coName = ch.company_name || co.name || '—';
+    el.innerHTML = '<div style="padding:1.5rem;background:#fff8f0;border-radius:8px;border:1px solid #fed7aa;text-align:center;">' +
+      '<div style="font-size:1.25rem;margin-bottom:0.5rem;">📋</div>' +
+      '<div style="font-weight:700;font-size:0.9rem;color:#c2410c;margin-bottom:0.5rem;">SQ document not yet uploaded</div>' +
+      '<div style="font-size:0.82rem;color:#92400e;line-height:1.6;">The administrator needs to upload the Selection Questionnaire document for this tender before this preview can show. Please contact your administrator.</div>' +
+      '<div style="margin-top:1rem;background:#fff;border-radius:6px;padding:0.75rem;font-size:0.82rem;color:#374151;text-align:left;">' +
+      '<div style="font-weight:600;margin-bottom:4px;">Company confirmed:</div>' +
+      '<div style="color:#166534;">✓ ' + escHtml(coName) + '</div>' +
+      '</div></div>';
+  }
+
+  function escHtml(str) {
+    return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
 
