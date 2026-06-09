@@ -253,102 +253,116 @@
     var co = window._companyDetails || {};
     var sqData = (window._tenderData && window._tenderData.sq_data) || null;
 
-    var html = '';
+    // Set tender title in doc header
+    var tTitle = (window._tenderData && window._tenderData.title) || '';
+    var titleEl = document.getElementById('sq-doc-tender-title');
+    if (titleEl) titleEl.textContent = tTitle || 'Selection Questionnaire';
 
-    // ── Company Information ──
+    // Company fields — CH data first, fallback to form fields
     var coFields = [
-      { label: 'Registered company name',   value: ch.company_name || co.name || '' },
-      { label: 'Company number',            value: ch.company_number || '' },
-      { label: 'Registered address',        value: ch.registered_address || '' },
-      { label: 'Company type',              value: ch.company_type ? ch.company_type.replace(/-/g,' ') : '' },
-      { label: 'Incorporated',              value: ch.date_of_creation ? ch.date_of_creation.split('-')[0] : '' },
-      { label: 'Company status',            value: ch.company_status || 'Active' },
-      { label: 'CQC status',                value: co.cqc || '' },
-      { label: 'SME status',                value: (parseInt(co.staff||'0') < 250) ? 'Yes — SME' : 'No' }
+      { label:'Registered company name',   value: ch.company_name || co.name || '' },
+      { label:'Company number',            value: ch.company_number || '' },
+      { label:'Registered address',        value: ch.registered_address || '' },
+      { label:'Company type',              value: ch.company_type ? ch.company_type.replace(/-/g,' ') : 'Private limited company' },
+      { label:'Year incorporated',         value: ch.date_of_creation ? ch.date_of_creation.split('-')[0] : co.founded || '' },
+      { label:'Company status',            value: ch.company_status || 'Active' },
+      { label:'CQC registration',          value: co.cqc || '' },
+      { label:'Number of staff',           value: co.staff || '' },
+      { label:'SME status',               value: (parseInt(co.staff||'0') < 250) ? 'Yes — SME' : 'No' }
     ].filter(function(f){ return f.value; });
 
-    html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
-    html += '<div style="background:#f0fdf4;padding:0.85rem 1.25rem;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">';
-    html += '<div style="font-weight:700;font-size:0.9rem;">🏢 Company Information</div>';
-    html += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 9px;border-radius:999px;">✓ Auto-filled</span>';
-    html += '</div>';
-    coFields.forEach(function(f, i) {
-      var border = i < coFields.length - 1 ? 'border-bottom:1px solid #f3f4f6;' : '';
-      html += '<div style="display:grid;grid-template-columns:1fr 1.2fr;gap:0.5rem;padding:0.65rem 1.25rem;' + border + '">';
-      html += '<div style="font-size:0.79rem;font-weight:600;color:#6b7280;">' + f.label + '</div>';
-      html += '<div style="font-size:0.82rem;font-weight:600;color:#166534;">✓ ' + f.value + '</div>';
-      html += '</div>';
-    });
-    html += '</div>';
+    var h = '';
 
-    // ── Directors & PSC ──
+    // ── COMPANY SECTION ──
+    h += '<div style="margin-bottom:1.5rem;">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">';
+    h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;border-left:3px solid #00C9E0;padding-left:8px;">Company Information</div>';
+    h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ Auto-filled</span>';
+    h += '</div>';
+    h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
+    coFields.forEach(function(f, i) {
+      var bg = i % 2 === 0 ? '#fafafa' : '#fff';
+      h += '<tr style="background:' + bg + ';">';
+      h += '<td style="padding:7px 10px;font-weight:600;color:#374151;width:45%;border-bottom:1px solid #f3f4f6;">' + f.label + '</td>';
+      h += '<td style="padding:7px 10px;color:#166534;font-weight:500;border-bottom:1px solid #f3f4f6;">✓ ' + f.value + '</td>';
+      h += '</tr>';
+    });
+    h += '</table></div>';
+
+    // ── DIRECTORS SECTION ──
     var officers = (ch.officers || []).filter(function(o){ return !o.resigned_on; });
     var pscs = ch.pscs || [];
 
-    html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:1rem;">';
-    html += '<div style="background:#f0fdf4;padding:0.85rem 1.25rem;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">';
-    html += '<div style="font-weight:700;font-size:0.9rem;">👤 Directors &amp; Persons of Significant Control</div>';
-    html += '<span style="background:#e8f7ee;color:#1a7a3f;font-size:0.7rem;font-weight:700;padding:2px 9px;border-radius:999px;">✓ From Companies House</span>';
-    html += '</div>';
+    h += '<div style="margin-bottom:1.5rem;">';
+    h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">';
+    h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;border-left:3px solid #00C9E0;padding-left:8px;">Directors &amp; Persons of Significant Control</div>';
+    h += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 9px;border-radius:999px;">✓ From Companies House</span>';
+    h += '</div>';
 
     if (officers.length || pscs.length) {
+      h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;">';
       officers.forEach(function(o, i) {
-        var border = (i < officers.length - 1 || pscs.length) ? 'border-bottom:1px solid #f3f4f6;' : '';
-        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.25rem;' + border + '">';
-        html += '<div><div style="font-size:0.85rem;font-weight:700;color:#166534;">✓ ' + o.name + '</div>';
-        html += '<div style="font-size:0.73rem;color:#6b7280;text-transform:capitalize;margin-top:2px;">' + (o.role || 'Director') + (o.appointed_on ? ' · Appointed ' + o.appointed_on : '') + '</div></div>';
-        html += '<span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 8px;border-radius:999px;flex-shrink:0;">Director</span>';
-        html += '</div>';
+        var bg = i % 2 === 0 ? '#fafafa' : '#fff';
+        h += '<tr style="background:' + bg + ';">';
+        h += '<td style="padding:7px 10px;font-weight:600;color:#166534;border-bottom:1px solid #f3f4f6;">✓ ' + o.name + '</td>';
+        h += '<td style="padding:7px 10px;color:#374151;text-transform:capitalize;border-bottom:1px solid #f3f4f6;">' + (o.role||'Director') + '</td>';
+        h += '<td style="padding:7px 10px;border-bottom:1px solid #f3f4f6;"><span style="font-size:0.69rem;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:2px 7px;border-radius:999px;">Director</span></td>';
+        h += '</tr>';
       });
       pscs.forEach(function(p, i) {
-        var border = i < pscs.length - 1 ? 'border-bottom:1px solid #f3f4f6;' : '';
-        html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:0.7rem 1.25rem;' + border + '">';
-        html += '<div><div style="font-size:0.85rem;font-weight:700;color:#5b21b6;">✓ ' + p.name + '</div>';
-        html += '<div style="font-size:0.73rem;color:#6b7280;margin-top:2px;">' + (p.nature_of_control || 'Person of Significant Control') + '</div></div>';
-        html += '<span style="font-size:0.69rem;font-weight:700;background:rgba(124,58,237,0.1);color:#5b21b6;padding:2px 8px;border-radius:999px;flex-shrink:0;">PSC</span>';
-        html += '</div>';
+        var bg = (officers.length + i) % 2 === 0 ? '#fafafa' : '#fff';
+        h += '<tr style="background:' + bg + ';">';
+        h += '<td style="padding:7px 10px;font-weight:600;color:#5b21b6;border-bottom:1px solid #f3f4f6;">✓ ' + p.name + '</td>';
+        h += '<td style="padding:7px 10px;color:#374151;border-bottom:1px solid #f3f4f6;" colspan="2">' + (p.nature_of_control||'PSC') + '</td>';
+        h += '</tr>';
       });
+      h += '</table>';
     } else {
-      html += '<div style="padding:1rem 1.25rem;font-size:0.83rem;color:#9ca3af;font-style:italic;">No director data — enter your Companies House number in the previous step to pull directors automatically.</div>';
+      h += '<div style="background:#fafafa;border-radius:6px;padding:0.75rem 1rem;font-size:0.82rem;color:#9ca3af;font-style:italic;">No director data pulled yet — enter your Companies House number in Step 2 to auto-fill directors.</div>';
     }
-    html += '</div>';
+    h += '</div>';
 
-    // ── Locked sections (from real SQ if available, otherwise generic) ──
-    var lockedSections = [];
+    // ── LOCKED SECTIONS ──
+    var lockedTitles = [];
     if (sqData && sqData.sections) {
+      var visibleKeys = ['company_name','company_number','registered_address','company_type',
+                         'founded_year','directors','psc_details','company_status','sme_status','cqc_status'];
       sqData.sections.forEach(function(s) {
         var isCompany = (s.fields||[]).some(function(f){
-          return ['company_name','company_number','registered_address','company_type',
-                  'founded_year','directors','psc_details','company_status','sme_status','cqc_status'].indexOf(f.profile_key) !== -1;
+          return f.field_type === 'auto_fill' && visibleKeys.indexOf(f.profile_key) !== -1;
         });
         var isDecl = (s.fields||[]).every(function(f){ return f.field_type === 'client_confirm'; });
-        if (!isCompany && !isDecl) lockedSections.push(s.title || s.section);
+        if (!isCompany && !isDecl) lockedTitles.push(s.title || s.section);
       });
-    } else {
-      lockedSections = ['Financial Standing', 'Technical Capability', 'Insurance & Compliance',
-                        'Quality Assurance', 'Subcontracting', 'Additional Questions'];
+    }
+    if (!lockedTitles.length) {
+      lockedTitles = ['Financial Standing','Technical Capability','Insurance & Compliance','Quality Assurance','Equal Opportunities'];
     }
 
-    lockedSections.forEach(function(title) {
-      html += '<div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;overflow:hidden;margin-bottom:1rem;position:relative;">';
-      html += '<div style="background:#f9fafb;padding:0.85rem 1.25rem;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;justify-content:space-between;">';
-      html += '<div style="font-weight:700;font-size:0.9rem;color:#9ca3af;">' + title + '</div>';
-      html += '<span style="background:#f3f4f6;color:#9ca3af;font-size:0.7rem;font-weight:700;padding:2px 9px;border-radius:999px;">🔒 Locked</span>';
-      html += '</div>';
-      html += '<div style="padding:0.75rem 1.25rem;filter:blur(3px);pointer-events:none;user-select:none;opacity:0.35;">';
-      html += '<div style="height:12px;background:#e5e7eb;border-radius:4px;margin-bottom:8px;width:80%;"></div>';
-      html += '<div style="height:12px;background:#e5e7eb;border-radius:4px;margin-bottom:8px;width:60%;"></div>';
-      html += '<div style="height:12px;background:#e5e7eb;border-radius:4px;width:70%;"></div>';
-      html += '</div>';
-      html += '<div style="position:absolute;inset:0;top:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;">';
-      html += '<span style="font-size:1.4rem;">🔒</span>';
-      html += '<span style="font-size:0.77rem;font-weight:700;color:#6b7280;">Completed in your full report</span>';
-      html += '</div>';
-      html += '</div>';
+    lockedTitles.forEach(function(title) {
+      h += '<div style="margin-bottom:1rem;position:relative;">';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">';
+      h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#9ca3af;border-left:3px solid #e5e7eb;padding-left:8px;">' + title + '</div>';
+      h += '<span style="font-size:0.69rem;font-weight:700;background:#f3f4f6;color:#9ca3af;padding:2px 9px;border-radius:999px;">🔒 Locked</span>';
+      h += '</div>';
+      h += '<div style="position:relative;border-radius:8px;overflow:hidden;">';
+      h += '<table style="width:100%;border-collapse:collapse;font-size:0.84rem;filter:blur(3px);pointer-events:none;user-select:none;opacity:0.3;">';
+      ['[Answer to be completed]','[Response required]','[See full report]'].forEach(function(text, i) {
+        h += '<tr style="background:' + (i%2===0?'#fafafa':'#fff') + ';"><td style="padding:7px 10px;border-bottom:1px solid #f3f4f6;width:45%;">Question ' + (i+1) + '</td><td style="padding:7px 10px;border-bottom:1px solid #f3f4f6;">' + text + '</td></tr>';
+      });
+      h += '</table>';
+      h += '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;">';
+      h += '<span style="font-size:1.2rem;">🔒</span>';
+      h += '<span style="font-size:0.74rem;font-weight:700;color:#6b7280;">Completed in your full report</span>';
+      h += '</div></div></div>';
     });
 
     var el = document.getElementById('sq-sections-cana');
-    if (el) el.innerHTML = html;
+    if (el) {
+      el.innerHTML = h;
+    } else {
+      console.error('sq-sections-cana element not found');
+    }
   }
 
 
