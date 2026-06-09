@@ -189,7 +189,7 @@
         var statusColor = status === 'active' ? '#166534' : '#9ca3af';
         return '<div onclick="selectCanaChResult(' + i + ')" data-idx="' + i + '"' +
           ' style="padding:10px 16px;cursor:pointer;border-bottom:1px solid #f3f4f6;transition:background 0.15s;"' +
-          ' onmouseover="this.style.background='#f0fdf4'" onmouseout="this.style.background=''">' +
+          ' class="ch-result-item">' +
           '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">' +
             '<div style="font-weight:600;font-size:0.88rem;color:#0B1929;">' + escapeHtml(c.company_name) + '</div>' +
             '<span style="font-size:0.7rem;font-weight:700;color:' + statusColor + ';flex-shrink:0;">' + status + '</span>' +
