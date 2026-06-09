@@ -508,30 +508,35 @@
       <p class="page-subtitle">Auto-imported from Contracts Finder — review and approve before going live</p>
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
-      <button onclick="runManualImport()" id="ti-import-btn" style="background:var(--accent);color:#fff;border:none;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.85rem;">⬇ Import Now</button>
+      <button onclick="runManualImport()" id="ti-import-btn" class="btn-primary">⬇ Import Now</button>
       <span id="ti-import-status" style="font-size:0.82rem;color:var(--muted);"></span>
     </div>
   </div>
+
   <div class="ti-stats-grid">
     <div class="ti-stat"><div class="ti-stat-label">Pending Review</div><div class="ti-stat-val" id="ti-count-pending">—</div></div>
     <div class="ti-stat"><div class="ti-stat-label">Approved Live</div><div class="ti-stat-val ti-green" id="ti-count-live">—</div></div>
     <div class="ti-stat"><div class="ti-stat-label">Rejected</div><div class="ti-stat-val ti-red" id="ti-count-rejected">—</div></div>
     <div class="ti-stat"><div class="ti-stat-label">Total Imported</div><div class="ti-stat-val" id="ti-count-total">—</div></div>
   </div>
+
   <div class="ti-filters">
     <button onclick="tiSetFilter('pending_review')" class="ti-tab active" id="ti-tab-pending">Pending</button>
     <button onclick="tiSetFilter('live')" class="ti-tab" id="ti-tab-live">Approved</button>
     <button onclick="tiSetFilter('rejected')" class="ti-tab" id="ti-tab-rejected">Rejected</button>
     <button onclick="tiSetFilter('all')" class="ti-tab" id="ti-tab-all">All</button>
-    <input type="text" id="ti-search" placeholder="Search..." oninput="tiRender()" style="margin-left:auto;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;width:180px;">
-    <select id="ti-cat-filter" onchange="tiRender()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;">
+    <input type="text" id="ti-search" placeholder="Search..." oninput="tiRender()" class="ti-search-input">
+    <select id="ti-cat-filter" onchange="tiRender()" class="ti-cat-select">
       <option value="">All categories</option>
       <option value="care">Care</option>
       <option value="commercial">Commercial</option>
     </select>
   </div>
+
   <div id="ti-list" style="display:flex;flex-direction:column;gap:10px;"></div>
-  <div id="ti-empty" style="display:none;text-align:center;padding:3rem;color:var(--muted);">No tenders found. Click "Import Now" to fetch the latest from Contracts Finder.</div>
+  <div id="ti-empty" style="display:none;text-align:center;padding:3rem;color:var(--muted);">
+    No tenders found. Click <strong>Import Now</strong> to fetch the latest from Contracts Finder.
+  </div>
 </div>
 
 <div class="toast" id="toast"><i class="ti ti-check" style="font-size:16px" id="toastIcon"></i><span id="toastMsg"></span></div>
