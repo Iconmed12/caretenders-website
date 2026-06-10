@@ -130,23 +130,6 @@
     .welcome { flex-direction:column; align-items:flex-start; }
   }
 </style>
-
-  <style>
-  .bid-history-section { max-width:860px; margin:2rem auto; padding:0 1.5rem; }
-  .bh-header { margin-bottom:1.25rem; }
-  .bh-title { font-family:'Playfair Display',serif; font-size:1.5rem; color:#0B1929; margin:0 0 4px; }
-  .bh-sub { font-size:0.85rem; color:#6b7280; margin:0; }
-  .bh-list { display:flex; flex-direction:column; gap:12px; }
-  .bh-card { background:#fff; border:1.5px solid #e5e7eb; border-radius:12px; padding:16px 20px; display:flex; align-items:center; gap:16px; transition:border-color 0.2s; }
-  .bh-card:hover { border-color:#00C9E0; }
-  .bh-icon { width:44px; height:44px; border-radius:10px; background:linear-gradient(135deg,#0B1929,#1a3550); display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
-  .bh-info { flex:1; min-width:0; }
-  .bh-tender { font-weight:700; font-size:0.9rem; color:#0B1929; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .bh-meta { font-size:0.78rem; color:#6b7280; margin-top:2px; }
-  .bh-date { font-size:0.78rem; color:#9ca3af; flex-shrink:0; text-align:right; }
-  .bh-badge { display:inline-flex; align-items:center; gap:4px; background:#e8f7ee; color:#166534; font-size:0.72rem; font-weight:700; padding:2px 8px; border-radius:999px; margin-left:8px; }
-  .bh-empty { text-align:center; padding:3rem 1rem; color:#9ca3af; font-size:0.9rem; }
-  </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0B1929">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -251,12 +234,7 @@
       <span class="action-arrow">Manage documents →</span>
     </a>
     
-    <a href="#bid-history-section" onclick="document.getElementById('bid-history-section').scrollIntoView({behavior:'smooth'});return false;" class="action-card">
-      <div class="action-icon navy">📊</div>
-      <h3>Bid History</h3>
-      <p>View all your previous Cana AI tender responses in one place.</p>
-      <span class="action-arrow">→</span>
-    </a>
+    
     <a href="#" class="action-card coming-soon">
       <div class="coming-badge">Coming soon</div>
       <div class="action-icon navy">🔔</div>
