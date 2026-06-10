@@ -137,7 +137,7 @@ exports.handler = async (event) => {
     // ── 3. Generate responses: DRAFT (Sonnet) → SELF-SCORE & REVISE (Sonnet) ──
     await setStatus(jobId, 'generating_responses');
     var responses = [];
-    var SONNET = 'claude-sonnet-4-5';
+    var SONNET = 'claude-sonnet-4-6';
 
     async function callSonnet(prompt, maxTokens) {
       var res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -145,6 +145,11 @@ exports.handler = async (event) => {
         headers: { 'Content-Type': 'application/json', 'x-api-key': AI_KEY, 'anthropic-version': '2023-06-01' },
         body: JSON.stringify({ model: SONNET, max_tokens: maxTokens || 3500, messages: [{ role: 'user', content: prompt }] })
       });
+      if (!res.ok) {
+        var errTxt = await res.text();
+        console.log('Anthropic API error:', res.status, errTxt.substring(0,300));
+        throw new Error('API ' + res.status + ': ' + errTxt.substring(0,100));
+      }
       var d = await res.json();
       if (d.error) { console.log('Sonnet error:', JSON.stringify(d.error).substring(0,200)); throw new Error(d.error.message || 'AI error'); }
       return d.content && d.content[0] ? d.content[0].text.trim() : '';
