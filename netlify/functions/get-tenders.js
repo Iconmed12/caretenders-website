@@ -20,11 +20,11 @@ exports.handler = async (event) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { data, error } = await supabase
-      .from('tenders')
-      .select('*')
-      .eq('status', 'live')
-      .order('created_at', { ascending: false });
+    // Public site gets live only; admin passes ?scope=all
+    const scope = (event.queryStringParameters && event.queryStringParameters.scope) || 'public';
+    let query = supabase.from('tenders').select('*').order('created_at', { ascending: false });
+    if (scope !== 'all') query = query.eq('status', 'live');
+    const { data, error } = await query;
 
     if (error) {
       return {
