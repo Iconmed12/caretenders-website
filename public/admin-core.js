@@ -27,8 +27,8 @@ function doLogout() {
   document.getElementById('loginScreen').style.display = 'flex';
 }
 
-const CARE_CATS = ['domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
-const COMMERCIAL_CATS = ['construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','logistics','other','it & services'];
+const CARE_CATS = ['care','domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
+const COMMERCIAL_CATS = ['commercial','construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','logistics','other','it & services','transport','waste','security'];
 
 function isCare(t) {
   const cat = (t.category||'').toLowerCase().trim();
