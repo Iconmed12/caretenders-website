@@ -275,12 +275,13 @@
         <div class="section-title">Recent tenders</div>
       </div>
       <div id="tenders-container">
-        <div class="empty-state">
+        <div class="empty-state" id="tenders-empty" style="display:none;">
           <div class="empty-icon">📄</div>
           <h3>No tenders yet</h3>
-          <p>Once you use Cana AI to generate tender responses, they'll appear here.</p>
+          <p>Browse available tenders and generate your first AI-powered bid response.</p>
           <a href="/" class="btn-primary">Browse tenders</a>
         </div>
+        <div class="tenders-list" id="tenders-list"></div>
       </div>
     </div>
 
@@ -396,9 +397,58 @@
       });
     }
 
+    // Load live tenders
+    await loadRecentTenders();
+
     // Hide loading, show page
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('main-page').style.display = 'block';
+  }
+
+  async function loadRecentTenders() {
+    try {
+      var { data: tenders, error } = await sb
+        .from('tenders')
+        .select('id,title,org,deadline,category,status')
+        .eq('status','live')
+        .order('deadline', { ascending: true })
+        .limit(5);
+
+      var list = document.getElementById('tenders-list');
+      var empty = document.getElementById('tenders-empty');
+      if (!list) return;
+
+      if (error || !tenders || !tenders.length) {
+        if (empty) empty.style.display = 'block';
+        return;
+      }
+
+      list.innerHTML = tenders.map(function(t) {
+        var deadline = t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'TBC';
+        var daysLeft = t.deadline ? Math.ceil((new Date(t.deadline) - new Date()) / 86400000) : null;
+        var urgency = daysLeft !== null && daysLeft <= 14 ? 'color:#dc2626;font-weight:700;' : 'color:var(--muted);';
+        var catLabel = t.category === 'care' ? '🏥 Care' : '🏢 Commercial';
+        return '<a href="/?tender=' + t.id + '" class="tender-row" style="text-decoration:none;">' +
+          '<div class="tender-icon">' + (t.category === 'care' ? '🏥' : '🏢') + '</div>' +
+          '<div class="tender-info">' +
+            '<div class="tender-name">' + (t.title || 'Untitled tender') + '</div>' +
+            '<div class="tender-meta">' + (t.org || '') + (t.org && deadline ? ' · ' : '') + 
+            '<span style="' + urgency + '">Closes ' + deadline + (daysLeft !== null ? ' (' + daysLeft + ' days)' : '') + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<span class="tender-status done">' + catLabel + '</span>' +
+        '</a>';
+      }).join('');
+
+      // Update stat
+      var statEl = document.getElementById('stat-tenders');
+      if (statEl) statEl.textContent = tenders.length + '+';
+
+    } catch(e) {
+      console.log('loadRecentTenders error:', e.message);
+      var empty = document.getElementById('tenders-empty');
+      if (empty) empty.style.display = 'block';
+    }
   }
 
   async function handleSignOut() {
