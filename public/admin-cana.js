@@ -751,8 +751,11 @@ function renderTenderStatusBar(t) {
   var label = isLive ? '&#x2713; LIVE on site' : status === 'needs_docs' ? '&#x1F4C4; Needs documents — not visible to clients' : '&#x23F3; ' + status;
 
   bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;background:' + bg + ';border:1.5px solid ' + color + '33;border-radius:10px;padding:12px 16px;margin-bottom:1rem;';
+  var srcLink = t.source_url
+    ? '<a href="' + t.source_url + '" target="_blank" style="font-size:0.8rem;color:#0369a1;font-weight:600;text-decoration:none;margin-left:auto;margin-right:12px;">Open original notice &#x2197;</a>'
+    : '';
   bar.innerHTML =
-    '<span style="font-weight:700;font-size:0.85rem;color:' + color + ';">' + label + '</span>' +
+    '<span style="font-weight:700;font-size:0.85rem;color:' + color + ';">' + label + '</span>' + srcLink +
     (isLive
       ? '<button data-status-action="needs_docs" data-tender="' + t.id + '" style="background:#fff;color:#92400e;border:1px solid #fbbf24;padding:7px 14px;border-radius:7px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit;">Take offline</button>'
       : '<button data-status-action="live" data-tender="' + t.id + '" style="background:#166534;color:#fff;border:none;padding:7px 16px;border-radius:7px;font-size:0.8rem;font-weight:700;cursor:pointer;font-family:inherit;">&#x1F680; Set LIVE on site</button>');
