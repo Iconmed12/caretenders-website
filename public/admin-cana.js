@@ -2,7 +2,8 @@ function renderCanaPanels() {
   var live = [];
   var pending = [];
 
-  allTenders.filter(function(t){ return t.status !== 'draft'; }).forEach(function(t) {
+  var CANA_STATUSES = ['live', 'needs_docs', 'open'];
+  allTenders.filter(function(t){ return CANA_STATUSES.indexOf(t.status) !== -1; }).forEach(function(t) {
     var hasSq      = !!(t.sq_data && (t.sq_data.fileName || t.sq_data.htmlPreview || (t.sq_data.sections && t.sq_data.sections.length > 0)));
     var hasQuality = !!(t.cana_docs && t.cana_docs.quality && t.cana_docs.quality.length);
     var hasSpec    = !!(t.cana_docs && t.cana_docs.spec    && t.cana_docs.spec.length);
