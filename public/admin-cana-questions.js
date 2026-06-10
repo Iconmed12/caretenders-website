@@ -254,6 +254,8 @@ async function setTenderStatus(id, newStatus) {
     var t = allTenders.find(function(x){ return x.id === id; });
     if (t) t.status = newStatus;
     renderTenderStatusBar(t);
+    renderCanaPanels();   // re-sort Live vs Needs Attention immediately
+    populateCanaTenderSelect();
     showToast(newStatus === 'live' ? 'Tender is now LIVE on the site' : 'Tender taken offline', 'success');
   } catch(e) { showToast('Status update failed: ' + e.message, 'error'); }
 }
