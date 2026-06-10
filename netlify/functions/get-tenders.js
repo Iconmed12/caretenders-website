@@ -23,6 +23,7 @@ exports.handler = async (event) => {
     const { data, error } = await supabase
       .from('tenders')
       .select('*')
+      .eq('status', 'live')
       .order('created_at', { ascending: false });
 
     if (error) {
