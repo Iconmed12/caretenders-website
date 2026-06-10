@@ -126,6 +126,12 @@ async function tiApprove(id) {
     });
     tiAllTenders = tiAllTenders.map(function(t){ return t.id === id ? Object.assign({},t,{status:'needs_docs'}) : t; });
     tiUpdateStats(); tiRender();
+    // Refresh the Cana AI panels so it appears in Needs Attention immediately
+    if (typeof loadTenders === 'function') {
+      await loadTenders();
+      if (typeof renderCanaPanels === 'function') renderCanaPanels();
+      if (typeof populateCanaTenderSelect === 'function') populateCanaTenderSelect();
+    }
     showToast('Approved — upload documents in Cana AI section, then set live', 'success');
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
