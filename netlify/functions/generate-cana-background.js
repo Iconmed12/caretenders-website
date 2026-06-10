@@ -323,8 +323,6 @@ exports.handler = async (event) => {
           });
           xml = xml.replace(/\[Insert(?:\s+company)?\s+number\]/gi, fillData.company_number || '');
           xml = xml.replace(/\[Insert(?:\s+registered)?\s+address\]/gi, fillData.address || '');
-          xml = xml.replace(/\[Insert\s+Yes\s+or\s+No\]/gi, 'Yes');
-          xml = xml.replace(/\[Insert\s+information\]/gi, 'See attached supporting documentation.');
           xml = xml.replace(/\[Insert\s+date\]/gi, new Date().toLocaleDateString('en-GB'));
           xml = xml.replace(/\[Insert\s+CQC[^\]]*\]/gi, fillData.cqc || '');
 
@@ -416,11 +414,6 @@ exports.handler = async (event) => {
             if (t === 'name' || (t.indexOf('name') === 0 && t.length < 20)) return setRowAnswer(row, '[INSERT: full name of signatory]');
             if (t === 'role' || (t.indexOf('role') === 0 && t.length < 20)) return setRowAnswer(row, '[INSERT: role of signatory]');
             return row;
-          });
-
-          // 4. Convert remaining bracket placeholders into clear INSERT flags
-          xml = xml.replace(/\[Insert ([^\]]{3,80})\]/g, function(m, inner) {
-            return '[INSERT: ' + inner.trim() + ']';
           });
 
           console.log('SQ fill complete');
