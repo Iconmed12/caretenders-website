@@ -1,13 +1,15 @@
-const { createClient } = require('@supabase/supabase-js');
-
 exports.handler = async (event) => {
   const cors = { 'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'*' };
   if (event.httpMethod === 'OPTIONS') return { statusCode:200, headers:cors, body:'' };
 
-  const sb = createClient(
-    'https://igpjfpncfuawikoyzfcd.supabase.co',
-    process.env.SUPABASE_ANON_KEY
-  );
+  var SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+  var SB_KEY = process.env.SUPABASE_ANON_KEY;
+  
+  function sbFetch(path, opts) {
+    return fetch(SB_URL + path, Object.assign({
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' }
+    }, opts || {}));
+  }
 
   // Categories to import — maps CF keywords to Cana categories
   const CATEGORY_MAP = [
@@ -54,21 +56,29 @@ exports.handler = async (event) => {
     for (var page = 0; page < pages; page++) {
       var apiUrl = 'https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search' +
         '?publishedFrom=' + getYesterdayDate() +
+        '&stages=tender' +
         '&size=100&page=' + page +
         '&order=publishedDate&orderDirection=DESC';
 
+      console.log('Fetching CF API page', page, ':', apiUrl);
       var res = await fetch(apiUrl, {
         headers: { 'Accept': 'application/json', 'User-Agent': 'Cana/1.0' }
       });
 
       if (!res.ok) {
-        console.log('CF API page', page, 'failed:', res.status);
+        var errBody = await res.text();
+        console.log('CF API page', page, 'failed:', res.status, errBody.substring(0,200));
         break;
       }
 
       var data = await res.json();
       var releases = data.releases || data.records || [];
-      console.log('Page', page, '— fetched', releases.length, 'records');
+      console.log('Page', page, '— fetched', releases.length, 'records, total:', data.total || 'unknown');
+      
+      if (!releases.length) {
+        console.log('No releases on page', page, '— stopping');
+        break;
+      }
 
       if (!releases.length) break;
 
@@ -92,12 +102,9 @@ exports.handler = async (event) => {
           if (!title || !deadline) { skipped++; continue; }
 
           // Check not already imported
-          var existing = await sb.from('tenders')
-            .select('id')
-            .eq('source_id', sourceId)
-            .single();
-
-          if (existing.data) { skipped++; continue; }
+          var existRes = await sbFetch('/rest/v1/tenders?source_id=eq.' + encodeURIComponent(sourceId) + '&select=id&limit=1');
+          var existData = await existRes.json();
+          if (Array.isArray(existData) && existData.length > 0) { skipped++; continue; }
 
           // Generate tender ID
           var now = Date.now();
@@ -122,9 +129,16 @@ exports.handler = async (event) => {
             created_at: new Date().toISOString()
           };
 
-          var { error } = await sb.from('tenders').insert(tenderObj);
-          if (error) { console.log('Insert error:', error.message); errors++; }
-          else { imported++; results.push({ id: tenderId, title: title.substring(0,60) }); }
+          var insertRes = await sbFetch('/rest/v1/tenders', {
+            method: 'POST',
+            body: JSON.stringify(tenderObj),
+            headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }
+          });
+          if (!insertRes.ok) {
+            var errTxt = await insertRes.text();
+            console.log('Insert error:', insertRes.status, errTxt.substring(0,150));
+            errors++;
+          } else { imported++; results.push({ id: tenderId, title: title.substring(0,60) }); }
 
         } catch(e) { console.log('Record error:', e.message); errors++; }
       }
@@ -146,5 +160,5 @@ exports.handler = async (event) => {
 function getYesterdayDate() {
   var d = new Date();
   d.setDate(d.getDate() - 1);
-  return d.toISOString().split('T')[0];
+  return d.toISOString().split('T')[0] + 'T00:00:00';
 }
