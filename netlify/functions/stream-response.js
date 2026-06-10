@@ -75,7 +75,9 @@ exports.handler = async (event) => {
     var scoringThemes = extractScoringThemes(scoringText, q.question);
 
     const wordLimit = q.wordLimit ? parseInt(q.wordLimit) : 500;
-    const maxTokens = Math.min(Math.ceil(wordLimit * 1.5) + 500, 7000);
+    // Give generous token headroom: 2.5 tokens per word + 800 overhead for structure
+    // Haiku max output is 8192 — cap at 8000 to never hit the hard limit mid-answer
+    const maxTokens = Math.min(Math.ceil(wordLimit * 2.5) + 800, 8000);
     const co = companyDetails;
 
     // ── UNIQUE PERSONA BUILDER ──
