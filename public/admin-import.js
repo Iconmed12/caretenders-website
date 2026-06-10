@@ -28,7 +28,7 @@ async function loadImportedTenders() {
 
 function tiUpdateStats() {
   var pending  = tiAllTenders.filter(function(t){ return t.status === 'pending_review'; }).length;
-  var live     = tiAllTenders.filter(function(t){ return t.status === 'live'; }).length;
+  var live     = tiAllTenders.filter(function(t){ return t.status === 'live' || t.status === 'needs_docs'; }).length;
   var rejected = tiAllTenders.filter(function(t){ return t.status === 'rejected'; }).length;
   var setEl = function(id, val) { var el = document.getElementById(id); if(el) el.textContent = val; };
   setEl('ti-count-pending',  pending);
@@ -50,7 +50,9 @@ function tiRender() {
   var cat    = document.getElementById('ti-cat-filter') ? document.getElementById('ti-cat-filter').value : '';
 
   var filtered = tiAllTenders.filter(function(t) {
-    if (tiCurrentFilter !== 'all' && t.status !== tiCurrentFilter) return false;
+    if (tiCurrentFilter === 'live') {
+      if (t.status !== 'live' && t.status !== 'needs_docs') return false;
+    } else if (tiCurrentFilter !== 'all' && t.status !== tiCurrentFilter) return false;
     if (cat && t.category !== cat) return false;
     if (search) {
       var text = ((t.title||'') + ' ' + (t.org||'') + ' ' + (t.buyer||'')).toLowerCase();
@@ -77,9 +79,9 @@ function tiRender() {
     if (rb) tiReject(rb.getAttribute('data-reject'));
   };
   list.innerHTML = filtered.map(function(t) {
-    var statusColor = t.status === 'live' ? '#166534' : t.status === 'rejected' ? '#dc2626' : '#92400e';
-    var statusBg    = t.status === 'live' ? '#e8f7ee' : t.status === 'rejected' ? '#fef2f2' : '#fefce8';
-    var statusLabel = t.status === 'live' ? '✓ Live' : t.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
+    var statusColor = t.status === 'live' ? '#166534' : t.status === 'needs_docs' ? '#0369a1' : t.status === 'rejected' ? '#dc2626' : '#92400e';
+    var statusBg    = t.status === 'live' ? '#e8f7ee' : t.status === 'needs_docs' ? '#e0f2fe' : t.status === 'rejected' ? '#fef2f2' : '#fefce8';
+    var statusLabel = t.status === 'live' ? '✓ Live' : t.status === 'needs_docs' ? '📄 Needs docs' : t.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
     var deadline    = t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
     var catBadge    = t.category === 'care' ? '#e0f2fe' : '#fef3c7';
     var catColor    = t.category === 'care' ? '#0369a1' : '#92400e';
@@ -120,11 +122,11 @@ async function tiApprove(id) {
   try {
     await sbFetch('/rest/v1/tenders?id=eq.' + id, {
       method: 'PATCH',
-      body: JSON.stringify({ status: 'live' })
+      body: JSON.stringify({ status: 'needs_docs' })
     });
-    tiAllTenders = tiAllTenders.map(function(t){ return t.id === id ? Object.assign({},t,{status:'live'}) : t; });
+    tiAllTenders = tiAllTenders.map(function(t){ return t.id === id ? Object.assign({},t,{status:'needs_docs'}) : t; });
     tiUpdateStats(); tiRender();
-    showToast('Tender approved — now live', 'success');
+    showToast('Approved — upload documents in Cana AI section, then set live', 'success');
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
