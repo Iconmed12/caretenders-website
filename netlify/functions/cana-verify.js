@@ -21,14 +21,18 @@ exports.handler = async (event) => {
     const stripeData = await stripeRes.json();
 
     var paid = false;
-    var stripeEmail = (companyDetails && companyDetails.email) || '';
+    var formEmail   = (companyDetails && companyDetails.email) || '';
+    var stripeEmail = formEmail; // Default: use the email the client typed in the form
 
     if (stripeData.data) {
       for (var i = 0; i < stripeData.data.length; i++) {
         var s = stripeData.data[i];
         if (s.metadata && s.metadata.session_id === sessionId && s.payment_status === 'paid') {
           paid = true;
-          if (s.customer_details && s.customer_details.email) stripeEmail = s.customer_details.email;
+          // Only use Stripe email if the client didn't type one in the form
+          if (!formEmail && s.customer_details && s.customer_details.email) {
+            stripeEmail = s.customer_details.email;
+          }
           break;
         }
       }
