@@ -92,9 +92,10 @@ function badgeHtml(s) {
 }
 
 function updateCounts() {
-  var care=allTenders.filter(isCare);
-  var commercial=allTenders.filter(function(t){return !isCare(t);});
-  var nc=allTenders.filter(function(t){return isNonCqcEligible(t)||t.is_non_cqc;});
+  var liveTenders=allTenders.filter(function(t){return t.status==='live'||t.status==='open';});
+  var care=liveTenders.filter(isCare);
+  var commercial=liveTenders.filter(function(t){return !isCare(t);});
+  var nc=liveTenders.filter(function(t){return isNonCqcEligible(t)||t.is_non_cqc;});
   var withDocs=allTenders.filter(function(t){return t.cana_docs&&(
     (t.cana_docs.quality&&t.cana_docs.quality.length)||
     (t.cana_docs.spec&&t.cana_docs.spec.length)||
