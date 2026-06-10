@@ -159,10 +159,14 @@ function tiApprove(id) {
 
 async function tiDoApprove(id) {
   try {
-    await sbFetch('/rest/v1/tenders?id=eq.' + id, {
+    var res = await sbFetch('/rest/v1/tenders?id=eq.' + id, {
       method: 'PATCH',
       body: JSON.stringify({ status: 'needs_docs' })
     });
+    if (!res.ok) {
+      var errTxt = await res.text();
+      throw new Error('DB update failed (' + res.status + '): ' + errTxt.substring(0, 120));
+    }
     tiAllTenders = tiAllTenders.map(function(t){ return t.id === id ? Object.assign({},t,{status:'needs_docs'}) : t; });
     tiUpdateStats(); tiRender();
     // Refresh the Cana AI panels so it appears in Needs Attention immediately
