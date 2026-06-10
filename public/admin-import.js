@@ -165,3 +165,16 @@ async function runManualImport() {
     if (btn) { btn.disabled = false; btn.textContent = '⬇ Import Now'; }
   }
 }
+
+
+// Update sidebar badge on admin load (not just when page opened)
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(async function() {
+    try {
+      var res = await sbFetch('/rest/v1/tenders?source=eq.contracts_finder&status=eq.pending_review&select=id');
+      var data = await res.json();
+      var badge = document.getElementById('sbImport');
+      if (badge && Array.isArray(data)) badge.textContent = data.length;
+    } catch(e) {}
+  }, 800);
+});
