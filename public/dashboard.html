@@ -269,19 +269,17 @@
   <!-- BOTTOM TWO COL -->
   <div class="two-col">
 
-    <!-- RECENT TENDERS -->
+    <!-- BID HISTORY -->
     <div>
       <div class="section-header">
-        <div class="section-title">Recent tenders</div>
+        <div class="section-title">Bid History</div>
+        <span style="font-size:0.8rem;color:var(--muted);">AI-generated responses</span>
       </div>
-      <div id="tenders-container">
-        <div class="empty-state" id="tenders-empty" style="display:none;">
-          <div class="empty-icon">📄</div>
-          <h3>No tenders yet</h3>
-          <p>Browse available tenders and generate your first AI-powered bid response.</p>
-          <a href="/" class="btn-primary">Browse tenders</a>
-        </div>
-        <div class="tenders-list" id="tenders-list"></div>
+      <div id="bid-history-list" class="bh-list"></div>
+      <div id="bid-history-empty" style="display:none;background:var(--white);border:1px solid var(--border);border-radius:11px;padding:2rem;text-align:center;">
+        <div style="font-size:2rem;margin-bottom:0.5rem;">📄</div>
+        <h3 style="font-size:0.95rem;margin-bottom:0.4rem;">No bids yet</h3>
+        <p style="font-size:0.82rem;color:var(--muted);">Your completed Cana AI submissions will appear here.</p>
       </div>
     </div>
 
@@ -397,56 +395,49 @@
       });
     }
 
-    // Load live tenders
-    await loadRecentTenders();
+    // Load bid history
+    await loadBidHistory();
 
     // Hide loading, show page
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('main-page').style.display = 'block';
   }
 
-  async function loadRecentTenders() {
+  
+
+  async function loadBidHistory() {
     try {
-      var { data: tenders, error } = await sb
-        .from('tenders')
-        .select('id,title,org,deadline,category,status')
-        .eq('status','live')
-        .order('deadline', { ascending: true })
-        .limit(5);
-
-      var list = document.getElementById('tenders-list');
-      var empty = document.getElementById('tenders-empty');
+      var { data: { user } } = await sb.auth.getUser();
+      if (!user) return;
+      var res = await fetch('/.netlify/functions/get-bid-history', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: user.email })
+      });
+      var history = await res.json();
+      var list  = document.getElementById('bid-history-list');
+      var empty = document.getElementById('bid-history-empty');
       if (!list) return;
-
-      if (error || !tenders || !tenders.length) {
+      if (!Array.isArray(history) || !history.length) {
         if (empty) empty.style.display = 'block';
         return;
       }
-
-      list.innerHTML = tenders.map(function(t) {
-        var deadline = t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'TBC';
-        var daysLeft = t.deadline ? Math.ceil((new Date(t.deadline) - new Date()) / 86400000) : null;
-        var urgency = daysLeft !== null && daysLeft <= 14 ? 'color:#dc2626;font-weight:700;' : 'color:var(--muted);';
-        var catLabel = t.category === 'care' ? '🏥 Care' : '🏢 Commercial';
-        return '<a href="/?tender=' + t.id + '" class="tender-row" style="text-decoration:none;">' +
-          '<div class="tender-icon">' + (t.category === 'care' ? '🏥' : '🏢') + '</div>' +
+      list.innerHTML = history.map(function(b) {
+        var date = b.created_at ? new Date(b.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
+        return '<div class="tender-row">' +
+          '<div class="tender-icon">📄</div>' +
           '<div class="tender-info">' +
-            '<div class="tender-name">' + (t.title || 'Untitled tender') + '</div>' +
-            '<div class="tender-meta">' + (t.org || '') + (t.org && deadline ? ' · ' : '') + 
-            '<span style="' + urgency + '">Closes ' + deadline + (daysLeft !== null ? ' (' + daysLeft + ' days)' : '') + '</span>' +
-            '</div>' +
+            '<div class="tender-name">' + (b.tender_title || 'Tender response') + '</div>' +
+            '<div class="tender-meta">' + (b.client_name || '') + (date ? ' · ' + date : '') + '</div>' +
           '</div>' +
-          '<span class="tender-status done">' + catLabel + '</span>' +
-        '</a>';
+          '<span class="tender-status done">✓ Sent</span>' +
+        '</div>';
       }).join('');
-
-      // Update stat
+      // Update tenders completed stat
       var statEl = document.getElementById('stat-tenders');
-      if (statEl) statEl.textContent = tenders.length + '+';
-
+      if (statEl) statEl.textContent = history.length;
     } catch(e) {
-      console.log('loadRecentTenders error:', e.message);
-      var empty = document.getElementById('tenders-empty');
+      console.log('loadBidHistory error:', e.message);
+      var empty = document.getElementById('bid-history-empty');
       if (empty) empty.style.display = 'block';
     }
   }
@@ -459,50 +450,10 @@
   init();
 </script>
 
-  <!-- Bid History -->
-  <section class="bid-history-section" id="bid-history-section">
-    <div class="bh-header">
-      <h2 class="bh-title">Your Bid History</h2>
-      <p class="bh-sub">Previous Cana AI submissions — all documents were sent to your email</p>
-    </div>
-    <div id="bid-history-list" class="bh-list"></div>
-  </section>
+  
 
 
-  <script>
-  (async function loadBidHistory() {
-    try {
-      var sb = window._supabase || (typeof supabase !== 'undefined' ? supabase.createClient('https://igpjfpncfuawikoyzfcd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA') : null);
-      if (!sb) return;
-      var { data:{ user } } = await sb.auth.getUser();
-      if (!user || !user.email) return;
-
-      var res = await fetch('/.netlify/functions/get-bid-history', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ email: user.email })
-      });
-      var history = await res.json();
-      if (!Array.isArray(history) || !history.length) return;
-
-      var section = document.getElementById('bid-history-section');
-      var list    = document.getElementById('bid-history-list');
-      if (!section || !list) return;
-      section.style.display = 'block';
-
-      list.innerHTML = history.map(function(h) {
-        var date = h.completed_at ? new Date(h.completed_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '';
-        return '<div class="bh-card">' +
-          '<div class="bh-icon">📄</div>' +
-          '<div class="bh-info">' +
-            '<div class="bh-tender">' + (h.tender_title||'Tender') + '<span class="bh-badge">✓ Sent</span></div>' +
-            '<div class="bh-meta">' + (h.org||'') + (h.client_name ? ' · ' + h.client_name : '') + '</div>' +
-          '</div>' +
-          '<div class="bh-date">' + date + '</div>' +
-        '</div>';
-      }).join('');
-    } catch(e) { console.log('Bid history error:', e.message); }
-  })();
-  </script>
+  
   <script>
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js').then(function(r){ console.log('SW registered'); }).catch(function(){});
