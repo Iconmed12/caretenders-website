@@ -91,7 +91,7 @@ exports.handler = async (event) => {
     if (kb.avoid)                    kbContext += 'NEVER DO THIS:\n'              + kbStr(kb.avoid).substring(0,600) + '\n\n';
 
     var coCtx = 'Company: ' + clientName + '\n' +
-      'CQC: ' + (co.cqc || '') + '\n' +
+      (co.cqc ? 'CQC: ' + co.cqc + '\n' : '') +
       'Services: ' + (co.services || '') + '\n' +
       'Regions: ' + (co.regions || '') + '\n' +
       'Staff: ' + (co.staff || '') + '\n' +
@@ -100,6 +100,15 @@ exports.handler = async (event) => {
       (co.achievements ? 'Achievements: ' + co.achievements + '\n' : '') +
       (co.policies ? 'Policies: ' + co.policies + '\n' : '') +
       (co.accreditations ? 'Accreditations: ' + co.accreditations + '\n' : '');
+
+    // ── Sector-aware framing ──
+    var isCare = (tender.category === 'care') || tender.is_cqc;
+    var roleExamples = isCare
+      ? 'the registered manager, the designated safeguarding lead, activity coordinators, training leads'
+      : 'the contracts manager, operations/site manager, health and safety (SHEQ) lead, account manager, quality manager';
+    var complianceRule = isCare
+      ? '═══ CQC RULE ═══\nOnly state a CQC registration status or rating if it appears verbatim in the company evidence. If the CQC field is empty or unclear, write [INSERT: confirm your CQC registration status and current rating] instead. Never assume a rating — councils verify CQC claims against the public register.\n\n'
+      : '═══ ACCREDITATIONS RULE ═══\nOnly state accreditations and certifications (ISO 9001/14001/45001, CHAS, Constructionline, SafeContractor, Cyber Essentials, SSIP and similar) if they appear verbatim in the company evidence. If relevant accreditations are missing from the evidence, write [INSERT: list your relevant accreditations e.g. ISO 9001, CHAS] — never assume them, buyers verify certificates.\n\n';
 
     // Derive word target from page/word limits in the question text
     function wordTarget(qText) {
@@ -160,9 +169,8 @@ exports.handler = async (event) => {
         '═══ ABSOLUTE RULE No. 1 — ZERO FABRICATION ═══\n' +
         'You must NEVER invent: names of people, statistics, percentages, staff counts, years of experience, tenure figures, retention rates, case studies, client examples, audit results, or track-record claims. Every specific fact MUST appear in the COMPANY EVIDENCE below. Where evidence is missing, write [INSERT: short description of what the client should provide]. A response containing placeholder flags scores higher than one containing invented facts — fabricated claims get bidders disqualified and blacklisted. This rule overrides all style and persuasiveness goals.\n\n' +
         '═══ NAMED ROLES REQUIREMENT ═══\n' +
-        'Evaluators award marks for named accountability. For any content about staffing, safeguarding, management, training, mobilisation or quality assurance, the response MUST identify key individuals by name, role and qualification — e.g. the registered manager, the designated safeguarding lead, activity coordinators. Where the company evidence does not contain a name or qualification, write [INSERT: full name and qualification of your <role>] at that exact point. NEVER write around the gap with generic phrasing like "our experienced manager" or "our qualified safeguarding lead" — unnamed roles lose marks; flagged gaps tell the client exactly what to add.\n\n' +
-        '═══ CQC RULE ═══\n' +
-        'Only state a CQC registration status or rating if it appears verbatim in the company evidence. If the CQC field is empty or unclear, write [INSERT: confirm your CQC registration status and current rating] instead. Never assume a rating — councils verify CQC claims against the public register.\n\n' +
+        'Evaluators award marks for named accountability. For any content about staffing, safeguarding, management, training, mobilisation or quality assurance, the response MUST identify key individuals by name, role and qualification — e.g. ' + roleExamples + '. Where the company evidence does not contain a name or qualification, write [INSERT: full name and qualification of your <role>] at that exact point. NEVER write around the gap with generic phrasing like "our experienced manager" or "our qualified safeguarding lead" — unnamed roles lose marks; flagged gaps tell the client exactly what to add.\n\n' +
+        complianceRule +
         '═══ COMPANY EVIDENCE (the ONLY permitted source of specific facts) ═══\n' + coCtx + '\n\n' +
         (kbContext ? '═══ KNOWLEDGE BASE ═══\n' + kbContext : '') +
         '═══ SERVICE SPECIFICATION ═══\n' + specFull + '\n\n' +
