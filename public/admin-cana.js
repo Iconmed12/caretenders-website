@@ -109,7 +109,8 @@ function populateCanaTenderSelect(){
   if(!sel) return;
   var cur=sel.value||localStorage.getItem('cana_last_tender')||'';
   sel.innerHTML='<option value="">Choose a tender...</option>';
-  allTenders.filter(function(t){return t.status!=='draft';}).forEach(function(t){
+  var CANA_STATUSES = ['live','needs_docs','open'];
+  allTenders.filter(function(t){ return CANA_STATUSES.indexOf(t.status) !== -1; }).forEach(function(t){
     var opt=document.createElement('option');
     opt.value=t.id;
     var hasAllDocs = !!(t.sq_data) && t.cana_docs &&
