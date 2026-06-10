@@ -11,19 +11,33 @@ exports.handler = async (event) => {
     }, opts || {}));
   }
 
-  // Categories to import — maps CF keywords to Cana categories
+  // Business-support / employment programmes are NOT care — checked first, against the TITLE only
+  var BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
+
+  // Categories to import — maps CF keywords to Cana categories.
+  // Matching is whole-word (\b boundaries) so e.g. 'care' no longer matches 'careers'.
   const CATEGORY_MAP = [
-    { keywords: ['care','social care','domiciliary','residential','nursing','supported living','mental health','learning disabilit','children','young people','older people','cqc','personal care'], category: 'care' },
-    { keywords: ['construction','building','refurbishment','maintenance','repair','facilities','cleaning','grounds','caretaking','security','fm ','facilities management'], category: 'commercial' },
-    { keywords: ['it ','digital','software','technology','ict','cyber','data','infrastructure','cloud'], category: 'commercial' },
+    { keywords: ['care','social care','domiciliary','residential','nursing','supported living','mental health','learning disabilit','older people','cqc','personal care','home care','homecare','extra care','respite','reablement','care home','foster'], category: 'care' },
+    { keywords: ['construction','building','refurbishment','maintenance','repair','facilities','cleaning','grounds','caretaking','security','fm','facilities management'], category: 'commercial' },
+    { keywords: ['it','digital','software','technology','ict','cyber','data','infrastructure','cloud'], category: 'commercial' },
     { keywords: ['consultancy','advisory','professional services','training','recruitment'], category: 'commercial' },
     { keywords: ['transport','fleet','logistics','waste','recycling'], category: 'commercial' },
   ];
 
+  function kwMatch(text, kw) {
+    var esc = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // 'learning disabilit' is a stem — no trailing boundary for stems ending mid-word
+    var trail = /[a-z]$/i.test(kw) && !/disabilit$/.test(kw) ? '\\b' : '';
+    return new RegExp('\\b' + esc + trail, 'i').test(text);
+  }
+
   function detectCategory(title, desc) {
-    var text = ((title||'') + ' ' + (desc||'')).toLowerCase();
+    // Employment / business-support programmes routinely mention "careers", "young people"
+    // etc. in descriptions, so they are excluded by title before care matching runs.
+    if (BUSINESS_TITLE_RE.test(title || '')) return 'commercial';
+    var text = ((title||'') + ' ' + (desc||''));
     for (var map of CATEGORY_MAP) {
-      if (map.keywords.some(function(kw){ return text.includes(kw); })) {
+      if (map.keywords.some(function(kw){ return kwMatch(text, kw); })) {
         return map.category;
       }
     }

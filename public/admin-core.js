@@ -28,9 +28,14 @@ function doLogout() {
 }
 
 const CARE_CATS = ['care','domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
-const COMMERCIAL_CATS = ['commercial','construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','logistics','other','it & services','transport','waste','security'];
+const COMMERCIAL_CATS = ['commercial','construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','logistics','other','it & services','transport','waste','security','employment','business support','marketing','enterprise','training','recruitment'];
+
+// Employment / business-support programmes are never care, whatever category they were
+// stamped with on import (their descriptions mention "careers" etc. and used to mis-match).
+const BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
 
 function isCare(t) {
+  if (BUSINESS_TITLE_RE.test(t.title||'')) return false;
   const cat = (t.category||'').toLowerCase().trim();
   if (!cat) return !!t.is_non_cqc;
   if (COMMERCIAL_CATS.includes(cat)) return false;
@@ -92,10 +97,11 @@ function badgeHtml(s) {
 }
 
 function updateCounts() {
-  var liveTenders=allTenders.filter(function(t){return t.status==='live'||t.status==='open';});
-  var care=liveTenders.filter(isCare);
-  var commercial=liveTenders.filter(function(t){return !isCare(t);});
-  var nc=liveTenders.filter(function(t){return isNonCqcEligible(t)||t.is_non_cqc;});
+  // Counts mirror what the tab tables actually show (all statuses), so the
+  // sidebar badges and dashboard cards always match the tables.
+  var care=allTenders.filter(isCare);
+  var commercial=allTenders.filter(function(t){return !isCare(t);});
+  var nc=allTenders.filter(function(t){return isNonCqcEligible(t)||(t.is_non_cqc&&isCare(t));});
   var withDocs=allTenders.filter(function(t){return t.cana_docs&&(
     (t.cana_docs.quality&&t.cana_docs.quality.length)||
     (t.cana_docs.spec&&t.cana_docs.spec.length)||
@@ -152,7 +158,7 @@ function renderCommercialTable() {
 
 function renderNonCqcTable() {
   var q=(document.getElementById('nonCqcSearch').value||'').toLowerCase();
-  var rows=allTenders.filter(function(t){return (isNonCqcEligible(t)||t.is_non_cqc)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  var rows=allTenders.filter(function(t){return (isNonCqcEligible(t)||(t.is_non_cqc&&isCare(t)))&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
   document.getElementById('nonCqcCountLabel').textContent='('+rows.length+')';
   var tb=document.getElementById('nonCqcTable');
   if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="ti ti-certificate"></i>No non-CQC listings yet</div></td></tr>';return;}
