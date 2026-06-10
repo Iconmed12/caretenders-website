@@ -94,7 +94,25 @@ exports.handler = async (event) => {
           var published = formatDate(release.date || tender.datePublished);
           var value = tender.value && tender.value.amount ? '£' + Number(tender.value.amount).toLocaleString('en-GB') : '';
           var buyerName = buyer.name || (release.parties && release.parties[0] && release.parties[0].name) || '';
-          var sourceUrl = release.links && release.links.self || '';
+          // Find the DIRECT human notice page URL (not the API link)
+          var sourceUrl = '';
+          // 1. CF includes the notice page in tender.documents as documentType tenderNotice
+          var docs = (tender.documents || []);
+          for (var d of docs) {
+            if (d.documentType === 'tenderNotice' && d.url) { sourceUrl = d.url; break; }
+          }
+          // 2. Fallback: any document URL pointing at a contractsfinder notice page
+          if (!sourceUrl) {
+            for (var d2 of docs) {
+              if (d2.url && d2.url.indexOf('contractsfinder.service.gov.uk/notice') !== -1) { sourceUrl = d2.url; break; }
+            }
+          }
+          // 3. Fallback: derive from OCID (CF notice GUID follows the ocds-b5fd17- prefix)
+          if (!sourceUrl && release.ocid && release.ocid.indexOf('ocds-b5fd17-') === 0) {
+            sourceUrl = 'https://www.contractsfinder.service.gov.uk/notice/' + release.ocid.replace('ocds-b5fd17-', '');
+          }
+          // 4. Last resort: the API record link
+          if (!sourceUrl) sourceUrl = (release.links && release.links.self) || '';
           var sourceId = release.ocid || release.id || '';
           var category = detectCategory(title, desc);
           var isCqc = detectCqc(title, desc);
