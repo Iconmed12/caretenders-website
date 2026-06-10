@@ -118,7 +118,46 @@ function tiRender() {
 function catBg(cat) { return cat === 'care' ? '#e0f2fe' : '#fef3c7'; }
 function catCol(cat) { return cat === 'care' ? '#0369a1' : '#92400e'; }
 
-async function tiApprove(id) {
+var tiPendingApproveId = null;
+
+function tiApprove(id) {
+  tiPendingApproveId = id;
+  var t = tiAllTenders.find(function(x){ return x.id === id; });
+  var modal = document.getElementById('ti-approve-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'ti-approve-modal';
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(10,42,30,0.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    modal.innerHTML =
+      '<div style="background:#fff;border-radius:16px;max-width:480px;width:100%;padding:28px;box-shadow:0 24px 64px rgba(0,0,0,0.3);">' +
+        '<div style="font-size:1.25rem;font-weight:800;color:#0a2a1e;margin-bottom:10px;">&#x26A0;&#xFE0F; Before you approve&hellip;</div>' +
+        '<p style="font-size:0.95rem;color:#374151;line-height:1.55;margin-bottom:14px;">Have you got <strong>all the following documents</strong> ready to upload for this tender to go live?</p>' +
+        '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px 16px;margin-bottom:18px;">' +
+          '<div style="font-weight:700;font-size:0.9rem;color:#166534;padding:4px 0;">&#x1F4C4; ITT (Invitation to Tender)</div>' +
+          '<div style="font-weight:700;font-size:0.9rem;color:#166534;padding:4px 0;">&#x1F4CB; Service specification(s)</div>' +
+          '<div style="font-weight:700;font-size:0.9rem;color:#166534;padding:4px 0;">&#x2753; Quality questions</div>' +
+          '<div style="font-weight:700;font-size:0.9rem;color:#166534;padding:4px 0;">&#x1F3AF; Scoring criteria</div>' +
+        '</div>' +
+        '<p style="font-size:0.82rem;color:#6b7280;margin-bottom:18px;">The tender will sit in <strong>Cana AI &rarr; Needs attention</strong> until every document is uploaded and you set it live.</p>' +
+        '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
+          '<button id="ti-approve-cancel" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.88rem;">Not yet</button>' +
+          '<button id="ti-approve-confirm" style="background:#166534;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.88rem;">&#x2713; Yes &mdash; approve</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    document.getElementById('ti-approve-cancel').onclick = function() { modal.style.display = 'none'; tiPendingApproveId = null; };
+    document.getElementById('ti-approve-confirm').onclick = function() {
+      modal.style.display = 'none';
+      if (tiPendingApproveId) tiDoApprove(tiPendingApproveId);
+      tiPendingApproveId = null;
+    };
+    modal.onclick = function(e) { if (e.target === modal) { modal.style.display = 'none'; tiPendingApproveId = null; } };
+  } else {
+    modal.style.display = 'flex';
+  }
+}
+
+async function tiDoApprove(id) {
   try {
     await sbFetch('/rest/v1/tenders?id=eq.' + id, {
       method: 'PATCH',
