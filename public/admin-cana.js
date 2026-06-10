@@ -380,7 +380,7 @@ async function saveKnowledgeBase(){
 
 async function loadTenders(){
   try{
-    const res=await fetch(API+'/get-tenders');
+    const res=await fetch(API+'/get-tenders?scope=all');
     allTenders=await res.json()||[];
     // Sync nextId to avoid overwriting existing tenders
     allTenders.forEach(function(t){
