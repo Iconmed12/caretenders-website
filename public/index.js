@@ -24,7 +24,11 @@
     'other'
   ];
 
+  // Employment / business-support programmes are never care (mirrors admin-core.js)
+  const BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
+
   function isCare(t) {
+    if (BUSINESS_TITLE_RE.test(t.title||'')) return false;
     const cat = (t.category||'').toLowerCase().trim();
     if (!cat) {
       // No category fall back to is_non_cqc flag (care side) or treat as unknown

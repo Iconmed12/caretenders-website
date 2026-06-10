@@ -28,9 +28,14 @@ function doLogout() {
 }
 
 const CARE_CATS = ['care','domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
-const COMMERCIAL_CATS = ['commercial','construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','logistics','other','it & services','transport','waste','security'];
+const COMMERCIAL_CATS = ['commercial','construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','logistics','other','it & services','transport','waste','security','employment','business support','marketing','enterprise','training','recruitment'];
+
+// Employment / business-support programmes are never care, whatever category they were
+// stamped with on import (their descriptions mention "careers" etc. and used to mis-match).
+const BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
 
 function isCare(t) {
+  if (BUSINESS_TITLE_RE.test(t.title||'')) return false;
   const cat = (t.category||'').toLowerCase().trim();
   if (!cat) return !!t.is_non_cqc;
   if (COMMERCIAL_CATS.includes(cat)) return false;
@@ -45,6 +50,10 @@ function requiresCqcRating(t) {
 }
 
 function isNonCqcEligible(t) { return isCare(t) && !requiresCqcRating(t); }
+
+// Imported tenders awaiting approval (or rejected) belong only on the Tender Import
+// page. The main tabs, dashboard and counts show approved listings only.
+function isApproved(t) { return t.status !== 'pending_review' && t.status !== 'rejected'; }
 
 function autoDetectCategory(text) {
   const t = (text||'').toLowerCase();
@@ -92,10 +101,12 @@ function badgeHtml(s) {
 }
 
 function updateCounts() {
-  var liveTenders=allTenders.filter(function(t){return t.status==='live'||t.status==='open';});
-  var care=liveTenders.filter(isCare);
-  var commercial=liveTenders.filter(function(t){return !isCare(t);});
-  var nc=liveTenders.filter(function(t){return isNonCqcEligible(t)||t.is_non_cqc;});
+  // Counts mirror what the tab tables actually show (approved listings only),
+  // so the sidebar badges and dashboard cards always match the tables.
+  var approved=allTenders.filter(isApproved);
+  var care=approved.filter(isCare);
+  var commercial=approved.filter(function(t){return !isCare(t);});
+  var nc=approved.filter(function(t){return isNonCqcEligible(t)||(t.is_non_cqc&&isCare(t));});
   var withDocs=allTenders.filter(function(t){return t.cana_docs&&(
     (t.cana_docs.quality&&t.cana_docs.quality.length)||
     (t.cana_docs.spec&&t.cana_docs.spec.length)||
@@ -104,16 +115,16 @@ function updateCounts() {
   document.getElementById('sbCommercial').textContent=commercial.length;
   document.getElementById('sbNonCqc').textContent=nc.length;
   document.getElementById('sbCana').textContent=withDocs.length;
-  document.getElementById('statTotal').textContent=allTenders.length;
-  document.getElementById('statOpen').textContent=allTenders.filter(function(t){return t.status==='open';}).length;
-  document.getElementById('statClosing').textContent=allTenders.filter(function(t){return t.status==='closing'||t.status==='urgent';}).length;
+  document.getElementById('statTotal').textContent=approved.length;
+  document.getElementById('statOpen').textContent=approved.filter(function(t){return t.status==='open'||t.status==='live';}).length;
+  document.getElementById('statClosing').textContent=approved.filter(function(t){return t.status==='closing'||t.status==='urgent';}).length;
   document.getElementById('statNonCqc').textContent=nc.length;
 }
 
 function renderAll() { updateCounts(); renderDashboard(); renderCareTable(); renderCommercialTable(); renderNonCqcTable(); }
 
 function renderDashboard() {
-  var rows=allTenders.slice(0,10);
+  var rows=allTenders.filter(isApproved).slice(0,10);
   document.getElementById('dashboardTable').innerHTML=rows.length?rows.map(function(t){return '<tr><td><div class="td-title">'+t.title+'</div><div class="td-org">'+(t.org||'')+'</div></td><td style="font-weight:600">'+(t.value||'')+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted)">'+fmtDate(t.deadline)+'</td><td><div class="action-btns"><button class="action-btn edit" onclick="openDrawer(\''+t.id+'\',\'care\')" title="Edit"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')" title="Delete"><i class="ti ti-trash"></i></button></div></td></tr>';}).join(''):'<tr><td colspan="5"><div class="empty-state"><i class="ti ti-file-off"></i>No listings yet</div></td></tr>';
 }
 
@@ -126,7 +137,7 @@ function feeStr(t) {
 
 function renderCareTable() {
   var q=(document.getElementById('careSearch').value||'').toLowerCase();
-  var rows=allTenders.filter(function(t){return isCare(t)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  var rows=allTenders.filter(function(t){return isApproved(t)&&isCare(t)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
   document.getElementById('careCountLabel').textContent='('+rows.length+')';
   var tb=document.getElementById('careTable');
   if(!rows.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><i class="ti ti-file-off"></i>No care tenders yet</div></td></tr>';return;}
@@ -140,7 +151,7 @@ function renderCareTable() {
 
 function renderCommercialTable() {
   var q=(document.getElementById('commercialSearch').value||'').toLowerCase();
-  var rows=allTenders.filter(function(t){return !isCare(t)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  var rows=allTenders.filter(function(t){return isApproved(t)&&!isCare(t)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
   document.getElementById('commercialCountLabel').textContent='('+rows.length+')';
   var tb=document.getElementById('commercialTable');
   if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="ti ti-building-off"></i>No commercial tenders yet</div></td></tr>';return;}
@@ -152,7 +163,7 @@ function renderCommercialTable() {
 
 function renderNonCqcTable() {
   var q=(document.getElementById('nonCqcSearch').value||'').toLowerCase();
-  var rows=allTenders.filter(function(t){return (isNonCqcEligible(t)||t.is_non_cqc)&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
+  var rows=allTenders.filter(function(t){return isApproved(t)&&(isNonCqcEligible(t)||(t.is_non_cqc&&isCare(t)))&&(!q||(t.title||'').toLowerCase().includes(q)||(t.org||'').toLowerCase().includes(q));});
   document.getElementById('nonCqcCountLabel').textContent='('+rows.length+')';
   var tb=document.getElementById('nonCqcTable');
   if(!rows.length){tb.innerHTML='<tr><td colspan="7"><div class="empty-state"><i class="ti ti-certificate"></i>No non-CQC listings yet</div></td></tr>';return;}
