@@ -324,8 +324,10 @@
       initTicker(data);
       initBentoFeed(data);
     } catch(e) {
-      document.getElementById('care-tenders-list').innerHTML='<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
-      document.getElementById('commercial-tenders-list').innerHTML='<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
+      console.error('loadData error:', e.message, e.stack);
+      var msg = '<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
+      document.getElementById('care-tenders-list').innerHTML = msg;
+      document.getElementById('commercial-tenders-list').innerHTML = msg;
     }
   }
 
@@ -379,7 +381,7 @@ function initTicker(tenders) {
       '<span class="ticker-item-title">' + (t.title||'').slice(0,55) + (t.title && t.title.length > 55 ? '…' : '') + '</span>' +
       (val ? '<span class="ticker-item-val">' + val + '</span>' : '') +
       '<span class="ticker-item-sep">|</span>';
-    el.onclick = function(){ openTenderModal(t); };
+    el.onclick = function(){ openModal(t); };
     return el;
   }
 
