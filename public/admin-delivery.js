@@ -104,17 +104,22 @@ async function saveDeliveryPack() {
     deliveryState.portal.url = 'https://' + deliveryState.portal.url;
   }
 
-  t.completion_docs = deliveryState.docs;
-  t.submission_portal = deliveryState.portal;
-
   try {
-    var res = await fetch(API + '/save-tender', {
+    // Send only the pack fields — full tender objects exceed size limits on
+    // tenders that already carry extracted document text.
+    var res = await fetch(API + '/save-delivery-pack', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'upsert', tender: t })
+      body: JSON.stringify({
+        tenderId: id,
+        completion_docs: deliveryState.docs,
+        submission_portal: deliveryState.portal
+      })
     });
     var d = await res.json();
     if (!res.ok || d.error) throw new Error(d.error || 'Save failed');
+    t.completion_docs = deliveryState.docs;
+    t.submission_portal = deliveryState.portal;
     showToast('Completion pack saved', 'success');
     var savedEl = document.getElementById('deliverySaved');
     if (savedEl) { savedEl.style.display = 'inline'; setTimeout(function() { savedEl.style.display = 'none'; }, 2500); }
