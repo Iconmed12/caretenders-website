@@ -111,10 +111,7 @@ function updateCounts() {
   var care=approved.filter(isCare);
   var commercial=approved.filter(function(t){return !isCare(t);});
   var nc=approved.filter(function(t){return isNonCqcEligible(t)||(t.is_non_cqc&&isCare(t));});
-  var withDocs=allTenders.filter(function(t){return t.cana_docs&&(
-    (t.cana_docs.quality&&t.cana_docs.quality.length)||
-    (t.cana_docs.spec&&t.cana_docs.spec.length)||
-    (t.cana_docs.scoring&&t.cana_docs.scoring.length));});
+  var withDocs=allTenders.filter(function(t){var f=t.docFlags||{};return f.sq||f.quality||f.spec||f.scoring;});
   document.getElementById('sbCare').textContent=care.length;
   document.getElementById('sbCommercial').textContent=commercial.length;
   document.getElementById('sbNonCqc').textContent=nc.length;
