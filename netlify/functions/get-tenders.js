@@ -28,11 +28,29 @@ exports.handler = async (event) => {
     if (scope !== 'all') query = query.in('status', ['live', 'open', 'closing', 'urgent']);
     const { data, error } = await query;
 
-    // completion_docs holds base64 files. The admin (scope=all) needs it for the
-    // pack editor; the public feed must never carry it. Strip in code rather than
-    // whitelisting columns, so the query never depends on guessed schema.
-    if (scope !== 'all' && Array.isArray(data)) {
-      data.forEach(function(t) { delete t.completion_docs; });
+    // LIST PAYLOADS ARE LIGHT. Heavy fields (document base64, extracted text,
+    // SQ internals) are stripped to presence summaries here; the full record
+    // comes from get-tender-full when one tender is opened. This keeps list
+    // loads fast no matter how loaded individual tenders become.
+    if (Array.isArray(data)) {
+      data.forEach(function(t) {
+        delete t.completion_docs;
+        if (t.cana_docs && typeof t.cana_docs === 'object') {
+          var light = {};
+          ['quality', 'spec', 'scoring'].forEach(function(k) {
+            var arr = Array.isArray(t.cana_docs[k]) ? t.cana_docs[k] : (t.cana_docs[k] ? [t.cana_docs[k]] : []);
+            light[k] = arr.map(function(d) { return { name: d && d.name }; });
+          });
+          t.cana_docs = light;
+        }
+        if (t.sq_data && typeof t.sq_data === 'object') {
+          t.sq_data = {
+            fileName: t.sq_data.fileName || null,
+            storagePath: t.sq_data.storagePath || null,
+            hasSections: !!(t.sq_data.sections && t.sq_data.sections.length)
+          };
+        }
+      });
     }
 
     if (error) {

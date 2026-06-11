@@ -255,9 +255,9 @@
 
   async function loadTender() {
     try {
-      const res = await fetch('/.netlify/functions/get-tenders');
-      const data = await res.json();
-      tenderData = data.find(t => t.id === tenderId);
+      const res = await fetch('/.netlify/functions/get-tender-full?id=' + encodeURIComponent(tenderId));
+      tenderData = res.ok ? await res.json() : null;
+      if (tenderData && tenderData.error) tenderData = null;
       window._tenderData = tenderData;
 
       if (!tenderData) {

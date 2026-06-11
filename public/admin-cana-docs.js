@@ -132,7 +132,7 @@ function populateCanaTenderSelect(){
   if(sel.value) { localStorage.setItem('cana_last_tender',sel.value); loadCanaDocs(); }
 }
 
-function loadCanaDocs(){
+async function loadCanaDocs(){
   var id=document.getElementById('canaTenderSelect').value;
   var area=document.getElementById('canaDocArea');
   if(!id){area.style.display='none';return;}
@@ -140,9 +140,25 @@ function loadCanaDocs(){
   canaDocData={quality:[],spec:[],scoring:[]};
   var t=allTenders.find(function(x){return x.id===id;});
   renderTenderStatusBar(t);
+
+  // List rows are light. Fetch the full record (extracted text, SQ internals,
+  // completion pack) for this one tender so editing and saving work on real data.
+  try {
+    var fullRes = await fetch(API + '/get-tender-full?id=' + encodeURIComponent(id));
+    if (fullRes.ok) {
+      var full = await fullRes.json();
+      if (t && full && full.id === id) {
+        t.cana_docs = full.cana_docs;
+        t.cana_questions = full.cana_questions;
+        t.sq_data = full.sq_data;
+        t.completion_docs = full.completion_docs;
+        t.submission_portal = full.submission_portal;
+      }
+    }
+  } catch(e) { showToast('Could not load full tender data: ' + e.message, 'error'); }
+
   var docs=(t&&t.cana_docs)||{};
   if (typeof loadDeliveryPack === 'function') loadDeliveryPack(t);
-  console.log('sq_data for tender', id, ':', JSON.stringify(t&&t.sq_data));
   ['quality','spec','scoring'].forEach(function(type){
     canaDocData[type]=Array.isArray(docs[type])?docs[type]:(docs[type]?[docs[type]]:[]);
     renderCanaFiles(type);
