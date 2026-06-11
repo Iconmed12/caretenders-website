@@ -208,7 +208,7 @@ async function restoreTender(id) {
     body: JSON.stringify({ status: 'pending_review' }),
     headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' }
   });
-  if (res.ok) { showToast('Tender restored', 'success'); await loadAllTenders(); renderExpiredTable(); updateCounts(); }
+  if (res.ok) { showToast('Tender restored', 'success'); await loadTenders(); renderAll(); }
   else showToast('Restore failed', 'error');
 }
 
