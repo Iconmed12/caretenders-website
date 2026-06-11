@@ -94,7 +94,7 @@ function tiRender() {
           (t.description ? '<div style="font-size:0.78rem;color:var(--muted);line-height:1.5;margin-bottom:8px;">' + (t.description||'').substring(0,200) + (t.description && t.description.length > 200 ? '...' : '') + '</div>' : '') +
           '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
             '<span style="background:' + catBg(t.category) + ';color:' + catCol(t.category) + ';font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">' + (t.category||'').toUpperCase() + '</span>' +
-            (t.source_url ? '<a href="' + t.source_url + '" target="_blank" style="background:#f3f4f6;color:#374151;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:999px;text-decoration:none;">View on CF ↗</a>' : '') +
+            (t.source_url ? '<a href="' + t.source_url + '" target="_blank" style="background:#f3f4f6;color:#374151;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:999px;text-decoration:none;">' + (t.source === 'find_a_tender' ? 'View on FAT ↗' : 'View on CF ↗') + '</a>' : '') +
           '</div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">' +

@@ -537,3 +537,7 @@
     .proof-stat, .proof-quote-card, .proof-cta { opacity:1; transform:none; transition:none; }
     .proof-bar-fill { transition:none; }
   }
+
+  /* Source link button in tender modal */
+  .modal-source-btn { display:inline-flex; align-items:center; gap:7px; background:var(--offwhite); border:1.5px solid var(--border); border-radius:8px; padding:9px 16px; font-size:0.82rem; font-weight:600; color:var(--navy); text-decoration:none; transition:border-color 0.2s,background 0.2s; }
+  .modal-source-btn:hover { border-color:var(--teal); background:#fff; color:var(--teal-dk); }

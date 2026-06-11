@@ -241,6 +241,21 @@
     applyBtn.innerHTML='<div class="btn-cta-icon">⚡</div><div class="btn-cta-text"><span class="btn-cta-label">Write with Cana AI</span><span class="btn-cta-desc">Let our AI system draft your full tender response instantly</span></div><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     applyBtn.className='btn-cta btn-cta--ai';
 
+    // Source link — shown on both public modal and admin
+    var srcEl = document.getElementById('modal-source-link');
+    if (srcEl) {
+      if (t.source_url) {
+        var srcLabel = t.source === 'find_a_tender' ? 'View on Find a Tender' :
+                       t.source === 'contracts_finder' ? 'View on Contracts Finder' : 'View original notice';
+        srcEl.innerHTML = '<a href="' + t.source_url + '" target="_blank" rel="noopener" class="modal-source-btn">' +
+          '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M7 3H3a1 1 0 00-1 1v9a1 1 0 001 1h9a1 1 0 001-1V9M10 2h4m0 0v4m0-4L7 9" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+          srcLabel + '</a>';
+        srcEl.style.display = '';
+      } else {
+        srcEl.style.display = 'none';
+      }
+    }
+
     document.getElementById('modal-overlay').classList.add('open');
     document.body.style.overflow='hidden';
   }
