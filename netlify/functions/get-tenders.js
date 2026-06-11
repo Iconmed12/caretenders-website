@@ -20,11 +20,12 @@ exports.handler = async (event) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Public site gets all approved tenders (live + open + needs_docs);
-    // admin passes ?scope=all to get everything including pending_review/expired
+    // Public site shows ONLY tenders the admin explicitly set live (plus legacy
+    // manual public statuses). needs_docs = approved but still being prepared,
+    // never client-visible. Admin passes ?scope=all for everything.
     const scope = (event.queryStringParameters && event.queryStringParameters.scope) || 'public';
     let query = supabase.from('tenders').select('*').order('created_at', { ascending: false });
-    if (scope !== 'all') query = query.in('status', ['live', 'open', 'needs_docs', 'closing', 'urgent']);
+    if (scope !== 'all') query = query.in('status', ['live', 'open', 'closing', 'urgent']);
     const { data, error } = await query;
 
     // completion_docs holds base64 files. The admin (scope=all) needs it for the
