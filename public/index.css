@@ -359,3 +359,11 @@
   .how-footer-title { font-size:0.82rem; font-weight:600; color:#fff; }
   .how-footer-sub { font-size:0.73rem; color:rgba(255,255,255,0.35); margin-top:2px; }
   @media(max-width:700px){ .cana-grid{grid-template-columns:1fr !important;} }
+
+  /* ══ SECTOR BAND ══ */
+  .sector-band { background:var(--offwhite); padding:2.5rem 2rem 0.5rem; }
+  .sector-band-inner { max-width:900px; margin:0 auto; text-align:center; }
+  .sector-band-label { display:block; font-size:0.72rem; font-weight:600; color:var(--muted); letter-spacing:0.11em; text-transform:uppercase; margin-bottom:1.1rem; }
+  .sector-chips { display:flex; flex-wrap:wrap; justify-content:center; gap:0.5rem; }
+  .sector-chip { font-size:0.78rem; font-weight:500; color:var(--navy); background:var(--white); border:1.5px solid var(--border); border-radius:999px; padding:6px 16px; transition:border-color 0.2s,transform 0.15s; cursor:default; }
+  .sector-chip:hover { border-color:rgba(0,201,224,0.4); transform:translateY(-1px); }
