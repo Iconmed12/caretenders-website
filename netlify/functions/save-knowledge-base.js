@@ -6,6 +6,7 @@ exports.handler = async (event) => {
     const sbKey = process.env.SUPABASE_ANON_KEY;
     const payload = {
       id: 'global',
+      writing_guidance: body.writing_guidance || '',
       writing_style: body.writing_style || '',
       commissioner_preferences: body.commissioner_preferences || '',
       avoid_patterns_text: body.avoid_patterns_text || '',
