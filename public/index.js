@@ -359,7 +359,7 @@ function initTicker(tenders) {
     el.innerHTML =
       '<span class="ticker-item-dot ' + (isC ? 'care' : 'commercial') + '"></span>' +
       '<span class="ticker-item-title">' + (t.title||'').slice(0,55) + (t.title && t.title.length > 55 ? '…' : '') + '</span>' +
-      (val ? '<span class="ticker-item-val">— ' + val + '</span>' : '') +
+      (val ? '<span class="ticker-item-val">' + val + '</span>' : '') +
       '<span class="ticker-item-sep">|</span>';
     el.onclick = function(){ openTenderModal(t); };
     return el;
@@ -393,17 +393,17 @@ function initTicker(tenders) {
 (function(){
   var DEMOS = [
     {
-      tender: 'Domiciliary Care Framework — Reading Borough Council',
+      tender: 'Domiciliary Care Framework, Reading Borough Council',
       question: 'Describe your approach to person-centred care and how care plans reflect individual needs.',
-      response: 'Our approach to person-centred care begins at the initial assessment stage, where we invest time understanding not just clinical and care needs but the individual\'s preferences, routines, relationships and personal goals. Each care plan is co-produced with the service user and, where appropriate, their family or representative. We use Care Planner to maintain live, accessible care records that are reviewed formally every 12 weeks and informally at every visit — ensuring the plan always reflects the person\'s current wishes rather than historical assumptions.'
+      response: 'Our approach to person-centred care begins at the initial assessment stage, where we invest time understanding not just clinical and care needs but the individual\'s preferences, routines, relationships and personal goals. Each care plan is co-produced with the service user and, where appropriate, their family or representative. We use Care Planner to maintain live, accessible care records that are reviewed formally every 12 weeks and informally at every visit, ensuring the plan always reflects the person\'s current wishes rather than historical assumptions.'
     },
     {
-      tender: 'Supported Living Services Framework — Birmingham City Council',
+      tender: 'Supported Living Services Framework, Birmingham City Council',
       question: 'How will you ensure continuity of care for service users during periods of staff absence or transition?',
-      response: 'Continuity of care is protected through a dedicated cover rota maintained by our registered manager, which ensures that any absence — planned or unplanned — is filled by a worker already known to the service user. All cover staff complete a handover review using the individual\'s care profile in Birdie before attending, so they arrive informed of current needs, preferences and any recent changes. We never use agency staff for continuity-critical roles without a supervised introduction period.'
+      response: 'Continuity of care is protected through a dedicated cover rota maintained by our registered manager, which ensures that any absence, planned or unplanned, is filled by a worker already known to the service user. All cover staff complete a handover review using the individual\'s care profile in Birdie before attending, so they arrive informed of current needs, preferences and any recent changes. We never use agency staff for continuity-critical roles without a supervised introduction period.'
     },
     {
-      tender: 'Mental Health Support Services — NHS South West ICB',
+      tender: 'Mental Health Support Services, NHS South West ICB',
       question: 'What safeguarding measures will you put in place to protect vulnerable adults in your care?',
       response: 'Safeguarding is embedded into every layer of our service delivery. All staff complete Level 2 safeguarding adults training before working unsupervised, with refresher training annually and an immediate debrief process following any concern. We operate a clear reporting pathway: concerns are logged in Care Planner within two hours, escalated to our safeguarding lead the same day, and reported to the local authority designated officer where the threshold is met. We maintain a rolling safeguarding audit reviewed at monthly governance meetings.'
     }
