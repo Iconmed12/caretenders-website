@@ -45,6 +45,9 @@
     return true;
   }
 
+  // Tenders awaiting approval are not shown on the public site
+  function isApproved(t) { return t.status !== 'pending_review' && t.status !== 'rejected'; }
+
   /* ── NAVIGATION ── */
   function showHome() {
     document.getElementById('home-view').style.display = '';
