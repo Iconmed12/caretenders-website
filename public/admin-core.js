@@ -106,7 +106,8 @@ function updateCounts() {
   // so the sidebar badges and dashboard cards always match the tables.
   var expired=allTenders.filter(function(t){return t.status==='expired';});
   var approved=allTenders.filter(isApproved);
-  setEl('sbExpired', expired.length||'');
+  var sbExp = document.getElementById('sbExpired');
+  if (sbExp) sbExp.textContent = expired.length;
   var care=approved.filter(isCare);
   var commercial=approved.filter(function(t){return !isCare(t);});
   var nc=approved.filter(function(t){return isNonCqcEligible(t)||(t.is_non_cqc&&isCare(t));});
