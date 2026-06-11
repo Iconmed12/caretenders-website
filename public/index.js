@@ -525,3 +525,29 @@ function initBentoFeed(tenders) {
     render();
   }, 3200);
 }
+
+// ══ COMPARISON SCROLL REVEAL ══
+(function(){
+  function setup(){
+    var grid = document.getElementById('compare-grid');
+    if (!grid || !('IntersectionObserver' in window)) {
+      // Fallback: just show everything
+      document.querySelectorAll('.cmp-item').forEach(function(el){ el.classList.add('in'); });
+      return;
+    }
+    var observer = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (!entry.isIntersecting) return;
+        observer.unobserve(entry.target);
+        // Stagger: old-way items first, then Cana items sweep in
+        var olds = entry.target.querySelectorAll('.cmp-old-item');
+        var news = entry.target.querySelectorAll('.cmp-new-item');
+        olds.forEach(function(el, i){ setTimeout(function(){ el.classList.add('in'); }, i * 140); });
+        news.forEach(function(el, i){ setTimeout(function(){ el.classList.add('in'); }, 400 + i * 140); });
+      });
+    }, { threshold: 0.25 });
+    observer.observe(grid);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
+  else setup();
+})();

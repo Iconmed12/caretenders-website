@@ -465,3 +465,47 @@
   .proof-attr { font-size:0.78rem; color:var(--muted); letter-spacing:0.03em; }
   .proof-cta { display:inline-flex; align-items:center; gap:6px; color:var(--teal-dk); font-size:0.9rem; font-weight:600; text-decoration:none; transition:gap 0.2s; }
   .proof-cta:hover { gap:10px; }
+
+  /* ══ COMPARISON: DIGITAL UPGRADE ══ */
+  .compare-grid { position:relative; }
+
+  /* VS badge between columns */
+  .compare-vs { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:5; width:54px; height:54px; border-radius:50%; background:var(--navy); border:2px solid var(--teal); display:flex; align-items:center; justify-content:center; box-shadow:0 0 0 6px var(--offwhite), 0 0 24px rgba(0,201,224,0.35); }
+  .compare-vs span { font-size:0.78rem; font-weight:800; color:var(--teal); letter-spacing:0.08em; }
+  .compare-vs::before { content:''; position:absolute; inset:-2px; border-radius:50%; border:2px solid rgba(0,201,224,0.4); animation:vsPulse 2.4s ease-out infinite; }
+  @keyframes vsPulse { 0%{transform:scale(1);opacity:1} 100%{transform:scale(1.7);opacity:0} }
+  @media(max-width:680px){ .compare-vs{display:none;} }
+
+  /* Item reveal animation (driven by .in class via IntersectionObserver) */
+  .cmp-item { opacity:0; transform:translateX(-14px); transition:opacity 0.45s ease,transform 0.45s ease; }
+  .cmp-new-item { transform:translateX(14px); }
+  .cmp-item.in { opacity:1; transform:none; }
+
+  /* Strikethrough sweep on old-way items after reveal */
+  .cmp-text { position:relative; display:inline; }
+  .cmp-text::after { content:''; position:absolute; left:0; top:55%; height:1.5px; width:0; background:rgba(196,81,92,0.65); transition:width 0.5s ease 0.35s; }
+  .cmp-item.in .cmp-text::after { width:100%; }
+  .cmp-item.in .cmp-text { color:#94a3b1; transition:color 0.5s ease 0.45s; }
+
+  /* Tick pop on Cana items */
+  .cmp-new-item .cv { display:inline-block; transform:scale(0); transition:transform 0.35s cubic-bezier(0.34,1.56,0.64,1) 0.15s; }
+  .cmp-new-item.in .cv { transform:scale(1); }
+
+  /* Shimmer sweep across the Cana card */
+  .compare-new { isolation:isolate; }
+  .compare-shimmer { position:absolute; top:0; bottom:0; width:60%; left:-70%; background:linear-gradient(105deg,transparent 0%,rgba(0,201,224,0.07) 45%,rgba(255,255,255,0.05) 50%,rgba(0,201,224,0.07) 55%,transparent 100%); animation:shimmerSweep 4.5s ease-in-out infinite 1.2s; pointer-events:none; z-index:0; }
+  @keyframes shimmerSweep { 0%{left:-70%} 55%,100%{left:120%} }
+  .compare-new .compare-col-label, .compare-new .compare-list { position:relative; z-index:1; }
+
+  /* Hover micro-lift on rows */
+  .compare-list li { border-radius:8px; padding:4px 8px; margin:-4px -8px; transition:background 0.2s; }
+  .compare-old .compare-list li:hover { background:rgba(196,81,92,0.05); }
+  .compare-new .compare-list li:hover { background:rgba(0,201,224,0.06); }
+
+  /* Reduced motion: show everything, kill animations */
+  @media (prefers-reduced-motion: reduce) {
+    .cmp-item { opacity:1; transform:none; }
+    .cmp-item .cmp-text::after { width:100%; transition:none; }
+    .cmp-new-item .cv { transform:scale(1); }
+    .compare-shimmer, .compare-vs::before { animation:none; }
+  }
