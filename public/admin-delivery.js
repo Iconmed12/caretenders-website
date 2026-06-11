@@ -107,13 +107,15 @@ async function saveDeliveryPack() {
   try {
     // Send only the pack fields — full tender objects exceed size limits on
     // tenders that already carry extracted document text.
-    var res = await fetch(API + '/save-delivery-pack', {
+    var res = await fetch(API + '/patch-tender', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         tenderId: id,
-        completion_docs: deliveryState.docs,
-        submission_portal: deliveryState.portal
+        fields: {
+          completion_docs: deliveryState.docs,
+          submission_portal: deliveryState.portal
+        }
       })
     });
     var d = await res.json();

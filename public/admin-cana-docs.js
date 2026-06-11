@@ -279,16 +279,21 @@ async function saveCanaDocs() {
   if (!id) { showToast('Please select a tender first', 'error'); return; }
   var t = allTenders.find(function(x) { return x.id === id; });
   if (!t) { showToast('Tender not found', 'error'); return; }
-  t.cana_docs = canaDocData;
-  t.cana_questions = getCanaQuestions();
   try {
-    var res = await fetch(API + '/save-tender', {
+    // Send only the changed fields. Whole-tender saves exceed request limits
+    // once a tender carries extracted document text.
+    var res = await fetch(API + '/patch-tender', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'upsert', tender: t })
+      body: JSON.stringify({
+        tenderId: id,
+        fields: { cana_docs: canaDocData, cana_questions: getCanaQuestions() }
+      })
     });
     var d = await res.json();
     if (!res.ok || d.error) throw new Error(d.error);
+    t.cana_docs = canaDocData;
+    t.cana_questions = getCanaQuestions();
     showToast('Cana AI saved successfully', 'success');
     var savedEl = document.getElementById('canaDocSaved');
     if (savedEl) savedEl.style.display = 'inline';
