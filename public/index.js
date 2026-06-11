@@ -303,6 +303,7 @@
       renderTenders('care');
       renderTenders('commercial');
       renderNonCQC();
+      initTicker(data);
     } catch(e) {
       document.getElementById('care-tenders-list').innerHTML='<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
       document.getElementById('commercial-tenders-list').innerHTML='<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
@@ -338,3 +339,150 @@
     await _sb.auth.signOut();
     window.location.reload();
   }
+
+// ══ TICKER ══
+function initTicker(tenders) {
+  var inner = document.getElementById('ticker-inner');
+  if (!inner) return;
+  if (!tenders || !tenders.length) { inner.innerHTML = '<span class="ticker-loading">No live opportunities at this time</span>'; return; }
+
+  var approved = tenders.filter(function(t){ return isApproved(t); });
+  if (!approved.length) { inner.innerHTML = '<span class="ticker-loading">Opportunities loading…</span>'; return; }
+
+  // Build items (duplicate for seamless loop)
+  function makeItem(t) {
+    var isC = isCare(t);
+    var val = t.contract_value ? '£' + Number(t.contract_value).toLocaleString('en-GB') : '';
+    var el = document.createElement('span');
+    el.className = 'ticker-item';
+    el.innerHTML =
+      '<span class="ticker-item-dot ' + (isC ? 'care' : 'commercial') + '"></span>' +
+      '<span class="ticker-item-title">' + (t.title||'').slice(0,55) + (t.title && t.title.length > 55 ? '…' : '') + '</span>' +
+      (val ? '<span class="ticker-item-val">— ' + val + '</span>' : '') +
+      '<span class="ticker-item-sep">|</span>';
+    el.onclick = function(){ openTenderModal(t); };
+    return el;
+  }
+
+  inner.innerHTML = '';
+  var items = approved.slice(0, 20);
+  // Double up for seamless scroll
+  items.concat(items).forEach(function(t){ inner.appendChild(makeItem(t)); });
+
+  // Measure and animate
+  var totalW = inner.scrollWidth / 2;
+  var speed = 40; // px/s
+  var duration = totalW / speed;
+  inner.style.animation = 'tickerScroll ' + duration + 's linear infinite';
+
+  // Pause on hover
+  var track = inner.parentElement;
+  track.addEventListener('mouseenter', function(){ inner.style.animationPlayState = 'paused'; });
+  track.addEventListener('mouseleave', function(){ inner.style.animationPlayState = 'running'; });
+}
+
+// Add ticker keyframe once
+(function(){
+  var s = document.createElement('style');
+  s.textContent = '@keyframes tickerScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }';
+  document.head.appendChild(s);
+})();
+
+// ══ CANA DEMO TYPING ANIMATION ══
+(function(){
+  var DEMOS = [
+    {
+      tender: 'Domiciliary Care Framework — Reading Borough Council',
+      question: 'Describe your approach to person-centred care and how care plans reflect individual needs.',
+      response: 'Our approach to person-centred care begins at the initial assessment stage, where we invest time understanding not just clinical and care needs but the individual\'s preferences, routines, relationships and personal goals. Each care plan is co-produced with the service user and, where appropriate, their family or representative. We use Care Planner to maintain live, accessible care records that are reviewed formally every 12 weeks and informally at every visit — ensuring the plan always reflects the person\'s current wishes rather than historical assumptions.'
+    },
+    {
+      tender: 'Supported Living Services Framework — Birmingham City Council',
+      question: 'How will you ensure continuity of care for service users during periods of staff absence or transition?',
+      response: 'Continuity of care is protected through a dedicated cover rota maintained by our registered manager, which ensures that any absence — planned or unplanned — is filled by a worker already known to the service user. All cover staff complete a handover review using the individual\'s care profile in Birdie before attending, so they arrive informed of current needs, preferences and any recent changes. We never use agency staff for continuity-critical roles without a supervised introduction period.'
+    },
+    {
+      tender: 'Mental Health Support Services — NHS South West ICB',
+      question: 'What safeguarding measures will you put in place to protect vulnerable adults in your care?',
+      response: 'Safeguarding is embedded into every layer of our service delivery. All staff complete Level 2 safeguarding adults training before working unsupervised, with refresher training annually and an immediate debrief process following any concern. We operate a clear reporting pathway: concerns are logged in Care Planner within two hours, escalated to our safeguarding lead the same day, and reported to the local authority designated officer where the threshold is met. We maintain a rolling safeguarding audit reviewed at monthly governance meetings.'
+    }
+  ];
+
+  var demoIdx = 0;
+  var charIdx = 0;
+  var typing = false;
+  var loopTimeout;
+
+  function getEls(){
+    return {
+      text: document.getElementById('demo-response-text'),
+      cursor: document.getElementById('demo-cursor'),
+      bar: document.getElementById('demo-progress-bar'),
+      label: document.getElementById('demo-progress-label'),
+      tname: document.getElementById('demo-tender-name'),
+      question: document.getElementById('demo-question')
+    };
+  }
+
+  function typeChar(){
+    var els = getEls();
+    if (!els.text) return;
+    var demo = DEMOS[demoIdx];
+    if (charIdx <= demo.response.length) {
+      els.text.textContent = demo.response.slice(0, charIdx);
+      var pct = Math.round((charIdx / demo.response.length) * 100);
+      if (els.bar) els.bar.style.width = pct + '%';
+      if (els.label) els.label.textContent = charIdx >= demo.response.length ? 'Complete ✓' : 'Writing…';
+      charIdx++;
+      var delay = charIdx < demo.response.length ? (Math.random() < 0.04 ? 60 : 18) : 0;
+      loopTimeout = setTimeout(typeChar, delay);
+    } else {
+      // Pause then cycle to next demo
+      loopTimeout = setTimeout(function(){
+        demoIdx = (demoIdx + 1) % DEMOS.length;
+        charIdx = 0;
+        var nextDemo = DEMOS[demoIdx];
+        var els2 = getEls();
+        if (els2.tname) els2.tname.textContent = nextDemo.tender;
+        if (els2.question) els2.question.textContent = nextDemo.question;
+        if (els2.text) els2.text.textContent = '';
+        if (els2.bar) els2.bar.style.width = '0%';
+        if (els2.label) els2.label.textContent = 'Writing…';
+        loopTimeout = setTimeout(typeChar, 600);
+      }, 3500);
+    }
+  }
+
+  function startDemo(){
+    var els = getEls();
+    if (!els.text) return;
+    clearTimeout(loopTimeout);
+    charIdx = 0;
+    demoIdx = 0;
+    var demo = DEMOS[0];
+    if (els.tname) els.tname.textContent = demo.tender;
+    if (els.question) els.question.textContent = demo.question;
+    if (els.text) els.text.textContent = '';
+    if (els.bar) els.bar.style.width = '0%';
+    if (els.label) els.label.textContent = 'Writing…';
+    setTimeout(typeChar, 1200);
+  }
+
+  // Start when home view is visible
+  document.addEventListener('DOMContentLoaded', function(){
+    startDemo();
+    // Restart whenever user returns to home
+    var orig = window.showHome;
+    if (typeof orig === 'function') {
+      window.showHome = function(){
+        orig();
+        clearTimeout(loopTimeout);
+        charIdx = 0;
+        demoIdx = 0;
+        setTimeout(startDemo, 300);
+      };
+    }
+  });
+
+  window._restartDemo = startDemo;
+})();

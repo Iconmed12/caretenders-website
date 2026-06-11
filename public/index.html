@@ -36,18 +36,146 @@
 
 <!-- ══ HOME ══ -->
 <div id="home-view">
+
+  <!-- ══ HERO ══ -->
   <div class="hero">
-    <div class="hero-eyebrow">UK Procurement Intelligence Platform</div>
-    <h1>Your <em>expert</em> route to winning tenders</h1>
-    <p>Browse live opportunities across care services and commercial contracts all in one place, powered by the Cana team.</p>
-    
+    <!-- Animated grid background -->
+    <div class="hero-grid" aria-hidden="true"></div>
+    <!-- Floating orbs -->
+    <div class="orb orb-1" aria-hidden="true"></div>
+    <div class="orb orb-2" aria-hidden="true"></div>
+
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="eyebrow-dot"></span>
+          UK Procurement Intelligence Platform
+        </div>
+        <h1>Win more tenders.<br><em>Work less.</em></h1>
+        <p>Live procurement opportunities across care and commercial sectors, matched to your business — with Cana AI writing your bid responses in under an hour.</p>
+        <div class="hero-actions">
+          <a href="#" onclick="showSection('care'); return false;" class="btn-primary">Browse care tenders</a>
+          <a href="#" onclick="showSection('commercial'); return false;" class="btn-ghost">Commercial tenders →</a>
+        </div>
+        <div class="hero-trust">
+          <span class="trust-item"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4" stroke="#00C9E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> No setup required</span>
+          <span class="trust-sep">·</span>
+          <span class="trust-item"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4" stroke="#00C9E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Updated daily</span>
+          <span class="trust-sep">·</span>
+          <span class="trust-item"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4" stroke="#00C9E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> UK-wide coverage</span>
+        </div>
+      </div>
+
+      <!-- Cana AI live demo card -->
+      <div class="hero-right">
+        <div class="demo-card">
+          <div class="demo-card-header">
+            <div class="demo-card-dot dot-red"></div>
+            <div class="demo-card-dot dot-amber"></div>
+            <div class="demo-card-dot dot-green"></div>
+            <span class="demo-card-title">Cana AI — generating response</span>
+            <span class="demo-card-badge">Live</span>
+          </div>
+          <div class="demo-card-tender">
+            <div class="demo-card-label">Tender loaded</div>
+            <div class="demo-card-tender-name" id="demo-tender-name">Domiciliary Care Framework — Reading Borough Council</div>
+          </div>
+          <div class="demo-card-question">
+            <div class="demo-card-label">Question 1 of 6</div>
+            <div class="demo-card-q" id="demo-question">Describe your organisation's approach to person-centred care and how you ensure care plans reflect individual needs.</div>
+          </div>
+          <div class="demo-card-response">
+            <div class="demo-card-label">Cana AI response</div>
+            <div class="demo-card-text" id="demo-response-text"></div>
+            <span class="demo-cursor" id="demo-cursor">|</span>
+          </div>
+          <div class="demo-card-footer">
+            <div class="demo-progress">
+              <div class="demo-progress-bar" id="demo-progress-bar"></div>
+            </div>
+            <span class="demo-progress-label" id="demo-progress-label">Writing…</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- ══ LIVE TICKER ══ -->
+  <div class="ticker-strip">
+    <span class="ticker-label">LIVE</span>
+    <div class="ticker-track">
+      <div class="ticker-inner" id="ticker-inner">
+        <span class="ticker-loading">Loading live opportunities…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STATS ══ -->
   <div class="stats-strip">
-    <div class="stat"><span class="stat-num" id="stat-care-count"></span><span class="stat-label">Care tenders</span></div>
-    <div class="stat"><span class="stat-num" id="stat-commercial-count"></span><span class="stat-label">Commercial tenders</span></div>
-    <div class="stat"><span class="stat-num">UK wide</span><span class="stat-label">Coverage</span></div>
-    <div class="stat"><span class="stat-num">£2M+</span><span class="stat-label">Contracts supported</span></div>
+    <div class="stat">
+      <span class="stat-num" id="stat-care-count">—</span>
+      <span class="stat-label">Care tenders live</span>
+    </div>
+    <div class="stat stat-divider">
+      <span class="stat-num" id="stat-commercial-count">—</span>
+      <span class="stat-label">Commercial tenders</span>
+    </div>
+    <div class="stat stat-divider">
+      <span class="stat-num">UK wide</span>
+      <span class="stat-label">Coverage</span>
+    </div>
+    <div class="stat stat-divider">
+      <span class="stat-num">£2M+</span>
+      <span class="stat-label">Contracts supported</span>
+    </div>
   </div>
+
+  <!-- ══ FEATURE STRIP ══ -->
+  <div class="features-section">
+    <div class="features-inner">
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#00C9E0" stroke-width="1.6"/><path d="M12 7v5l3 3" stroke="#00C9E0" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feature-text">
+          <div class="feature-title">Updated every 24 hours</div>
+          <div class="feature-desc">Fresh opportunities pulled from Find a Tender, Contracts Finder and council portals daily.</div>
+        </div>
+      </div>
+      <div class="feature-divider"></div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#00C9E0" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#00C9E0" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="feature-text">
+          <div class="feature-title">Pre-CQC routes included</div>
+          <div class="feature-desc">Handpicked lower-barrier contracts for new and emerging care providers building their track record.</div>
+        </div>
+      </div>
+      <div class="feature-divider"></div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#00C9E0" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>
+        </div>
+        <div class="feature-text">
+          <div class="feature-title">Cana AI writes your bid</div>
+          <div class="feature-desc">Tell Cana about your company. It already has the tender loaded — full responses in under an hour.</div>
+        </div>
+      </div>
+      <div class="feature-divider"></div>
+      <div class="feature-item">
+        <div class="feature-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="#00C9E0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" stroke="#00C9E0" stroke-width="1.6"/></svg>
+        </div>
+        <div class="feature-text">
+          <div class="feature-title">Expert review included</div>
+          <div class="feature-desc">Every Cana AI response is reviewed by our bid writing consultants before it reaches you.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PORTAL CARDS ══ -->
   <div class="portal-section">
     <div class="portal-heading">Choose your portal</div>
     <div class="portal-grid">
@@ -55,7 +183,7 @@
         <div class="card-icon">🏥</div>
         <div class="card-label">Care sector</div>
         <h3>Care Tenders</h3>
-        <p>Domiciliary care, residential, nursing, supported living, mental health and hospital discharge including specialist routes for new and pre-CQC providers.</p>
+        <p>Domiciliary care, residential, nursing, supported living, mental health and hospital discharge — including specialist routes for new and pre-CQC providers.</p>
         <div class="card-tags"><span class="tag">Domiciliary</span><span class="tag">Residential</span><span class="tag">Supported living</span><span class="tag">Pre-CQC</span></div>
         <div class="card-cta">Browse care tenders <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </a>
@@ -71,92 +199,57 @@
   </div>
 
   <!-- ══ CANA AI SECTION ══ -->
-  <div style="background:var(--navy);padding:5rem 2rem;">
-    <div style="max-width:900px;margin:0 auto;">
-
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:2rem;">
-        <div style="background:rgba(0,201,224,0.12);border:1px solid rgba(0,201,224,0.25);border-radius:999px;padding:5px 16px;font-size:0.72rem;color:var(--teal);font-weight:600;letter-spacing:0.08em;text-transform:uppercase;white-space:nowrap;">New · Powered </div>
-        <div style="height:1px;flex:1;background:rgba(255,255,255,0.07);"></div>
+  <div class="cana-section">
+    <div class="cana-inner">
+      <div class="cana-badge">
+        <span class="cana-badge-dot"></span>
+        New · Powered by Claude AI
       </div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
-
-        <!-- Left -->
+      <div class="cana-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
         <div>
-          <h2 style="font-family:'Playfair Display',serif;font-size:clamp(1.8rem,3.5vw,2.5rem);color:#fff;line-height:1.2;margin-bottom:1rem;">
-            Meet <em style="color:var(--teal);font-style:italic;">Cana AI</em> tender responses written specifically for you, in under an hour
-          </h2>
-          <p style="font-size:0.93rem;color:rgba(255,255,255,0.52);line-height:1.8;margin-bottom:1.2rem;">
-            Cana AI already knows the tender. When you select an opportunity on our portal, Cana AI loads the actual questions from that specific tender automatically so you never have to paste or upload anything.
-          </p>
-          <p style="font-size:0.93rem;color:rgba(255,255,255,0.52);line-height:1.8;margin-bottom:2rem;">
-            All we ask you is a few questions about your company. Cana AI then writes fully tailored responses that answer each question using your organisation's own information not generic text, not a template. A real, submission-ready bid written for that tender, about your business, in under 60 minutes.
-          </p>
-          <div style="display:flex;flex-direction:column;gap:0.6rem;margin-bottom:2rem;">
-            <div style="display:flex;align-items:center;gap:10px;font-size:0.87rem;color:rgba(255,255,255,0.68);"><span style="color:var(--teal);font-weight:700;">✓</span> Tender questions loaded automatically nothing to copy or paste</div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:0.87rem;color:rgba(255,255,255,0.68);"><span style="color:var(--teal);font-weight:700;">✓</span> Answers written specifically for your company, not a generic template</div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:0.87rem;color:rgba(255,255,255,0.68);"><span style="color:var(--teal);font-weight:700;">✓</span> Every response tailored to the exact tender you are bidding for</div>
-            <div style="display:flex;align-items:center;gap:10px;font-size:0.87rem;color:rgba(255,255,255,0.68);"><span style="color:var(--teal);font-weight:700;">✓</span> Full submission ready in under 1 hour, reviewed by our consultants</div>
+          <h2 class="cana-heading">Meet <em>Cana AI</em> — tender responses written specifically for you, in under an hour</h2>
+          <p class="cana-body">Cana AI already knows the tender. When you select an opportunity on our portal, Cana AI loads the actual questions from that specific tender automatically — you never have to paste or upload anything.</p>
+          <p class="cana-body" style="margin-top:0.85rem;">All we ask is a few questions about your company. Cana AI then writes fully tailored responses using your organisation's own information — not generic text, not a template. A real, submission-ready bid in under 60 minutes.</p>
+          <ul class="cana-checklist">
+            <li><span class="check">✓</span> Tender questions loaded automatically — nothing to copy or paste</li>
+            <li><span class="check">✓</span> Answers written specifically for your company, not a generic template</li>
+            <li><span class="check">✓</span> Every response tailored to the exact tender you are bidding for</li>
+            <li><span class="check">✓</span> Full submission ready in under 1 hour, reviewed by our consultants</li>
+          </ul>
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:2rem;">
+            <a href="https://caretenders-website.netlify.app" target="_blank" class="btn-primary">⚡ Try Cana AI now →</a>
+            <a href="/case-studies.html" class="cana-link">See tenders won →</a>
           </div>
-          <a href="https://caretenders-website.netlify.app" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:var(--teal);color:var(--navy);border-radius:10px;padding:13px 26px;font-size:0.92rem;font-weight:700;text-decoration:none;">
-            ⚡ Try Cana AI now →
-          </a>
-          <a href="/case-studies.html" style="display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,0.5);font-size:0.85rem;text-decoration:none;margin-left:1.25rem;margin-top:0.25rem;">
-            See tenders won with Cana AI →
-          </a>
         </div>
-
-        <!-- Right: how it works card -->
-        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:2rem;position:relative;overflow:hidden;">
-          <div style="position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(0,201,224,0.1) 0%,transparent 70%);pointer-events:none;"></div>
-
-          <div style="font-size:0.7rem;font-weight:600;color:var(--teal);letter-spacing:0.09em;text-transform:uppercase;margin-bottom:1.5rem;">How it works</div>
-
-          <div style="display:flex;flex-direction:column;gap:0;">
-
-            <div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:1rem;">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,201,224,0.12);border:1px solid rgba(0,201,224,0.28);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:var(--teal);flex-shrink:0;">1</div>
-              <div style="padding-top:4px;">
-                <div style="font-size:0.88rem;font-weight:600;color:#fff;margin-bottom:3px;">Choose your tender</div>
-                <div style="font-size:0.79rem;color:rgba(255,255,255,0.42);line-height:1.55;">Browse the portal and select the opportunity you want to bid for</div>
-              </div>
+        <div class="how-card">
+          <div class="how-card-label">How it works</div>
+          <div class="how-steps">
+            <div class="how-step">
+              <div class="how-num">1</div>
+              <div><div class="how-title">Choose your tender</div><div class="how-desc">Browse the portal and select the opportunity you want to bid for</div></div>
             </div>
-
-            <div style="width:1px;height:14px;background:rgba(255,255,255,0.07);margin-left:15px;margin-bottom:1rem;"></div>
-
-            <div style="display:flex;gap:14px;align-items:flex-start;padding-bottom:1rem;">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,201,224,0.12);border:1px solid rgba(0,201,224,0.28);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:var(--teal);flex-shrink:0;">2</div>
-              <div style="padding-top:4px;">
-                <div style="font-size:0.88rem;font-weight:600;color:#fff;margin-bottom:3px;">Tell Cana AI about your company</div>
-                <div style="font-size:0.79rem;color:rgba(255,255,255,0.42);line-height:1.55;">Answer a few simple questions about your organisation Cana AI already has the tender questions loaded</div>
-              </div>
+            <div class="how-connector"></div>
+            <div class="how-step">
+              <div class="how-num">2</div>
+              <div><div class="how-title">Tell Cana about your company</div><div class="how-desc">Answer a few simple questions — Cana already has the tender questions loaded</div></div>
             </div>
-
-            <div style="width:1px;height:14px;background:rgba(255,255,255,0.07);margin-left:15px;margin-bottom:1rem;"></div>
-
-            <div style="display:flex;gap:14px;align-items:flex-start;">
-              <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,201,224,0.12);border:1px solid rgba(0,201,224,0.28);display:flex;align-items:center;justify-content:center;font-size:0.78rem;font-weight:700;color:var(--teal);flex-shrink:0;">3</div>
-              <div style="padding-top:4px;">
-                <div style="font-size:0.88rem;font-weight:600;color:#fff;margin-bottom:3px;">Receive your completed bid in under 1 hour</div>
-                <div style="font-size:0.79rem;color:rgba(255,255,255,0.42);line-height:1.55;">Every question answered using your company's information, tailored to that specific tender, reviewed and ready to submit</div>
-              </div>
+            <div class="how-connector"></div>
+            <div class="how-step">
+              <div class="how-num">3</div>
+              <div><div class="how-title">Receive your completed bid</div><div class="how-desc">Every question answered using your company's information, tailored to that specific tender, reviewed and ready to submit</div></div>
             </div>
-
           </div>
-
-          <div style="margin-top:1.75rem;background:rgba(0,201,224,0.07);border:1px solid rgba(0,201,224,0.18);border-radius:10px;padding:1rem 1.1rem;display:flex;align-items:center;gap:10px;">
+          <div class="how-footer">
             <span style="font-size:1.1rem;">⚡</span>
             <div>
-              <div style="font-size:0.82rem;font-weight:600;color:#fff;">Average turnaround: under 1 hour</div>
-              <div style="font-size:0.74rem;color:rgba(255,255,255,0.38);margin-top:2px;">Across all tender types and categories</div>
+              <div class="how-footer-title">Average turnaround: under 1 hour</div>
+              <div class="how-footer-sub">Across all tender types and categories</div>
             </div>
           </div>
-
         </div>
       </div>
     </div>
   </div>
-  <!-- ══ END CANA AI ══ -->
 
 </div>
 
