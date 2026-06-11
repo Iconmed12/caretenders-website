@@ -130,47 +130,79 @@
     </div>
   </div>
 
-  <!-- ══ FEATURE STRIP ══ -->
-  <div class="features-section">
-    <div class="features-inner">
-      <div class="feature-item">
-        <div class="feature-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#00C9E0" stroke-width="1.6"/><path d="M12 7v5l3 3" stroke="#00C9E0" stroke-width="1.6" stroke-linecap="round"/></svg>
-        </div>
-        <div class="feature-text">
-          <div class="feature-title">Your pipeline, always full</div>
-          <div class="feature-desc">New contract opportunities land on the platform every single day — often before your competitors have seen them.</div>
-        </div>
+  <!-- ══ BENTO FEATURES ══ -->
+  <div class="bento-section">
+    <div class="bento-inner">
+      <div class="bento-heading-row">
+        <h2 class="bento-heading">Built to give you the <em>unfair advantage</em></h2>
+        <p class="bento-sub">Intelligence, speed and expertise — in one platform.</p>
       </div>
-      <div class="feature-divider"></div>
-      <div class="feature-item">
-        <div class="feature-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="#00C9E0" stroke-width="1.6" stroke-linejoin="round"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5" stroke="#00C9E0" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <div class="bento-grid">
+
+        <!-- Tile 1: live pipeline feed (wide) -->
+        <div class="bento-tile bento-wide">
+          <div class="bento-tile-glow"></div>
+          <div class="bento-tile-head">
+            <div class="bento-tile-title">Your pipeline, always full</div>
+            <div class="bento-live-pill"><span class="bento-live-dot"></span><span id="bento-live-count">—</span> live now</div>
+          </div>
+          <div class="bento-tile-desc">New contract opportunities land every single day — often before your competitors have seen them.</div>
+          <div class="bento-feed" id="bento-feed">
+            <div class="bento-feed-row"><span class="bento-feed-dot"></span><span class="bento-feed-text">Loading opportunities…</span></div>
+          </div>
         </div>
-        <div class="feature-text">
-          <div class="feature-title">Opportunities at every level</div>
-          <div class="feature-desc">From your first public contract to multi-million frameworks — including specialist entry routes for businesses still building their track record.</div>
+
+        <!-- Tile 2: value scale -->
+        <div class="bento-tile">
+          <div class="bento-tile-glow"></div>
+          <div class="bento-tile-title">Opportunities at every level</div>
+          <div class="bento-tile-desc">From your first public contract to multi-million frameworks — including entry routes for businesses still building their track record.</div>
+          <div class="bento-scale">
+            <div class="bento-scale-track"><div class="bento-scale-fill"></div></div>
+            <div class="bento-scale-labels"><span>£25k</span><span>£215M+</span></div>
+          </div>
         </div>
-      </div>
-      <div class="feature-divider"></div>
-      <div class="feature-item">
-        <div class="feature-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="#00C9E0" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg>
+
+        <!-- Tile 3: turnaround ring -->
+        <div class="bento-tile">
+          <div class="bento-tile-glow"></div>
+          <div class="bento-tile-title">Spec to submission in an hour</div>
+          <div class="bento-tile-desc">Cana AI already knows the tender. While others are still reading the spec, your responses are written.</div>
+          <div class="bento-ring-wrap">
+            <svg class="bento-ring" viewBox="0 0 90 90" width="90" height="90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/>
+              <circle class="bento-ring-fill" cx="45" cy="45" r="38" fill="none" stroke="#00C9E0" stroke-width="6" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="238.76" transform="rotate(-90 45 45)"/>
+            </svg>
+            <div class="bento-ring-center"><span class="bento-ring-num">&lt;1</span><span class="bento-ring-unit">hour</span></div>
+          </div>
         </div>
-        <div class="feature-text">
-          <div class="feature-title">From spec to submission in an hour</div>
-          <div class="feature-desc">Cana AI already knows the tender. While others are still reading the spec, you have complete, tailored responses written around your business.</div>
+
+        <!-- Tile 4: AI -> human pipeline (wide) -->
+        <div class="bento-tile bento-wide">
+          <div class="bento-tile-glow"></div>
+          <div class="bento-tile-title">AI speed. Human judgement.</div>
+          <div class="bento-tile-desc">Every response passes through experienced bid consultants before it reaches you — sharp, compliant and built to score.</div>
+          <div class="bento-pipeline">
+            <div class="bento-stage">
+              <div class="bento-stage-icon">⚡</div>
+              <div class="bento-stage-label">Cana AI drafts</div>
+              <div class="bento-stage-sub">Tailored to the tender</div>
+            </div>
+            <div class="bento-flow"><div class="bento-flow-pulse"></div></div>
+            <div class="bento-stage">
+              <div class="bento-stage-icon">👤</div>
+              <div class="bento-stage-label">Consultant reviews</div>
+              <div class="bento-stage-sub">Sharpened &amp; checked</div>
+            </div>
+            <div class="bento-flow"><div class="bento-flow-pulse" style="animation-delay:1.4s;"></div></div>
+            <div class="bento-stage bento-stage-done">
+              <div class="bento-stage-icon">✓</div>
+              <div class="bento-stage-label">Ready to submit</div>
+              <div class="bento-stage-sub">Built to score</div>
+            </div>
+          </div>
         </div>
-      </div>
-      <div class="feature-divider"></div>
-      <div class="feature-item">
-        <div class="feature-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4" stroke="#00C9E0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z" stroke="#00C9E0" stroke-width="1.6"/></svg>
-        </div>
-        <div class="feature-text">
-          <div class="feature-title">AI speed. Human judgement.</div>
-          <div class="feature-desc">Every response passes through experienced bid consultants before it reaches you — sharp, compliant and built to score.</div>
-        </div>
+
       </div>
     </div>
   </div>

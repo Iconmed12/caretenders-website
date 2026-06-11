@@ -304,6 +304,7 @@
       renderTenders('commercial');
       renderNonCQC();
       initTicker(data);
+      initBentoFeed(data);
     } catch(e) {
       document.getElementById('care-tenders-list').innerHTML='<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
       document.getElementById('commercial-tenders-list').innerHTML='<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
@@ -486,3 +487,41 @@ function initTicker(tenders) {
 
   window._restartDemo = startDemo;
 })();
+
+// ══ BENTO LIVE FEED ══
+function initBentoFeed(tenders) {
+  var feed = document.getElementById('bento-feed');
+  var countEl = document.getElementById('bento-live-count');
+  if (!feed) return;
+
+  var approved = (tenders || []).filter(function(t){ return isApproved(t); });
+  if (countEl) countEl.textContent = approved.length;
+  if (!approved.length) { feed.innerHTML = '<div class="bento-feed-row"><span class="bento-feed-text">New opportunities arriving daily</span></div>'; return; }
+
+  var pool = approved.slice(0, 30);
+  var idx = 0;
+
+  function row(t) {
+    var d = document.createElement('div');
+    d.className = 'bento-feed-row';
+    var isC = isCare(t);
+    var val = t.contract_value ? '£' + Number(t.contract_value).toLocaleString('en-GB') : '';
+    d.innerHTML = '<span class="bento-feed-dot' + (isC ? '' : ' amber') + '"></span>' +
+      '<span class="bento-feed-text">' + (t.title||'') + '</span>' +
+      (val ? '<span class="bento-feed-val">' + val + '</span>' : '');
+    return d;
+  }
+
+  function render() {
+    feed.innerHTML = '';
+    for (var i = 0; i < 3; i++) {
+      feed.appendChild(row(pool[(idx + i) % pool.length]));
+    }
+  }
+
+  render();
+  setInterval(function(){
+    idx = (idx + 1) % pool.length;
+    render();
+  }, 3200);
+}
