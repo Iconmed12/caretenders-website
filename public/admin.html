@@ -171,11 +171,11 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:1.25rem;">
 
           <!-- SELECTION QUESTIONNAIRE CARD — first -->
-          <div class="table-card" style="padding:1.25rem;background:#eff6ff;border:1.5px solid #bfdbfe;">
+          <div class="table-card" style="padding:1.25rem;border:1.5px solid rgba(124,58,237,0.2);">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
               <div style="width:36px;height:36px;background:rgba(124,58,237,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">📋</div>
               <div>
-                <div style="font-weight:600;font-size:0.9rem;color:#1d4ed8;">Selection Questionnaire</div>
+                <div style="font-weight:600;font-size:0.9rem;">Selection Questionnaire</div>
                 <div style="font-size:0.75rem;color:var(--text-light);">Commissioner's SQ document (.docx) — Cana will extract all fields</div>
               </div>
             </div>
@@ -193,10 +193,10 @@
             <div id="sqExtractStatus" style="display:none;margin-top:0.75rem;padding:8px 12px;border-radius:8px;font-size:0.8rem;font-weight:600;"></div>
           </div>
 
-          <div class="table-card" style="padding:1.25rem;background:#eff6ff;border:1.5px solid #bfdbfe;">
+          <div class="table-card" style="padding:1.25rem;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
               <div style="width:36px;height:36px;background:rgba(0,201,224,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">?</div>
-              <div><div style="font-weight:600;font-size:0.9rem;color:#1d4ed8;">Quality Questions</div><div style="font-size:0.75rem;color:var(--text-light);">The questions the tender requires answering</div></div>
+              <div><div style="font-weight:600;font-size:0.9rem;">Quality Questions</div><div style="font-size:0.75rem;color:var(--text-light);">The questions the tender requires answering</div></div>
             </div>
             <div class="cana-drop-zone" id="qualityDrop" ondragover="canaDragOver(event,'qualityDrop')" ondragleave="canaDragLeave('qualityDrop')" ondrop="canaOnDrop(event,'quality')">
               <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
@@ -205,10 +205,10 @@
             </div>
             <div id="qualityFiles" class="cana-files-list"></div>
           </div>
-          <div class="table-card" style="padding:1.25rem;background:#eff6ff;border:1.5px solid #bfdbfe;">
+          <div class="table-card" style="padding:1.25rem;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
               <div style="width:36px;height:36px;background:rgba(245,166,35,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">📋</div>
-              <div><div style="font-weight:600;font-size:0.9rem;color:#1d4ed8;">Service Specification</div><div style="font-size:0.75rem;color:var(--text-light);">What the commissioner expects to be delivered</div></div>
+              <div><div style="font-weight:600;font-size:0.9rem;">Service Specification</div><div style="font-size:0.75rem;color:var(--text-light);">What the commissioner expects to be delivered</div></div>
             </div>
             <div class="cana-drop-zone" id="specDrop" ondragover="canaDragOver(event,'specDrop')" ondragleave="canaDragLeave('specDrop')" ondrop="canaOnDrop(event,'spec')">
               <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
@@ -217,10 +217,10 @@
             </div>
             <div id="specFiles" class="cana-files-list"></div>
           </div>
-          <div class="table-card" style="padding:1.25rem;background:#eff6ff;border:1.5px solid #bfdbfe;">
+          <div class="table-card" style="padding:1.25rem;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
               <div style="width:36px;height:36px;background:rgba(99,91,255,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🎯</div>
-              <div><div style="font-weight:600;font-size:0.9rem;color:#1d4ed8;">Scoring Criteria</div><div style="font-size:0.75rem;color:var(--text-light);">How responses will be evaluated and marked</div></div>
+              <div><div style="font-weight:600;font-size:0.9rem;">Scoring Criteria</div><div style="font-size:0.75rem;color:var(--text-light);">How responses will be evaluated and marked</div></div>
             </div>
             <div class="cana-drop-zone" id="scoringDrop" ondragover="canaDragOver(event,'scoringDrop')" ondragleave="canaDragLeave('scoringDrop')" ondrop="canaOnDrop(event,'scoring')">
               <i class="ti ti-cloud-upload" style="font-size:1.5rem;color:var(--text-light);"></i>
@@ -232,10 +232,10 @@
 
         </div>
         <!-- QUESTIONS ENTRY -->
-        <div style="background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;">
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
             <div>
-              <div style="font-weight:600;font-size:0.95rem;color:#1d4ed8;">Tender Questions</div>
+              <div style="font-weight:600;font-size:0.95rem;">Tender Questions</div>
               <div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">Type or paste each question below. Cana AI will write a full response to every one.</div>
             </div>
             <button onclick="addCanaQuestion()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
