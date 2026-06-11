@@ -24,32 +24,26 @@ exports.handler = async (event) => {
     // manual public statuses). needs_docs = approved but still being prepared,
     // never client-visible. Admin passes ?scope=all for everything.
     const scope = (event.queryStringParameters && event.queryStringParameters.scope) || 'public';
-    let query = supabase.from('tenders').select('*').order('created_at', { ascending: false });
+    // Light columns only (verified against live schema). Heavy fields excluded
+    // so the DATABASE never reads or sends them for list views.
+    const LIST_COLS = 'id,status,title,org,category,region,value,duration,deadline,days_left,link,description,pricing,eligibility,is_non_cqc,why_cqc,created_at,stripe_link,source,source_id,source_url,buyer,published_date,is_cqc,submission_portal,cana_docs,sq_data';
+    let query = supabase.from('tenders').select(LIST_COLS).order('created_at', { ascending: false });
     if (scope !== 'all') query = query.in('status', ['live', 'open', 'closing', 'urgent']);
     const { data, error } = await query;
 
-    // LIST PAYLOADS ARE LIGHT. Heavy fields (document base64, extracted text,
-    // SQ internals) are stripped to presence summaries here; the full record
-    // comes from get-tender-full when one tender is opened. This keeps list
-    // loads fast no matter how loaded individual tenders become.
+    // Reduce the two document fields to tiny presence flags so panels and badges
+    // keep working, then drop the heavy originals. Net payload stays light.
     if (Array.isArray(data)) {
       data.forEach(function(t) {
-        delete t.completion_docs;
-        if (t.cana_docs && typeof t.cana_docs === 'object') {
-          var light = {};
-          ['quality', 'spec', 'scoring'].forEach(function(k) {
-            var arr = Array.isArray(t.cana_docs[k]) ? t.cana_docs[k] : (t.cana_docs[k] ? [t.cana_docs[k]] : []);
-            light[k] = arr.map(function(d) { return { name: d && d.name }; });
-          });
-          t.cana_docs = light;
-        }
-        if (t.sq_data && typeof t.sq_data === 'object') {
-          t.sq_data = {
-            fileName: t.sq_data.fileName || null,
-            storagePath: t.sq_data.storagePath || null,
-            hasSections: !!(t.sq_data.sections && t.sq_data.sections.length)
-          };
-        }
+        var cd = t.cana_docs || {};
+        t.docFlags = {
+          sq:       !!(t.sq_data && (t.sq_data.fileName || t.sq_data.htmlPreview || (t.sq_data.sections && t.sq_data.sections.length))),
+          quality:  !!(cd.quality && cd.quality.length),
+          spec:     !!(cd.spec && cd.spec.length),
+          scoring:  !!(cd.scoring && cd.scoring.length)
+        };
+        delete t.cana_docs;
+        delete t.sq_data;
       });
     }
 
