@@ -37,6 +37,7 @@
       <button class="nav-item" onclick="showPage('care',this)"><i class="ti ti-heart-handshake"></i> Care tenders <span class="nav-badge" id="sbCare">0</span></button>
       <button class="nav-item" onclick="showPage('commercial',this)"><i class="ti ti-building"></i> Commercial <span class="nav-badge" id="sbCommercial">0</span></button>
       <button class="nav-item" onclick="showPage('noncqc',this)"><i class="ti ti-certificate"></i> Non-CQC listings <span class="nav-badge" id="sbNonCqc">0</span></button>
+      <button class="nav-item" onclick="showPage('expired',this)"><i class="ti ti-clock-off"></i> Expired <span class="nav-badge nav-badge--muted" id="sbExpired">0</span></button>
     </div>
     <div class="sidebar-section">System</div>
     <div class="sidebar-nav">
@@ -379,6 +380,24 @@
     </div>
 
   
+
+<div class="page" id="page-expired" style="display:none">
+  <div class="page-header">
+    <div>
+      <div class="page-title">Expired tenders</div>
+      <div class="page-subtitle">Past their deadline. Hidden from the public portal automatically.</div>
+    </div>
+  </div>
+  <div class="table-card">
+    <div class="table-toolbar">
+      <input class="table-search" id="expired-search" type="text" placeholder="Search expired..." oninput="renderExpiredTable()">
+    </div>
+    <table class="data-table">
+      <thead><tr><th>Tender</th><th>Organisation</th><th>Deadline</th><th>Actions</th></tr></thead>
+      <tbody id="expired-tbody"></tbody>
+    </table>
+  </div>
+</div>
 
 <div class="page" id="page-tenders-import">
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:1.5rem;flex-wrap:wrap;">

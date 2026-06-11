@@ -88,6 +88,7 @@ function showPage(page, btn) {
   if (page === 'care') { document.getElementById('aiUploadBtn').style.display='flex'; document.getElementById('addTenderBtn').style.display='flex'; renderCareTable(); }
   if (page === 'commercial') { document.getElementById('aiCommercialBtn').style.display='flex'; document.getElementById('addCommercialBtn').style.display='flex'; renderCommercialTable(); }
   if (page === 'noncqc') { document.getElementById('aiNonCqcBtn').style.display='flex'; document.getElementById('addNonCqcBtn').style.display='flex'; renderNonCqcTable(); }
+  if (page === 'expired') { renderExpiredTable(); }
   if (page === 'knowledge') { loadKnowledgeBase(); }
   if (page === 'cana') { populateCanaTenderSelect(); }
 }
@@ -103,7 +104,9 @@ function badgeHtml(s) {
 function updateCounts() {
   // Counts mirror what the tab tables actually show (approved listings only),
   // so the sidebar badges and dashboard cards always match the tables.
+  var expired=allTenders.filter(function(t){return t.status==='expired';});
   var approved=allTenders.filter(isApproved);
+  setEl('sbExpired', expired.length||'');
   var care=approved.filter(isCare);
   var commercial=approved.filter(function(t){return !isCare(t);});
   var nc=approved.filter(function(t){return isNonCqcEligible(t)||(t.is_non_cqc&&isCare(t));});
@@ -115,13 +118,13 @@ function updateCounts() {
   document.getElementById('sbCommercial').textContent=commercial.length;
   document.getElementById('sbNonCqc').textContent=nc.length;
   document.getElementById('sbCana').textContent=withDocs.length;
-  document.getElementById('statTotal').textContent=approved.length;
+  document.getElementById('statTotal').textContent=allTenders.length;
   document.getElementById('statOpen').textContent=approved.filter(function(t){return t.status==='open'||t.status==='live';}).length;
   document.getElementById('statClosing').textContent=approved.filter(function(t){return t.status==='closing'||t.status==='urgent';}).length;
   document.getElementById('statNonCqc').textContent=nc.length;
 }
 
-function renderAll() { updateCounts(); renderDashboard(); renderCareTable(); renderCommercialTable(); renderNonCqcTable(); }
+function renderAll() { updateCounts(); renderDashboard(); renderCareTable(); renderCommercialTable(); renderNonCqcTable(); renderExpiredTable(); }
 
 function renderDashboard() {
   var rows=allTenders.filter(isApproved).slice(0,10);
@@ -171,6 +174,41 @@ function renderNonCqcTable() {
     var isAuto=isNonCqcEligible(t)&&!t.is_non_cqc;
     return '<tr><td><div class="td-title">'+(t.title||'')+'</div><div class="td-org">'+(t.org||'')+'</div></td><td>'+(t.organisation||t.org||'')+'</td><td>'+(t.value||'')+'</td><td style="color:var(--green);font-weight:600">'+feeStr(t)+'</td><td>'+(isAuto?'<span class="td-badge" style="background:#e8f7ee;color:#085041;font-size:10px">Auto</span>':'<span style="color:var(--text-light)">Manual</span>')+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted);font-size:12px">'+fmtDate(t.deadline)+'</td><td><div class="action-btns"><button class="action-btn edit" onclick="openDrawerById(\''+t.id+'\',\'noncqc\')"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')"><i class="ti ti-trash"></i></button></div></td></tr>';
   }).join('');
+}
+
+function renderExpiredTable() {
+  var q = (document.getElementById('expired-search').value||'').toLowerCase();
+  var rows = allTenders.filter(function(t){
+    return t.status === 'expired' && (!q || (t.title||'').toLowerCase().includes(q) || (t.org||'').toLowerCase().includes(q));
+  });
+  var tbody = document.getElementById('expired-tbody');
+  if (!tbody) return;
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:2rem;">No expired tenders</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(function(t) {
+    return '<tr>' +
+      '<td><div style="font-weight:600;font-size:0.85rem;">' + (t.title||'') + '</div></td>' +
+      '<td style="font-size:0.82rem;color:var(--muted);">' + (t.org||'') + '</td>' +
+      '<td style="font-size:0.82rem;color:var(--muted);">' + (t.deadline||'') + '</td>' +
+      '<td>' +
+        '<button onclick="restoreTender("' + t.id + '")" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;margin-right:6px;">Restore</button>' +
+        '<button onclick="deleteTender("' + t.id + '")" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;">Delete</button>' +
+      '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+async function restoreTender(id) {
+  if (!confirm('Restore this tender to pending_review?')) return;
+  var res = await sbFetch('/rest/v1/tenders?id=eq.' + id, {
+    method: 'PATCH',
+    body: JSON.stringify({ status: 'pending_review' }),
+    headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' }
+  });
+  if (res.ok) { showToast('Tender restored', 'success'); await loadAllTenders(); renderExpiredTable(); updateCounts(); }
+  else showToast('Restore failed', 'error');
 }
 
 // AI MODAL

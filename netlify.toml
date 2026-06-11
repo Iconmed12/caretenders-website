@@ -23,3 +23,6 @@
 
 [functions."check-vault-expiry"]
   schedule = "0 9 * * *"
+
+[functions."expire-tenders"]
+  schedule = "0 1 * * *"
