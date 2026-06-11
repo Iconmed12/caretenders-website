@@ -481,6 +481,51 @@ exports.handler = async (event) => {
     if (docBase64)   attachments.push({ filename: 'Cana_AI_Tender_Responses.docx', content: docBase64 });
     if (sqDocBase64) attachments.push({ filename: sqFileName || 'SQ_Completed.docx', content: sqDocBase64 });
 
+    // ── Completion pack (additive, fully guarded — never blocks the send) ──
+    // tender was loaded with select=*, so completion_docs/submission_portal are present.
+    var packChecklistHtml = '';
+    try {
+      var completionDocs = (tender && Array.isArray(tender.completion_docs)) ? tender.completion_docs : [];
+      var portal = (tender && tender.submission_portal) || null;
+      var packBytes = attachments.reduce(function(sum, a){ return sum + Math.ceil((a.content||'').length * 0.75); }, 0);
+      var skippedPack = [];
+      completionDocs.forEach(function(d) {
+        if (!d || !d.data) return;
+        var bytes = Math.ceil((d.data||'').length * 0.75);
+        if (packBytes + bytes > 35 * 1024 * 1024) { skippedPack.push(d.fileName || d.label); return; }
+        attachments.push({ filename: d.fileName || ((d.label || 'document') + '.pdf'), content: d.data });
+        packBytes += bytes;
+      });
+      if (skippedPack.length) console.log('Pack docs skipped (size):', skippedPack.join(', '));
+
+      if (completionDocs.length || (portal && portal.name)) {
+        packChecklistHtml += '<div style="border:2px solid #0B1929;border-radius:10px;overflow:hidden;margin-bottom:20px;">' +
+          '<div style="background:#0B1929;padding:12px 16px;"><span style="color:#00C9E0;font-weight:800;font-size:14px;letter-spacing:0.04em;">YOUR SUBMISSION CHECKLIST</span></div>' +
+          '<div style="padding:16px;">';
+        if (completionDocs.length) {
+          packChecklistHtml += '<div style="font-size:13px;font-weight:800;color:#0B1929;margin-bottom:6px;">Attached for your completion</div>' +
+            '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:14px;">';
+          completionDocs.forEach(function(d) {
+            packChecklistHtml += '<div style="font-size:13px;color:#78350f;padding:3px 0;">&#9744; ' + (d.label || d.fileName || 'Document') + ' — complete, sign and include with your submission</div>';
+          });
+          packChecklistHtml += '</div>';
+        }
+        packChecklistHtml += '<div style="font-size:13px;font-weight:800;color:#0B1929;margin-bottom:6px;">Where to submit</div>' +
+          '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;">';
+        if (portal && portal.name) {
+          packChecklistHtml += '<div style="font-size:13px;color:#166534;padding:2px 0;">Portal: <strong>' + portal.name + '</strong></div>';
+          if (portal.url) packChecklistHtml += '<div style="padding:8px 0 2px;"><a href="' + portal.url + '" style="display:inline-block;background:#166534;color:#fff;font-size:13px;font-weight:700;padding:8px 16px;border-radius:7px;text-decoration:none;">Go to submission portal &rarr;</a></div>';
+        } else {
+          packChecklistHtml += '<div style="font-size:13px;color:#166534;">Submit via the buyer portal stated in the tender documents.</div>';
+        }
+        if (tender && tender.deadline) packChecklistHtml += '<div style="font-size:13px;font-weight:700;color:#c53030;padding-top:6px;">&#9200; Deadline: ' + tender.deadline + '</div>';
+        packChecklistHtml += '</div></div></div>';
+      }
+    } catch (packErr) {
+      console.log('Completion pack step failed (non-fatal, email still sends):', packErr.message);
+      packChecklistHtml = '';
+    }
+
     var emailHtml = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
       '<div style="background:#0B1929;padding:24px;border-radius:8px 8px 0 0;"><h1 style="color:#00C9E0;margin:0;">Cana AI</h1></div>' +
       '<div style="background:#fff;padding:28px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;">' +
@@ -492,6 +537,7 @@ exports.handler = async (event) => {
       (docBase64 ? '<div style="font-size:13px;color:#166534;padding:2px 0;">✓ Cana_AI_Tender_Responses.docx</div>' : '') +
       (sqDocBase64 ? '<div style="font-size:13px;color:#166534;padding:2px 0;">✓ ' + (sqFileName||'SQ_Completed.docx') + '</div>' : '') +
       '</div>' +
+      packChecklistHtml +
       '<div style="background:#fefce8;border:1px solid #fde047;border-radius:8px;padding:14px;margin-bottom:20px;">' +
       '<strong style="color:#854d0e;">Before you submit:</strong>' +
       '<div style="font-size:13px;color:#92400e;margin-top:6px;line-height:1.8;">• Review all sections carefully<br>• Sign all declaration sections<br>• Attach required certificates</div>' +
