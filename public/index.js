@@ -15,12 +15,15 @@
   ];
   // All possible commercial category values
   const COMMERCIAL_CATS = [
+    'commercial',
     'construction',
     'facilities','facilities management',
     'cleaning',
     'consultancy',
     'it & digital','it','digital','it & services',
     'logistics',
+    'transport','waste','security',
+    'employment','business support','marketing','enterprise','training','recruitment',
     'other'
   ];
 
