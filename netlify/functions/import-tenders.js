@@ -133,10 +133,23 @@ exports.handler = async (event) => {
 
           if (!title || !deadline) { skipped++; continue; }
 
-          // Check not already imported
+          // Check not already imported — two guards:
+          // 1. Same source_id (same portal, exact record match)
           var existRes = await sbFetch('/rest/v1/tenders?source_id=eq.' + encodeURIComponent(sourceId) + '&select=id&limit=1');
           var existData = await existRes.json();
           if (Array.isArray(existData) && existData.length > 0) { skipped++; continue; }
+
+          // 2. Same title + org + deadline from a different portal (cross-source duplicate)
+          if (title && buyerName && deadline) {
+            var crossRes = await sbFetch(
+              '/rest/v1/tenders?select=id&limit=1' +
+              '&title=eq.' + encodeURIComponent(title) +
+              '&org=eq.'   + encodeURIComponent(buyerName) +
+              '&deadline=eq.' + encodeURIComponent(deadline)
+            );
+            var crossData = await crossRes.json();
+            if (Array.isArray(crossData) && crossData.length > 0) { skipped++; continue; }
+          }
 
           // Generate tender ID
           var now = Date.now();
@@ -173,6 +186,88 @@ exports.handler = async (event) => {
           } else { imported++; results.push({ id: tenderId, title: title.substring(0,60) }); }
 
         } catch(e) { console.log('Record error:', e.message); errors++; }
+      }
+    }
+
+    // ── Find a Tender (UK-wide, all values, above + below threshold since Feb 2025) ──
+    // Uses the same OCDS-compatible search endpoint — no auth required
+    for (var fatPage = 0; fatPage < pages; fatPage++) {
+      var fatUrl = 'https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages' +
+        '?publishedFrom=' + getYesterdayDate() +
+        '&stages=tender' +
+        '&size=100&page=' + fatPage;
+
+      console.log('Fetching FAT API page', fatPage, ':', fatUrl);
+      var fatRes = await fetch(fatUrl, {
+        headers: { 'Accept': 'application/json', 'User-Agent': 'Cana/1.0' }
+      });
+
+      if (!fatRes.ok) {
+        var fatErr = await fatRes.text();
+        console.log('FAT API page', fatPage, 'failed:', fatRes.status, fatErr.substring(0,200));
+        break;
+      }
+
+      var fatData = await fatRes.json();
+      var fatReleases = fatData.releases || fatData.records || [];
+      console.log('FAT page', fatPage, '— fetched', fatReleases.length, 'records');
+      if (!fatReleases.length) break;
+
+      for (var fatRelease of fatReleases) {
+        try {
+          var ft = fatRelease.tender || {};
+          var fb = fatRelease.buyer || {};
+          var title = (ft.title || fatRelease.name || '').trim();
+          var desc  = ft.description || '';
+          var buyerName = fb.name || (fatRelease.parties && fatRelease.parties.find(p=>p.roles&&p.roles.includes('buyer'))?.name) || '';
+          var deadline = '';
+          if (ft.tenderPeriod && ft.tenderPeriod.endDate) deadline = parseDate(ft.tenderPeriod.endDate);
+          var published = fatRelease.date ? parseDate(fatRelease.date) : new Date().toISOString().split('T')[0];
+          var value = '';
+          if (ft.value && ft.value.amount) value = String(ft.value.amount);
+          var sourceId = fatRelease.ocid || fatRelease.id || '';
+          var sourceUrl = '';
+          if (ft.documents) {
+            for (var fd of ft.documents) {
+              if (fd.documentType === 'tenderNotice' && fd.url) { sourceUrl = fd.url; break; }
+            }
+          }
+          if (!sourceUrl && sourceId) sourceUrl = 'https://www.find-tender.service.gov.uk/Notice/' + sourceId.replace('ocds-pfh999-','');
+
+          if (!title || !deadline) continue;
+
+          // Guard 1: source_id match
+          var fExist = await sbFetch('/rest/v1/tenders?source_id=eq.' + encodeURIComponent(sourceId) + '&select=id&limit=1');
+          var fExistData = await fExist.json();
+          if (Array.isArray(fExistData) && fExistData.length > 0) { skipped++; continue; }
+
+          // Guard 2: cross-source duplicate
+          if (title && buyerName && deadline) {
+            var fCross = await sbFetch('/rest/v1/tenders?select=id&limit=1&title=eq.' + encodeURIComponent(title) + '&org=eq.' + encodeURIComponent(buyerName) + '&deadline=eq.' + encodeURIComponent(deadline));
+            var fCrossData = await fCross.json();
+            if (Array.isArray(fCrossData) && fCrossData.length > 0) { skipped++; continue; }
+          }
+
+          var category = detectCategory(title, desc);
+          var isCqc = detectCqc(title, desc);
+          var tenderId = 'T-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*900)+100);
+
+          var fatObj = {
+            id: tenderId, title, org: buyerName, buyer: buyerName,
+            deadline, published_date: published, value, description: desc,
+            category, is_cqc: isCqc, status: 'pending_review',
+            source: 'find_a_tender', source_id: sourceId, source_url: sourceUrl,
+            created_at: new Date().toISOString()
+          };
+
+          var fatInsert = await sbFetch('/rest/v1/tenders', {
+            method: 'POST',
+            body: JSON.stringify(fatObj),
+            headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }
+          });
+          if (!fatInsert.ok) { errors++; } else { imported++; results.push({ id: tenderId, title: title.substring(0,60) }); }
+
+        } catch(e) { console.log('FAT record error:', e.message); errors++; }
       }
     }
 
