@@ -11,12 +11,33 @@ exports.handler = async (event) => {
 
   try {
     const { responses, clientEmail, clientName, tenderTitle, sessionId,
-            sqDocBase64, sqFileName, sqData, includeSq } = JSON.parse(event.body);
+            sqDocBase64, sqFileName, sqData, includeSq, tenderId } = JSON.parse(event.body);
     const RESEND_KEY = process.env.RESEND_API_KEY;
     const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@icongrp.co.uk';
     const ICONGRP_EMAIL = 'consulting@icongrp.co.uk';
 
     if (!RESEND_KEY) return { statusCode: 500, headers: cors, body: JSON.stringify({ error: 'RESEND_API_KEY not set' }) };
+
+    // ── Fetch completion pack server-side (never travels through the client) ──
+    var completionDocs = [];
+    var submissionPortal = null;
+    var tenderDeadline = '';
+    if (tenderId) {
+      try {
+        var sbKey = process.env.SUPABASE_ANON_KEY;
+        var packRes = await fetch(
+          'https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/tenders?id=eq.' + encodeURIComponent(tenderId) +
+          '&select=deadline,completion_docs,submission_portal',
+          { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } }
+        );
+        var packRows = await packRes.json();
+        if (Array.isArray(packRows) && packRows[0]) {
+          completionDocs = packRows[0].completion_docs || [];
+          submissionPortal = packRows[0].submission_portal || null;
+          tenderDeadline = packRows[0].deadline || '';
+        }
+      } catch (e) { console.log('Completion pack fetch failed (non-fatal):', e.message); }
+    }
 
     // ── Build tender responses Word doc (existing) ──
     var children = [];
@@ -134,6 +155,9 @@ exports.handler = async (event) => {
     // Attached files list
     var attachedFiles = ['<strong>Cana_AI_Tender_Responses.docx</strong> — ' + (responses ? responses.length : 0) + ' complete bid responses'];
     if (includeSq && sqDocBase64) attachedFiles.push('<strong>' + (sqFileName || 'Selection_Questionnaire_Completed.docx') + '</strong> — completed SQ document (original template filled in)');
+    (completionDocs || []).forEach(function(d) {
+      attachedFiles.push('<strong>' + (d.fileName || d.label || 'Document') + '</strong> — for your completion: ' + (d.label || ''));
+    });
 
     htmlBody += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 16px;margin-bottom:24px;">' +
       '<div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:8px;">📎 ' + attachedFiles.length + ' document' + (attachedFiles.length>1?'s':'') + ' attached</div>' +
@@ -150,6 +174,46 @@ exports.handler = async (event) => {
         '</div>';
     });
 
+    // ── DELIVERY CHECKLIST ──
+    var checklistHtml = '<div style="border:2px solid #0B1929;border-radius:10px;overflow:hidden;margin:28px 0;">' +
+      '<div style="background:#0B1929;padding:14px 18px;"><span style="color:#00C9E0;font-weight:800;font-size:15px;letter-spacing:0.04em;">YOUR SUBMISSION CHECKLIST</span></div>' +
+      '<div style="padding:18px;">';
+
+    checklistHtml += '<div style="font-size:13px;font-weight:800;color:#0B1929;margin-bottom:8px;">1. Completed by Cana AI (review required)</div>';
+    checklistHtml += '<div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:12px 14px;margin-bottom:18px;">';
+    if (includeSq && sqDocBase64) {
+      checklistHtml += '<div style="font-size:13px;color:#0B1929;padding:4px 0;">☑ Selection Questionnaire — completed</div>';
+    }
+    checklistHtml += '<div style="font-size:13px;color:#0B1929;padding:4px 0;">☑ ' + (responses ? responses.length : 0) + ' tender responses — written and consultant reviewed</div>';
+    checklistHtml += '<div style="font-size:13px;font-weight:800;color:#c53030;margin-top:8px;">🔴 YOU MUST READ THROUGH EVERY DOCUMENT BEFORE SUBMISSION. Check all answers reflect your business accurately.</div>';
+    checklistHtml += '</div>';
+
+    if (completionDocs && completionDocs.length) {
+      checklistHtml += '<div style="font-size:13px;font-weight:800;color:#0B1929;margin-bottom:8px;">2. Attached for YOUR completion</div>';
+      checklistHtml += '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:18px;">';
+      completionDocs.forEach(function(d) {
+        checklistHtml += '<div style="font-size:13px;color:#78350f;padding:4px 0;">☐ ' + (d.label || d.fileName || 'Document') + ' — complete, sign and include with your submission</div>';
+      });
+      checklistHtml += '</div>';
+    }
+
+    var stepNum = (completionDocs && completionDocs.length) ? '3' : '2';
+    checklistHtml += '<div style="font-size:13px;font-weight:800;color:#0B1929;margin-bottom:8px;">' + stepNum + '. Where to submit</div>';
+    checklistHtml += '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:12px 14px;">';
+    if (submissionPortal && submissionPortal.name) {
+      checklistHtml += '<div style="font-size:13px;color:#166534;padding:2px 0;">Portal: <strong>' + submissionPortal.name + '</strong></div>';
+      if (submissionPortal.url) {
+        checklistHtml += '<div style="padding:8px 0 4px;"><a href="' + submissionPortal.url + '" style="display:inline-block;background:#166534;color:#ffffff;font-size:13px;font-weight:700;padding:9px 18px;border-radius:7px;text-decoration:none;">Go to submission portal →</a></div>';
+      }
+    } else {
+      checklistHtml += '<div style="font-size:13px;color:#166534;padding:2px 0;">Submit via the buyer portal stated in the tender documents.</div>';
+    }
+    if (tenderDeadline) {
+      checklistHtml += '<div style="font-size:13px;font-weight:700;color:#c53030;padding:6px 0 0;">⏰ Submission deadline: ' + tenderDeadline + ' — do not leave it to the last day.</div>';
+    }
+    checklistHtml += '</div></div></div>';
+
+    htmlBody += checklistHtml;
     htmlBody += reportHtml;
 
     htmlBody += '<hr style="margin-top:32px;"><p style="color:#9ca3af;font-size:11px;text-align:center;">Generated by Cana AI | ICONGRP Consulting | consulting@icongrp.co.uk</p>' +
@@ -166,6 +230,16 @@ exports.handler = async (event) => {
         content: sqDocBase64
       });
     }
+    // Completion documents — guard total size against email provider limits (~40MB)
+    var totalAttachBytes = attachments.reduce(function(sum, a) { return sum + Math.ceil((a.content || '').length * 0.75); }, 0);
+    var skippedDocs = [];
+    (completionDocs || []).forEach(function(d) {
+      var bytes = Math.ceil((d.data || '').length * 0.75);
+      if (totalAttachBytes + bytes > 35 * 1024 * 1024) { skippedDocs.push(d.fileName || d.label); return; }
+      attachments.push({ filename: d.fileName || ((d.label || 'document') + '.pdf'), content: d.data });
+      totalAttachBytes += bytes;
+    });
+    if (skippedDocs.length) console.log('Skipped attachments over size limit:', skippedDocs.join(', '));
 
     var errors = [];
 

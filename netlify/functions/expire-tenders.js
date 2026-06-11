@@ -49,6 +49,25 @@ exports.handler = async (event) => {
       throw new Error('Patch failed: ' + patch.status + ' ' + errTxt.substring(0, 200));
     }
 
+    // ── Purge completion packs from tenders expired 30+ days ago (storage recycling) ──
+    try {
+      const cutoff = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString().split('T')[0];
+      const purgeRes = await fetch(
+        `${sbUrl}/rest/v1/tenders?status=eq.expired&deadline=lt.${cutoff}&completion_docs=not.is.null&select=id,title`,
+        { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } }
+      );
+      const purgeRows = await purgeRes.json();
+      if (Array.isArray(purgeRows) && purgeRows.length) {
+        const pids = purgeRows.map(t => t.id);
+        await fetch(`${sbUrl}/rest/v1/tenders?id=in.(${pids.map(id => `"${id}"`).join(',')})`, {
+          method: 'PATCH',
+          headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({ completion_docs: null })
+        });
+        console.log('Purged completion packs from', purgeRows.length, 'tenders expired 30+ days');
+      }
+    } catch (e) { console.log('Pack purge step failed (non-fatal):', e.message); }
+
     console.log(`Expired ${tenders.length} tenders on ${today}:`, tenders.map(t => t.title.substring(0, 50)));
     return {
       statusCode: 200,

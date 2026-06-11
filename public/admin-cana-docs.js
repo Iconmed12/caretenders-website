@@ -141,6 +141,7 @@ function loadCanaDocs(){
   var t=allTenders.find(function(x){return x.id===id;});
   renderTenderStatusBar(t);
   var docs=(t&&t.cana_docs)||{};
+  if (typeof loadDeliveryPack === 'function') loadDeliveryPack(t);
   console.log('sq_data for tender', id, ':', JSON.stringify(t&&t.sq_data));
   ['quality','spec','scoring'].forEach(function(type){
     canaDocData[type]=Array.isArray(docs[type])?docs[type]:(docs[type]?[docs[type]]:[]);
