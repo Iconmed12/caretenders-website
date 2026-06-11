@@ -20,10 +20,11 @@ exports.handler = async (event) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Public site gets live only; admin passes ?scope=all
+    // Public site gets all approved tenders (live + open + needs_docs);
+    // admin passes ?scope=all to get everything including pending_review/expired
     const scope = (event.queryStringParameters && event.queryStringParameters.scope) || 'public';
     let query = supabase.from('tenders').select('*').order('created_at', { ascending: false });
-    if (scope !== 'all') query = query.eq('status', 'live');
+    if (scope !== 'all') query = query.in('status', ['live', 'open', 'needs_docs', 'closing', 'urgent']);
     const { data, error } = await query;
 
     if (error) {
