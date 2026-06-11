@@ -371,6 +371,8 @@ async function confirmSqAndGenerate() {
         '<p style="color:rgba(255,255,255,0.7);margin-bottom:0.5rem;">All ' + responses.length + ' responses are now visible above.</p>' +
         '<p style="color:rgba(255,255,255,0.6);font-size:0.85rem;">A Word document with all your responses has been emailed to you. Check your inbox.</p>';
     }
+    window._isPaid = true;
+    renderClientChecklist();
     setStep(3);
     showState('results');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -432,7 +434,8 @@ async function confirmSqAndGenerate() {
           sqDocBase64: sqDocBase64,
           sqFileName: sqFileName,
           sqData: sqDataForEmail,
-          includeSq: !!(sqDocBase64)
+          includeSq: !!(sqDocBase64),
+          tenderId: tenderId
         })
       });
       var result = await res.json();
@@ -483,6 +486,76 @@ async function confirmSqAndGenerate() {
       `;
     }).join('');
   }
+
+  // ── Client delivery checklist (after payment) ──
+  async function renderClientChecklist() {
+    var existing = document.getElementById('delivery-checklist');
+    if (existing) existing.remove();
+    if (!window._isPaid) return;
+    var container = document.getElementById('responses-list');
+    if (!container || !tenderId) return;
+
+    var pack = null;
+    try {
+      var res = await fetch('/.netlify/functions/get-delivery-pack?id=' + encodeURIComponent(tenderId));
+      if (res.ok) pack = await res.json();
+    } catch (e) { return; }
+    if (!pack) return;
+
+    var docs = pack.completion_docs || [];
+    var portal = pack.submission_portal || null;
+    window._deliveryDocs = docs;
+
+    var html = '<div id="delivery-checklist" style="border:2px solid var(--navy,#0B1929);border-radius:14px;overflow:hidden;margin-top:1.5rem;">' +
+      '<div style="background:var(--navy,#0B1929);padding:14px 20px;"><span style="color:#00C9E0;font-weight:800;font-size:0.95rem;letter-spacing:0.04em;">YOUR SUBMISSION CHECKLIST</span></div>' +
+      '<div style="padding:1.25rem;background:#fff;">';
+
+    html += '<div style="font-size:0.85rem;font-weight:800;color:var(--navy,#0B1929);margin-bottom:6px;">1. Completed by Cana AI</div>';
+    html += '<div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:14px;">' +
+      '<div style="font-size:0.82rem;color:var(--navy,#0B1929);padding:2px 0;">All responses above, plus any completed SQ sent to your email.</div>' +
+      '<div style="font-size:0.82rem;font-weight:800;color:#c53030;margin-top:4px;">READ THROUGH EVERY ANSWER BEFORE SUBMITTING. Check each one reflects your business accurately.</div></div>';
+
+    if (docs.length) {
+      html += '<div style="font-size:0.85rem;font-weight:800;color:var(--navy,#0B1929);margin-bottom:6px;">2. For your completion</div>';
+      html += '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:14px;">';
+      docs.forEach(function(d, i) {
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:5px 0;">' +
+          '<span style="font-size:0.82rem;color:#78350f;">☐ ' + (d.label || d.fileName || 'Document') + '</span>' +
+          '<button onclick="downloadDeliveryDoc(' + i + ')" style="border:1px solid #d6a516;background:#fff;color:#92400e;font-size:0.72rem;font-weight:700;padding:4px 12px;border-radius:6px;cursor:pointer;white-space:nowrap;">Download</button></div>';
+      });
+      html += '</div>';
+    }
+
+    html += '<div style="font-size:0.85rem;font-weight:800;color:var(--navy,#0B1929);margin-bottom:6px;">' + (docs.length ? '3' : '2') + '. Where to submit</div>';
+    html += '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:10px 14px;">';
+    if (portal && portal.name) {
+      html += '<div style="font-size:0.82rem;color:#166534;">Portal: <strong>' + portal.name + '</strong></div>';
+      if (portal.url) html += '<div style="padding-top:8px;"><a href="' + portal.url + '" target="_blank" rel="noopener" style="display:inline-block;background:#166534;color:#fff;font-size:0.8rem;font-weight:700;padding:8px 16px;border-radius:7px;text-decoration:none;">Go to submission portal →</a></div>';
+    } else {
+      html += '<div style="font-size:0.82rem;color:#166534;">Submit via the buyer portal stated in the tender documents.</div>';
+    }
+    if (pack.deadline) html += '<div style="font-size:0.82rem;font-weight:700;color:#c53030;padding-top:6px;">⏰ Deadline: ' + pack.deadline + '</div>';
+    html += '</div></div></div>';
+
+    container.insertAdjacentHTML('afterend', html);
+  }
+
+  window.downloadDeliveryDoc = function(i) {
+    var d = (window._deliveryDocs || [])[i];
+    if (!d || !d.data) { alert('Document unavailable'); return; }
+    try {
+      var bin = atob(d.data);
+      var bytes = new Uint8Array(bin.length);
+      for (var j = 0; j < bin.length; j++) bytes[j] = bin.charCodeAt(j);
+      var blob = new Blob([bytes], { type: d.type || 'application/octet-stream' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = d.fileName || ((d.label || 'document') + '.pdf');
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function() { URL.revokeObjectURL(a.href); a.remove(); }, 800);
+    } catch (e) { alert('Download failed: ' + e.message); }
+  };
 
   // ── Profile pre-fill ──
   async function prefillFromProfile() {

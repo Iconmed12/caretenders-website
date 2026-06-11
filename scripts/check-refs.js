@@ -18,7 +18,7 @@ const GLOBALS = new Set([
   'parseInt','parseFloat','isNaN','isFinite','encodeURIComponent','decodeURIComponent',
   'encodeURI','decodeURI','Error','Map','Set','Symbol','Proxy','Reflect','Intl','BigInt',
   'setTimeout','setInterval','clearTimeout','clearInterval','requestAnimationFrame',
-  'structuredClone','queueMicrotask','escape','unescape',
+  'structuredClone','queueMicrotask','escape','unescape','Uint8Array','Uint16Array','Uint32Array','Int8Array','Float32Array','Float64Array','ArrayBuffer','DataView','TextEncoder','TextDecoder',
   // Browser
   'fetch','alert','confirm','prompt','atob','btoa','FormData','URLSearchParams','URL',
   'FileReader','Blob','File','AbortController','IntersectionObserver','MutationObserver',
