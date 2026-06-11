@@ -509,3 +509,31 @@
     .cmp-new-item .cv { transform:scale(1); }
     .compare-shimmer, .compare-vs::before { animation:none; }
   }
+
+  /* ══ PROOF BAND: DIGITAL UPGRADE ══ */
+  .proof-eyebrow { font-size:0.72rem; font-weight:700; color:var(--teal-dk); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:1.75rem; }
+  .proof-num { font-variant-numeric:tabular-nums; }
+  .proof-stat { position:relative; padding-bottom:14px; }
+  .proof-bar { display:block; width:56px; height:3px; background:rgba(11,25,41,0.07); border-radius:999px; margin:10px auto 0; overflow:hidden; }
+  .proof-bar-fill { display:block; height:100%; width:0; background:linear-gradient(90deg,var(--teal) 0%,var(--teal-dk) 100%); border-radius:999px; transition:width 1.4s cubic-bezier(0.22,1,0.36,1) 0.3s; }
+  .proof-section.in .proof-bar-fill { width:var(--w,0%); }
+
+  .proof-stat, .proof-quote-card, .proof-cta { opacity:0; transform:translateY(16px); transition:opacity 0.5s ease,transform 0.5s ease; }
+  .proof-section.in .proof-stat, .proof-section.in .proof-quote-card, .proof-section.in .proof-cta { opacity:1; transform:none; }
+  .proof-section.in .proof-stat:nth-child(1) { transition-delay:0s; }
+  .proof-section.in .proof-stat:nth-child(2) { transition-delay:0.1s; }
+  .proof-section.in .proof-stat:nth-child(3) { transition-delay:0.2s; }
+  .proof-section.in .proof-stat:nth-child(4) { transition-delay:0.3s; }
+  .proof-section.in .proof-quote-card { transition-delay:0.45s; }
+  .proof-section.in .proof-cta { transition-delay:0.6s; }
+
+  .proof-quote-card { overflow:hidden; }
+  .proof-quote-card::before { content:''; position:absolute; top:0; left:0; bottom:0; width:3px; background:linear-gradient(180deg,var(--teal) 0%,transparent 100%); }
+  .proof-quote-card { position:relative; }
+  .proof-attr-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .proof-won-pill { background:#e8f7ee; color:#1a7a3f; font-size:0.72rem; font-weight:700; padding:4px 12px; border-radius:999px; white-space:nowrap; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .proof-stat, .proof-quote-card, .proof-cta { opacity:1; transform:none; transition:none; }
+    .proof-bar-fill { transition:none; }
+  }

@@ -551,3 +551,60 @@ function initBentoFeed(tenders) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
   else setup();
 })();
+
+// ══ PROOF BAND: COUNT-UP + REVEAL ══
+(function(){
+  function animateCount(el, duration){
+    var target = parseFloat(el.getAttribute('data-count'));
+    var prefix = el.getAttribute('data-prefix') || '';
+    var suffix = el.getAttribute('data-suffix') || '';
+    var decimals = parseInt(el.getAttribute('data-decimals') || '0');
+    var start = null;
+    function step(ts){
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / duration, 1);
+      var eased = 1 - Math.pow(1 - p, 3); // easeOutCubic
+      var val = (target * eased).toFixed(decimals);
+      el.textContent = prefix + val + suffix;
+      if (p < 1) requestAnimationFrame(step);
+      else el.textContent = prefix + target.toFixed(decimals).replace(/\.0$/, decimals ? '.0' : '') + suffix;
+    }
+    requestAnimationFrame(step);
+  }
+
+  function setup(){
+    var section = document.getElementById('proof-section');
+    if (!section) return;
+
+    // Set bar widths from data attributes as CSS vars
+    section.querySelectorAll('.proof-bar-fill').forEach(function(b){
+      b.style.setProperty('--w', (b.getAttribute('data-width') || 0) + '%');
+    });
+
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function fire(){
+      section.classList.add('in');
+      section.querySelectorAll('.proof-num[data-count]').forEach(function(el, i){
+        if (reduced) {
+          var t = parseFloat(el.getAttribute('data-count'));
+          var d = parseInt(el.getAttribute('data-decimals') || '0');
+          el.textContent = (el.getAttribute('data-prefix')||'') + t.toFixed(d) + (el.getAttribute('data-suffix')||'');
+        } else {
+          setTimeout(function(){ animateCount(el, 1600); }, i * 120);
+        }
+      });
+    }
+
+    if (!('IntersectionObserver' in window)) { fire(); return; }
+    var obs = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if (e.isIntersecting) { obs.unobserve(e.target); fire(); }
+      });
+    }, { threshold: 0.3 });
+    obs.observe(section);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
+  else setup();
+})();
