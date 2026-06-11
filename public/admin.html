@@ -257,10 +257,10 @@
       </div>
 
       <!-- CLIENT COMPLETION PACK -->
-      <div class="table-card" style="margin-top:1.25rem;padding:1.5rem;">
+      <div class="table-card" style="margin-top:1.25rem;padding:1.5rem;background:#eff6ff;border:1.5px solid #bfdbfe;">
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
           <div>
-            <div style="font-weight:700;font-size:1rem;color:var(--navy,#0B1929);">Client completion pack</div>
+            <div style="font-weight:700;font-size:1rem;color:#1d4ed8;">Client completion pack</div>
             <div style="font-size:0.8rem;color:var(--text-light);margin-top:2px;">Documents the client must complete themselves (Form of Tender, appendices, pricing schedules). Sent with the delivery email as a checklist, with the submission portal link.</div>
           </div>
           <span id="deliveryTotal" style="font-size:0.75rem;color:var(--text-light);"></span>
@@ -268,7 +268,7 @@
 
         <div id="deliveryDrop" ondragover="deliveryDragOver(event)" ondragleave="deliveryDragLeave(event)" ondrop="deliveryOnDrop(event)"
              onclick="document.getElementById('deliveryFileInput').click()"
-             style="border:2px dashed var(--border);border-radius:10px;padding:1.25rem;text-align:center;cursor:pointer;margin:0.9rem 0;">
+             style="border:2px dashed #93c5fd;background:#fff;border-radius:10px;padding:1.25rem;text-align:center;cursor:pointer;margin:0.9rem 0;">
           <div style="font-size:1.3rem;">📎</div>
           <div style="font-size:0.85rem;font-weight:600;color:var(--navy,#0B1929);">Drop completion documents here or click to upload</div>
           <div style="font-size:0.73rem;color:var(--text-light);margin-top:2px;">Max 10MB per file. PDFs and Word documents recommended.</div>
@@ -302,7 +302,7 @@
         </div>
 
         <div style="display:flex;align-items:center;gap:12px;margin-top:1.1rem;">
-          <button onclick="saveDeliveryPack()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Save completion pack</button>
+          <button onclick="saveDeliveryPack()" style="background:#1d4ed8;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Save completion pack</button>
           <span id="deliverySaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved — pack will be sent with the client delivery</span>
         </div>
       </div>
