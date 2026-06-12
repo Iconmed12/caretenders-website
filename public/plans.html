@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Membership Plans | Cana Procurement Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+  :root { --navy:#0B1929; --navy-mid:#11243A; --teal:#00C9E0; --teal-dk:#00a8bc; --white:#fff; --offwhite:#F4F6F9; --border:#E3E8EF; --muted:#5a6b7a; --amber:#d6a516; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); }
+  a { text-decoration:none; }
+
+  nav { background:var(--navy); display:flex; align-items:center; justify-content:space-between; padding:0.9rem 2rem; }
+  .nav-logo-main { font-family:'Playfair Display',serif; font-weight:700; font-size:1.15rem; color:#fff; }
+  .nav-logo-main span { color:var(--teal); }
+  nav ul { list-style:none; display:flex; gap:1.6rem; }
+  nav ul a { color:rgba(255,255,255,0.7); font-size:0.85rem; font-weight:500; transition:color 0.2s; }
+  nav ul a:hover, nav ul a.active { color:#fff; }
+
+  .plans-hero { background:var(--navy); text-align:center; padding:3.5rem 2rem 7rem; }
+  .plans-hero h1 { font-family:'Playfair Display',serif; font-size:clamp(1.9rem,4vw,2.7rem); color:#fff; margin-bottom:0.7rem; }
+  .plans-hero h1 em { font-style:italic; color:var(--teal); }
+  .plans-hero p { color:rgba(255,255,255,0.55); font-size:0.95rem; max-width:520px; margin:0 auto; line-height:1.7; }
+
+  .founding { max-width:760px; margin:1.5rem auto 0; display:inline-flex; align-items:center; gap:10px; background:rgba(0,201,224,0.1); border:1px solid rgba(0,201,224,0.3); border-radius:999px; padding:8px 20px; }
+  .founding-dot { width:7px; height:7px; border-radius:50%; background:var(--teal); animation:pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .founding span { color:rgba(255,255,255,0.85); font-size:0.82rem; font-weight:600; }
+  .founding strong { color:var(--teal); }
+
+  .cards-wrap { max-width:1060px; margin:-4.5rem auto 0; padding:0 2rem 3rem; display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; align-items:start; }
+  @media(max-width:880px){ .cards-wrap{grid-template-columns:1fr; max-width:480px;} .card.popular{transform:none;} }
+
+  .card { background:#fff; border:1.5px solid var(--border); border-radius:18px; padding:1.9rem 1.7rem; position:relative; }
+  .card.popular { border:2px solid var(--teal); transform:translateY(-14px); box-shadow:0 18px 48px rgba(0,201,224,0.16); }
+  .pop-badge { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.66rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; padding:5px 16px; border-radius:999px; white-space:nowrap; }
+
+  .plan-name { font-size:1.05rem; font-weight:700; margin-bottom:2px; }
+  .plan-for { font-size:0.76rem; color:var(--muted); margin-bottom:1.1rem; }
+  .plan-price { font-family:'Playfair Display',serif; font-size:2.2rem; font-weight:700; line-height:1; }
+  .plan-price small { font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500; color:var(--muted); }
+  .plan-billed { font-size:0.72rem; color:var(--muted); margin:6px 0 1.3rem; }
+
+  .feat { list-style:none; display:flex; flex-direction:column; gap:0.55rem; margin-bottom:1.5rem; }
+  .feat li { display:flex; gap:9px; font-size:0.82rem; color:#33475b; line-height:1.5; }
+  .feat .tick { color:var(--teal-dk); font-weight:700; flex-shrink:0; }
+  .feat .hl { font-weight:700; color:var(--navy); }
+
+  .setup-row { display:flex; align-items:center; gap:8px; background:var(--offwhite); border:1px solid var(--border); border-radius:8px; padding:9px 12px; margin-bottom:1.1rem; font-size:0.78rem; color:#33475b; cursor:pointer; }
+  .setup-row input { accent-color:var(--teal-dk); }
+
+  .plan-btn { display:block; width:100%; text-align:center; border:none; border-radius:10px; padding:13px; font-size:0.9rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:transform 0.15s, background 0.2s; }
+  .plan-btn:hover { transform:translateY(-1px); }
+  .btn-outline { background:#fff; border:1.5px solid var(--navy); color:var(--navy); }
+  .btn-solid { background:var(--teal); color:var(--navy); }
+  .btn-navy { background:var(--navy); color:#fff; }
+
+  .terms { text-align:center; font-size:0.75rem; color:var(--muted); padding:0 2rem 1rem; }
+  .compare-note { text-align:center; font-size:0.82rem; color:var(--muted); padding:0 2rem 3.5rem; }
+  .compare-note a { color:var(--teal-dk); font-weight:600; }
+
+  footer { background:var(--navy); text-align:center; padding:1.5rem; font-size:0.75rem; color:rgba(255,255,255,0.4); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="nav-logo"><span class="nav-logo-main">Cana <span>Tech</span></span></a>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/plans.html" class="active">Plans</a></li>
+    <li><a href="/case-studies.html">Case Studies</a></li>
+  </ul>
+</nav>
+
+<div class="plans-hero">
+  <h1>Win tenders <em>every month</em>, not just once</h1>
+  <p>Every plan includes consultant-reviewed responses written by Cana AI, matched tender alerts, and member rates on everything extra. Per month, billed quarterly.</p>
+  <div class="founding">
+    <span class="founding-dot"></span>
+    <span>Founding offer: Profile Setup (£199) <strong>free for our first 20 members</strong></span>
+  </div>
+</div>
+
+<div class="cards-wrap">
+
+  <!-- CORE -->
+  <div class="card">
+    <div class="plan-name">Core</div>
+    <div class="plan-for">For occasional bidders building momentum</div>
+    <div class="plan-price">£249<small>/month</small></div>
+    <div class="plan-billed">Billed quarterly (£747)</div>
+    <ul class="feat">
+      <li><span class="tick">✓</span><span><span class="hl">1 consultant-reviewed response</span> every month</span></li>
+      <li><span class="tick">✓</span><span>Unlimited Cana AI drafts</span></li>
+      <li><span class="tick">✓</span><span>Matched tender alerts for your sector</span></li>
+      <li><span class="tick">✓</span><span>Unused responses roll over one month</span></li>
+      <li><span class="tick">✓</span><span>Extra responses at £249 each</span></li>
+    </ul>
+    <label class="setup-row"><input type="checkbox" id="core-setup"> Add Profile Setup, one-off £199</label>
+    <button class="plan-btn btn-outline" onclick="startPlan('core')">Start with Core</button>
+  </div>
+
+  <!-- GROWTH -->
+  <div class="card popular">
+    <div class="pop-badge">Most popular</div>
+    <div class="plan-name">Growth</div>
+    <div class="plan-for">For providers bidding most months</div>
+    <div class="plan-price">£449<small>/month</small></div>
+    <div class="plan-billed">Billed quarterly (£1,347)</div>
+    <ul class="feat">
+      <li><span class="tick">✓</span><span><span class="hl">2 consultant-reviewed responses</span> every month</span></li>
+      <li><span class="tick">✓</span><span>Everything in Core</span></li>
+      <li><span class="tick">✓</span><span><span class="hl">Profile Setup included free</span></span></li>
+      <li><span class="tick">✓</span><span>Extra responses at £199 each</span></li>
+    </ul>
+    <button class="plan-btn btn-solid" onclick="startPlan('growth')">Start with Growth</button>
+  </div>
+
+  <!-- PRO -->
+  <div class="card">
+    <div class="plan-name">Pro</div>
+    <div class="plan-for">For serious bidders with a full pipeline</div>
+    <div class="plan-price">£899<small>/month</small></div>
+    <div class="plan-billed">Billed quarterly (£2,697)</div>
+    <ul class="feat">
+      <li><span class="tick">✓</span><span><span class="hl">5 consultant-reviewed responses</span> every month</span></li>
+      <li><span class="tick">✓</span><span>Priority turnaround on every response</span></li>
+      <li><span class="tick">✓</span><span>Dedicated consultant who knows your business</span></li>
+      <li><span class="tick">✓</span><span>Profile Setup included free</span></li>
+      <li><span class="tick">✓</span><span>Extra responses at £149 each</span></li>
+    </ul>
+    <button class="plan-btn btn-navy" onclick="startPlan('pro')">Start with Pro</button>
+  </div>
+
+</div>
+
+<div class="terms">3-month minimum term. Billed quarterly; cancel any time before your next renewal.</div>
+<div class="compare-note">Prefer one tender at a time? <a href="/">Cana AI writes any single tender from £480</a>, or our consultants can handle the whole submission for you.</div>
+
+<footer>Cana Consulting Solutions &nbsp;·&nbsp; 01268 20 30 10 &nbsp;·&nbsp; consulting@cana.ai</footer>
+
+<script>
+async function startPlan(plan) {
+  var btns = document.querySelectorAll('.plan-btn');
+  btns.forEach(function(b){ b.disabled = true; b.style.opacity = '0.6'; });
+  try {
+    var withSetup = plan === 'core' && document.getElementById('core-setup').checked;
+    var res = await fetch('/.netlify/functions/plan-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan: plan, withSetup: withSetup })
+    });
+    var data = await res.json();
+    if (data.url) { window.location.href = data.url; return; }
+    alert(data.error || 'Could not start checkout. Please try again.');
+  } catch (e) {
+    alert('Could not start checkout. Please try again.');
+  }
+  btns.forEach(function(b){ b.disabled = false; b.style.opacity = '1'; });
+}
+
+// Post-checkout thank you
+(function(){
+  var sub = new URLSearchParams(location.search).get('subscribed');
+  if (!sub) return;
+  var hero = document.querySelector('.plans-hero p');
+  if (hero) hero.innerHTML = '<strong style="color:#27c93f;">Welcome aboard! Your ' + sub.charAt(0).toUpperCase() + sub.slice(1) + ' membership is active.</strong> Check your email for your receipt; we will be in touch within one working day to set up your profile.';
+})();
+</script>
+
+</body>
+</html>

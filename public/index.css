@@ -541,3 +541,22 @@
   /* Source link button in tender modal */
   .modal-source-btn { display:inline-flex; align-items:center; gap:7px; background:var(--offwhite); border:1.5px solid var(--border); border-radius:8px; padding:9px 16px; font-size:0.82rem; font-weight:600; color:var(--navy); text-decoration:none; transition:border-color 0.2s,background 0.2s; }
   .modal-source-btn:hover { border-color:var(--teal); background:#fff; color:var(--teal-dk); }
+
+  /* ══ PLANS TEASER ══ */
+  .plansteaser-section { background:var(--navy-mid); padding:4rem 2rem; border-top:1px solid rgba(255,255,255,0.05); }
+  .plansteaser-inner { max-width:920px; margin:0 auto; }
+  .plansteaser-head { text-align:center; margin-bottom:2.25rem; }
+  .plansteaser-heading { font-family:'Playfair Display',serif; font-size:clamp(1.6rem,3.2vw,2.2rem); color:#fff; margin-bottom:0.6rem; }
+  .plansteaser-heading em { font-style:italic; color:var(--teal); }
+  .plansteaser-sub { font-size:0.9rem; color:rgba(255,255,255,0.5); }
+  .plansteaser-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:1.75rem; }
+  @media(max-width:700px){ .plansteaser-grid{grid-template-columns:1fr;} }
+  .plansteaser-card { position:relative; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:1.4rem 1.3rem; text-align:center; transition:border-color 0.2s,transform 0.2s; }
+  .plansteaser-card:hover { border-color:rgba(0,201,224,0.45); transform:translateY(-3px); }
+  .plansteaser-pop { border:1.5px solid var(--teal); }
+  .plansteaser-badge { position:absolute; top:-10px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.6rem; font-weight:800; letter-spacing:0.07em; text-transform:uppercase; padding:3px 11px; border-radius:999px; white-space:nowrap; }
+  .plansteaser-name { font-size:0.85rem; font-weight:700; color:#fff; margin-bottom:6px; }
+  .plansteaser-price { font-family:'Playfair Display',serif; font-size:1.7rem; font-weight:700; color:#fff; }
+  .plansteaser-price span { font-family:'DM Sans',sans-serif; font-size:0.75rem; color:rgba(255,255,255,0.4); font-weight:500; }
+  .plansteaser-line { font-size:0.74rem; color:rgba(255,255,255,0.45); margin-top:6px; }
+  .plansteaser-cta-row { text-align:center; }
