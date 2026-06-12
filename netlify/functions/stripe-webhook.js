@@ -77,6 +77,33 @@ exports.handler = async (event) => {
         status: status,
         current_period_end: periodEnd
       });
+
+      // Welcome email: tells the member which email unlocks their bidding.
+      // Fully guarded, never blocks the webhook response.
+      try {
+        const RESEND_KEY = process.env.RESEND_API_KEY;
+        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@icongrp.co.uk';
+        if (RESEND_KEY && email) {
+          const welcomeHtml = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
+            '<div style="background:#0B1929;padding:24px;border-radius:8px 8px 0 0;"><h1 style="color:#00C9E0;margin:0;">Cana AI</h1></div>' +
+            '<div style="background:#fff;padding:28px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;">' +
+            '<h2 style="color:#0B1929;margin:0 0 12px;">Welcome to Cana Membership</h2>' +
+            '<p style="color:#374151;margin:0 0 16px;">Your membership is active. Bid on as many tenders as you want: Cana writes the SQ and responses, emails you the full pack with a submission checklist, and you submit.</p>' +
+            '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:14px;margin-bottom:16px;">' +
+            '<strong style="color:#854d0e;">One important thing:</strong>' +
+            '<div style="font-size:13px;color:#92400e;margin-top:6px;line-height:1.7;">Your membership is linked to <strong>' + email + '</strong>. Always enter this exact email in the company form when you bid, and your unlimited access is recognised automatically with no payment step.</div>' +
+            '</div>' +
+            '<p style="padding:4px 0;"><a href="https://caretenders-website.netlify.app" style="display:inline-block;background:#00C9E0;color:#0B1929;font-weight:700;padding:11px 24px;border-radius:8px;text-decoration:none;font-size:14px;">Browse live tenders &rarr;</a></p>' +
+            '<p style="color:#9ca3af;font-size:11px;text-align:center;margin-top:18px;">Cana Consulting Solutions | 01268 20 30 10 | consulting@icongrp.co.uk</p>' +
+            '</div></div>';
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ from: 'Cana AI <' + FROM_EMAIL + '>', to: email, subject: 'Welcome to Cana Membership: one important detail', html: welcomeHtml })
+          });
+          console.log('Welcome email sent to', email);
+        }
+      } catch (e) { console.log('Welcome email failed (non-fatal):', e.message); }
     }
 
     if (type === 'customer.subscription.updated' && obj) {
