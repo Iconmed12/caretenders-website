@@ -19,9 +19,10 @@ exports.handler = async (event) => {
     if (product === 'membership') {
       params.append('mode', 'subscription');
       params.append('line_items[0][price_data][currency]', 'gbp');
-      params.append('line_items[0][price_data][product_data][name]', 'Cana Membership (TEST 1 GBP) unlimited tenders, 299 GBP per month');
-      params.append('line_items[0][price_data][unit_amount]', '100'); // TEST. Go-live: 29900
+      params.append('line_items[0][price_data][product_data][name]', 'Cana Membership (TEST 1 GBP) unlimited tenders, 299 GBP per month billed quarterly');
+      params.append('line_items[0][price_data][unit_amount]', '100'); // TEST. Go-live: 89700 (299 x 3, charged quarterly)
       params.append('line_items[0][price_data][recurring][interval]', 'month');
+      params.append('line_items[0][price_data][recurring][interval_count]', '3');
       params.append('line_items[0][quantity]', '1');
       params.append('success_url', 'https://caretenders-website.netlify.app/plans.html?subscribed=membership');
       params.append('cancel_url', 'https://caretenders-website.netlify.app/plans.html');
