@@ -184,7 +184,7 @@ exports.handler = async (event) => {
     if (includeSq && sqDocBase64) {
       checklistHtml += '<div style="font-size:13px;color:#0B1929;padding:4px 0;">☑ Selection Questionnaire — completed</div>';
     }
-    checklistHtml += '<div style="font-size:13px;color:#0B1929;padding:4px 0;">☑ ' + (responses ? responses.length : 0) + ' tender responses — written and consultant reviewed</div>';
+    checklistHtml += '<div style="font-size:13px;color:#0B1929;padding:4px 0;">☑ ' + (responses ? responses.length : 0) + ' tender responses, written by Cana AI for your review</div>';
     checklistHtml += '<div style="font-size:13px;font-weight:800;color:#c53030;margin-top:8px;">🔴 YOU MUST READ THROUGH EVERY DOCUMENT BEFORE SUBMISSION. Check all answers reflect your business accurately.</div>';
     checklistHtml += '</div>';
 
