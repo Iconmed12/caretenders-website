@@ -330,6 +330,74 @@
     showState('ch');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     window._companyDetails = { name, founded, staff, cqc, services, regions, experience, achievements, policies, accreditations, kpis, email };
+    checkMembership(email);
+  }
+
+  // ── Membership: unlimited bidding for active members ──
+  async function checkMembership(email) {
+    window._isMember = false;
+    if (!email) return;
+    try {
+      var res = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
+      var data = await res.json();
+      window._isMember = !!data.member;
+    } catch (e) { window._isMember = false; }
+    if (window._isMember && typeof window.applyMemberPaywall === 'function') window.applyMemberPaywall();
+  }
+
+  window.applyMemberPaywall = function() {
+    if (!window._isMember) return;
+    var btn = document.getElementById('paywall-btn');
+    if (btn) {
+      btn.textContent = '⚡ Generate now, included in your membership';
+      btn.onclick = memberStartFlow;
+    }
+    var amt = document.querySelector('.paywall-price-amount');
+    var lbl = document.querySelector('.paywall-price-label');
+    if (amt) amt.textContent = 'Included';
+    if (lbl) lbl.textContent = 'with your Cana Membership';
+  };
+
+  async function memberStartFlow() {
+    var btn = document.getElementById('paywall-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Starting...'; }
+    try {
+      var co = window._companyDetails || {};
+      var chData = window._chData || {};
+      var mergedCo = Object.assign({}, co, {
+        name: co.name || chData.company_name || '',
+        company_name: co.name || chData.company_name || '',
+        chData: chData
+      });
+      var res = await fetch('/.netlify/functions/member-start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenderId: tenderId,
+          includeSq: !!(window._tenderData && window._tenderData.sq_data),
+          companyDetails: mergedCo
+        })
+      });
+      var data = await res.json();
+      if (!res.ok || !data.member) throw new Error(data.error || 'Membership could not be verified');
+
+      showProcessingScreen(data.jobId, data.email);
+      fetch('/.netlify/functions/generate-cana-background', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: data.jobId,
+          tenderId: data.tenderId || tenderId,
+          sessionId: 'member_' + data.jobId,
+          includeSq: data.includeSq,
+          companyDetails: data.companyDetails || mergedCo
+        })
+      }).catch(function(e){ console.error('Background trigger failed:', e.message); });
+      pollJobStatus(data.jobId);
+    } catch (e) {
+      alert('Could not start: ' + e.message);
+      if (btn) { btn.disabled = false; window.applyMemberPaywall(); }
+    }
   }
 
   // CH lookup functions

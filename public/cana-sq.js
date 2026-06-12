@@ -353,6 +353,7 @@ async function confirmSqAndGenerate() {
       }
     } catch(e) {
       btn.textContent = 'Pay £480 and unlock full bid';
+      if (typeof window.applyMemberPaywall === 'function') window.applyMemberPaywall();
       btn.style.opacity = '1';
       btn.disabled = false;
       alert('Payment error: ' + e.message);
