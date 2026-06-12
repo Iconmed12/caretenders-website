@@ -353,15 +353,11 @@
 
   async function loadSavedProfile(token) {
     try {
-      if (!window.supabase) return null;
-      var sbClient = window.supabase.createClient(
-        'https://igpjfpncfuawikoyzfcd.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
-      );
-      var userRes = await sbClient.auth.getUser();
-      if (!userRes.data || !userRes.data.user) return null;
-      var uid = userRes.data.user.id;
-      var r = await sbClient.from('company_profiles').select('*').eq('user_id', uid).single();
+      var sb = sharedSb();
+      if (!sb) return null;
+      var sess = await getAuthSession();
+      if (!sess || !sess.userId) return null;
+      var r = await sb.from('company_profiles').select('*').eq('user_id', sess.userId).single();
       return (r && r.data) ? r.data : null;
     } catch (e) { return null; }
   }
@@ -513,20 +509,33 @@
     }
   };
 
-  // ── Auth session: who is actually signed in (verified identity) ──
-  async function getAuthSession() {
-    try {
-      if (!window.supabase) return null;
-      var sbClient = window.supabase.createClient(
-        'https://igpjfpncfuawikoyzfcd.supabase.co',
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
-      );
-      var sess = await sbClient.auth.getSession();
-      if (sess.data && sess.data.session) {
-        return { email: (sess.data.session.user.email || '').toLowerCase(), token: sess.data.session.access_token };
-      }
-    } catch (e) {}
-    return null;
+  // ── ONE shared Supabase client for the whole page (kills the
+  //    'Multiple GoTrueClient instances' warning and repeated setup cost) ──
+  function sharedSb() {
+    if (window._sbShared) return window._sbShared;
+    if (!window.supabase) return null;
+    window._sbShared = window.supabase.createClient(
+      'https://igpjfpncfuawikoyzfcd.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
+    );
+    return window._sbShared;
+  }
+
+  // Session fetched once per page, cached promise reused everywhere
+  function getAuthSession() {
+    if (window._sessPromise) return window._sessPromise;
+    window._sessPromise = (async function() {
+      try {
+        var sb = sharedSb();
+        if (!sb) return null;
+        var sess = await sb.auth.getSession();
+        if (sess.data && sess.data.session) {
+          return { email: (sess.data.session.user.email || '').toLowerCase(), token: sess.data.session.access_token, userId: sess.data.session.user.id };
+        }
+      } catch (e) {}
+      return null;
+    })();
+    return window._sessPromise;
   }
 
   // Live check as the person leaves the email field.
@@ -556,10 +565,22 @@
     window._authToken = null;
     if (!email) return { member: false, verified: false };
     var member = false;
+    var cacheKey = 'cana_member_' + email.toLowerCase();
     try {
-      var res = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
-      var data = await res.json();
-      member = !!data.member;
+      // 10-minute cache: repeat tender visits skip the network round trip
+      var cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        var c = JSON.parse(cached);
+        if (Date.now() - c.ts < 10 * 60 * 1000) { member = !!c.member; window._memberMeta = c; }
+        else cached = null;
+      }
+      if (!cached) {
+        var res = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
+        var data = await res.json();
+        member = !!data.member;
+        window._memberMeta = { member: member, term_months: data.term_months, current_period_end: data.current_period_end, ts: Date.now() };
+        try { sessionStorage.setItem(cacheKey, JSON.stringify(window._memberMeta)); } catch(e2) {}
+      }
     } catch (e) { member = false; }
 
     var verified = false;
@@ -769,10 +790,7 @@
     // Save profile in background — fire and forget
     if (window.supabase && window._chData) {
       try {
-        var sbClient = window.supabase.createClient(
-          'https://igpjfpncfuawikoyzfcd.supabase.co',
-          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
-        );
+        var sbClient = sharedSb();
         var sess = await sbClient.auth.getSession();
         if (sess.data && sess.data.session) {
           sbClient.from('company_profiles').upsert({
