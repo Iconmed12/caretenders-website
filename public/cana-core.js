@@ -411,26 +411,43 @@
     showState('member');
   }
 
-  window.memberGenerate = async function() {
-    var btn = document.getElementById('member-generate-btn');
-    if (btn) { btn.disabled = true; btn.textContent = 'Starting...'; }
+  // Build companyDetails from saved profile — used by both SQ and generation
+  function memberCompanyDetails() {
+    var p = window._memberProfile || {};
+    var cpData = p.ch_data ? (typeof p.ch_data === 'string' ? JSON.parse(p.ch_data) : p.ch_data) : {};
+    return {
+      name: p.company_name || cpData.company_name || '',
+      founded: p.year_founded || '',
+      staff: p.staff_count || '',
+      cqc: p.cqc_status || '',
+      services: p.services || '',
+      regions: p.regions || '',
+      experience: p.experience || '',
+      achievements: p.achievements || '',
+      policies: p.policies || '',
+      accreditations: p.accreditations || '',
+      kpis: p.kpis || '',
+      email: window._memberEmail || ''
+    };
+  }
+
+  window.memberGenerate = function() {
+    // Store company details from profile so the SQ + results flow can use them
+    window._companyDetails = memberCompanyDetails();
+    window._isMember = true;
+    // Route through the SQ state exactly as the normal flow does --
+    // members review the SQ before generation fires
+    setStep(2);
+    showState('sq');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Called by the SQ confirm button (same path as non-member) -- fires generation
+  window.memberStartGeneration = async function() {
+    var btn = document.getElementById('sq-confirm-btn');
+    if (btn) { btn.disabled = true; }
     try {
-      var p = window._memberProfile || {};
-      var cpData = p.ch_data ? (typeof p.ch_data === 'string' ? JSON.parse(p.ch_data) : p.ch_data) : {};
-      var companyDetails = {
-        name: p.company_name || cpData.company_name || '',
-        founded: p.year_founded || '',
-        staff: p.staff_count || '',
-        cqc: p.cqc_status || '',
-        services: p.services || '',
-        regions: p.regions || '',
-        experience: p.experience || '',
-        achievements: p.achievements || '',
-        policies: p.policies || '',
-        accreditations: p.accreditations || '',
-        kpis: p.kpis || '',
-        email: window._memberEmail || ''
-      };
+      var companyDetails = window._companyDetails || memberCompanyDetails();
       var res = await fetch('/.netlify/functions/member-start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -438,7 +455,8 @@
           tenderId: tenderId,
           includeSq: !!(window._tenderData && window._tenderData.sq_data),
           companyDetails: companyDetails,
-          accessToken: window._authToken || ''
+          accessToken: window._authToken || '',
+          wantsReview: !!window._wantsExpertReview
         })
       });
       var data = await res.json();
@@ -458,7 +476,7 @@
       pollJobStatus(data.jobId);
     } catch (e) {
       alert('Could not start: ' + e.message);
-      if (btn) { btn.disabled = false; btn.textContent = '⚡ Generate my tender responses'; }
+      if (btn) { btn.disabled = false; }
     }
   };
 
