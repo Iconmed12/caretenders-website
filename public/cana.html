@@ -102,7 +102,9 @@
         </div>
         <div class="form-group form-full">
           <label class="form-label">Email address <span style="color:#e53e3e;">*</span></label>
-          <input class="form-input" type="email" id="f-email" placeholder="e.g. info@yourcompany.co.uk">
+          <input class="form-input" type="email" id="f-email" placeholder="e.g. info@yourcompany.co.uk" onblur="canaEmailCheck(this.value)">
+          <div style="font-size:0.74rem;color:#8a97a5;margin-top:5px;">Cana members: enter the email you joined with and your unlimited bidding is recognised automatically.</div>
+          <div id="member-badge" style="display:none;margin-top:7px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:7px;padding:7px 12px;font-size:0.78rem;font-weight:600;color:#166534;">✓ Cana Membership recognised, unlimited bidding active. No payment step for you.</div>
           <div style="font-size:0.75rem;color:var(--muted);margin-top:4px;">Your full responses will be emailed here after payment</div>
         </div>
         <div class="form-group form-full">

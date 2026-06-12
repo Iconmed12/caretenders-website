@@ -333,6 +333,18 @@
     checkMembership(email);
   }
 
+  // Live check as the person leaves the email field: members see instant
+  // confirmation; a typo means no badge, so they self-correct on the spot.
+  window.canaEmailCheck = function(val) {
+    var badge = document.getElementById('member-badge');
+    if (badge) badge.style.display = 'none';
+    var email = (val || '').trim();
+    if (!email || email.indexOf('@') < 1) return;
+    checkMembership(email).then(function() {
+      if (window._isMember && badge) badge.style.display = 'block';
+    });
+  };
+
   // ── Membership: unlimited bidding for active members ──
   async function checkMembership(email) {
     window._isMember = false;
