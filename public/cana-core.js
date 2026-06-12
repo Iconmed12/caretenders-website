@@ -205,6 +205,24 @@
         if (job.status === 'complete') {
           clearInterval(interval);
           showJobComplete(job, false);
+          // Member ticked Expert Review: docs are sent, now take the payment
+          if (window._wantsExpertReview) {
+            setTimeout(async function() {
+              try {
+                var r = await fetch('/.netlify/functions/plan-checkout', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    product: 'review',
+                    tenderId: tenderId,
+                    tenderTitle: (window._tenderData && window._tenderData.title) || ''
+                  })
+                });
+                var d = await r.json();
+                if (d.url) window.location.href = d.url;
+              } catch(e) { console.error('Review checkout failed:', e.message); }
+            }, 2500);
+          }
         } else if (job.status === 'error') {
           clearInterval(interval);
           showJobComplete(job, false, job.error || null);
@@ -432,14 +450,21 @@
   }
 
   window.memberGenerate = function() {
-    // Store company details from profile so the SQ + results flow can use them
+    // Store company details + CH data from the saved profile so the SQ
+    // preview renders exactly as it does in the normal flow
     window._companyDetails = memberCompanyDetails();
+    var prof = window._memberProfile || {};
+    try {
+      window._chData = prof.ch_data ? (typeof prof.ch_data === 'string' ? JSON.parse(prof.ch_data) : prof.ch_data) : {};
+    } catch(e) { window._chData = {}; }
     window._isMember = true;
-    // Route through the SQ state exactly as the normal flow does --
-    // members review the SQ before generation fires
     setStep(2);
     showState('sq');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    // This is what fills the SQ preview — the CH path calls it, members must too
+    if (typeof populateSqStep === 'function') {
+      populateSqStep().catch(function(e){ console.warn('SQ populate warning:', e.message); });
+    }
   };
 
   // Called by the SQ confirm button (same path as non-member) -- fires generation

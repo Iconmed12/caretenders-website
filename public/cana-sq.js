@@ -227,6 +227,11 @@ async function populateSqStep() {
       return;
     }
     document.getElementById('sq-decl-error').style.display = 'none';
+    // Members skip the paywall entirely: declarations confirmed, generate now
+    if (window._isMember && window._companyDetails && typeof window.memberStartGeneration === 'function') {
+      window.memberStartGeneration();
+      return;
+    }
     // Skip preview — go straight to paywall
     setStep(4);
     showState('results');
