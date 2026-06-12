@@ -283,6 +283,7 @@
       // Always use the fixed Cana AI payment link
       document.getElementById('paywall-btn').href = 'https://buy.stripe.com/5kQfZgcFx0fJeqR3MUcbC03';
 
+    initMemberExperience();
     } catch(e) {
       document.getElementById('tender-title').textContent = 'Could not load tender';
     }
@@ -332,6 +333,133 @@
     window._companyDetails = { name, founded, staff, cqc, services, regions, experience, achievements, policies, accreditations, kpis, email };
     checkMembership(email);
   }
+
+  // ── On page load: detect member and route to the right experience ──
+  async function initMemberExperience() {
+    var sess = await getAuthSession();
+    if (!sess || !sess.email) return; // not signed in, show normal form
+
+    var memRes = await checkMembership(sess.email);
+    if (!memRes || !memRes.member || !memRes.verified) return; // not a member
+
+    // Load saved company profile
+    var profile = await loadSavedProfile(sess.token);
+    if (!profile) return; // no profile saved yet, stay on form
+
+    // Show the member dashboard state
+    showMemberDashboard(sess.email, memRes, profile);
+  }
+
+  async function loadSavedProfile(token) {
+    try {
+      if (!window.supabase) return null;
+      var sbClient = window.supabase.createClient(
+        'https://igpjfpncfuawikoyzfcd.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
+      );
+      var userRes = await sbClient.auth.getUser();
+      if (!userRes.data || !userRes.data.user) return null;
+      var uid = userRes.data.user.id;
+      var r = await sbClient.from('company_profiles').select('*').eq('user_id', uid).single();
+      return (r && r.data) ? r.data : null;
+    } catch (e) { return null; }
+  }
+
+  function showMemberDashboard(email, memRes, profile) {
+    // Mirror tender details onto the member state header
+    var t1 = document.getElementById('tender-title-member');
+    var t2 = document.getElementById('tender-title');
+    if (t1 && t2) t1.innerHTML = t2.innerHTML;
+    ['org','value','deadline'].forEach(function(f) {
+      var src = document.getElementById('tender-' + f);
+      var dst = document.getElementById('tender-' + f + '-member');
+      if (src && dst) dst.innerHTML = src.innerHTML;
+    });
+
+    // Membership status card
+    var planLabel = document.getElementById('member-plan-label');
+    var renewsLabel = document.getElementById('member-renews-label');
+    if (planLabel) {
+      var term = memRes.term_months ? memRes.term_months + '-month membership' : 'Cana Membership';
+      planLabel.textContent = term.charAt(0).toUpperCase() + term.slice(1);
+    }
+    if (renewsLabel && memRes.current_period_end) {
+      var d = new Date(memRes.current_period_end);
+      renewsLabel.textContent = 'Renews ' + d.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+    }
+
+    // Company profile summary
+    var nameEl = document.getElementById('member-company-name');
+    var linesEl = document.getElementById('member-profile-lines');
+    var cpData = profile.ch_data ? (typeof profile.ch_data === 'string' ? JSON.parse(profile.ch_data) : profile.ch_data) : {};
+    var companyName = profile.company_name || cpData.company_name || 'Your company';
+    if (nameEl) nameEl.textContent = companyName;
+    if (linesEl) {
+      var lines = [];
+      if (profile.cqc_status) lines.push('CQC: ' + profile.cqc_status);
+      if (profile.services) lines.push('Services: ' + profile.services.substring(0, 80) + (profile.services.length > 80 ? '...' : ''));
+      if (profile.regions) lines.push('Regions: ' + profile.regions);
+      if (profile.staff_count) lines.push('Staff: ' + profile.staff_count);
+      linesEl.innerHTML = lines.map(function(l){ return '<div>' + l + '</div>'; }).join('');
+    }
+
+    // Store profile for generation
+    window._memberProfile = profile;
+    window._memberEmail = email;
+
+    showState('member');
+  }
+
+  window.memberGenerate = async function() {
+    var btn = document.getElementById('member-generate-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Starting...'; }
+    try {
+      var p = window._memberProfile || {};
+      var cpData = p.ch_data ? (typeof p.ch_data === 'string' ? JSON.parse(p.ch_data) : p.ch_data) : {};
+      var companyDetails = {
+        name: p.company_name || cpData.company_name || '',
+        founded: p.year_founded || '',
+        staff: p.staff_count || '',
+        cqc: p.cqc_status || '',
+        services: p.services || '',
+        regions: p.regions || '',
+        experience: p.experience || '',
+        achievements: p.achievements || '',
+        policies: p.policies || '',
+        accreditations: p.accreditations || '',
+        kpis: p.kpis || '',
+        email: window._memberEmail || ''
+      };
+      var res = await fetch('/.netlify/functions/member-start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenderId: tenderId,
+          includeSq: !!(window._tenderData && window._tenderData.sq_data),
+          companyDetails: companyDetails,
+          accessToken: window._authToken || ''
+        })
+      });
+      var data = await res.json();
+      if (!res.ok || !data.member) throw new Error(data.error || 'Membership could not be verified');
+      showProcessingScreen(data.jobId, data.email);
+      fetch('/.netlify/functions/generate-cana-background', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: data.jobId,
+          tenderId: data.tenderId || tenderId,
+          sessionId: 'member_' + data.jobId,
+          includeSq: data.includeSq,
+          companyDetails: data.companyDetails || companyDetails
+        })
+      }).catch(function(e){ console.error('Background trigger:', e.message); });
+      pollJobStatus(data.jobId);
+    } catch (e) {
+      alert('Could not start: ' + e.message);
+      if (btn) { btn.disabled = false; btn.textContent = '⚡ Generate my tender responses'; }
+    }
+  };
 
   // ── Auth session: who is actually signed in (verified identity) ──
   async function getAuthSession() {

@@ -137,6 +137,51 @@
 
   </div>
 
+  <!-- MEMBER DASHBOARD STATE -->
+  <div class="state" id="state-member">
+    <div class="tender-header" id="tender-header-member">
+      <div class="tender-header-eyebrow">⚡ Cana AI — Tender Writer</div>
+      <h1 id="tender-title-member">Loading tender...</h1>
+      <div class="tender-header-meta">
+        <span class="tender-meta-pill" id="tender-org-member"></span>
+        <span class="tender-meta-pill" id="tender-value-member"></span>
+        <span class="tender-meta-pill" id="tender-deadline-member"></span>
+      </div>
+    </div>
+
+    <div class="section">
+      <!-- Membership status card -->
+      <div id="member-status-card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:linear-gradient(135deg,#0B1929,#11243A);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="background:rgba(0,201,224,0.15);border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">⚡</div>
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:0.95rem;" id="member-plan-label">Cana Membership</div>
+            <div style="color:rgba(255,255,255,0.5);font-size:0.76rem;" id="member-renews-label">Unlimited bidding active</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <a href="/plans.html" style="font-size:0.74rem;font-weight:600;color:var(--teal);text-decoration:none;border:1px solid rgba(0,201,224,0.3);border-radius:6px;padding:5px 12px;">Upgrade plan</a>
+          <a href="/profile.html" style="font-size:0.74rem;font-weight:600;color:rgba(255,255,255,0.6);text-decoration:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:5px 12px;">Edit profile</a>
+        </div>
+      </div>
+
+      <!-- Company summary -->
+      <div id="member-profile-summary" style="background:#f8fafc;border:1.5px solid var(--border);border-radius:12px;padding:1.1rem 1.4rem;margin-bottom:1.5rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">
+          <div style="font-weight:700;font-size:0.88rem;color:var(--navy);" id="member-company-name">Your company</div>
+          <a href="/profile.html" style="font-size:0.75rem;color:var(--teal-dk);font-weight:600;text-decoration:none;">Update profile →</a>
+        </div>
+        <div id="member-profile-lines" style="font-size:0.8rem;color:var(--muted);line-height:1.8;"></div>
+      </div>
+
+      <!-- Generate button -->
+      <button class="generate-btn" onclick="memberGenerate()" id="member-generate-btn">
+        ⚡ Generate my tender responses
+      </button>
+      <div style="text-align:center;font-size:0.78rem;color:var(--muted);margin-top:0.75rem;">Included in your membership, no payment needed</div>
+    </div>
+  </div>
+
   <!-- STEP 2: COMPANY LOOKUP -->
   <div class="state" id="state-ch">
     <div class="section" style="max-width:520px;margin:0 auto;">

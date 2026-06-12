@@ -577,5 +577,34 @@
 
 
 
+<script>
+(async function() {
+  try {
+    var SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+    var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrZ4c6XNN2hga2LB1AEWb_vsxNakA';
+    if (!window.supabase) return;
+    var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    var userRes = await sb.auth.getUser();
+    if (!userRes.data || !userRes.data.user) return;
+    var email = userRes.data.user.email;
+    if (!email) return;
+    var memRes = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
+    var memData = await memRes.json();
+    if (!memData.member) return;
+    var section = document.getElementById('membership-section');
+    var planName = document.getElementById('profile-plan-name');
+    var planDetail = document.getElementById('profile-plan-detail');
+    if (!section) return;
+    section.style.display = 'block';
+    if (planName && memData.term_months) {
+      planName.textContent = memData.term_months + '-Month Cana Membership';
+    }
+    if (planDetail && memData.current_period_end) {
+      var d = new Date(memData.current_period_end);
+      planDetail.textContent = 'Renews ' + d.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+    }
+  } catch(e) {}
+})();
+</script>
 </body>
 </html>
