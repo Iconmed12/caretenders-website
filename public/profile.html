@@ -141,6 +141,20 @@
   </div>
 
   <!-- COMPLETION -->
+  <!-- MEMBERSHIP STATUS CARD (shown only to active members by JS below) -->
+  <div id="membership-section" style="display:none;background:linear-gradient(135deg,#0B1929,#11243A);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="background:rgba(0,201,224,0.15);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1rem;">⚡</div>
+        <div>
+          <div style="color:#fff;font-weight:700;font-size:0.92rem;" id="profile-plan-name">Cana Membership</div>
+          <div style="color:rgba(255,255,255,0.5);font-size:0.75rem;" id="profile-plan-detail">Unlimited bidding active</div>
+        </div>
+      </div>
+      <a href="/plans.html" style="font-size:0.78rem;font-weight:700;color:#00C9E0;text-decoration:none;border:1px solid rgba(0,201,224,0.3);border-radius:8px;padding:7px 14px;">Upgrade plan →</a>
+    </div>
+  </div>
+
   <div class="completion-bar-wrap">
     <span class="completion-label">Profile strength</span>
     <div class="completion-track"><div class="completion-fill" id="comp-fill" style="width:0%"></div></div>
