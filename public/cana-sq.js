@@ -354,14 +354,14 @@ async function confirmSqAndGenerate() {
     } catch(e) {
       btn.textContent = 'Pay £480 and unlock full bid';
       if (typeof window.applyMemberPaywall === 'function') window.applyMemberPaywall();
-      // If member came via member dashboard, wire confirm to skip paywall
+      // If member came via member dashboard, rewire paywall button to bypass
       if (window._isMember && window._companyDetails) {
-        var sqBtn = document.getElementById('sq-confirm-btn');
+        var sqBtn = document.getElementById('paywall-btn');
         if (sqBtn) {
           sqBtn.textContent = window._wantsExpertReview
             ? '⚡ Generate + add Expert Review (£300)'
-            : '⚡ Generate my responses (membership)';
-          sqBtn.onclick = function() { window.memberStartGeneration(); };
+            : '⚡ Generate my responses (included in membership)';
+          sqBtn.onclick = function(e) { e.preventDefault(); window.memberStartGeneration(); };
           sqBtn.style.background = 'var(--teal)';
           sqBtn.style.color = 'var(--navy)';
         }
