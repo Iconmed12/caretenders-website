@@ -73,6 +73,12 @@
   .rung-step { font-size:0.62rem; font-weight:800; letter-spacing:0.08em; color:var(--muted); text-transform:uppercase; }
   .rung-name { font-size:0.84rem; font-weight:700; color:var(--navy); margin:4px 0 2px; }
   .rung-price { font-size:0.76rem; color:var(--teal-dk); font-weight:700; }
+
+  .term-toggle { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; background:var(--offwhite); border:1px solid var(--border); border-radius:10px; padding:5px; margin-bottom:1.1rem; }
+  .term-opt { position:relative; border:none; background:transparent; border-radius:7px; padding:8px 4px; font-family:'DM Sans',sans-serif; font-size:0.74rem; font-weight:600; color:var(--muted); cursor:pointer; transition:all 0.15s; }
+  .term-opt.sel { background:var(--navy); color:#fff; }
+  .term-opt .t-rate { display:block; font-size:0.68rem; font-weight:500; opacity:0.75; margin-top:1px; }
+  .term-best { position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.55rem; font-weight:800; letter-spacing:0.05em; padding:2px 8px; border-radius:999px; text-transform:uppercase; white-space:nowrap; }
 </style>
 <body>
 
@@ -101,8 +107,13 @@
     <div class="pop-badge">Cana Membership</div>
     <div class="plan-name" style="margin-top:0.4rem;">Unlimited bidding</div>
     <div class="plan-for">For providers who want to bid whenever an opportunity appears</div>
-    <div class="plan-price">£299<small>/month</small></div>
-    <div class="plan-billed">Billed quarterly (£897). 3-month minimum.</div>
+    <div class="term-toggle">
+      <button class="term-opt" data-term="3" onclick="setTerm(3)">3 months<span class="t-rate">£299/mo</span></button>
+      <button class="term-opt" data-term="6" onclick="setTerm(6)">6 months<span class="t-rate">£279/mo</span></button>
+      <button class="term-opt sel" data-term="12" onclick="setTerm(12)"><span class="term-best">Best value</span>12 months<span class="t-rate">£249/mo</span></button>
+    </div>
+    <div class="plan-price" id="member-price">£249<small>/month</small></div>
+    <div class="plan-billed" id="member-billed">One payment of £2,988 per year. Save £600 against the 3-month rate.</div>
     <ul class="feat">
       <li><span class="tick">✓</span><span><span class="hl">Unlimited tenders.</span> Bid on every opportunity that fits, no counting, no credits</span></li>
       <li><span class="tick">✓</span><span>Cana drafts your SQ and every response, tailored to your company</span></li>
@@ -110,7 +121,7 @@
       <li><span class="tick">✓</span><span><span class="hl">Profile Setup included as standard</span>, so every response sounds like you</span></li>
       <li><span class="tick">✓</span><span>Matched tender alerts for your sector</span></li>
     </ul>
-    <button class="plan-btn btn-solid" onclick="startCheckout('membership')">Become a member</button>
+    <button class="plan-btn btn-solid" onclick="startMembership()">Become a member</button>
   </div>
 
   <!-- EXPERT REVIEW -->
@@ -139,7 +150,7 @@
     <div class="rung active">
       <div class="rung-step">Members</div>
       <div class="rung-name">Unlimited bidding</div>
-      <div class="rung-price">£299/month</div>
+      <div class="rung-price">From £249/month</div>
     </div>
     <div class="rung">
       <div class="rung-step">Optional</div>
@@ -154,12 +165,26 @@
   </div>
 </div>
 
-<div class="terms">3-month minimum term, billed quarterly. Cancel any time before your next renewal. Fair use applies: membership covers tenders your business is genuinely bidding for.</div>
+<div class="terms">One payment per term, renewing automatically. Cancel any time before your next renewal. Fair use applies: membership covers tenders your business is genuinely bidding for.</div>
 <div class="compare-note">Want one tender first? <a href="/">Cana writes any single tender for £480</a>. Want it all handled? Our consultants offer full bid support.</div>
 
 <footer>Cana Consulting Solutions &nbsp;·&nbsp; 01268 20 30 10 &nbsp;·&nbsp; consulting@cana.ai</footer>
 
 <script>
+var selectedTerm = 12;
+var TERM_INFO = {
+  3:  { price: '£299', billed: 'One payment of £897 every 3 months.' },
+  6:  { price: '£279', billed: 'One payment of £1,674 every 6 months. Save £120 a year against the 3-month rate.' },
+  12: { price: '£249', billed: 'One payment of £2,988 per year. Save £600 against the 3-month rate.' }
+};
+function setTerm(t) {
+  selectedTerm = t;
+  document.querySelectorAll('.term-opt').forEach(function(b){ b.classList.toggle('sel', parseInt(b.getAttribute('data-term')) === t); });
+  document.getElementById('member-price').innerHTML = TERM_INFO[t].price + '<small>/month</small>';
+  document.getElementById('member-billed').textContent = TERM_INFO[t].billed;
+}
+function startMembership() { startCheckout('membership'); }
+
 async function startCheckout(product) {
   var btns = document.querySelectorAll('.plan-btn');
   btns.forEach(function(b){ b.disabled = true; b.style.opacity = '0.6'; });
@@ -167,7 +192,7 @@ async function startCheckout(product) {
     var res = await fetch('/.netlify/functions/plan-checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product: product })
+      body: JSON.stringify({ product: product, term: selectedTerm })
     });
     var data = await res.json();
     if (data.url) { window.location.href = data.url; return; }
