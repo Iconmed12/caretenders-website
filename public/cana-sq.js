@@ -391,6 +391,25 @@ async function confirmSqAndGenerate() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     // Send emails with Word doc
     sendResponseEmails(responses);
+    // If member requested Expert Review, redirect to checkout after a short
+    // delay so they can see responses are ready before leaving the page
+    if (window._wantsExpertReview) {
+      setTimeout(async function() {
+        try {
+          var res = await fetch('/.netlify/functions/plan-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              product: 'review',
+              tenderId: tenderId,
+              tenderTitle: (window._tenderData && window._tenderData.title) || ''
+            })
+          });
+          var data = await res.json();
+          if (data.url) window.location.href = data.url;
+        } catch (e) { console.error('Expert review checkout failed:', e.message); }
+      }, 2000);
+    }
   }
 
   var emailsSent = false;
