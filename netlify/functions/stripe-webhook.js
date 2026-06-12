@@ -91,9 +91,9 @@ exports.handler = async (event) => {
             '<p style="color:#374151;margin:0 0 16px;">Your membership is active. Bid on as many tenders as you want: Cana writes the SQ and responses, emails you the full pack with a submission checklist, and you submit.</p>' +
             '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:14px;margin-bottom:16px;">' +
             '<strong style="color:#854d0e;">One important thing:</strong>' +
-            '<div style="font-size:13px;color:#92400e;margin-top:6px;line-height:1.7;">Your membership is linked to <strong>' + email + '</strong>. Always enter this exact email in the company form when you bid, and your unlimited access is recognised automatically with no payment step.</div>' +
+            '<div style="font-size:13px;color:#92400e;margin-top:6px;line-height:1.7;">Your membership is linked to <strong>' + email + '</strong>. Create your free account (or sign in) with this exact email, and when you bid while signed in your unlimited access unlocks automatically with no payment step.</div>' +
             '</div>' +
-            '<p style="padding:4px 0;"><a href="https://caretenders-website.netlify.app" style="display:inline-block;background:#00C9E0;color:#0B1929;font-weight:700;padding:11px 24px;border-radius:8px;text-decoration:none;font-size:14px;">Browse live tenders &rarr;</a></p>' +
+            '<p style="padding:4px 0;"><a href="https://caretenders-website.netlify.app/register.html?email=' + encodeURIComponent(email) + '" style="display:inline-block;background:#00C9E0;color:#0B1929;font-weight:700;padding:11px 24px;border-radius:8px;text-decoration:none;font-size:14px;margin-right:8px;">Create your account &rarr;</a> <a href="https://caretenders-website.netlify.app" style="display:inline-block;background:#fff;border:1.5px solid #0B1929;color:#0B1929;font-weight:700;padding:10px 22px;border-radius:8px;text-decoration:none;font-size:14px;">Browse tenders</a></p>' +
             '<p style="color:#9ca3af;font-size:11px;text-align:center;margin-top:18px;">Cana Consulting Solutions | 01268 20 30 10 | consulting@icongrp.co.uk</p>' +
             '</div></div>';
           await fetch('https://api.resend.com/emails', {

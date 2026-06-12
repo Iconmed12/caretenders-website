@@ -333,28 +333,66 @@
     checkMembership(email);
   }
 
-  // Live check as the person leaves the email field: members see instant
-  // confirmation; a typo means no badge, so they self-correct on the spot.
+  // ── Auth session: who is actually signed in (verified identity) ──
+  async function getAuthSession() {
+    try {
+      if (!window.supabase) return null;
+      var sbClient = window.supabase.createClient(
+        'https://igpjfpncfuawikoyzfcd.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
+      );
+      var sess = await sbClient.auth.getSession();
+      if (sess.data && sess.data.session) {
+        return { email: (sess.data.session.user.email || '').toLowerCase(), token: sess.data.session.access_token };
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  // Live check as the person leaves the email field.
+  // Member + signed in with that email  -> green badge, bypass armed.
+  // Member but NOT signed in as them    -> amber prompt to sign in. No access.
   window.canaEmailCheck = function(val) {
     var badge = document.getElementById('member-badge');
     if (badge) badge.style.display = 'none';
-    var email = (val || '').trim();
+    var email = (val || '').trim().toLowerCase();
     if (!email || email.indexOf('@') < 1) return;
-    checkMembership(email).then(function() {
-      if (window._isMember && badge) badge.style.display = 'block';
+    checkMembership(email).then(function(state) {
+      if (!badge || !state || !state.member) return;
+      if (state.verified) {
+        badge.style.background = '#f0fdf4'; badge.style.borderColor = '#bbf7d0'; badge.style.color = '#166534';
+        badge.innerHTML = '✓ Cana Membership recognised, unlimited bidding active. No payment step for you.';
+      } else {
+        badge.style.background = '#fffbeb'; badge.style.borderColor = '#fde68a'; badge.style.color = '#92400e';
+        badge.innerHTML = 'This email has a Cana Membership. <a href="/login.html" target="_blank" style="color:#92400e;font-weight:700;">Sign in</a> to unlock unlimited bidding, then <a href="#" onclick="canaEmailCheck(document.getElementById(\'f-email\').value); return false;" style="color:#92400e;font-weight:700;">check again</a>.';
+      }
+      badge.style.display = 'block';
     });
   };
 
-  // ── Membership: unlimited bidding for active members ──
+  // ── Membership: unlimited only for a signed-in account that owns the email ──
   async function checkMembership(email) {
     window._isMember = false;
-    if (!email) return;
+    window._authToken = null;
+    if (!email) return { member: false, verified: false };
+    var member = false;
     try {
       var res = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
       var data = await res.json();
-      window._isMember = !!data.member;
-    } catch (e) { window._isMember = false; }
+      member = !!data.member;
+    } catch (e) { member = false; }
+
+    var verified = false;
+    if (member) {
+      var sess = await getAuthSession();
+      if (sess && sess.email === email.toLowerCase()) {
+        verified = true;
+        window._isMember = true;
+        window._authToken = sess.token;
+      }
+    }
     if (window._isMember && typeof window.applyMemberPaywall === 'function') window.applyMemberPaywall();
+    return { member: member, verified: verified };
   }
 
   window.applyMemberPaywall = function() {
@@ -387,7 +425,8 @@
         body: JSON.stringify({
           tenderId: tenderId,
           includeSq: !!(window._tenderData && window._tenderData.sq_data),
-          companyDetails: mergedCo
+          companyDetails: mergedCo,
+          accessToken: window._authToken || ''
         })
       });
       var data = await res.json();
