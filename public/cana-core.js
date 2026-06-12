@@ -205,24 +205,6 @@
         if (job.status === 'complete') {
           clearInterval(interval);
           showJobComplete(job, false);
-          // Member ticked Expert Review: docs are sent, now take the payment
-          if (window._wantsExpertReview) {
-            setTimeout(async function() {
-              try {
-                var r = await fetch('/.netlify/functions/plan-checkout', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    product: 'review',
-                    tenderId: tenderId,
-                    tenderTitle: (window._tenderData && window._tenderData.title) || ''
-                  })
-                });
-                var d = await r.json();
-                if (d.url) window.location.href = d.url;
-              } catch(e) { console.error('Review checkout failed:', e.message); }
-            }, 2500);
-          }
         } else if (job.status === 'error') {
           clearInterval(interval);
           showJobComplete(job, false, job.error || null);
@@ -487,17 +469,43 @@
       var data = await res.json();
       if (!res.ok || !data.member) throw new Error(data.error || 'Membership could not be verified');
       showProcessingScreen(data.jobId, data.email);
-      fetch('/.netlify/functions/generate-cana-background', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          jobId: data.jobId,
-          tenderId: data.tenderId || tenderId,
-          sessionId: 'member_' + data.jobId,
-          includeSq: data.includeSq,
-          companyDetails: data.companyDetails || companyDetails
-        })
-      }).catch(function(e){ console.error('Background trigger:', e.message); });
+
+      // Await the trigger: background functions reply instantly (202) and then
+      // run server-side regardless of what this browser does next
+      try {
+        await fetch('/.netlify/functions/generate-cana-background', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jobId: data.jobId,
+            tenderId: data.tenderId || tenderId,
+            sessionId: 'member_' + data.jobId,
+            includeSq: data.includeSq,
+            companyDetails: data.companyDetails || companyDetails
+          })
+        });
+      } catch(e) { console.error('Background trigger:', e.message); }
+
+      // Expert Review ticked: generation is running and docs will email
+      // regardless. Take the payment now, while intent is certain.
+      if (window._wantsExpertReview) {
+        window._wantsExpertReview = false;
+        try {
+          var rRes = await fetch('/.netlify/functions/plan-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              product: 'review',
+              tenderId: tenderId,
+              tenderTitle: (window._tenderData && window._tenderData.title) || '',
+              email: (companyDetails && companyDetails.email) || ''
+            })
+          });
+          var rData = await rRes.json();
+          if (rData.url) { window.location.href = rData.url; return; }
+        } catch(e) { console.error('Review checkout failed:', e.message); }
+      }
+
       pollJobStatus(data.jobId);
     } catch (e) {
       alert('Could not start: ' + e.message);
