@@ -26,26 +26,14 @@ exports.handler = async (event) => {
     const scope = (event.queryStringParameters && event.queryStringParameters.scope) || 'public';
     // Light columns only (verified against live schema). Heavy fields excluded
     // so the DATABASE never reads or sends them for list views.
-    const LIST_COLS = 'id,status,title,org,category,region,value,duration,deadline,days_left,link,description,pricing,eligibility,is_non_cqc,why_cqc,created_at,stripe_link,source,source_id,source_url,buyer,published_date,is_cqc,submission_portal,cana_docs,sq_data';
+    // Light columns only -- heavy fields (cana_docs, sq_data, completion_docs)
+    // are never selected in list views. docFlags come from get-tender-full.
+    const LIST_COLS = 'id,status,title,org,category,region,value,duration,deadline,days_left,link,description,pricing,eligibility,is_non_cqc,why_cqc,created_at,stripe_link,source,source_id,source_url,buyer,published_date,is_cqc,submission_portal';
     let query = supabase.from('tenders').select(LIST_COLS).order('created_at', { ascending: false });
     if (scope !== 'all') query = query.in('status', ['live', 'open', 'closing', 'urgent']);
     const { data, error } = await query;
 
-    // Reduce the two document fields to tiny presence flags so panels and badges
-    // keep working, then drop the heavy originals. Net payload stays light.
-    if (Array.isArray(data)) {
-      data.forEach(function(t) {
-        var cd = t.cana_docs || {};
-        t.docFlags = {
-          sq:       !!(t.sq_data && (t.sq_data.fileName || t.sq_data.htmlPreview || (t.sq_data.sections && t.sq_data.sections.length))),
-          quality:  !!(cd.quality && cd.quality.length),
-          spec:     !!(cd.spec && cd.spec.length),
-          scoring:  !!(cd.scoring && cd.scoring.length)
-        };
-        delete t.cana_docs;
-        delete t.sq_data;
-      });
-    }
+    // Heavy fields not selected -- list rows are already light.
 
     if (error) {
       return {

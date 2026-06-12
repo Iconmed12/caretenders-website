@@ -336,17 +336,18 @@
 
   // ── On page load: detect member and route to the right experience ──
   async function initMemberExperience() {
+    // Single auth call, then parallel membership + profile fetches
     var sess = await getAuthSession();
-    if (!sess || !sess.email) return; // not signed in, show normal form
+    if (!sess || !sess.email) return;
 
-    var memRes = await checkMembership(sess.email);
-    if (!memRes || !memRes.member || !memRes.verified) return; // not a member
+    // Parallel: check membership AND load profile at the same time
+    var [memRes, profile] = await Promise.all([
+      checkMembership(sess.email),
+      loadSavedProfile(sess.token)
+    ]);
+    if (!memRes || !memRes.member || !memRes.verified) return;
+    if (!profile) return;
 
-    // Load saved company profile
-    var profile = await loadSavedProfile(sess.token);
-    if (!profile) return; // no profile saved yet, stay on form
-
-    // Show the member dashboard state
     showMemberDashboard(sess.email, memRes, profile);
   }
 
