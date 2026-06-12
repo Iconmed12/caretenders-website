@@ -330,6 +330,125 @@
     showState('ch');
     window.scrollTo({ top: 0, behavior: 'smooth' });
     window._companyDetails = { name, founded, staff, cqc, services, regions, experience, achievements, policies, accreditations, kpis, email };
+    checkMembership(email);
+  }
+
+  // ── Auth session: who is actually signed in (verified identity) ──
+  async function getAuthSession() {
+    try {
+      if (!window.supabase) return null;
+      var sbClient = window.supabase.createClient(
+        'https://igpjfpncfuawikoyzfcd.supabase.co',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
+      );
+      var sess = await sbClient.auth.getSession();
+      if (sess.data && sess.data.session) {
+        return { email: (sess.data.session.user.email || '').toLowerCase(), token: sess.data.session.access_token };
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  // Live check as the person leaves the email field.
+  // Member + signed in with that email  -> green badge, bypass armed.
+  // Member but NOT signed in as them    -> amber prompt to sign in. No access.
+  window.canaEmailCheck = function(val) {
+    var badge = document.getElementById('member-badge');
+    if (badge) badge.style.display = 'none';
+    var email = (val || '').trim().toLowerCase();
+    if (!email || email.indexOf('@') < 1) return;
+    checkMembership(email).then(function(state) {
+      if (!badge || !state || !state.member) return;
+      if (state.verified) {
+        badge.style.background = '#f0fdf4'; badge.style.borderColor = '#bbf7d0'; badge.style.color = '#166534';
+        badge.innerHTML = '✓ Cana Membership recognised, unlimited bidding active. No payment step for you.';
+      } else {
+        badge.style.background = '#fffbeb'; badge.style.borderColor = '#fde68a'; badge.style.color = '#92400e';
+        badge.innerHTML = 'This email has a Cana Membership. <a href="/login.html" target="_blank" style="color:#92400e;font-weight:700;">Sign in</a> to unlock unlimited bidding, then <a href="#" onclick="canaEmailCheck(document.getElementById(\'f-email\').value); return false;" style="color:#92400e;font-weight:700;">check again</a>.';
+      }
+      badge.style.display = 'block';
+    });
+  };
+
+  // ── Membership: unlimited only for a signed-in account that owns the email ──
+  async function checkMembership(email) {
+    window._isMember = false;
+    window._authToken = null;
+    if (!email) return { member: false, verified: false };
+    var member = false;
+    try {
+      var res = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
+      var data = await res.json();
+      member = !!data.member;
+    } catch (e) { member = false; }
+
+    var verified = false;
+    if (member) {
+      var sess = await getAuthSession();
+      if (sess && sess.email === email.toLowerCase()) {
+        verified = true;
+        window._isMember = true;
+        window._authToken = sess.token;
+      }
+    }
+    if (window._isMember && typeof window.applyMemberPaywall === 'function') window.applyMemberPaywall();
+    return { member: member, verified: verified };
+  }
+
+  window.applyMemberPaywall = function() {
+    if (!window._isMember) return;
+    var btn = document.getElementById('paywall-btn');
+    if (btn) {
+      btn.textContent = '⚡ Generate now, included in your membership';
+      btn.onclick = memberStartFlow;
+    }
+    var amt = document.querySelector('.paywall-price-amount');
+    var lbl = document.querySelector('.paywall-price-label');
+    if (amt) amt.textContent = 'Included';
+    if (lbl) lbl.textContent = 'with your Cana Membership';
+  };
+
+  async function memberStartFlow() {
+    var btn = document.getElementById('paywall-btn');
+    if (btn) { btn.disabled = true; btn.textContent = 'Starting...'; }
+    try {
+      var co = window._companyDetails || {};
+      var chData = window._chData || {};
+      var mergedCo = Object.assign({}, co, {
+        name: co.name || chData.company_name || '',
+        company_name: co.name || chData.company_name || '',
+        chData: chData
+      });
+      var res = await fetch('/.netlify/functions/member-start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenderId: tenderId,
+          includeSq: !!(window._tenderData && window._tenderData.sq_data),
+          companyDetails: mergedCo,
+          accessToken: window._authToken || ''
+        })
+      });
+      var data = await res.json();
+      if (!res.ok || !data.member) throw new Error(data.error || 'Membership could not be verified');
+
+      showProcessingScreen(data.jobId, data.email);
+      fetch('/.netlify/functions/generate-cana-background', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: data.jobId,
+          tenderId: data.tenderId || tenderId,
+          sessionId: 'member_' + data.jobId,
+          includeSq: data.includeSq,
+          companyDetails: data.companyDetails || mergedCo
+        })
+      }).catch(function(e){ console.error('Background trigger failed:', e.message); });
+      pollJobStatus(data.jobId);
+    } catch (e) {
+      alert('Could not start: ' + e.message);
+      if (btn) { btn.disabled = false; window.applyMemberPaywall(); }
+    }
   }
 
   // CH lookup functions

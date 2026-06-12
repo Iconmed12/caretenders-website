@@ -12,7 +12,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { companyDetails, tenderId, includeSq } = JSON.parse(event.body);
+    const { companyDetails, tenderId, includeSq, accessToken } = JSON.parse(event.body);
     const email = (companyDetails && companyDetails.email || '').trim().toLowerCase();
     if (!email || !tenderId) {
       return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing email or tender' }) };
@@ -20,6 +20,23 @@ exports.handler = async (event) => {
 
     const sbKey = process.env.SUPABASE_ANON_KEY;
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+
+    // ── Identity check: the login token must belong to this email ──
+    // Knowing a member's email is not enough; they must be signed in as them.
+    if (!accessToken) {
+      return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'Please sign in to use your membership' }) };
+    }
+    const userRes = await fetch(sbUrl + '/auth/v1/user', {
+      headers: { apikey: sbKey, Authorization: 'Bearer ' + accessToken }
+    });
+    if (!userRes.ok) {
+      return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'Sign-in could not be verified. Please sign in again.' }) };
+    }
+    const userData = await userRes.json();
+    const authedEmail = (userData && userData.email || '').toLowerCase();
+    if (!authedEmail || authedEmail !== email) {
+      return { statusCode: 403, headers: cors, body: JSON.stringify({ error: 'This membership belongs to a different account. Sign in with the email you joined with.' }) };
+    }
 
     // ── Server-side membership check (never trust the browser) ──
     const memRes = await fetch(
