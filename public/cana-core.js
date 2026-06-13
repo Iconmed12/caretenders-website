@@ -423,6 +423,8 @@
       policies: p.policies || '',
       accreditations: p.accreditations || '',
       kpis: p.kpis || '',
+      social_value: p.social_value || '',
+      key_people: p.key_people || [],
       email: window._memberEmail || ''
     };
   }
