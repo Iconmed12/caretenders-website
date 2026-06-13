@@ -425,6 +425,7 @@
       kpis: p.kpis || '',
       social_value: p.social_value || '',
       key_people: p.key_people || [],
+      contract_examples: p.contract_examples || [],
       email: window._memberEmail || ''
     };
   }

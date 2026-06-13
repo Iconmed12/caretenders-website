@@ -412,6 +412,21 @@
     </div>
   </div>
 
+  <div class="section-card">
+    <div class="section-head">
+      <div class="section-head-icon teal">📄</div>
+      <div class="section-head-text">
+        <h2>Contract examples</h2>
+        <p>Up to 3 real contracts. Cana uses these as evidence and to fill the SQ contract table, always re-writing the description to match the tender you are bidding for</p>
+      </div>
+    </div>
+    <div class="section-body">
+      <div id="contract-examples-list"></div>
+      <button type="button" onclick="addContractExample()" id="add-contract-btn" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:0.5rem;">+ Add a contract example</button>
+      <span class="form-hint" style="display:block;margin-top:0.75rem;">Write the description as it really is. When you bid, Cana automatically re-shapes each description to line up with that tender's specification, so the same real contract reads as relevant evidence every time. Maximum 3.</span>
+    </div>
+  </div>
+
 </div>
 
 <!-- SAVE BAR -->
@@ -496,6 +511,7 @@
       if (el && map[id]) el.value = map[id];
     });
     loadKeyPeople(p.key_people);
+    loadContractExamples(p.contract_examples);
     updateCompletion();
     if (p.company_name) {
       document.getElementById('save-bar-company').textContent = p.company_name;
@@ -556,6 +572,82 @@
     }
   }
 
+  // ── Contract Examples: real contracts Cana uses as evidence + SQ table ──
+  window.addContractExample = function(ex) {
+    var list = document.getElementById('contract-examples-list');
+    if (list.querySelectorAll('.contract-example-row').length >= 3) {
+      alert('You can add up to 3 contract examples.');
+      return;
+    }
+    ex = ex || { customer:'', contact_name:'', contact_position:'', contact_email:'', description:'', start:'', end:'', value:'' };
+    var row = document.createElement('div');
+    row.className = 'contract-example-row';
+    row.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:1.1rem;margin-bottom:0.85rem;background:#fafbfc;';
+    function v(x){ return (x||'').replace(/"/g,'&quot;'); }
+    row.innerHTML =
+      '<div style="font-weight:700;font-size:0.82rem;color:var(--navy);margin-bottom:0.75rem;">Contract example</div>' +
+      '<div class="form-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">' +
+        '<div class="form-group"><label class="form-label">Customer organisation</label>' +
+          '<input class="form-input ce-customer" type="text" value="'+v(ex.customer)+'" placeholder="e.g. Kent County Council"></div>' +
+        '<div class="form-group"><label class="form-label">Contract value</label>' +
+          '<input class="form-input ce-value" type="text" value="'+v(ex.value)+'" placeholder="e.g. £327,300 or N/A"></div>' +
+        '<div class="form-group"><label class="form-label">Contact name</label>' +
+          '<input class="form-input ce-contact-name" type="text" value="'+v(ex.contact_name)+'" placeholder="e.g. Tony Carey"></div>' +
+        '<div class="form-group"><label class="form-label">Contact position</label>' +
+          '<input class="form-input ce-contact-position" type="text" value="'+v(ex.contact_position)+'" placeholder="e.g. Contract Manager"></div>' +
+        '<div class="form-group"><label class="form-label">Contact email</label>' +
+          '<input class="form-input ce-contact-email" type="text" value="'+v(ex.contact_email)+'" placeholder="e.g. tony.carey@kent.gov.uk"></div>' +
+        '<div class="form-group"><label class="form-label">Contract value confirmed?</label>' +
+          '<input class="form-input ce-spacer" type="text" value="" placeholder="(leave blank)" style="visibility:hidden;"></div>' +
+        '<div class="form-group"><label class="form-label">Start date (MM/YYYY)</label>' +
+          '<input class="form-input ce-start" type="text" value="'+v(ex.start)+'" placeholder="e.g. 06/2025"></div>' +
+        '<div class="form-group"><label class="form-label">End date (MM/YYYY or ongoing)</label>' +
+          '<input class="form-input ce-end" type="text" value="'+v(ex.end)+'" placeholder="e.g. 06/2027 or ongoing"></div>' +
+      '</div>' +
+      '<div class="form-group" style="margin-top:0.5rem;"><label class="form-label">Contract description</label>' +
+        '<textarea class="form-input ce-description" rows="4" placeholder="What you delivered, for whom, and the outcomes. Cana re-shapes this to match each tender you bid for.">'+v(ex.description)+'</textarea></div>' +
+      '<button type="button" onclick="this.closest(\'.contract-example-row\').remove(); updateContractBtn();" style="background:none;border:none;color:#b91c1c;font-size:0.78rem;font-weight:600;cursor:pointer;padding:4px 0;">Remove</button>';
+    list.appendChild(row);
+    updateContractBtn();
+  };
+
+  window.updateContractBtn = function() {
+    var btn = document.getElementById('add-contract-btn');
+    var count = document.querySelectorAll('.contract-example-row').length;
+    if (btn) {
+      btn.style.display = count >= 3 ? 'none' : 'inline-block';
+    }
+  };
+
+  function readContractExamples() {
+    var examples = [];
+    document.querySelectorAll('.contract-example-row').forEach(function(row){
+      var customer = row.querySelector('.ce-customer').value.trim();
+      var description = row.querySelector('.ce-description').value.trim();
+      if (!customer && !description) return; // skip empty
+      examples.push({
+        customer: customer,
+        contact_name: row.querySelector('.ce-contact-name').value.trim(),
+        contact_position: row.querySelector('.ce-contact-position').value.trim(),
+        contact_email: row.querySelector('.ce-contact-email').value.trim(),
+        description: description,
+        start: row.querySelector('.ce-start').value.trim(),
+        end: row.querySelector('.ce-end').value.trim(),
+        value: row.querySelector('.ce-value').value.trim()
+      });
+    });
+    return examples;
+  }
+
+  function loadContractExamples(arr) {
+    var list = document.getElementById('contract-examples-list');
+    if (list) list.innerHTML = '';
+    if (Array.isArray(arr) && arr.length) {
+      arr.forEach(function(ex){ addContractExample(ex); });
+    }
+    updateContractBtn();
+  }
+
   function readForm() {
     return {
       contact_first_name:  document.getElementById('f-first').value.trim(),
@@ -584,6 +676,7 @@
       experience:          document.getElementById('f-experience').value.trim(),
       social_value:        document.getElementById('f-social').value.trim(),
       key_people:          readKeyPeople(),
+      contract_examples:   readContractExamples(),
       updated_at:          new Date().toISOString()
     };
   }
