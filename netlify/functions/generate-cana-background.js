@@ -370,77 +370,115 @@ exports.handler = async (event) => {
           xml = xml.replace(/\[Insert\s+date\]/gi, new Date().toLocaleDateString('en-GB'));
           xml = xml.replace(/\[Insert\s+CQC[^\]]*\]/gi, fillData.cqc || '');
 
-          // 2. Sequential row processing: question row → fill the NEXT row's answer cell
-          // (PSQ-style docs have the question in one row and the answer cell in the row below)
-          function rowText(row) {
-            var t = ''; var m; var tp = /<w:t[^>]*>([^<]*)<\/w:t>/g;
-            while ((m = tp.exec(row)) !== null) t += m[1] + ' ';
-            return t;
+          // ── SQ FILL ENGINE v2: handles right-cell, below-cell, and contract grids ──
+          function rowTextLocal(row) {
+            var t=''; var m; var tp=/<w:t[^>]*>([^<]*)<\/w:t>/g;
+            while((m=tp.exec(row))!==null) t+=m[1]+' ';
+            return t.replace(/\s+/g,' ').trim();
           }
-          function looksLikeAnswerCell(txt) {
-            var t = txt.trim();
-            if (t === '') return true;
-            if (/\[insert/i.test(t)) return true;
-            if (/yes\s*\/\s*no/i.test(t)) return true;
-            if (/^\[?(yes|no)\b/i.test(t) && t.length < 120) return true;
-            if (/\[where applicable\]|\[if yes/i.test(t)) return true;
+          function getCells(row){ return row.match(/<w:tc[ >][\s\S]*?<\/w:tc>/g) || []; }
+          function cellTxt(cell){
+            var t=''; var m; var tp=/<w:t[^>]*>([^<]*)<\/w:t>/g;
+            while((m=tp.exec(cell))!==null) t+=m[1]+' ';
+            return t.replace(/\s+/g,' ').trim();
+          }
+          function fillable(txt){
+            var t=(txt||'').trim();
+            if(t==='') return true;
+            if(/\[insert/i.test(t)) return true;
+            if(/yes\s*\/?\s*no/i.test(t)&&t.length<40) return true;
+            if(/click here|enter text|\.{4,}|_{4,}/i.test(t)) return true;
             return false;
           }
-          function setRowAnswer(row, answer) {
-            // Replace the text content of the LAST cell with the answer
-            var cells = row.match(/<w:tc[ >][\s\S]*?<\/w:tc>/g);
-            if (!cells || !cells.length) return row;
-            var last = cells[cells.length - 1];
-            var tcPrM = last.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
-            var tcPr = tcPrM ? tcPrM[0] : '';
-            var esc = String(answer).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-            var newCell = '<w:tc>' + tcPr + '<w:p><w:r><w:rPr><w:b/></w:rPr><w:t xml:space="preserve">' + esc + '</w:t></w:r></w:p></w:tc>';
-            var pos = row.lastIndexOf(last);
-            return row.substring(0, pos) + newCell + row.substring(pos + last.length);
+          function writeCell(row, cellIdx, answer){
+            var cells=getCells(row);
+            if(!cells||cellIdx>=cells.length) return row;
+            var target=cells[cellIdx];
+            var tcPrM=target.match(/<w:tcPr[\s\S]*?<\/w:tcPr>/);
+            var tcPr=tcPrM?tcPrM[0]:'';
+            var esc=String(answer).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            var isFlag=/^\[INSERT:/.test(String(answer).trim());
+            var rPr=isFlag?'<w:rPr><w:b/><w:color w:val="C00000"/></w:rPr>':'<w:rPr><w:b/></w:rPr>';
+            var newCell='<w:tc>'+tcPr+'<w:p><w:r>'+rPr+'<w:t xml:space="preserve">'+esc+'</w:t></w:r></w:p></w:tc>';
+            var pos=row.lastIndexOf(target);
+            return row.substring(0,pos)+newCell+row.substring(pos+target.length);
           }
 
-          // Question-pattern → answer map (answers from evidence only; gaps become [INSERT] flags)
-          var hasCqc = !!(co.cqc);
-          var QA_MAP = [
-            { pat: /supplier name|company name|organisation name/i,            ans: clientName },
-            { pat: /central digital platform unique identifier|cdp.*identifier/i, ans: '[INSERT: your CDP unique identifier from gov.uk/find-tender]' },
-            { pat: /which lot\(s\)|which lots.*bid/i,                          ans: '[INSERT: confirm which Lot(s) you are bidding for]' },
-            { pat: /confirm you have shared this information/i,                ans: 'Yes — [INSERT: CDP share code or file name]' },
-            { pat: /relying on any associated persons/i,                       ans: 'No' },
-            { pat: /list of all (your )?intended sub.?contractors|full list of.*sub.?contractors/i, ans: 'Not applicable — we do not intend to use sub-contractors. [INSERT: amend if you will use sub-contractors]' },
-            { pat: /company number|registration number/i,                      ans: fillData.company_number || '[INSERT: company number]' },
-            { pat: /registered address|principal address/i,                    ans: fillData.address || '[INSERT: registered address]' },
-            { pat: /credit check|credit risk rating/i,                         ans: 'Confirmed — we consent to the financial standing check.' },
-            { pat: /acting? as a guarantor|relying on another supplier to act as a guarantor/i, ans: 'No' },
-            { pat: /insurance/i,                                               ans: 'Yes — [INSERT: details of insurances in place, e.g. Public Liability £10m, Employers Liability £10m, with insurer names]' },
-            { pat: /uk gdpr|data protection/i,                                 ans: 'Yes — UK GDPR compliant. Data Protection Policy in place.' },
-            { pat: /relevant experience and contract examples|details of up to three contracts/i, ans: '[INSERT: details of up to three relevant contracts — customer organisation, contact, dates, value, description]' },
-            { pat: /sub.?contractor management/i,                              ans: 'Not applicable — no sub-contracting proposed.' },
-            { pat: /organisational standards|organisational qualifications/i,  ans: '[INSERT: relevant qualifications/standards held, or state how equivalent standards are met]' },
-            { pat: /health and safety/i,                                       ans: 'Yes — Health & Safety Policy in place, reviewed annually.' },
-            { pat: /safeguarding/i,                                            ans: 'Yes — Safeguarding Policy in place, reviewed annually.' },
-            { pat: /cqc/i,                                                     ans: hasCqc ? co.cqc : '[INSERT: confirm your CQC registration status and rating]' },
-            { pat: /debarment|debarred|exclusion list/i,                       ans: 'No' },
-            { pat: /i confirm that/i,                                          ans: 'Yes' }
-          ];
+          // Contract grid field-label -> which saved field to use
+          function contractFieldFor(label){
+            var l=label.toLowerCase();
+            if(/name of customer|customer organisation who signed/.test(l)) return 'customer';
+            if(/name of supplier who signed/.test(l)) return '__supplier__';
+            if(/point of contact/.test(l)) return 'contact_name';
+            if(/position in the customer/.test(l)) return 'contact_position';
+            if(/e-?mail address/.test(l)) return 'contact_email';
+            if(/description of (the )?(contract|agreement)/.test(l)) return 'description';
+            if(/(contract|agreement) start date/.test(l)) return 'start';
+            if(/(contract|agreement) (completion|end) date/.test(l)) return 'end';
+            if(/(estimated )?(contract|agreement) value/.test(l)) return 'value';
+            return null;
+          }
 
-          // Split document into rows, walk sequentially, fill next row when it looks like an answer cell
+          var ceArr = co.contract_examples;
+          if(typeof ceArr==='string'){ try{ ceArr=JSON.parse(ceArr); }catch(e){ ceArr=null; } }
+          if(!Array.isArray(ceArr)) ceArr=[];
+
+          // Split into rows and process
           var rows = xml.split(/(<w:tr[ >][\s\S]*?<\/w:tr>)/);
-          for (var ri = 0; ri < rows.length; ri++) {
-            if (!/^<w:tr[ >]/.test(rows[ri])) continue;
-            var qText = rowText(rows[ri]);
-            if (qText.trim().length < 8) continue;
+          var contractIdx = -1; // which contract block we're in (0,1,2)
 
-            for (var qi = 0; qi < QA_MAP.length; qi++) {
-              if (QA_MAP[qi].pat.test(qText)) {
-                // Find the next actual row
-                var nj = ri + 1;
-                while (nj < rows.length && !/^<w:tr[ >]/.test(rows[nj])) nj++;
-                if (nj < rows.length) {
-                  var aText = rowText(rows[nj]);
-                  if (looksLikeAnswerCell(aText)) {
-                    rows[nj] = setRowAnswer(rows[nj], QA_MAP[qi].ans);
-                    ri = nj; // skip past the answer row
+          for(var ri=0; ri<rows.length; ri++){
+            if(!/^<w:tr[ >]/.test(rows[ri])) continue;
+            var qText = rowTextLocal(rows[ri]);
+            if(!qText) continue;
+
+            // Detect contract block headers: "Contract 1/2/3" or "Agreement 1/2/3"
+            var cMatch = qText.match(/^(contract|agreement)\s*([123])\b/i);
+            if(cMatch){ contractIdx = parseInt(cMatch[2]) - 1; continue; }
+
+            var cells = getCells(rows[ri]);
+
+            // CASE A: contract grid field row (label cell + empty answer cell, inside a contract block)
+            if(contractIdx >= 0){
+              var cf = contractFieldFor(qText);
+              if(cf && cells.length >= 2){
+                var ex = ceArr[contractIdx];
+                var val;
+                if(cf === '__supplier__'){ val = clientName; }
+                else if(ex && ex[cf]){ val = ex[cf]; }
+                else { val = ex ? '[INSERT: ' + qText.replace(/:$/,'') + ']' : '[INSERT: ' + qText.replace(/:$/,'') + ']'; }
+                rows[ri] = writeCell(rows[ri], cells.length-1, val);
+                continue;
+              }
+            }
+
+            // CASE B: label + answer in the SAME row (answer cell to the right is fillable)
+            if(cells.length >= 2){
+              var lastTxt = cellTxt(cells[cells.length-1]);
+              var labelTxt = cellTxt(cells[0]);
+              // only if last cell is fillable and the label cell carries the question text
+              if(fillable(lastTxt) && labelTxt && labelTxt.length > 3){
+                for(var qi=0; qi<QA_MAP.length; qi++){
+                  if(QA_MAP[qi].pat.test(qText)){
+                    rows[ri] = writeCell(rows[ri], cells.length-1, QA_MAP[qi].ans);
+                    break;
+                  }
+                }
+                continue;
+              }
+            }
+
+            // CASE C: question row, answer in the NEXT row (classic PSQ below-layout)
+            for(var qj=0; qj<QA_MAP.length; qj++){
+              if(QA_MAP[qj].pat.test(qText)){
+                var nj=ri+1;
+                while(nj<rows.length && !/^<w:tr[ >]/.test(rows[nj])) nj++;
+                if(nj<rows.length){
+                  var aTxt=rowTextLocal(rows[nj]);
+                  if(fillable(aTxt)){
+                    var ncells=getCells(rows[nj]);
+                    rows[nj]=writeCell(rows[nj], ncells.length-1, QA_MAP[qj].ans);
+                    ri=nj;
                   }
                 }
                 break;
