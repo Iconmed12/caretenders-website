@@ -27,9 +27,8 @@ current state. Claude updates this file as items are completed.
 - [x] Checkbox on member dashboard
 - [x] Card on results page (members + non-members)
 - [x] Payment fires after generation starts
-- [ ] Ops notification: paid review emails consulting@icongrp.co.uk with the
-      client's responses attached (NOT built -- reviews currently have no
-      fulfilment alert)
+- [x] Ops notification live: review purchase emails consulting@icongrp.co.uk
+      with client email, tender title and ID, reply-to set to the client
 - [ ] Decide + add scope line ("up to ~10 questions, larger quoted") and the
       48h turnaround promise wording on the card
 
