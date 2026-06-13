@@ -6,6 +6,7 @@
 <title>Membership Plans | Cana Procurement Intelligence</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root { --navy:#0B1929; --navy-mid:#11243A; --teal:#00C9E0; --teal-dk:#00a8bc; --white:#fff; --offwhite:#F4F6F9; --border:#E3E8EF; --muted:#5a6b7a; --amber:#d6a516; }
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -195,9 +196,9 @@
 <script>
 var selectedTerm = 12;
 // ── Active membership detection ──
-document.addEventListener('DOMContentLoaded', async function() {
+(async function() {
   try {
-    if (!window.supabase) return;
+    if (!window.supabase) { console.warn('Supabase not loaded'); return; }
     var sb = window.supabase.createClient(
       'https://igpjfpncfuawikoyzfcd.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
@@ -242,8 +243,8 @@ document.addEventListener('DOMContentLoaded', async function() {
         billedEl.insertAdjacentElement('afterend', line);
       }
     }
-  } catch(e) {}
-});
+  } catch(e) { console.warn('Membership detection:', e.message); }
+})();
 
 var TERM_INFO = {
   3:  { total: '£897',   billed: 'Covers 3 months of unlimited bidding. Works out at £299 a month.' },
