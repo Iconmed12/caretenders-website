@@ -82,8 +82,7 @@ current state. Claude updates this file as items are completed.
 - [x] Supabase Pro purchased (daily automated DB backups now available)
 - [ ] Confirm daily backups + point-in-time recovery are toggled ON in
       Supabase dashboard (Database > Backups)
-- [ ] Record all Netlify env var values somewhere private (Stripe, Resend,
-      Supabase service role, webhook secret) -- only place they live
+- [x] Netlify env var values recorded privately by Joel
 - [ ] Optional: weekly manual CSV export of tenders + subscriptions tables
 
 ## 8. Open decisions (Joel only)
