@@ -1,6 +1,6 @@
 # Cana / Tender Experts -- Launch Checklist
 
-Last updated: 2026-06-13
+Last updated: 2026-06-13 (evening)
 
 This is the living pre-launch checklist. Ask Claude "where are we on launch"
 at any time (7pm or otherwise) and it will read this file and give you the
@@ -34,12 +34,22 @@ current state. Claude updates this file as items are completed.
       48h turnaround promise wording on the card
 
 ## 3. Cana generation quality (LAUNCH BLOCKERS)
-- [ ] Response truncation: increase maxTokens in generation so answers do not
-      cut off
-- [ ] Genericness: feed the knowledge base strong example responses so output
-      is specific, not templated
-- [ ] Word-count control: generate answers to the tender's stated word limits
-      (idea from competitor analysis, strong-to-have)
+- [x] Response truncation: max_tokens raised 4000 -> 8000 per answer, generated
+      one question at a time so each gets full budget. Verified clean on 5 real bids
+- [~] Genericness: Key People section added to profile (named staff by role) and
+      fed into generation; KPIs + social value now flow in too. Still want richer
+      contract-example prompting in onboarding to push specificity further
+- [x] Word-count control: answers already generated to each question's stated
+      page/word limit
+- [x] Em dashes stripped from all generated output (house rule)
+- [x] [INSERT: ...] gaps render bold red in the Word doc with a review banner
+
+## 3b. Onboarding profile depth (the real genericness fix)
+- [~] Key People capture live (Registered Manager, Safeguarding Lead, Operations
+      Lead, Nominated Individual, Care Coordinator, Other)
+- [ ] Strengthen contract-experience prompting so members enter real numbers,
+      named commissioners and outcomes (this is what kills genericness at source)
+- [ ] Needs Supabase column: key_people jsonb (run the ALTER TABLE)
 
 ## 4. Delivery + fulfilment
 - [ ] Full delivery pack email retest: confirm completion docs + checklist +
