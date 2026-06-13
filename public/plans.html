@@ -194,6 +194,57 @@
 
 <script>
 var selectedTerm = 12;
+// ── Active membership detection ──
+(async function() {
+  try {
+    if (!window.supabase) return;
+    var sb = window.supabase.createClient(
+      'https://igpjfpncfuawikoyzfcd.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
+    );
+    var sessRes = await sb.auth.getSession();
+    var sess = sessRes.data && sessRes.data.session;
+    if (!sess || !sess.user || !sess.user.email) return;
+    var email = sess.user.email.toLowerCase();
+    var memRes = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
+    var memData = await memRes.json();
+    if (!memData.member) return;
+    var currentTerm = memData.term_months || 3;
+
+    // Badge the current term button
+    document.querySelectorAll('.term-opt').forEach(function(btn) {
+      var t = parseInt(btn.getAttribute('data-term'));
+      var existing = btn.querySelector('.current-plan-badge');
+      if (existing) existing.remove();
+      if (t === currentTerm) {
+        var badge = document.createElement('span');
+        badge.className = 'current-plan-badge';
+        badge.textContent = 'Your plan';
+        badge.style.cssText = 'display:block;font-size:0.6rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;';
+        btn.appendChild(badge);
+      }
+    });
+
+    // Change button copy and show renewal date
+    var planBtn = document.querySelector('.plan-btn.btn-solid');
+    if (planBtn) {
+      planBtn.textContent = 'Upgrade or manage membership';
+    }
+    var billedEl = document.getElementById('member-billed');
+    if (billedEl && memData.current_period_end) {
+      var d = new Date(memData.current_period_end);
+      var existing = document.getElementById('member-renewal-line');
+      if (!existing) {
+        var line = document.createElement('div');
+        line.id = 'member-renewal-line';
+        line.style.cssText = 'margin-top:6px;font-size:0.76rem;color:var(--teal-dk);font-weight:600;';
+        line.textContent = 'Your membership renews ' + d.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+        billedEl.insertAdjacentElement('afterend', line);
+      }
+    }
+  } catch(e) {}
+})();
+
 var TERM_INFO = {
   3:  { total: '£897',   billed: 'Covers 3 months of unlimited bidding. Works out at £299 a month.' },
   6:  { total: '£1,674', billed: 'Covers 6 months of unlimited bidding. Works out at £279 a month.' },
