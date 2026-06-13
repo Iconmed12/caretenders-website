@@ -399,26 +399,41 @@ exports.handler = async (event) => {
             return row.substring(0, pos) + newCell + row.substring(pos + last.length);
           }
 
+          // Build the contract-examples answer from the client's saved real contracts
+          var contractAnswer = '[INSERT: details of up to three relevant contracts, customer organisation, contact, dates, value, description]';
+          var ceList = co.contract_examples;
+          if (typeof ceList === 'string') { try { ceList = JSON.parse(ceList); } catch(e) { ceList = null; } }
+          if (Array.isArray(ceList) && ceList.length) {
+            contractAnswer = ceList.map(function(c, i) {
+              var lines = ['Contract ' + (i+1) + ': ' + (c.customer || '[INSERT: customer organisation]')];
+              if (c.value) lines.push('Value: ' + c.value);
+              if (c.start || c.end) lines.push('Period: ' + (c.start||'[INSERT: start]') + ' to ' + (c.end||'ongoing'));
+              if (c.contact_name) lines.push('Reference: ' + c.contact_name + (c.contact_position ? ', ' + c.contact_position : '') + (c.contact_email ? ', ' + c.contact_email : ''));
+              if (c.description) lines.push(c.description);
+              return lines.join('. ');
+            }).join('  ||  ');
+          }
+
           // Question-pattern → answer map (answers from evidence only; gaps become [INSERT] flags)
           var hasCqc = !!(co.cqc);
           var QA_MAP = [
             { pat: /supplier name|company name|organisation name/i,            ans: clientName },
             { pat: /central digital platform unique identifier|cdp.*identifier/i, ans: '[INSERT: your CDP unique identifier from gov.uk/find-tender]' },
             { pat: /which lot\(s\)|which lots.*bid/i,                          ans: '[INSERT: confirm which Lot(s) you are bidding for]' },
-            { pat: /confirm you have shared this information/i,                ans: 'Yes — [INSERT: CDP share code or file name]' },
+            { pat: /confirm you have shared this information/i,                ans: 'Yes. [INSERT: CDP share code or file name]' },
             { pat: /relying on any associated persons/i,                       ans: 'No' },
-            { pat: /list of all (your )?intended sub.?contractors|full list of.*sub.?contractors/i, ans: 'Not applicable — we do not intend to use sub-contractors. [INSERT: amend if you will use sub-contractors]' },
+            { pat: /list of all (your )?intended sub.?contractors|full list of.*sub.?contractors/i, ans: 'Not applicable. We do not intend to use sub-contractors. [INSERT: amend if you will use sub-contractors]' },
             { pat: /company number|registration number/i,                      ans: fillData.company_number || '[INSERT: company number]' },
             { pat: /registered address|principal address/i,                    ans: fillData.address || '[INSERT: registered address]' },
             { pat: /credit check|credit risk rating/i,                         ans: 'Confirmed — we consent to the financial standing check.' },
             { pat: /acting? as a guarantor|relying on another supplier to act as a guarantor/i, ans: 'No' },
-            { pat: /insurance/i,                                               ans: 'Yes — [INSERT: details of insurances in place, e.g. Public Liability £10m, Employers Liability £10m, with insurer names]' },
-            { pat: /uk gdpr|data protection/i,                                 ans: 'Yes — UK GDPR compliant. Data Protection Policy in place.' },
-            { pat: /relevant experience and contract examples|details of up to three contracts/i, ans: '[INSERT: details of up to three relevant contracts — customer organisation, contact, dates, value, description]' },
-            { pat: /sub.?contractor management/i,                              ans: 'Not applicable — no sub-contracting proposed.' },
+            { pat: /insurance/i,                                               ans: 'Yes. [INSERT: details of insurances in place, e.g. Public Liability £10m, Employers Liability £10m, with insurer names]' },
+            { pat: /uk gdpr|data protection/i,                                 ans: 'Yes. UK GDPR compliant. Data Protection Policy in place.' },
+            { pat: /relevant experience and contract examples|details of up to three contracts|contract example|previous contract|similar contract/i, ans: contractAnswer },
+            { pat: /sub.?contractor management/i,                              ans: 'Not applicable. No sub-contracting proposed.' },
             { pat: /organisational standards|organisational qualifications/i,  ans: '[INSERT: relevant qualifications/standards held, or state how equivalent standards are met]' },
-            { pat: /health and safety/i,                                       ans: 'Yes — Health & Safety Policy in place, reviewed annually.' },
-            { pat: /safeguarding/i,                                            ans: 'Yes — Safeguarding Policy in place, reviewed annually.' },
+            { pat: /health and safety/i,                                       ans: 'Yes. Health and Safety Policy in place, reviewed annually.' },
+            { pat: /safeguarding/i,                                            ans: 'Yes. Safeguarding Policy in place, reviewed annually.' },
             { pat: /cqc/i,                                                     ans: hasCqc ? co.cqc : '[INSERT: confirm your CQC registration status and rating]' },
             { pat: /debarment|debarred|exclusion list/i,                       ans: 'No' },
             { pat: /i confirm that/i,                                          ans: 'Yes' }
