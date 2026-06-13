@@ -1,6 +1,6 @@
 # Cana / Tender Experts -- Launch Checklist
 
-Last updated: 2026-06-13 (evening)
+Last updated: 2026-06-13 (late)
 
 This is the living pre-launch checklist. Ask Claude "where are we on launch"
 at any time (7pm or otherwise) and it will read this file and give you the
@@ -47,14 +47,19 @@ current state. Claude updates this file as items are completed.
 ## 3b. Onboarding profile depth (the real genericness fix)
 - [~] Key People capture live (Registered Manager, Safeguarding Lead, Operations
       Lead, Nominated Individual, Care Coordinator, Other)
-- [ ] Strengthen contract-experience prompting so members enter real numbers,
-      named commissioners and outcomes (this is what kills genericness at source)
-- [ ] Needs Supabase column: key_people jsonb (run the ALTER TABLE)
+- [x] Contract examples section live (up to 3, full PSQ fields), fed into both
+      written answers and the SQ contract table, always re-tailored to the spec
+- [x] Supabase columns added: key_people jsonb, contract_examples jsonb
+- [ ] Optional later: knowledge base of strong example ANSWERS for written
+      scored questions (separate from form-filling, helps answer quality)
 
 ## 4. Delivery + fulfilment
 - [ ] Full delivery pack email retest: confirm completion docs + checklist +
       portal link all land via generate-cana-background end to end
-- [ ] SQ fill audit v2 -- waiting on Joel to send the Reading PSQ
+- [x] SQ fill engine v2 rebuilt and live: tested against 7 real council SQs,
+      handles contract grids, right-cell/below-cell layouts, supplier name.
+      Contract examples from profile auto-fill the SQ contract table.
+- [ ] Watch real SQ output across more councils, refine matching as needed
 
 ## 5. Payments go-live (ONE coordinated switch, after ALL testing approved)
 - [ ] Convert membership to real recurring Stripe subscriptions (Option B):
