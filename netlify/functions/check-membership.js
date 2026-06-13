@@ -14,7 +14,7 @@ exports.handler = async (event) => {
       'https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/subscriptions' +
       '?email=eq.' + encodeURIComponent(email) +
       '&status=in.(active,trialing,past_due)' +
-      '&select=id,status,term_months,current_period_end' +
+      '&select=id,status,term_months,current_period_end,created_at' +
       '&order=current_period_end.desc&limit=1',
       { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } }
     );
@@ -33,7 +33,8 @@ exports.handler = async (event) => {
         member: member,
         status: sub ? sub.status : null,
         term_months: sub ? sub.term_months : null,
-        current_period_end: sub ? sub.current_period_end : null
+        current_period_end: sub ? sub.current_period_end : null,
+        created_at: sub ? sub.created_at : null
       })
     };
   } catch (err) {

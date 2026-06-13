@@ -232,14 +232,21 @@ var selectedTerm = 12;
       planBtn.textContent = 'Upgrade or manage membership';
     }
     var billedEl = document.getElementById('member-billed');
-    if (billedEl && memData.current_period_end) {
-      var d = new Date(memData.current_period_end);
+    if (billedEl) {
+      var renewDate = null;
+      if (memData.current_period_end) {
+        renewDate = new Date(memData.current_period_end);
+      } else if (memData.created_at && memData.term_months) {
+        // Fallback: derive renewal from signup date + term length
+        renewDate = new Date(memData.created_at);
+        renewDate.setMonth(renewDate.getMonth() + memData.term_months);
+      }
       var existing = document.getElementById('member-renewal-line');
-      if (!existing) {
+      if (!existing && renewDate && !isNaN(renewDate.getTime())) {
         var line = document.createElement('div');
         line.id = 'member-renewal-line';
         line.style.cssText = 'margin-top:6px;font-size:0.76rem;color:var(--teal-dk);font-weight:600;';
-        line.textContent = 'Your membership renews ' + d.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+        line.textContent = 'Your membership renews ' + renewDate.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
         billedEl.insertAdjacentElement('afterend', line);
       }
     }
