@@ -86,8 +86,8 @@ current state. Claude updates this file as items are completed.
 - [ ] Optional: weekly manual CSV export of tenders + subscriptions tables
 
 ## 8. Open decisions (Joel only)
-- [ ] Homepage 94% stat -- keep or remove now members submit unreviewed output
-- [ ] £480-credit-toward-membership offer -- yes / no
+- [x] Homepage 94% stat -- REMOVED
+- [x] £480-credit-toward-membership offer -- DECIDED NO
 - [ ] Daily matched-tenders member email -- build now or post-launch
 
 ---
