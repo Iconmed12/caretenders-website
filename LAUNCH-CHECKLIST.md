@@ -60,6 +60,19 @@ current state. Claude updates this file as items are completed.
       Contract examples from profile auto-fill the SQ contract table.
 - [ ] Watch real SQ output across more councils, refine matching as needed
 
+## 4b. Email migration to Cana domain (plan as one pass)
+- [ ] Verify the Cana domain in Resend (add DNS records) so emails can send
+      from e.g. noreply@cana.ai / hello@cana.ai
+- [ ] Create mailboxes on the Cana domain (WorkMail or similar): hello@,
+      review@ (dedicated review inbox, separate from consulting@), noreply@
+- [ ] Then Claude updates every address across the site + functions in ONE
+      pass (sending from, review alert to, contact addresses)
+- [ ] Do NOT point code at cana.ai before the domain is verified or email
+      delivery will break. Stays on icongrp.co.uk until then.
+- Note: dedicated review inbox idea -- review alerts currently go to
+  consulting@icongrp.co.uk which also receives every submission, so they get
+  buried. A separate review@ address is the fix, bundled into this migration.
+
 ## 5. Payments go-live (ONE coordinated switch, after ALL testing approved)
 - [ ] Convert membership to real recurring Stripe subscriptions (Option B):
       proper recurring prices in plan-checkout, real current_period_end,
