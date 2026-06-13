@@ -47,6 +47,7 @@ exports.handler = async (event) => {
       params.append('cancel_url', 'https://caretenders-website.netlify.app/cana.html?tender=' + (tenderId || ''));
       params.append('metadata[product]', 'review');
       if (tenderId) params.append('metadata[tender_id]', tenderId);
+      if (tenderTitle) params.append('metadata[tender_title]', String(tenderTitle).substring(0, 120));
     } else {
       return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Unknown product' }) };
     }

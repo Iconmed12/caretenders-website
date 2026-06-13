@@ -106,6 +106,43 @@ exports.handler = async (event) => {
       } catch (e) { console.log('Welcome email failed (non-fatal):', e.message); }
     }
 
+    // ── Expert Review purchase: alert the team so the review gets done ──
+    if (type === 'checkout.session.completed' && obj && obj.mode === 'payment' &&
+        obj.metadata && obj.metadata.product === 'review') {
+      try {
+        const RESEND_KEY = process.env.RESEND_API_KEY;
+        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@icongrp.co.uk';
+        const OPS_EMAIL = 'consulting@icongrp.co.uk';
+        const buyerEmail = (obj.customer_details && obj.customer_details.email) || obj.customer_email || 'unknown';
+        const tenderTitle = (obj.metadata && obj.metadata.tender_title) || 'a tender';
+        const tenderId = (obj.metadata && obj.metadata.tender_id) || '';
+        if (RESEND_KEY) {
+          const html = '<div style="font-family:Arial,sans-serif;max-width:600px;">' +
+            '<h2 style="color:#0B1929;">New Expert Review purchased</h2>' +
+            '<p style="color:#374151;line-height:1.7;">A client has paid for an Expert Review. Their bid responses were generated and emailed to them. Please review and sharpen against the scoring criteria within 48 hours.</p>' +
+            '<table style="border-collapse:collapse;font-size:14px;color:#374151;">' +
+            '<tr><td style="padding:4px 12px 4px 0;"><strong>Client email:</strong></td><td>' + buyerEmail + '</td></tr>' +
+            '<tr><td style="padding:4px 12px 4px 0;"><strong>Tender:</strong></td><td>' + tenderTitle + '</td></tr>' +
+            '<tr><td style="padding:4px 12px 4px 0;"><strong>Tender ID:</strong></td><td>' + tenderId + '</td></tr>' +
+            '</table>' +
+            '<p style="color:#6b7280;font-size:12px;margin-top:16px;">The client\'s generated responses are in their email and in the cana_jobs record for this tender.</p>' +
+            '</div>';
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'Cana AI <' + FROM_EMAIL + '>',
+              to: OPS_EMAIL,
+              reply_to: buyerEmail !== 'unknown' ? buyerEmail : undefined,
+              subject: 'Expert Review purchased: ' + tenderTitle,
+              html: html
+            })
+          });
+          console.log('Expert Review alert sent to', OPS_EMAIL, 'for', buyerEmail);
+        }
+      } catch (e) { console.log('Review alert failed (non-fatal):', e.message); }
+    }
+
     if (type === 'customer.subscription.updated' && obj) {
       await upsertSub({
         id: obj.id,
