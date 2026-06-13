@@ -117,6 +117,32 @@ exports.handler = async (event) => {
       (co.social_value ? 'Social value: ' + co.social_value + '\n' : '') +
       keyPeopleStr;
 
+    // Contract examples: real past contracts used as evidence. The description
+    // MUST always be re-shaped to match THIS tender's specification.
+    var contractExStr = '';
+    var ce = co.contract_examples;
+    if (typeof ce === 'string') { try { ce = JSON.parse(ce); } catch(e) { ce = null; } }
+    if (Array.isArray(ce) && ce.length) {
+      contractExStr = '\n=== REAL CONTRACT EXAMPLES (use as genuine evidence in relevant answers) ===\n' +
+        ce.map(function(c, i) {
+          return 'Contract ' + (i+1) + ': ' + (c.customer || '') +
+            (c.value ? ' | Value: ' + c.value : '') +
+            (c.start || c.end ? ' | ' + (c.start||'') + ' to ' + (c.end||'ongoing') : '') +
+            (c.contact_name ? ' | Reference: ' + c.contact_name + (c.contact_position ? ', ' + c.contact_position : '') : '') +
+            '\nWhat they delivered: ' + (c.description || '');
+        }).join('\n\n') +
+        '\n\n*** CRITICAL COMMAND ABOUT CONTRACT EXAMPLES ***\n' +
+        'The contract descriptions above are the TRUE facts of real contracts. ' +
+        'You MUST ALWAYS re-shape and tailor each description so it directly addresses ' +
+        'THIS tender\'s specification and scoring criteria. NEVER copy a description word for word. ' +
+        'Keep every fact true (the customer, dates, value, what was actually delivered) but ' +
+        'frame, emphasise and word the description so it reads as relevant evidence for the ' +
+        'specific service this buyer is asking for. The same real contract must read as ' +
+        'tailored, relevant proof no matter which tender the client is bidding for. ' +
+        'Do not invent contracts or change the underlying facts; only re-frame how they are described.\n';
+    }
+    coCtx = coCtx + contractExStr;
+
     // ── Sector-aware framing ──
     var isCare = (tender.category === 'care') || tender.is_cqc;
     var roleExamples = isCare
