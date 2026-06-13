@@ -90,6 +90,19 @@ exports.handler = async (event) => {
     if (kb.commissioner_preferences) kbContext += 'WHAT COMMISSIONERS WANT:\n'    + kbStr(kb.commissioner_preferences).substring(0,800) + '\n\n';
     if (kb.avoid)                    kbContext += 'NEVER DO THIS:\n'              + kbStr(kb.avoid).substring(0,600) + '\n\n';
 
+    // Key people: named, qualified staff the client provided at onboarding
+    var keyPeopleStr = '';
+    var kp = co.key_people;
+    if (typeof kp === 'string') { try { kp = JSON.parse(kp); } catch(e) { kp = null; } }
+    if (Array.isArray(kp) && kp.length) {
+      keyPeopleStr = 'NAMED KEY PEOPLE (use these real names, roles and qualifications wherever the question calls for named accountability):\n' +
+        kp.map(function(person) {
+          return '- ' + (person.name || '') + ', ' + (person.role || '') +
+            (person.qualifications ? ' (' + person.qualifications + ')' : '') +
+            (person.experience ? '. Experience: ' + person.experience : '');
+        }).join('\n') + '\n';
+    }
+
     var coCtx = 'Company: ' + clientName + '\n' +
       (co.cqc ? 'CQC: ' + co.cqc + '\n' : '') +
       'Services: ' + (co.services || '') + '\n' +
@@ -99,7 +112,10 @@ exports.handler = async (event) => {
       (co.experience ? 'Experience: ' + co.experience + '\n' : '') +
       (co.achievements ? 'Achievements: ' + co.achievements + '\n' : '') +
       (co.policies ? 'Policies: ' + co.policies + '\n' : '') +
-      (co.accreditations ? 'Accreditations: ' + co.accreditations + '\n' : '');
+      (co.accreditations ? 'Accreditations: ' + co.accreditations + '\n' : '') +
+      (co.kpis ? 'KPIs tracked: ' + co.kpis + '\n' : '') +
+      (co.social_value ? 'Social value: ' + co.social_value + '\n' : '') +
+      keyPeopleStr;
 
     // ── Sector-aware framing ──
     var isCare = (tender.category === 'care') || tender.is_cqc;
@@ -188,7 +204,7 @@ exports.handler = async (event) => {
         '- First person plural (we/our). Confident, specific, human. Vary sentence length. No AI tells like "Moreover" chains, "delve", "tapestry", "Furthermore" repetition.\n' +
         '- Write the response only — no preamble, no meta-commentary.';
 
-      var draft = await callSonnet(draftPrompt, 4000);
+      var draft = await callSonnet(draftPrompt, 8000);
 
       // STAGE B — Adversarial self-score and rewrite
       var revisePrompt =
@@ -207,7 +223,9 @@ exports.handler = async (event) => {
 
       var final;
       try {
-        final = await callSonnet(revisePrompt, 4000);
+        final = await callSonnet(revisePrompt, 8000);
+        // House rule: no em dashes anywhere. Replace with comma or spaced hyphen.
+        if (final) final = final.replace(/\s*\u2014\s*/g, ', ').replace(/\u2013/g, '-');
         if (!final || final.length < draft.length * 0.5) final = draft; // safety: revision collapsed
       } catch(e) {
         console.log('Q' + (i+1) + ' revision failed, using draft:', e.message);
@@ -442,6 +460,10 @@ exports.handler = async (event) => {
         alignment: AlignmentType.CENTER, spacing: { after: 200 }
       }));
       children.push(new Paragraph({
+        children: [new TextRun({ text: 'Anything shown in red, like [INSERT: ...], must be completed by you before you submit.', size: 20, font: 'Arial', bold: true, color: 'C00000' })],
+        spacing: { after: 160 }
+      }));
+      children.push(new Paragraph({
         children: [new TextRun({ text: 'Organisation: ' + clientName, size: 22, font: 'Arial' })],
         alignment: AlignmentType.CENTER, spacing: { after: 600 }
       }));
@@ -456,9 +478,16 @@ exports.handler = async (event) => {
           spacing: { after: 160 }, border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: '00C9E0' } }
         }));
         (r.answer || '').split('\n').forEach(function(line) {
-          if (line.trim()) children.push(new Paragraph({
-            children: [new TextRun({ text: line, size: 22, font: 'Arial' })], spacing: { after: 120 }
-          }));
+          if (!line.trim()) return;
+          // Split the line around [INSERT: ...] flags and render those bold red
+          var parts = line.split(/(\[INSERT:[^\]]*\])/g);
+          var runs = parts.filter(function(seg){ return seg.length; }).map(function(seg) {
+            if (/^\[INSERT:/.test(seg)) {
+              return new TextRun({ text: seg, size: 22, font: 'Arial', bold: true, color: 'C00000' });
+            }
+            return new TextRun({ text: seg, size: 22, font: 'Arial' });
+          });
+          children.push(new Paragraph({ children: runs, spacing: { after: 120 } }));
         });
       });
 
