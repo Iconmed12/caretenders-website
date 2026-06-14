@@ -285,7 +285,9 @@ exports.handler = async (event) => {
         final = cut;
       }
 
-      return { question: qText, answer: stripMarkdown(final) };
+      var finalText = stripMarkdown(final);
+      var wc = finalText.split(/\s+/).filter(Boolean).length;
+      return { question: qText, answer: finalText, wordCount: wc, wordLimit: target };
     }
 
     // Process in batches of 2 for speed within the 900s budget
@@ -539,8 +541,19 @@ exports.handler = async (event) => {
         }));
         children.push(new Paragraph({
           children: [new TextRun({ text: r.question || '', bold: true, size: 22, font: 'Arial', color: '0B1929' })],
-          spacing: { after: 160 }, border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: '00C9E0' } }
+          spacing: { after: 80 }, border: { bottom: { style: BorderStyle.SINGLE, size: 2, color: '00C9E0' } }
         }));
+        // Word count line: green within limit, red if over the tender's limit
+        if (typeof r.wordCount === 'number' && r.wordLimit) {
+          var over = r.wordCount > r.wordLimit;
+          var countText = over
+            ? 'Word count: ' + r.wordCount + ' of ' + r.wordLimit + ' allowed. OVER LIMIT, please shorten before submitting.'
+            : 'Word count: ' + r.wordCount + ' of ' + r.wordLimit + ' allowed. Within limit.';
+          children.push(new Paragraph({
+            children: [new TextRun({ text: countText, size: 18, font: 'Arial', italics: true, bold: over, color: over ? 'C00000' : '15803D' })],
+            spacing: { after: 160 }
+          }));
+        }
         (r.answer || '').split('\n').forEach(function(line) {
           if (!line.trim()) return;
           // Split the line around [INSERT: ...] flags and render those bold red
