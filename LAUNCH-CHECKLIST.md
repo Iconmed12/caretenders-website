@@ -38,8 +38,8 @@ current state. Claude updates this file as items are completed.
 - [~] Genericness: Key People section added to profile (named staff by role) and
       fed into generation; KPIs + social value now flow in too. Still want richer
       contract-example prompting in onboarding to push specificity further
-- [x] Word-count control: answers already generated to each question's stated
-      page/word limit
+- [x] Word-count control: answers generated to each question's limit AND a
+      count vs limit line shown under each answer (green within, red over)
 - [x] Em dashes stripped from all generated output (house rule)
 - [x] [INSERT: ...] gaps render bold red in the Word doc with a review banner
 
