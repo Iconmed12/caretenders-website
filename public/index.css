@@ -16,7 +16,8 @@
 
   /* NAV */
   nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; position:sticky; top:0; z-index:200; border-bottom:1px solid rgba(255,255,255,0.06); }
-  .nav-logo { display:flex; align-items:baseline; gap:8px; text-decoration:none; }
+  .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
+  .nav-logo-img { height:48px; width:auto; display:block; }
   .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
   .nav-logo-main span { color:var(--teal); }
   .nav-logo-by { font-size:0.7rem; color:rgba(255,255,255,0.35); letter-spacing:0.04em; font-weight:400; }
