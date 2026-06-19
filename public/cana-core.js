@@ -319,9 +319,18 @@
 
     const errEl = document.getElementById('form-error');
     const email = document.getElementById('f-email').value.trim();
-    if (!name || !founded || !staff || !cqc || !services || !regions || !email) {
-      errEl.textContent = 'Please fill in all required fields including your email address.';
+    var missing = [];
+    if (!name) missing.push('organisation name');
+    if (!founded) missing.push('year founded');
+    if (!staff) missing.push('number of staff');
+    if (!cqc) missing.push('CQC status');
+    if (!services) missing.push('services');
+    if (!regions) missing.push('regions');
+    if (!email) missing.push('email');
+    if (missing.length) {
+      errEl.textContent = 'Please complete: ' + missing.join(', ') + '.';
       errEl.style.display = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
     errEl.style.display = 'none';
@@ -372,8 +381,8 @@
     var cpData = p.ch_data ? (typeof p.ch_data === 'string' ? (function(){ try { return JSON.parse(p.ch_data); } catch(e){ return {}; } })() : p.ch_data) : {};
     var map = {
       'f-name':          p.company_name || cpData.company_name || '',
-      'f-founded':       p.year_founded || '',
-      'f-staff':         p.staff_count || '',
+      'f-founded':       p.founded_year || p.year_founded || '',
+      'f-staff':         p.total_staff || p.staff_count || '',
       'f-services':      p.services || '',
       'f-regions':       p.regions || '',
       'f-experience':    p.experience || '',
