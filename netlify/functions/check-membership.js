@@ -29,20 +29,25 @@ exports.handler = async (event) => {
 
     // Does a site account exist for this email? Drives the 'please sign in' prompt.
     let hasAccount = false;
-    try {
-      var srv = process.env.SUPABASE_SERVICE_KEY;
-      if (srv) {
+    var srv = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (srv) {
+      try {
+        // The admin filter param is GoTrue-version dependent; fetch a page and match.
         var uRes = await fetch(
-          'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?email=' + encodeURIComponent(email),
+          'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?per_page=200',
           { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
         );
         if (uRes.ok) {
           var uData = await uRes.json();
           var list = Array.isArray(uData) ? uData : (uData.users || []);
           hasAccount = list.some(function(u){ return (u.email || '').toLowerCase() === email; });
+        } else {
+          console.log('admin users lookup failed:', uRes.status);
         }
-      }
-    } catch (e) { hasAccount = false; }
+      } catch (e) { console.log('account check error:', e.message); }
+    } else {
+      console.log('SUPABASE_SERVICE_KEY not set');
+    }
 
     return {
       statusCode: 200, headers: cors,
