@@ -83,6 +83,26 @@
         console.error('Background function trigger failed:', e.message);
       });
 
+      // If they ticked Expert Review at the paywall, charge it now (after the
+      // 480 generation has started). Docs email regardless.
+      if (localStorage.getItem('cana_wants_review') === '1') {
+        localStorage.removeItem('cana_wants_review');
+        try {
+          var rRes = await fetch('/.netlify/functions/plan-checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              product: 'review',
+              tenderId: tenderId,
+              tenderTitle: (window._tenderData && window._tenderData.title) || '',
+              email: (mergedCo && mergedCo.email) || ''
+            })
+          });
+          var rData = await rRes.json();
+          if (rData.url) { window.location.href = rData.url; return; }
+        } catch(e) { console.error('Review checkout failed:', e.message); }
+      }
+
       // Start polling for status updates
       pollJobStatus(data.jobId);
 
@@ -395,13 +415,26 @@
       var el = document.getElementById(id);
       if (el && map[id] && !el.value) el.value = map[id];
     });
-    // CQC dropdown
+    // CQC dropdown: profile and form word these differently, so match on the
+    // rating keyword (Outstanding / Good / Requires Improvement / etc)
     var cqcEl = document.getElementById('f-cqc');
     if (cqcEl && p.cqc_status) {
+      var ps = p.cqc_status.toLowerCase();
+      var key = ps.indexOf('outstanding') >= 0 ? 'outstanding'
+              : ps.indexOf('good') >= 0 ? 'good'
+              : ps.indexOf('requires') >= 0 ? 'requires'
+              : ps.indexOf('inadequate') >= 0 ? 'inadequate'
+              : ps.indexOf('awaiting') >= 0 ? 'awaiting'
+              : ps.indexOf('not yet') >= 0 ? 'not yet'
+              : ps.indexOf('not applicable') >= 0 ? 'not applicable'
+              : ps.indexOf('registered') >= 0 ? 'registered' : '';
       for (var i=0;i<cqcEl.options.length;i++){
-        if (cqcEl.options[i].value === p.cqc_status || cqcEl.options[i].text === p.cqc_status){ cqcEl.selectedIndex = i; break; }
+        var optTxt = (cqcEl.options[i].value + ' ' + cqcEl.options[i].text).toLowerCase();
+        if (key && optTxt.indexOf(key) >= 0){ cqcEl.selectedIndex = i; break; }
       }
     }
+    // Stash company number so the CH lookup step can be skipped
+    if (p.company_number) window._savedCompanyNumber = p.company_number;
     // Stash key_people + contract_examples so generation uses them
     window._savedProfileExtras = { key_people: p.key_people || [], contract_examples: p.contract_examples || [], social_value: p.social_value || '' };
 

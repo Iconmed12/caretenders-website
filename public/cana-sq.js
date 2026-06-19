@@ -339,6 +339,9 @@ async function confirmSqAndGenerate() {
           chData: window._chData || {}
         });
         localStorage.setItem('cana_company_details', JSON.stringify(fullCo));
+        // Remember if they ticked Expert Review so we can charge it after the 480
+        if (window._wantsExpertReview) localStorage.setItem('cana_wants_review', '1');
+        else localStorage.removeItem('cana_wants_review');
       } catch(e) {}
 
       const res = await fetch('/.netlify/functions/cana-checkout', {
