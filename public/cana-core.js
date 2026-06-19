@@ -595,16 +595,21 @@
     try {
       // 10-minute cache: repeat tender visits skip the network round trip
       var cached = sessionStorage.getItem(cacheKey);
+      var c = null;
       if (cached) {
-        var c = JSON.parse(cached);
+        c = JSON.parse(cached);
         if (Date.now() - c.ts < 10 * 60 * 1000) { member = !!c.member; window._memberMeta = c; }
-        else cached = null;
+        else { cached = null; c = null; }
       }
-      if (!cached) {
+      var hasAccount = false;
+      if (cached) {
+        hasAccount = !!c.has_account;
+      } else {
         var res = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
         var data = await res.json();
         member = !!data.member;
-        window._memberMeta = { member: member, term_months: data.term_months, current_period_end: data.current_period_end, ts: Date.now() };
+        hasAccount = !!data.has_account;
+        window._memberMeta = { member: member, has_account: hasAccount, term_months: data.term_months, current_period_end: data.current_period_end, ts: Date.now() };
         try { sessionStorage.setItem(cacheKey, JSON.stringify(window._memberMeta)); } catch(e2) {}
       }
     } catch (e) { member = false; }
@@ -619,7 +624,7 @@
       }
     }
     if (window._isMember && typeof window.applyMemberPaywall === 'function') window.applyMemberPaywall();
-    return { member: member, verified: verified };
+    return { member: member, verified: verified, has_account: (window._memberMeta && window._memberMeta.has_account) || false };
   }
 
   window.applyMemberPaywall = function() {
