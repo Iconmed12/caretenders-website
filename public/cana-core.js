@@ -352,10 +352,62 @@
       checkMembership(sess.email),
       loadSavedProfile(sess.token)
     ]);
-    if (!memRes || !memRes.member || !memRes.verified) return;
-    if (!profile) return;
 
-    showMemberDashboard(sess.email, memRes, profile);
+    // Verified paid member with a profile -> member dashboard (free generate)
+    if (memRes && memRes.member && memRes.verified && profile) {
+      showMemberDashboard(sess.email, memRes, profile);
+      return;
+    }
+
+    // Signed-in account holder (not a paid member) with a saved profile ->
+    // pre-fill the form so they don't retype onboarding details. They still
+    // pay the 480 because they are not members.
+    if (profile) {
+      prefillFormFromProfile(profile, sess.email);
+    }
+  }
+
+  // Fill the Cana company form from a saved company_profiles row
+  function prefillFormFromProfile(p, email) {
+    var cpData = p.ch_data ? (typeof p.ch_data === 'string' ? (function(){ try { return JSON.parse(p.ch_data); } catch(e){ return {}; } })() : p.ch_data) : {};
+    var map = {
+      'f-name':          p.company_name || cpData.company_name || '',
+      'f-founded':       p.year_founded || '',
+      'f-staff':         p.staff_count || '',
+      'f-services':      p.services || '',
+      'f-regions':       p.regions || '',
+      'f-experience':    p.experience || '',
+      'f-achievements':  p.achievements || '',
+      'f-policies':      p.policies || '',
+      'f-accreditations':p.accreditations || '',
+      'f-kpis':          p.kpis || ''
+    };
+    Object.keys(map).forEach(function(id){
+      var el = document.getElementById(id);
+      if (el && map[id] && !el.value) el.value = map[id];
+    });
+    // CQC dropdown
+    var cqcEl = document.getElementById('f-cqc');
+    if (cqcEl && p.cqc_status) {
+      for (var i=0;i<cqcEl.options.length;i++){
+        if (cqcEl.options[i].value === p.cqc_status || cqcEl.options[i].text === p.cqc_status){ cqcEl.selectedIndex = i; break; }
+      }
+    }
+    // Stash key_people + contract_examples so generation uses them
+    window._savedProfileExtras = { key_people: p.key_people || [], contract_examples: p.contract_examples || [], social_value: p.social_value || '' };
+
+    // Show a small note that details were pre-filled
+    var note = document.getElementById('prefill-note');
+    if (!note) {
+      var emailField = document.getElementById('f-email');
+      if (emailField && emailField.parentNode) {
+        note = document.createElement('div');
+        note.id = 'prefill-note';
+        note.style.cssText = 'margin-top:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:9px 13px;font-size:0.78rem;color:#1e40af;';
+        note.innerHTML = '✓ We filled in your company details from your profile. Check them over, then continue.';
+        emailField.parentNode.appendChild(note);
+      }
+    }
   }
 
   async function loadSavedProfile(token) {
