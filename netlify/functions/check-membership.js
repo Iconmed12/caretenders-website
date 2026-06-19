@@ -27,10 +27,28 @@ exports.handler = async (event) => {
       else member = (new Date(sub.current_period_end).getTime() + 3 * 24 * 3600 * 1000) > Date.now();
     }
 
+    // Does a site account exist for this email? Drives the 'please sign in' prompt.
+    let hasAccount = false;
+    try {
+      var srv = process.env.SUPABASE_SERVICE_KEY;
+      if (srv) {
+        var uRes = await fetch(
+          'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?email=' + encodeURIComponent(email),
+          { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
+        );
+        if (uRes.ok) {
+          var uData = await uRes.json();
+          var list = Array.isArray(uData) ? uData : (uData.users || []);
+          hasAccount = list.some(function(u){ return (u.email || '').toLowerCase() === email; });
+        }
+      }
+    } catch (e) { hasAccount = false; }
+
     return {
       statusCode: 200, headers: cors,
       body: JSON.stringify({
         member: member,
+        has_account: hasAccount,
         status: sub ? sub.status : null,
         term_months: sub ? sub.term_months : null,
         current_period_end: sub ? sub.current_period_end : null,
