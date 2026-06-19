@@ -340,6 +340,13 @@
     var sess = await getAuthSession();
     if (!sess || !sess.email) return;
 
+    // Signed in: pre-fill the email field so they don't retype it, and greet them
+    var emailField = document.getElementById('f-email');
+    if (emailField && !emailField.value) {
+      emailField.value = sess.email;
+      window.canaEmailCheck(sess.email);
+    }
+
     // Parallel: check membership AND load profile at the same time
     var [memRes, profile] = await Promise.all([
       checkMembership(sess.email),
@@ -533,7 +540,8 @@
         if (!sb) return null;
         var sess = await sb.auth.getSession();
         if (sess.data && sess.data.session) {
-          return { email: (sess.data.session.user.email || '').toLowerCase(), token: sess.data.session.access_token, userId: sess.data.session.user.id };
+          window._sessEmail = (sess.data.session.user.email || '').toLowerCase();
+          return { email: window._sessEmail, token: sess.data.session.access_token, userId: sess.data.session.user.id };
         }
       } catch (e) {}
       return null;
@@ -550,15 +558,30 @@
     var email = (val || '').trim().toLowerCase();
     if (!email || email.indexOf('@') < 1) return;
     checkMembership(email).then(function(state) {
-      if (!badge || !state || !state.member) return;
-      if (state.verified) {
+      if (!badge || !state) return;
+      var signedInAs = window._sessEmail && window._sessEmail === email;
+
+      if (state.member && state.verified) {
+        // Paid member, signed in as them
         badge.style.background = '#f0fdf4'; badge.style.borderColor = '#bbf7d0'; badge.style.color = '#166534';
         badge.innerHTML = '✓ Cana Membership recognised, unlimited bidding active. No payment step for you.';
-      } else {
+        badge.style.display = 'block';
+      } else if (state.member && !state.verified) {
+        // Paid member, not signed in as them
         badge.style.background = '#fffbeb'; badge.style.borderColor = '#fde68a'; badge.style.color = '#92400e';
         badge.innerHTML = 'This email has a Cana Membership. <a href="/login.html" target="_blank" style="color:#92400e;font-weight:700;">Sign in</a> to unlock unlimited bidding, then <a href="#" onclick="canaEmailCheck(document.getElementById(\'f-email\').value); return false;" style="color:#92400e;font-weight:700;">check again</a>.';
+        badge.style.display = 'block';
+      } else if (signedInAs) {
+        // Signed in (not a member) - friendly greeting, no payment claim
+        badge.style.background = '#eff6ff'; badge.style.borderColor = '#bfdbfe'; badge.style.color = '#1e40af';
+        badge.innerHTML = '✓ Signed in as ' + email + '. Your details are saved for this bid.';
+        badge.style.display = 'block';
+      } else if (state.has_account) {
+        // Has an account but not signed in - prompt sign in
+        badge.style.background = '#eff6ff'; badge.style.borderColor = '#bfdbfe'; badge.style.color = '#1e40af';
+        badge.innerHTML = 'You have a Cana account. <a href="/login.html" target="_blank" style="color:#1e40af;font-weight:700;">Sign in</a> to use your saved details, then <a href="#" onclick="canaEmailCheck(document.getElementById(\'f-email\').value); return false;" style="color:#1e40af;font-weight:700;">check again</a>.';
+        badge.style.display = 'block';
       }
-      badge.style.display = 'block';
     });
   };
 
