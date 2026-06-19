@@ -580,6 +580,11 @@
     var email = (val || '').trim().toLowerCase();
     if (!email || email.indexOf('@') < 1) return;
 
+    // Instant, no server call: if you're signed in as this email, greet now
+    if (window._sessEmail && window._sessEmail === email) {
+      renderEmailBadge(badge, { member: false, verified: false, has_account: true, signedIn: true }, email);
+    }
+
     // Instant: if we already have this email cached, render immediately
     try {
       var cachedRaw = sessionStorage.getItem('cana_member_' + email);

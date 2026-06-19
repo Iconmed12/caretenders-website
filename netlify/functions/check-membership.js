@@ -10,51 +10,38 @@ exports.handler = async (event) => {
     if (!email) return { statusCode: 400, headers: cors, body: JSON.stringify({ member: false, error: 'Missing email' }) };
 
     const sbKey = process.env.SUPABASE_ANON_KEY;
-    const res = await fetch(
+    var srv = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    // Run BOTH lookups at once instead of waiting for one then the other
+    var subPromise = fetch(
       'https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/subscriptions' +
       '?email=eq.' + encodeURIComponent(email) +
       '&status=in.(active,trialing,past_due)' +
       '&select=id,status,term_months,current_period_end,created_at' +
       '&order=current_period_end.desc&limit=1',
       { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } }
-    );
-    const rows = await res.json();
-    const sub = Array.isArray(rows) && rows[0];
+    ).then(function(r){ return r.json(); }).catch(function(){ return []; });
 
+    var acctPromise = srv ? fetch(
+      'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?filter=' + encodeURIComponent(email),
+      { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
+    ).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }) : Promise.resolve(null);
+
+    var results = await Promise.all([subPromise, acctPromise]);
+    var rows = results[0];
+    var acctData = results[1];
+
+    const sub = Array.isArray(rows) && rows[0];
     let member = false;
     if (sub) {
       if (!sub.current_period_end) member = sub.status === 'active';
       else member = (new Date(sub.current_period_end).getTime() + 3 * 24 * 3600 * 1000) > Date.now();
     }
 
-    // Does a site account exist for this email? Drives the 'please sign in' prompt.
     let hasAccount = false;
-    var srv = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (srv) {
-      try {
-        // Fast path: GoTrue filter by email. Falls back to a list+match if the
-        // filter returns nothing (version dependent).
-        var fRes = await fetch(
-          'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?filter=' + encodeURIComponent(email),
-          { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
-        );
-        if (fRes.ok) {
-          var fData = await fRes.json();
-          var fList = Array.isArray(fData) ? fData : (fData.users || []);
-          hasAccount = fList.some(function(u){ return (u.email || '').toLowerCase() === email; });
-        }
-        if (!hasAccount) {
-          var uRes = await fetch(
-            'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?per_page=200',
-            { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
-          );
-          if (uRes.ok) {
-            var uData = await uRes.json();
-            var list = Array.isArray(uData) ? uData : (uData.users || []);
-            hasAccount = list.some(function(u){ return (u.email || '').toLowerCase() === email; });
-          }
-        }
-      } catch (e) { console.log('account check error:', e.message); }
+    if (acctData) {
+      var aList = Array.isArray(acctData) ? acctData : (acctData.users || []);
+      hasAccount = aList.some(function(u){ return (u.email || '').toLowerCase() === email; });
     }
 
     return {
