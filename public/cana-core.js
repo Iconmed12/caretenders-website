@@ -552,36 +552,48 @@
   // Live check as the person leaves the email field.
   // Member + signed in with that email  -> green badge, bypass armed.
   // Member but NOT signed in as them    -> amber prompt to sign in. No access.
+  function renderEmailBadge(badge, state, email) {
+    if (!badge || !state) return;
+    var signedInAs = window._sessEmail && window._sessEmail === email;
+    if (state.member && state.verified) {
+      badge.style.background = '#f0fdf4'; badge.style.borderColor = '#bbf7d0'; badge.style.color = '#166534';
+      badge.innerHTML = '✓ Cana Membership recognised, unlimited bidding active. No payment step for you.';
+      badge.style.display = 'block';
+    } else if (state.member && !state.verified) {
+      badge.style.background = '#fffbeb'; badge.style.borderColor = '#fde68a'; badge.style.color = '#92400e';
+      badge.innerHTML = 'This email has a Cana Membership. <a href="/login.html" target="_blank" style="color:#92400e;font-weight:700;">Sign in</a> to unlock unlimited bidding, then <a href="#" onclick="canaEmailCheck(document.getElementById(\'f-email\').value); return false;" style="color:#92400e;font-weight:700;">check again</a>.';
+      badge.style.display = 'block';
+    } else if (signedInAs) {
+      badge.style.background = '#eff6ff'; badge.style.borderColor = '#bfdbfe'; badge.style.color = '#1e40af';
+      badge.innerHTML = '✓ Signed in as ' + email + '. Your details are saved for this bid.';
+      badge.style.display = 'block';
+    } else if (state.has_account) {
+      badge.style.background = '#eff6ff'; badge.style.borderColor = '#bfdbfe'; badge.style.color = '#1e40af';
+      badge.innerHTML = 'You have a Cana account. <a href="/login.html" target="_blank" style="color:#1e40af;font-weight:700;">Sign in</a> to use your saved details, then <a href="#" onclick="canaEmailCheck(document.getElementById(\'f-email\').value); return false;" style="color:#1e40af;font-weight:700;">check again</a>.';
+      badge.style.display = 'block';
+    }
+  }
+
   window.canaEmailCheck = function(val) {
     var badge = document.getElementById('member-badge');
     if (badge) badge.style.display = 'none';
     var email = (val || '').trim().toLowerCase();
     if (!email || email.indexOf('@') < 1) return;
-    checkMembership(email).then(function(state) {
-      if (!badge || !state) return;
-      var signedInAs = window._sessEmail && window._sessEmail === email;
 
-      if (state.member && state.verified) {
-        // Paid member, signed in as them
-        badge.style.background = '#f0fdf4'; badge.style.borderColor = '#bbf7d0'; badge.style.color = '#166534';
-        badge.innerHTML = '✓ Cana Membership recognised, unlimited bidding active. No payment step for you.';
-        badge.style.display = 'block';
-      } else if (state.member && !state.verified) {
-        // Paid member, not signed in as them
-        badge.style.background = '#fffbeb'; badge.style.borderColor = '#fde68a'; badge.style.color = '#92400e';
-        badge.innerHTML = 'This email has a Cana Membership. <a href="/login.html" target="_blank" style="color:#92400e;font-weight:700;">Sign in</a> to unlock unlimited bidding, then <a href="#" onclick="canaEmailCheck(document.getElementById(\'f-email\').value); return false;" style="color:#92400e;font-weight:700;">check again</a>.';
-        badge.style.display = 'block';
-      } else if (signedInAs) {
-        // Signed in (not a member) - friendly greeting, no payment claim
-        badge.style.background = '#eff6ff'; badge.style.borderColor = '#bfdbfe'; badge.style.color = '#1e40af';
-        badge.innerHTML = '✓ Signed in as ' + email + '. Your details are saved for this bid.';
-        badge.style.display = 'block';
-      } else if (state.has_account) {
-        // Has an account but not signed in - prompt sign in
-        badge.style.background = '#eff6ff'; badge.style.borderColor = '#bfdbfe'; badge.style.color = '#1e40af';
-        badge.innerHTML = 'You have a Cana account. <a href="/login.html" target="_blank" style="color:#1e40af;font-weight:700;">Sign in</a> to use your saved details, then <a href="#" onclick="canaEmailCheck(document.getElementById(\'f-email\').value); return false;" style="color:#1e40af;font-weight:700;">check again</a>.';
-        badge.style.display = 'block';
+    // Instant: if we already have this email cached, render immediately
+    try {
+      var cachedRaw = sessionStorage.getItem('cana_member_' + email);
+      if (cachedRaw) {
+        var cd = JSON.parse(cachedRaw);
+        if (Date.now() - cd.ts < 10 * 60 * 1000) {
+          var sInAs = window._sessEmail && window._sessEmail === email;
+          renderEmailBadge(badge, { member: cd.member, verified: sInAs && cd.member, has_account: cd.has_account }, email);
+        }
       }
+    } catch(e) {}
+
+    checkMembership(email).then(function(state) {
+      renderEmailBadge(badge, state, email);
     });
   };
 

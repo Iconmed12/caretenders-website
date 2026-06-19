@@ -32,21 +32,29 @@ exports.handler = async (event) => {
     var srv = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (srv) {
       try {
-        // The admin filter param is GoTrue-version dependent; fetch a page and match.
-        var uRes = await fetch(
-          'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?per_page=200',
+        // Fast path: GoTrue filter by email. Falls back to a list+match if the
+        // filter returns nothing (version dependent).
+        var fRes = await fetch(
+          'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?filter=' + encodeURIComponent(email),
           { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
         );
-        if (uRes.ok) {
-          var uData = await uRes.json();
-          var list = Array.isArray(uData) ? uData : (uData.users || []);
-          hasAccount = list.some(function(u){ return (u.email || '').toLowerCase() === email; });
-        } else {
-          console.log('admin users lookup failed:', uRes.status);
+        if (fRes.ok) {
+          var fData = await fRes.json();
+          var fList = Array.isArray(fData) ? fData : (fData.users || []);
+          hasAccount = fList.some(function(u){ return (u.email || '').toLowerCase() === email; });
+        }
+        if (!hasAccount) {
+          var uRes = await fetch(
+            'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?per_page=200',
+            { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
+          );
+          if (uRes.ok) {
+            var uData = await uRes.json();
+            var list = Array.isArray(uData) ? uData : (uData.users || []);
+            hasAccount = list.some(function(u){ return (u.email || '').toLowerCase() === email; });
+          }
         }
       } catch (e) { console.log('account check error:', e.message); }
-    } else {
-      console.log('SUPABASE_SERVICE_KEY not set');
     }
 
     return {
