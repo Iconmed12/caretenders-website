@@ -83,25 +83,8 @@
         console.error('Background function trigger failed:', e.message);
       });
 
-      // If they ticked Expert Review at the paywall, charge it now (after the
-      // 480 generation has started). Docs email regardless.
-      if (localStorage.getItem('cana_wants_review') === '1') {
-        localStorage.removeItem('cana_wants_review');
-        try {
-          var rRes = await fetch('/.netlify/functions/plan-checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              product: 'review',
-              tenderId: tenderId,
-              tenderTitle: (window._tenderData && window._tenderData.title) || '',
-              email: (mergedCo && mergedCo.email) || ''
-            })
-          });
-          var rData = await rRes.json();
-          if (rData.url) { window.location.href = rData.url; return; }
-        } catch(e) { console.error('Review checkout failed:', e.message); }
-      }
+      // Expert Review (if ticked) was already paid in the same checkout as the
+      // 480, so nothing extra to charge here.
 
       // Start polling for status updates
       pollJobStatus(data.jobId);

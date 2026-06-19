@@ -350,7 +350,8 @@ async function confirmSqAndGenerate() {
         body: JSON.stringify({
           sessionId: currentSessionId,
           tenderId: tenderId,
-          tenderTitle: tenderData ? tenderData.title : ''
+          tenderTitle: tenderData ? tenderData.title : '',
+          wantsReview: !!window._wantsExpertReview
         })
       });
       const data = await res.json();

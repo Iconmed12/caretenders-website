@@ -21,6 +21,7 @@ exports.handler = async (event) => {
     const stripeData = await stripeRes.json();
 
     var paid = false;
+    var includesReview = false;
     var formEmail   = (companyDetails && companyDetails.email) || '';
     var stripeEmail = formEmail; // Default: use the email the client typed in the form
 
@@ -33,6 +34,7 @@ exports.handler = async (event) => {
           if (!formEmail && s.customer_details && s.customer_details.email) {
             stripeEmail = s.customer_details.email;
           }
+          if (s.metadata.includes_review === '1') includesReview = true;
           break;
         }
       }
@@ -59,6 +61,32 @@ exports.handler = async (event) => {
     });
     var jobResText = await jobRes.text();
     console.log('Job created:', jobRes.status, jobResText.substring(0, 200));
+
+    // If the bid included Expert Review, alert the team to action it
+    if (includesReview) {
+      try {
+        const RESEND_KEY = process.env.RESEND_API_KEY;
+        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@icongrp.co.uk';
+        if (RESEND_KEY) {
+          await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              from: 'Cana AI <' + FROM_EMAIL + '>',
+              to: 'consulting@icongrp.co.uk',
+              reply_to: stripeEmail || undefined,
+              subject: 'Expert Review purchased with a bid',
+              html: '<div style="font-family:Arial,sans-serif;"><h2 style="color:#0B1929;">Expert Review purchased</h2>' +
+                '<p>A client bought a bid with Expert Review. Please review within 48 hours.</p>' +
+                '<p><strong>Client:</strong> ' + (stripeEmail || 'unknown') + '<br>' +
+                '<strong>Tender ID:</strong> ' + tenderId + '<br>' +
+                '<strong>Job:</strong> ' + jobId + '</p></div>'
+            })
+          });
+          console.log('Review alert sent for combined bid+review');
+        }
+      } catch (e) { console.log('Review alert failed (non-fatal):', e.message); }
+    }
 
     // ── Trigger background function ──
     // Return job details to browser — browser will trigger the background function directly
