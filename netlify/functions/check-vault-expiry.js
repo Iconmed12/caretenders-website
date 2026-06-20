@@ -7,7 +7,7 @@ exports.handler = async () => {
     const sbKey = process.env.SUPABASE_ANON_KEY;
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
     const resendKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@icongrp.co.uk';
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@getcana.co.uk';
     const siteUrl = process.env.SITE_URL || 'https://caretenders.netlify.app';
 
     // Get all documents with expiry dates

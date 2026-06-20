@@ -82,10 +82,10 @@ exports.handler = async (event) => {
       // Fully guarded, never blocks the webhook response.
       try {
         const RESEND_KEY = process.env.RESEND_API_KEY;
-        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@icongrp.co.uk';
+        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@getcana.co.uk';
         if (RESEND_KEY && email) {
           const welcomeHtml = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
-            '<div style="background:#0B1929;padding:24px;border-radius:8px 8px 0 0;"><h1 style="color:#00C9E0;margin:0;">Cana AI</h1></div>' +
+            '<div style="background:#0B1929;padding:24px;border-radius:8px 8px 0 0;"><h1 style="color:#00C9E0;margin:0;">Cana</h1></div>' +
             '<div style="background:#fff;padding:28px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;">' +
             '<h2 style="color:#0B1929;margin:0 0 12px;">Welcome to Cana Membership</h2>' +
             '<p style="color:#374151;margin:0 0 16px;">Your membership is active. Bid on as many tenders as you want: Cana writes the SQ and responses, emails you the full pack with a submission checklist, and you submit.</p>' +
@@ -94,12 +94,12 @@ exports.handler = async (event) => {
             '<div style="font-size:13px;color:#92400e;margin-top:6px;line-height:1.7;">Your membership is linked to <strong>' + email + '</strong>. Create your free account (or sign in) with this exact email, and when you bid while signed in your unlimited access unlocks automatically with no payment step.</div>' +
             '</div>' +
             '<p style="padding:4px 0;"><a href="https://caretenders-website.netlify.app/register.html?email=' + encodeURIComponent(email) + '" style="display:inline-block;background:#00C9E0;color:#0B1929;font-weight:700;padding:11px 24px;border-radius:8px;text-decoration:none;font-size:14px;margin-right:8px;">Create your account &rarr;</a> <a href="https://caretenders-website.netlify.app" style="display:inline-block;background:#fff;border:1.5px solid #0B1929;color:#0B1929;font-weight:700;padding:10px 22px;border-radius:8px;text-decoration:none;font-size:14px;">Browse tenders</a></p>' +
-            '<p style="color:#9ca3af;font-size:11px;text-align:center;margin-top:18px;">Cana Consulting Solutions | 01268 20 30 10 | consulting@icongrp.co.uk</p>' +
+            '<p style="color:#9ca3af;font-size:11px;text-align:center;margin-top:18px;">Cana | 01268 20 30 10 | hello@getcana.co.uk</p>' +
             '</div></div>';
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: { Authorization: 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ from: 'Cana AI <' + FROM_EMAIL + '>', to: email, subject: 'Welcome to Cana Membership: one important detail', html: welcomeHtml })
+            body: JSON.stringify({ from: 'Cana <' + FROM_EMAIL + '>', to: email, subject: 'Welcome to Cana Membership: one important detail', html: welcomeHtml })
           });
           console.log('Welcome email sent to', email);
         }
@@ -111,8 +111,8 @@ exports.handler = async (event) => {
         obj.metadata && obj.metadata.product === 'review') {
       try {
         const RESEND_KEY = process.env.RESEND_API_KEY;
-        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@icongrp.co.uk';
-        const OPS_EMAIL = 'consulting@icongrp.co.uk';
+        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@getcana.co.uk';
+        const OPS_EMAIL = 'hello@getcana.co.uk';
         const buyerEmail = (obj.customer_details && obj.customer_details.email) || obj.customer_email || 'unknown';
         const tenderTitle = (obj.metadata && obj.metadata.tender_title) || 'a tender';
         const tenderId = (obj.metadata && obj.metadata.tender_id) || '';
@@ -131,7 +131,7 @@ exports.handler = async (event) => {
             method: 'POST',
             headers: { Authorization: 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              from: 'Cana AI <' + FROM_EMAIL + '>',
+              from: 'Cana <' + FROM_EMAIL + '>',
               to: OPS_EMAIL,
               reply_to: buyerEmail !== 'unknown' ? buyerEmail : undefined,
               subject: 'Expert Review purchased: ' + tenderTitle,
