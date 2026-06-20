@@ -75,6 +75,7 @@
           tenderId: data.tenderId || tenderId,
           sessionId: sid,
           includeSq: data.includeSq,
+          wantsReview: localStorage.getItem('cana_wants_review') === '1',
           companyDetails: data.companyDetails || mergedCo
         })
       }).then(function(r){
@@ -564,6 +565,7 @@
             tenderId: data.tenderId || tenderId,
             sessionId: 'member_' + data.jobId,
             includeSq: data.includeSq,
+            wantsReview: !!window._wantsExpertReview,
             companyDetails: data.companyDetails || companyDetails
           })
         });
@@ -766,6 +768,7 @@
           jobId: data.jobId,
           tenderId: data.tenderId || tenderId,
           sessionId: 'member_' + data.jobId,
+          wantsReview: !!window._wantsExpertReview,
           includeSq: data.includeSq,
           companyDetails: data.companyDetails || mergedCo
         })

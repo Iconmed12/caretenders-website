@@ -48,7 +48,7 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body || '{}');
     jobId = body.jobId;
-    const { tenderId, companyDetails, sessionId, includeSq } = body;
+    const { tenderId, companyDetails, sessionId, includeSq, wantsReview } = body;
 
     if (!jobId) return;
 
@@ -668,7 +668,7 @@ exports.handler = async (event) => {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + RESEND, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: 'hello@getcana.co.uk', subject: 'New — ' + clientName + ' | ' + (tender.title||'').substring(0,40), html: '<p><strong>Client:</strong> ' + clientName + ' | <strong>Email:</strong> ' + clientEmail + '</p>' + emailHtml, attachments })
+        body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: 'hello@getcana.co.uk', subject: (wantsReview ? 'REVIEW REQUESTED — ' : 'New — ') + clientName + ' | ' + (tender.title||'').substring(0,40), html: (wantsReview ? '<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#92400e;font-weight:700;">EXPERT REVIEW PURCHASED — please review the attached documents within 48 hours.</div>' : '') + '<p><strong>Client:</strong> ' + clientName + ' | <strong>Email:</strong> ' + clientEmail + '</p>' + emailHtml, attachments })
       });
     } catch(e) { console.log('ICONGRP email failed:', e.message); }
 
