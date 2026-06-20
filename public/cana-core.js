@@ -480,7 +480,7 @@
       if (profile.cqc_status) lines.push('CQC: ' + profile.cqc_status);
       if (profile.services) lines.push('Services: ' + profile.services.substring(0, 80) + (profile.services.length > 80 ? '...' : ''));
       if (profile.regions) lines.push('Regions: ' + profile.regions);
-      if (profile.staff_count) lines.push('Staff: ' + profile.staff_count);
+      if (profile.total_staff || profile.staff_count) lines.push('Staff: ' + (profile.total_staff || profile.staff_count));
       linesEl.innerHTML = lines.map(function(l){ return '<div>' + l + '</div>'; }).join('');
     }
 
@@ -497,8 +497,8 @@
     var cpData = p.ch_data ? (typeof p.ch_data === 'string' ? JSON.parse(p.ch_data) : p.ch_data) : {};
     return {
       name: p.company_name || cpData.company_name || '',
-      founded: p.year_founded || '',
-      staff: p.staff_count || '',
+      founded: p.founded_year || p.year_founded || '',
+      staff: p.total_staff || p.staff_count || '',
       cqc: p.cqc_status || '',
       services: p.services || '',
       regions: p.regions || '',
