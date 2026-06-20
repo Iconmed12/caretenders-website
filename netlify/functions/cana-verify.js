@@ -41,7 +41,7 @@ exports.handler = async (event) => {
     }
 
     if (!paid) {
-      return { statusCode: 402, headers: cors, body: JSON.stringify({ error: 'Payment not confirmed. If you have paid please email consulting@icongrp.co.uk with your reference.' }) };
+      return { statusCode: 402, headers: cors, body: JSON.stringify({ error: 'Payment not confirmed. If you have paid please email hello@getcana.co.uk with your reference.' }) };
     }
 
     // ── Create job record ──
@@ -66,14 +66,14 @@ exports.handler = async (event) => {
     if (includesReview) {
       try {
         const RESEND_KEY = process.env.RESEND_API_KEY;
-        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@icongrp.co.uk';
+        const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'noreply@getcana.co.uk';
         if (RESEND_KEY) {
           await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: { Authorization: 'Bearer ' + RESEND_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              from: 'Cana AI <' + FROM_EMAIL + '>',
-              to: 'consulting@icongrp.co.uk',
+              from: 'Cana <' + FROM_EMAIL + '>',
+              to: 'hello@getcana.co.uk',
               reply_to: stripeEmail || undefined,
               subject: 'Expert Review purchased with a bid',
               html: '<div style="font-family:Arial,sans-serif;"><h2 style="color:#0B1929;">Expert Review purchased</h2>' +
