@@ -58,7 +58,7 @@
 
       if (!res.ok || !data.paid) {
         showState('form'); setStep(1);
-        alert('Payment could not be verified: ' + (data.error || 'Please contact consulting@icongrp.co.uk'));
+        alert('Payment could not be verified: ' + (data.error || 'Please contact hello@getcana.co.uk'));
         return;
       }
 
@@ -227,12 +227,12 @@
 
     if (errorMsg) {
       if (h3) h3.textContent = 'Something went wrong';
-      if (p)  p.innerHTML = 'Our team has been notified. Please email <strong>consulting@icongrp.co.uk</strong> with your payment reference and we will send your documents manually within 1 hour.';
+      if (p)  p.innerHTML = 'Our team has been notified. Please email <strong>hello@getcana.co.uk</strong> with your payment reference and we will send your documents manually within 1 hour.';
     } else {
       if (h3) h3.innerHTML = '✅ Your documents are on their way';
       if (p)  p.innerHTML =
         'Your bid responses have been sent to <strong>' + email + '</strong> as Word documents.<br><br>' +
-        '<span style="font-size:0.85em;color:var(--muted);">Check your spam folder if you don\'t see it within 5 minutes. If you need help email consulting@icongrp.co.uk</span>';
+        '<span style="font-size:0.85em;color:var(--muted);">Check your spam folder if you don\'t see it within 5 minutes. If you need help email hello@getcana.co.uk</span>';
     }
   }
 
