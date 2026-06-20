@@ -34,18 +34,18 @@
   .nav-admin { background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.13); border-radius:6px; padding:6px 14px; font-size:0.82rem !important; color:rgba(255,255,255,0.75) !important; }
 
   /* HERO */
-  .hero { background:var(--navy); padding:5rem 2rem 4rem; text-align:center; position:relative; overflow:hidden; }
+  .hero { background:var(--white); padding:5rem 2rem 4rem; text-align:center; position:relative; overflow:hidden; border-bottom:1px solid var(--border); }
   .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 70% 55% at 50% -10%,rgba(0,201,224,0.1) 0%,transparent 65%); pointer-events:none; }
-  .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; background:rgba(0,201,224,0.1); border:1px solid rgba(0,201,224,0.22); border-radius:999px; padding:5px 16px; font-size:0.75rem; color:var(--teal); letter-spacing:0.07em; text-transform:uppercase; font-weight:500; margin-bottom:1.5rem; }
-  .hero h1 { font-family:'Inter',sans-serif; letter-spacing:-0.02em; font-size:clamp(2rem,5vw,3.2rem); color:var(--white); line-height:1.2; margin-bottom:1rem; max-width:680px; margin-left:auto; margin-right:auto; }
-  .hero h1 em { font-style:italic; color:var(--teal); }
-  .hero p { font-size:1rem; color:rgba(255,255,255,0.52); max-width:520px; margin:0 auto; line-height:1.78; }
+  .hero-eyebrow { display:inline-flex; align-items:center; gap:8px; font-size:0.75rem; color:var(--teal-dk); letter-spacing:0.12em; text-transform:uppercase; font-weight:700; margin-bottom:1.5rem; }
+  .hero h1 { font-family:'Inter',sans-serif; font-weight:800; letter-spacing:-0.03em; font-size:clamp(2rem,5vw,3.2rem); color:var(--navy); line-height:1.15; margin-bottom:1rem; max-width:680px; margin-left:auto; margin-right:auto; }
+  .hero h1 em { font-style:normal; color:var(--teal-dk); }
+  .hero p { font-size:1rem; color:var(--muted); max-width:520px; margin:0 auto; line-height:1.78; }
 
   /* STATS */
-  .stats-strip { background:var(--navy-mid); border-top:1px solid rgba(255,255,255,0.05); border-bottom:1px solid rgba(255,255,255,0.05); padding:1.4rem 2rem; display:flex; justify-content:center; gap:4rem; flex-wrap:wrap; }
+  .stats-strip { background:var(--offwhite); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:1.4rem 2rem; display:flex; justify-content:center; gap:4rem; flex-wrap:wrap; }
   .stat { text-align:center; }
-  .stat-num { font-size:1.5rem; font-weight:600; color:var(--white); display:block; }
-  .stat-label { font-size:0.74rem; color:rgba(255,255,255,0.4); margin-top:2px; letter-spacing:0.04em; }
+  .stat-num { font-size:1.5rem; font-weight:700; color:var(--navy); display:block; }
+  .stat-label { font-size:0.74rem; color:var(--muted); margin-top:2px; letter-spacing:0.04em; }
 
   /* CASE STUDIES GRID */
   .cases-section { max-width:1060px; margin:0 auto; padding:4rem 2rem 6rem; }
@@ -72,12 +72,12 @@
   .case-stat-value.teal  { color:var(--teal-dk); }
 
   .case-quote-block { max-width:1060px; margin:0 auto 4rem; padding:0 2rem; }
-  .case-quote { background:var(--navy); border-radius:16px; padding:2.5rem; position:relative; overflow:hidden; }
+  .case-quote { background:var(--offwhite); border:1px solid var(--border); border-radius:16px; padding:2.5rem; position:relative; overflow:hidden; }
   .case-quote::before { content:''; position:absolute; top:-30px; right:-30px; width:160px; height:160px; background:radial-gradient(circle,rgba(0,201,224,0.1) 0%,transparent 70%); pointer-events:none; }
-  .case-quote-mark { font-size:3rem; color:var(--teal); line-height:1; margin-bottom:0.5rem; font-family:'Inter',sans-serif; letter-spacing:-0.02em; }
-  .case-quote p { font-size:1.05rem; color:rgba(255,255,255,0.8); line-height:1.75; font-style:italic; margin-bottom:1.25rem; max-width:720px; }
-  .case-quote-author { font-size:0.85rem; color:rgba(255,255,255,0.45); }
-  .case-quote-author strong { color:rgba(255,255,255,0.75); display:block; margin-bottom:2px; }
+  .case-quote-mark { font-size:3rem; color:var(--teal-dk); line-height:1; margin-bottom:0.5rem; font-family:'Inter',sans-serif; letter-spacing:-0.02em; }
+  .case-quote p { font-size:1.05rem; color:var(--navy); line-height:1.75; font-style:italic; margin-bottom:1.25rem; max-width:720px; }
+  .case-quote-author { font-size:0.85rem; color:var(--muted); }
+  .case-quote-author strong { color:var(--navy); display:block; margin-bottom:2px; }
 
   /* CTA STRIP */
   .cta-strip { background:var(--teal); padding:4rem 2rem; text-align:center; }
@@ -135,7 +135,6 @@
 
 <!-- STATS -->
 <div class="stats-strip">
-  <div class="stat"><span class="stat-num">94%</span><span class="stat-label">Success rate</span></div>
   <div class="stat"><span class="stat-num">£4.2M+</span><span class="stat-label">Contract value won</span></div>
   <div class="stat"><span class="stat-num">47 min</span><span class="stat-label">Avg. turnaround</span></div>
   <div class="stat"><span class="stat-num">38+</span><span class="stat-label">Tenders submitted</span></div>
