@@ -75,7 +75,7 @@
           tenderId: data.tenderId || tenderId,
           sessionId: sid,
           includeSq: data.includeSq,
-          wantsReview: localStorage.getItem('cana_wants_review') === '1',
+          wantsReview: (function(){ var w = localStorage.getItem('cana_wants_review') === '1'; localStorage.removeItem('cana_wants_review'); return w; })(),
           companyDetails: data.companyDetails || mergedCo
         })
       }).then(function(r){
@@ -102,11 +102,11 @@
     var p  = document.querySelector('.loading-state p');
     var spinner = document.querySelector('.loading-state .loading-spinner');
     if (spinner) spinner.style.display = 'none';
-    if (h3) { h3.innerHTML = '✅ Payment received — Cana AI is on it'; }
+    if (h3) { h3.innerHTML = '✅ Payment received — Cana is on it'; }
     if (p)  { p.innerHTML =
       'Your bid responses will be sent to <strong>' + (email||'your email') + '</strong> as Word documents.<br><br>' +
       '<span style="color:var(--muted);font-size:0.88em;">Expect to receive your documents within 1 hour. ' +
-      'If you don\'t receive anything please email <strong>hello@cana.ai</strong></span>'; }
+      'If you don\'t receive anything please email <strong>hello@getcana.co.uk</strong></span>'; }
 
     // Prompt to register an account (for guest buyers)
     setTimeout(function() {
