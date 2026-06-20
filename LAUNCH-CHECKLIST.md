@@ -52,6 +52,14 @@ current state. Claude updates this file as items are completed.
 - [ ] Optional later: knowledge base of strong example ANSWERS for written
       scored questions (separate from form-filling, helps answer quality)
 
+## 3c. Profile reuse when bidding (mostly done)
+- [x] Signed-in account holders: bid form pre-fills from saved profile
+      (name, staff, founded, CQC, services, regions, experience)
+- [x] Staff and founded-year field name mismatches fixed across member +
+      non-member paths
+- [ ] Company-number step: skip the Companies House lookup when the profile
+      already has the company number (PARKED, do later)
+
 ## 4. Delivery + fulfilment
 - [ ] Full delivery pack email retest: confirm completion docs + checklist +
       portal link all land via generate-cana-background end to end
