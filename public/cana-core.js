@@ -50,7 +50,7 @@
         body: JSON.stringify({
           sessionId: sid,
           tenderId: tenderId,
-          includeSq: !!(window._tenderData && window._tenderData.sq_data),
+          includeSq: false, // SQ auto-fill paused for launch - see SQ_FEATURE_PAUSED note
           companyDetails: mergedCo
         })
       });
@@ -544,7 +544,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tenderId: tenderId,
-          includeSq: !!(window._tenderData && window._tenderData.sq_data),
+          includeSq: false, // SQ auto-fill paused for launch - see SQ_FEATURE_PAUSED note
           companyDetails: companyDetails,
           accessToken: window._authToken || '',
           wantsReview: !!window._wantsExpertReview
@@ -752,7 +752,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           tenderId: tenderId,
-          includeSq: !!(window._tenderData && window._tenderData.sq_data),
+          includeSq: false, // SQ auto-fill paused for launch - see SQ_FEATURE_PAUSED note
           companyDetails: mergedCo,
           accessToken: window._authToken || ''
         })

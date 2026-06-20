@@ -8,8 +8,20 @@ async function populateSqStep() {
 
     try {
       var tEl = document.getElementById('sq-doc-tender-title');
-      if (tEl && td) tEl.textContent = td.title || 'Selection Questionnaire';
+      if (tEl && td) tEl.textContent = td.title || 'Your tender responses';
     } catch(e) {}
+
+    // ── SQ auto-fill paused for launch: show a clean confirm-and-generate screen ──
+    // (Full SQ preview code retained below the early return for when the feature
+    //  is perfected and switched back on.)
+    if (true) {
+      el.innerHTML =
+        '<div style="text-align:center;padding:1.5rem 1rem;">' +
+          '<div style="font-size:0.95rem;color:#0B1929;font-weight:700;margin-bottom:0.5rem;">Your responses are ready to generate</div>' +
+          '<div style="font-size:0.85rem;color:#6b7280;line-height:1.6;max-width:440px;margin:0 auto;">Cana will write full, tailored answers to every question in this tender using your company details. You will receive them as a Word document to review and submit.</div>' +
+        '</div>';
+      return;
+    }
 
     var companyName = ch.company_name || co.name || '—';
 
@@ -423,7 +435,7 @@ async function confirmSqAndGenerate() {
       var sqFileName = null;
       var sqDataForEmail = null;
 
-      if (window._includeSq && window._tenderData && window._tenderData.sq_data && window._tenderData.sq_data.storagePath) {
+      if (false && window._includeSq && window._tenderData && window._tenderData.sq_data && window._tenderData.sq_data.storagePath) { // SQ auto-fill paused for launch
         try {
           var sqFillRes = await fetch('/.netlify/functions/fill-sq-doc', {
             method: 'POST',
