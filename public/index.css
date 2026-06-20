@@ -328,31 +328,31 @@
   .feature-desc { font-size:0.78rem; color:var(--muted); line-height:1.6; }
 
   /* ══ CANA SECTION ══ */
-  .cana-section { background:var(--navy); padding:5rem 2rem; }
+  .cana-section { background:var(--white); padding:5rem 2rem; border-top:1px solid var(--border); }
   .cana-inner { max-width:1000px; margin:0 auto; }
-  .cana-badge { display:inline-flex; align-items:center; gap:10px; background:rgba(0,201,224,0.08); border:1px solid rgba(0,201,224,0.18); border-radius:999px; padding:5px 16px; font-size:0.72rem; color:rgba(0,201,224,0.85); letter-spacing:0.08em; text-transform:uppercase; font-weight:600; margin-bottom:2rem; }
+  .cana-badge { display:inline-flex; align-items:center; gap:10px; font-size:0.72rem; color:var(--teal-dk); letter-spacing:0.12em; text-transform:uppercase; font-weight:700; margin-bottom:2rem; }
   .cana-badge-dot { width:6px; height:6px; border-radius:50%; background:var(--teal); animation:pulse 2s ease-in-out infinite; flex-shrink:0; }
-  .cana-heading { font-family:'Playfair Display',serif; font-size:clamp(1.7rem,3.2vw,2.3rem); color:#fff; line-height:1.22; margin-bottom:1rem; }
-  .cana-heading em { font-style:italic; color:var(--teal); }
-  .cana-body { font-size:0.92rem; color:rgba(255,255,255,0.5); line-height:1.8; }
+  .cana-heading { font-family:'Playfair Display',serif; font-size:clamp(1.7rem,3.2vw,2.3rem); color:var(--navy); line-height:1.22; margin-bottom:1rem; }
+  .cana-heading em { font-style:italic; color:var(--teal-dk); }
+  .cana-body { font-size:0.92rem; color:var(--muted); line-height:1.8; }
   .cana-checklist { list-style:none; display:flex; flex-direction:column; gap:0.55rem; margin:1.4rem 0 0; }
-  .cana-checklist li { display:flex; align-items:flex-start; gap:10px; font-size:0.86rem; color:rgba(255,255,255,0.65); line-height:1.5; }
-  .check { color:var(--teal); font-weight:700; flex-shrink:0; margin-top:1px; }
-  .cana-link { color:rgba(255,255,255,0.45); font-size:0.85rem; text-decoration:none; transition:color 0.2s; }
-  .cana-link:hover { color:rgba(255,255,255,0.75); }
+  .cana-checklist li { display:flex; align-items:flex-start; gap:10px; font-size:0.86rem; color:var(--navy); line-height:1.5; }
+  .check { color:var(--teal-dk); font-weight:700; flex-shrink:0; margin-top:1px; }
+  .cana-link { color:var(--muted); font-size:0.85rem; text-decoration:none; transition:color 0.2s; }
+  .cana-link:hover { color:var(--teal-dk); }
 
-  .how-card { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.09); border-radius:20px; padding:2rem; position:relative; overflow:hidden; }
+  .how-card { background:var(--offwhite); border:1px solid var(--border); border-radius:20px; padding:2rem; position:relative; overflow:hidden; }
   .how-card::before { content:''; position:absolute; top:-40px; right:-40px; width:180px; height:180px; background:radial-gradient(circle,rgba(0,201,224,0.08) 0%,transparent 70%); pointer-events:none; }
   .how-card-label { font-size:0.68rem; font-weight:600; color:var(--teal); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:1.5rem; }
   .how-steps { display:flex; flex-direction:column; gap:0; }
   .how-step { display:flex; gap:14px; align-items:flex-start; }
   .how-num { width:32px; height:32px; border-radius:50%; background:rgba(0,201,224,0.1); border:1px solid rgba(0,201,224,0.25); display:flex; align-items:center; justify-content:center; font-size:0.78rem; font-weight:700; color:var(--teal); flex-shrink:0; }
-  .how-title { font-size:0.87rem; font-weight:600; color:#fff; margin-bottom:3px; padding-top:4px; }
-  .how-desc { font-size:0.78rem; color:rgba(255,255,255,0.4); line-height:1.55; }
-  .how-connector { width:1px; height:16px; background:rgba(255,255,255,0.07); margin-left:15px; margin:0.85rem 0 0.85rem 15px; }
+  .how-title { font-size:0.87rem; font-weight:600; color:var(--navy); margin-bottom:3px; padding-top:4px; }
+  .how-desc { font-size:0.78rem; color:var(--muted); line-height:1.55; }
+  .how-connector { width:1px; height:16px; background:var(--border); margin-left:15px; margin:0.85rem 0 0.85rem 15px; }
   .how-footer { margin-top:1.75rem; background:rgba(0,201,224,0.06); border:1px solid rgba(0,201,224,0.16); border-radius:10px; padding:1rem 1.1rem; display:flex; align-items:center; gap:10px; }
-  .how-footer-title { font-size:0.82rem; font-weight:600; color:#fff; }
-  .how-footer-sub { font-size:0.73rem; color:rgba(255,255,255,0.35); margin-top:2px; }
+  .how-footer-title { font-size:0.82rem; font-weight:600; color:var(--navy); }
+  .how-footer-sub { font-size:0.73rem; color:var(--muted); margin-top:2px; }
   @media(max-width:700px){ .cana-grid{grid-template-columns:1fr !important;} }
 
   /* ══ SECTOR BAND ══ */
