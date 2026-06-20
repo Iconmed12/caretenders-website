@@ -121,6 +121,39 @@ current state. Claude updates this file as items are completed.
 - [x] £480-credit-toward-membership offer -- DECIDED NO
 - [ ] Daily matched-tenders member email -- build now or post-launch
 
+## 9. FUTURE ROADMAP (~12 months out, AFTER bidding product is established)
+Expansion beyond bidding into the rest of the supplier procurement journey:
+find -> win -> DELIVER. The "after they win" side is the big recurring-revenue
+opportunity and is underserved for SMEs. Do NOT build until the core bidding
+product is live and has winning customers who pull us into it.
+
+Post-win contract management (the priority direction):
+- [ ] Mobilisation plans + checklists (the 4-12 week scramble after winning:
+      staffing, training, policies, TUPE) -- generate tailored to the contract
+- [ ] Ongoing performance reporting -- template + part-automate the KPI/outcome
+      returns councils require (quarterly/monthly), with due-date reminders.
+      RECURRING revenue, sticky, genuinely painful for providers = ideal
+- [ ] Compliance + audit readiness tracker -- CQC, safeguarding, insurance,
+      DBS, policy reviews; flag what is expiring (extends existing CQC data)
+- [ ] Variations / change requests -- draft them like we draft bids
+- [ ] Renewal loop -- log outcomes/satisfaction/achievements THROUGHOUT the
+      contract so the re-tender bid half-writes itself from real delivery data
+      (closes the loop back into the core bidding product)
+
+Earlier-stage expansion (nearer-term, still bidding-adjacent):
+- [ ] Smarter tender matching + qualification ("these 3 are worth your time")
+- [ ] Bid/no-bid scoring -- predict likelihood of scoring well before they
+      invest effort
+- [ ] Framework / DPS management -- get onto lists, win the mini-competitions
+- [ ] Tender intelligence data product -- win rates, pricing benchmarks, who
+      buys what (this is where "Procurement Intelligence" earns its name)
+
+Strategic note: this arc (find -> win -> deliver) is why "Cana Procurement
+Intelligence" is not overreach -- it is the roadmap. Bidding stays the anchor;
+growth goes earlier (find/qualify) and later (deliver/keep the contract).
+Revenue shifts from transactional (pay-per-bid) to recurring (pay monthly to
+keep delivering), which is a bigger, stickier business.
+
 ---
 
 ## Done this far (for confidence)
