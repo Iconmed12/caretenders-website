@@ -32,7 +32,7 @@
 
   /* PAGE HEADER */
   .page-header { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; margin-bottom:2rem; flex-wrap:wrap; }
-  .page-header-left h1 { font-family:'Playfair Display',serif; font-size:1.75rem; color:var(--navy); margin-bottom:0.35rem; }
+  .page-header-left h1 { font-family:'Inter',sans-serif; letter-spacing:-0.02em; font-size:1.75rem; color:var(--navy); margin-bottom:0.35rem; }
   .page-header-left p { font-size:0.9rem; color:var(--muted); line-height:1.6; }
   .btn-upload { background:var(--navy); color:var(--white); border:none; border-radius:10px; padding:11px 22px; font-size:0.9rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; display:flex; align-items:center; gap:8px; transition:background 0.2s; white-space:nowrap; }
   .btn-upload:hover { background:#1a3550; }
