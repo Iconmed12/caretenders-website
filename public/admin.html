@@ -41,7 +41,7 @@
     </div>
     <div class="sidebar-section">System</div>
     <div class="sidebar-nav">
-      <button class="nav-item" onclick="showPage('cana',this)"><i class="ti ti-sparkles"></i> Cana AI <span class="nav-badge" id="sbCana">0</span></button>
+      <button class="nav-item" onclick="showPage('cana',this)"><i class="ti ti-sparkles"></i> Cana <span class="nav-badge" id="sbCana">0</span></button>
 <button class="nav-item" onclick="showPage('tenders-import',this)"><i class="ti ti-cloud-download"></i> Tender Import <span class="nav-badge" id="sbImport">0</span></button>
 <button class="nav-item" onclick="showPage('knowledge',this)"><i class="ti ti-brain"></i> Knowledge Base</button>
       <button class="nav-item" onclick="showPage('settings',this)"><i class="ti ti-settings"></i> Settings</button>
@@ -114,7 +114,7 @@
     <div class="page" id="page-cana">
       <div style="background:rgba(0,201,224,0.06);border:1px solid rgba(0,201,224,0.2);border-radius:8px;padding:10px 16px;margin-bottom:1.25rem;font-size:13px;color:#0099AA;display:flex;align-items:center;gap:8px;">
         <i class="ti ti-sparkles" style="font-size:16px;flex-shrink:0;"></i>
-        <span>Upload documents for each tender so Cana AI knows exactly how to write the responses. You can upload multiple files per section.</span>
+        <span>Upload documents for each tender so Cana knows exactly how to write the responses. You can upload multiple files per section.</span>
       </div>
       <!-- LIVE / NEEDS ATTENTION PANELS -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;" id="canaStatusPanels">
@@ -236,7 +236,7 @@
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
             <div>
               <div style="font-weight:600;font-size:0.95rem;">Tender Questions</div>
-              <div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">Type or paste each question below. Cana AI will write a full response to every one.</div>
+              <div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">Type or paste each question below. Cana will write a full response to every one.</div>
             </div>
             <button onclick="addCanaQuestion()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
               <i class="ti ti-plus" style="font-size:13px;"></i> Add question
@@ -250,7 +250,7 @@
 
         <div style="display:flex;align-items:center;gap:1rem;">
           <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
-            <i class="ti ti-sparkles" style="font-size:14px;"></i> Save &amp; train Cana AI
+            <i class="ti ti-sparkles" style="font-size:14px;"></i> Save &amp; train Cana
           </button>
           <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved — Cana is ready for this tender</span>
         </div>
@@ -313,7 +313,7 @@
     <div class="page" id="page-knowledge">
       <div style="margin-bottom:1.5rem;">
         <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:4px;">Knowledge Base</h2>
-        <p style="color:var(--text-muted);font-size:0.875rem;">Train Cana AI with winning examples, writing style, and commissioner preferences. Applies to every tender automatically.</p>
+        <p style="color:var(--text-muted);font-size:0.875rem;">Train Cana with winning examples, writing style, and commissioner preferences. Applies to every tender automatically.</p>
       </div>
       <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;">
         <div style="font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><i class="ti ti-pencil" style="color:#2563eb;"></i> Writing Style &amp; Structure</div>
@@ -421,7 +421,7 @@
         <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.5rem;">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:1rem;">
             <div style="width:42px;height:42px;background:#0B1929;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">⚡</div>
-            <div style="flex:1;"><div style="font-weight:600;font-size:0.95rem;">Cana AI Writing Knowledge</div><div style="font-size:0.78rem;color:var(--text-light);">Teach Cana how to write winning tenders</div></div>
+            <div style="flex:1;"><div style="font-weight:600;font-size:0.95rem;">Cana Writing Knowledge</div><div style="font-size:0.78rem;color:var(--text-light);">Teach Cana how to write winning tenders</div></div>
             <div style="background:#e8f7ee;color:#1a7a3f;font-size:0.72rem;font-weight:600;padding:4px 12px;border-radius:999px;flex-shrink:0;">Active</div>
           </div>
           <textarea id="canaKnowledge" style="width:100%;min-height:180px;padding:0.85rem;border:1.5px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:var(--text);line-height:1.6;resize:vertical;outline:none;" placeholder="Write your tender guidance here..."></textarea>
