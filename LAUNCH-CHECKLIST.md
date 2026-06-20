@@ -60,6 +60,17 @@ current state. Claude updates this file as items are completed.
 - [ ] Company-number step: skip the Companies House lookup when the profile
       already has the company number (PARKED, do later)
 
+## 3d. SQ auto-fill — PAUSED for launch (decision)
+- [x] SQ document auto-fill switched OFF (hidden, not deleted). Reason: never
+      fully completed every SQ format; a partly-filled legal form risks more
+      work for the client and looks unreliable.
+- [x] Launch on the reliable core: Cana writes the tender RESPONSES, delivered
+      as Word docs. Expert Review still applies to those responses.
+- [ ] FUTURE: perfect SQ filling against many real council formats, then
+      relaunch as an announced upgrade ("Cana now completes your SQ").
+- Switch-back: includeSq flags + the if(false) guard in cana-sq.js + the early
+      return in populateSqStep. All SQ code retained.
+
 ## 4. Delivery + fulfilment
 - [ ] Full delivery pack email retest: confirm completion docs + checklist +
       portal link all land via generate-cana-background end to end
