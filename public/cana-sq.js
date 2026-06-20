@@ -250,7 +250,7 @@ async function populateSqStep() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     // Update paywall to show SQ is included
     var pNote = document.querySelector('.paywall-note');
-    if (pNote) pNote.textContent = 'Secure payment via Stripe · Responses + completed SQ delivered to your email as Word documents';
+    if (pNote) pNote.textContent = 'Secure payment via Stripe · Responses delivered to your email as Word documents';
   }
 
 async function confirmSqAndGenerate() {
@@ -547,7 +547,7 @@ async function confirmSqAndGenerate() {
 
     html += '<div style="font-size:0.85rem;font-weight:800;color:var(--navy,#0B1929);margin-bottom:6px;">1. Completed by Cana AI</div>';
     html += '<div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:14px;">' +
-      '<div style="font-size:0.82rem;color:var(--navy,#0B1929);padding:2px 0;">All responses above, plus any completed SQ sent to your email.</div>' +
+      '<div style="font-size:0.82rem;color:var(--navy,#0B1929);padding:2px 0;">All responses above, sent to your email as Word documents.</div>' +
       '<div style="font-size:0.82rem;font-weight:800;color:#c53030;margin-top:4px;">READ THROUGH EVERY ANSWER BEFORE SUBMITTING. Check each one reflects your business accurately.</div></div>';
 
     if (docs.length) {

@@ -104,7 +104,7 @@
     if (spinner) spinner.style.display = 'none';
     if (h3) { h3.innerHTML = '✅ Payment received — Cana AI is on it'; }
     if (p)  { p.innerHTML =
-      'Your bid responses and completed SQ will be sent to <strong>' + (email||'your email') + '</strong> as Word documents.<br><br>' +
+      'Your bid responses will be sent to <strong>' + (email||'your email') + '</strong> as Word documents.<br><br>' +
       '<span style="color:var(--muted);font-size:0.88em;">Expect to receive your documents within 1 hour. ' +
       'If you don\'t receive anything please email <strong>hello@cana.ai</strong></span>'; }
 
@@ -231,7 +231,7 @@
     } else {
       if (h3) h3.innerHTML = '✅ Your documents are on their way';
       if (p)  p.innerHTML =
-        'Your bid responses and completed SQ have been sent to <strong>' + email + '</strong> as Word documents.<br><br>' +
+        'Your bid responses have been sent to <strong>' + email + '</strong> as Word documents.<br><br>' +
         '<span style="font-size:0.85em;color:var(--muted);">Check your spam folder if you don\'t see it within 5 minutes. If you need help email consulting@icongrp.co.uk</span>';
     }
   }
