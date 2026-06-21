@@ -190,27 +190,32 @@ exports.handler = async (event) => {
     }
 
     // ── Find a Tender (UK-wide, all values, above + below threshold since Feb 2025) ──
-    // Uses the same OCDS-compatible search endpoint — no auth required
-    for (var fatPage = 0; fatPage < pages; fatPage++) {
-      var fatUrl = 'https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages' +
-        '?publishedFrom=' + getYesterdayDate() +
-        '&stages=tender' +
-        '&size=100&page=' + fatPage;
+    // Uses the OCDS release package endpoint. Valid params per FAT API spec:
+    // stages, limit, cursor, updatedFrom, updatedTo. Pagination is cursor-based via links.next.
+    var fatNextUrl = 'https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages' +
+      '?updatedFrom=' + getYesterdayDateISO() +
+      '&stages=tender' +
+      '&limit=100';
 
-      console.log('Fetching FAT API page', fatPage, ':', fatUrl);
-      var fatRes = await fetch(fatUrl, {
+    for (var fatLoop = 0; fatLoop < pages && fatNextUrl; fatLoop++) {
+      console.log('Fetching FAT API page', fatLoop, ':', fatNextUrl);
+      var fatRes = await fetch(fatNextUrl, {
         headers: { 'Accept': 'application/json', 'User-Agent': 'Cana/1.0' }
       });
 
       if (!fatRes.ok) {
         var fatErr = await fatRes.text();
-        console.log('FAT API page', fatPage, 'failed:', fatRes.status, fatErr.substring(0,200));
+        console.log('FAT API page', fatLoop, 'failed:', fatRes.status, fatErr.substring(0,200));
         break;
       }
 
       var fatData = await fatRes.json();
       var fatReleases = fatData.releases || fatData.records || [];
-      console.log('FAT page', fatPage, '— fetched', fatReleases.length, 'records');
+      console.log('FAT page', fatLoop, '— fetched', fatReleases.length, 'records');
+
+      // Set up next page from the cursor link FAT returns
+      fatNextUrl = (fatData.links && fatData.links.next) ? fatData.links.next : '';
+
       if (!fatReleases.length) break;
 
       for (var fatRelease of fatReleases) {
@@ -288,4 +293,10 @@ function getYesterdayDate() {
   var d = new Date();
   d.setDate(d.getDate() - 1);
   return d.toISOString().split('T')[0] + 'T00:00:00';
+}
+
+function getYesterdayDateISO() {
+  var d = new Date();
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().split('.')[0] + 'Z';
 }
