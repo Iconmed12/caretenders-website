@@ -484,6 +484,7 @@
     <button onclick="tiSetFilter('live')" class="ti-tab" id="ti-tab-live">Approved</button>
     <button onclick="tiSetFilter('pending_review')" class="ti-tab" id="ti-tab-pending">Pending</button>
     <button onclick="tiSetFilter('rejected')" class="ti-tab" id="ti-tab-rejected">Rejected</button>
+    <button onclick="tiClearAllRejected()" id="ti-clear-rejected" style="display:none;background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:7px 14px;border-radius:8px;font-size:0.82rem;font-weight:600;cursor:pointer;font-family:inherit;">Clear all rejected</button>
     <select id="ti-cat-dropdown" onchange="tiCatDropdownChange(this.value)" style="margin-left:auto;padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;cursor:pointer;background:#fff;"><option value="">All categories</option></select>
     <select id="ti-year-filter" onchange="tiRender()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;cursor:pointer;background:#fff;"><option value="">All years</option></select>
     <input type="text" id="ti-search" placeholder="Search..." oninput="tiRender()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;width:160px;">

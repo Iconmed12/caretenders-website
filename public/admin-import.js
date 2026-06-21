@@ -159,6 +159,8 @@ function tiSetFilter(filter) {
   document.querySelectorAll('.ti-tab').forEach(function(b){ b.classList.remove('active'); });
   var tab = document.getElementById('ti-tab-' + (filter === 'pending_review' ? 'pending' : filter));
   if (tab) tab.classList.add('active');
+  var clearBtn = document.getElementById('ti-clear-rejected');
+  if (clearBtn) clearBtn.style.display = (filter === 'rejected') ? 'inline-block' : 'none';
   tiRender();
 }
 
@@ -299,6 +301,22 @@ async function tiDoApprove(id) {
       if (typeof populateCanaTenderSelect === 'function') populateCanaTenderSelect();
     }
     showToast('Approved: upload documents in the Cana section, then set live', 'success');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function tiClearAllRejected() {
+  var rejected = tiAllTenders.filter(function(t){ return t.status === 'rejected'; });
+  if (!rejected.length) { showToast('No rejected tenders to clear', 'success'); return; }
+  if (!confirm('Delete all ' + rejected.length + ' rejected tenders? This is permanent and cannot be undone.')) return;
+  try {
+    var res = await sbFetch('/rest/v1/tenders?status=eq.rejected', {
+      method: 'DELETE',
+      headers: { Prefer: 'return=minimal' }
+    });
+    if (!res.ok) throw new Error('Delete failed (' + res.status + ')');
+    tiAllTenders = tiAllTenders.filter(function(t){ return t.status !== 'rejected'; });
+    tiUpdateStats(); tiRender();
+    showToast('Cleared ' + rejected.length + ' rejected tenders', 'success');
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
