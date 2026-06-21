@@ -213,12 +213,6 @@ exports.handler = async (event) => {
       var fatReleases = fatData.releases || fatData.records || [];
       console.log('FAT page', fatLoop, '— fetched', fatReleases.length, 'records');
 
-      // Diagnostic: if empty, show what FAT actually returned so we can see the shape
-      if (!fatReleases.length) {
-        console.log('FAT response top-level keys:', Object.keys(fatData).join(', '));
-        console.log('FAT response sample:', JSON.stringify(fatData).substring(0, 500));
-      }
-
       // Set up next page from the cursor link FAT returns
       fatNextUrl = (fatData.links && fatData.links.next) ? fatData.links.next : '';
 
@@ -232,10 +226,10 @@ exports.handler = async (event) => {
           var desc  = ft.description || '';
           var buyerName = fb.name || (fatRelease.parties && fatRelease.parties.find(p=>p.roles&&p.roles.includes('buyer'))?.name) || '';
           var deadline = '';
-          if (ft.tenderPeriod && ft.tenderPeriod.endDate) deadline = parseDate(ft.tenderPeriod.endDate);
-          var published = fatRelease.date ? parseDate(fatRelease.date) : new Date().toISOString().split('T')[0];
+          if (ft.tenderPeriod && ft.tenderPeriod.endDate) deadline = formatDate(ft.tenderPeriod.endDate);
+          var published = fatRelease.date ? formatDate(fatRelease.date) : new Date().toISOString().split('T')[0];
           var value = '';
-          if (ft.value && ft.value.amount) value = String(ft.value.amount);
+          if (ft.value && ft.value.amount) value = '£' + Number(ft.value.amount).toLocaleString('en-GB');
           var sourceId = fatRelease.ocid || fatRelease.id || '';
           var sourceUrl = '';
           if (ft.documents) {
