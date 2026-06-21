@@ -480,10 +480,10 @@
   </div>
   <div id="ti-cat-boxes" style="margin-bottom:1.25rem;"></div>
   <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center;">
-    <button onclick="tiSetFilter('pending_review')" class="ti-tab active" id="ti-tab-pending">Pending</button>
+    <button onclick="tiSetFilter('all')" class="ti-tab active" id="ti-tab-all">All</button>
     <button onclick="tiSetFilter('live')" class="ti-tab" id="ti-tab-live">Approved</button>
+    <button onclick="tiSetFilter('pending_review')" class="ti-tab" id="ti-tab-pending">Pending</button>
     <button onclick="tiSetFilter('rejected')" class="ti-tab" id="ti-tab-rejected">Rejected</button>
-    <button onclick="tiSetFilter('all')" class="ti-tab" id="ti-tab-all">All</button>
     <select id="ti-year-filter" onchange="tiRender()" style="margin-left:auto;padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;cursor:pointer;background:#fff;"><option value="">All years</option></select>
     <input type="text" id="ti-search" placeholder="Search..." oninput="tiRender()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;width:160px;">
   </div>

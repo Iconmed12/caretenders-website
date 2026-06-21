@@ -204,7 +204,7 @@ tr:hover td{background:#fafafa}
 /* ── Tender Import tabs ── */
 .ti-tab { background:#f3f4f6; border:1px solid #e5e7eb; color:#374151; padding:7px 16px; border-radius:8px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit; }
 .ti-tab:hover { background:#e9ebee; }
-.ti-tab.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+.ti-tab.active { background:#166534; color:#fff; border-color:#166534; }
 
 .ti-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:1.5rem; }
 .ti-stat { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:16px; }
