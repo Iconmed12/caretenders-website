@@ -26,3 +26,6 @@
 
 [functions."expire-tenders"]
   schedule = "0 1 * * *"
+
+[functions."purge-rejected"]
+  schedule = "0 2 * * *"
