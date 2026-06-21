@@ -188,13 +188,13 @@ function renderExpiredTable() {
   }
   tbody.innerHTML = rows.map(function(t) {
     return '<tr>' +
-      '<td><div style="font-weight:600;font-size:0.85rem;">' + (t.title||'') + '</div></td>' +
-      '<td style="font-size:0.82rem;color:var(--muted);">' + (t.org||'') + '</td>' +
-      '<td style="font-size:0.82rem;color:var(--muted);">' + (t.deadline||'') + '</td>' +
-      '<td>' +
-        '<button onclick="restoreTender(\'' + t.id + '\')" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;margin-right:6px;">Restore</button>' +
-        '<button onclick="deleteTender(\'' + t.id + '\')" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;">Delete</button>' +
-      '</td>' +
+      '<td><div class="td-title">' + (t.title||'Untitled') + '</div><div class="td-org">' + (t.org||'') + '</div></td>' +
+      '<td>' + (t.organisation||t.org||'') + '</td>' +
+      '<td style="color:var(--text-muted);font-size:12px">' + fmtDate(t.deadline) + '</td>' +
+      '<td><div class="action-btns">' +
+        '<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;" onclick="restoreTender(\'' + t.id + '\')" title="Restore"><i class="ti ti-rotate"></i></button>' +
+        '<button class="action-btn del" onclick="askDelete(\'' + t.id + '\')" title="Delete"><i class="ti ti-trash"></i></button>' +
+      '</div></td>' +
     '</tr>';
   }).join('');
 }
