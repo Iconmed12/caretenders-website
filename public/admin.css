@@ -183,15 +183,19 @@ tr:hover td{background:#fafafa}
 .toast.error{background:var(--red)}
 .toast.ai{background:linear-gradient(135deg,#7c3aed,#4f46e5)}
 .saving-spinner{display:none;width:16px;height:16px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.6s linear infinite}
-.cana-drop-zone{border:2px dashed rgba(11,25,41,0.15);border-radius:10px;padding:1.25rem;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center}
+.cana-drop-zone{border:1.5px dashed rgba(11,25,41,0.18);border-radius:10px;padding:1rem;text-align:center;transition:all 0.2s;display:flex;flex-direction:column;align-items:center}
 .cana-drop-zone.drag-over{border-color:#00C9E0;background:rgba(0,201,224,0.04)}
 .cana-files-list{display:flex;flex-direction:column;gap:6px;margin-top:0.75rem}
-.cana-file-item{display:flex;align-items:center;gap:8px;background:#e8f7ee;border:1.5px solid #9FE1CB;border-radius:8px;padding:8px 12px;font-size:0.82rem;color:#1a7a3f}
-.cana-file-item i{color:#1a7a3f;flex-shrink:0}
+.cana-file-item{display:flex;align-items:center;gap:8px;background:#e8f7ee;border:1px solid #9FE1CB;border-radius:8px;padding:7px 8px 7px 11px;font-size:0.8rem;color:#1a7a3f}
+.cana-file-item i{color:#1a7a3f;flex-shrink:0;font-size:14px}
 .cana-file-item span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
-.cana-file-remove{background:none;border:none;color:#a32d2d;cursor:pointer;font-size:1rem;padding:0 2px;flex-shrink:0;font-weight:700}
-.cana-upload-btn{display:inline-flex;align-items:center;gap:6px;background:#F4F6F9;border:1.5px solid rgba(11,25,41,0.12);border-radius:8px;padding:7px 14px;font-size:0.82rem;font-family:'DM Sans',sans-serif;color:#6B8FA3;cursor:pointer;transition:all 0.2s;margin-top:6px}
+.cana-file-remove{display:flex;align-items:center;justify-content:center;background:none;border:none;color:#1a7a3f;cursor:pointer;font-size:1rem;padding:2px;flex-shrink:0;border-radius:5px;opacity:0.55;transition:opacity 0.15s,background 0.15s}
+.cana-file-remove:hover{opacity:1;background:rgba(163,45,45,0.1);color:#a32d2d}
+.cana-upload-btn{display:inline-flex;align-items:center;gap:6px;background:#F4F6F9;border:1px solid rgba(11,25,41,0.12);border-radius:8px;padding:6px 13px;font-size:0.8rem;font-family:'DM Sans',sans-serif;color:#6B8FA3;cursor:pointer;transition:all 0.2s;margin-top:6px}
 .cana-upload-btn:hover{border-color:#00C9E0;color:#0099AA}
+.cana-doc-card{padding:1rem 1.1rem !important}
+.cana-doc-progress-track{height:5px;background:rgba(11,25,41,0.08);border-radius:999px;overflow:hidden}
+.cana-doc-progress-fill{height:100%;background:#1a7a3f;border-radius:999px;transition:width 0.3s ease}
 
 .cana-panel-row { cursor:pointer; border-radius:8px; margin-bottom:2px; transition:background 0.15s; }
 .cana-panel-row:hover { background:#f0fdf4; }

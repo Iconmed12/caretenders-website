@@ -220,22 +220,35 @@ async function loadCanaDocs(){
   buildCanaQuestionRows(t && t.cana_questions ? t.cana_questions : []);
 }
 
+function updateCanaDocProgress(){
+  var sections=['quality','spec','scoring'];
+  var filled=0;
+  sections.forEach(function(s){
+    if(window.canaDocData&&canaDocData[s]&&canaDocData[s].length) filled++;
+  });
+  var label=document.getElementById('canaDocProgressLabel');
+  var fill=document.getElementById('canaDocProgressFill');
+  if(label) label.textContent=filled+' of 3';
+  if(fill) fill.style.width=Math.round((filled/3)*100)+'%';
+}
+
 function renderCanaFiles(type){
   var container=document.getElementById(type+'Files');
-  if(!container) return;
+  if(!container){ updateCanaDocProgress(); return; }
   var files=canaDocData[type]||[];
-  if(!files.length){container.innerHTML='';return;}
+  if(!files.length){container.innerHTML='';updateCanaDocProgress();return;}
     container.innerHTML='';
   files.forEach(function(f,i){
     var div=document.createElement('div');
     div.className='cana-file-item';
     var icon=document.createElement('i');icon.className='ti ti-file-text';
     var span=document.createElement('span');span.title=f.name;span.textContent=f.name;span.style.flex='1';span.style.overflow='hidden';span.style.textOverflow='ellipsis';span.style.whiteSpace='nowrap';span.style.fontWeight='500';
-    var btn=document.createElement('button');btn.className='cana-file-remove';btn.title='Remove';btn.textContent='x';
+    var btn=document.createElement('button');btn.className='cana-file-remove';btn.title='Remove';btn.setAttribute('aria-label','Remove file');btn.innerHTML='<i class="ti ti-x" style="font-size:15px;"></i>';
     var t2=type,i2=i;btn.onclick=function(){removeCanaFile(t2,i2);};
     div.appendChild(icon);div.appendChild(span);div.appendChild(btn);
     container.appendChild(div);
   });
+  updateCanaDocProgress();
 }
 
 function removeCanaFile(type,index){canaDocData[type].splice(index,1);renderCanaFiles(type);}

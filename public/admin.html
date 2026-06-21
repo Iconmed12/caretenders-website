@@ -173,7 +173,14 @@
         </div>
       </div>
       <div id="canaDocArea" style="display:none;">
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:1.25rem;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <div style="font-weight:600;font-size:0.9rem;">Tender documents</div>
+          <div id="canaDocProgressLabel" style="font-size:0.8rem;color:var(--text-light);">0 of 3</div>
+        </div>
+        <div class="cana-doc-progress-track" style="margin-bottom:1.25rem;">
+          <div class="cana-doc-progress-fill" id="canaDocProgressFill" style="width:0%;"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:0.85rem;margin-bottom:1.25rem;">
 
           <!-- SELECTION QUESTIONNAIRE CARD — first -->
           <div class="table-card" style="padding:1.25rem;border:1.5px solid rgba(124,58,237,0.2);">
