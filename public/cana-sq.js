@@ -325,11 +325,25 @@ async function confirmSqAndGenerate() {
     }
   }
 
+  function setCanaTier(tier) {
+    window._canaTier = tier;
+    // Keep legacy flag in sync (review or review_docs both involve a review)
+    window._wantsExpertReview = (tier === 'review' || tier === 'review_docs');
+    var totals = { none: 480, review: 780, review_docs: 1480 };
+    var total = totals[tier] || 480;
+    var btn = document.getElementById('paywall-btn');
+    var amt = document.getElementById('paywall-price-amount');
+    if (btn) btn.textContent = '💳 Pay £' + total.toLocaleString() + ' and unlock full bid';
+    if (amt) amt.textContent = '£' + total.toLocaleString();
+  }
+  window.setCanaTier = setCanaTier;
+
   async function handlePayNow() {
     const btn = document.getElementById('paywall-btn');
     btn.textContent = 'Preparing payment...';
     btn.style.opacity = '0.7';
     btn.disabled = true;
+    var tier = window._canaTier || 'none';
     try {
       // Save client details before redirect
       try {
@@ -351,8 +365,9 @@ async function confirmSqAndGenerate() {
           chData: window._chData || {}
         });
         localStorage.setItem('cana_company_details', JSON.stringify(fullCo));
-        // Remember if they ticked Expert Review so we can charge it after the 480
-        if (window._wantsExpertReview) localStorage.setItem('cana_wants_review', '1');
+        // Remember chosen tier so we can apply it after payment returns
+        localStorage.setItem('cana_tier', tier);
+        if (tier !== 'none') localStorage.setItem('cana_wants_review', '1');
         else localStorage.removeItem('cana_wants_review');
       } catch(e) {}
 
@@ -363,7 +378,8 @@ async function confirmSqAndGenerate() {
           sessionId: currentSessionId,
           tenderId: tenderId,
           tenderTitle: tenderData ? tenderData.title : '',
-          wantsReview: !!window._wantsExpertReview
+          tier: tier,
+          wantsReview: tier !== 'none'
         })
       });
       const data = await res.json();
@@ -373,7 +389,8 @@ async function confirmSqAndGenerate() {
         throw new Error(data.error || 'Could not create payment session');
       }
     } catch(e) {
-      btn.textContent = 'Pay £480 and unlock full bid';
+      var totals = { none: 480, review: 780, review_docs: 1480 };
+      btn.textContent = 'Pay £' + (totals[tier]||480).toLocaleString() + ' and unlock full bid';
       if (typeof window.applyMemberPaywall === 'function') window.applyMemberPaywall();
       // If member came via member dashboard, rewire paywall button to bypass
       if (window._isMember && window._companyDetails) {

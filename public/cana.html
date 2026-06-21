@@ -179,14 +179,21 @@
         <div id="member-profile-lines" style="font-size:0.8rem;color:var(--muted);line-height:1.8;"></div>
       </div>
 
-      <!-- Expert Review option -->
-      <label style="display:flex;align-items:flex-start;gap:12px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem;cursor:pointer;">
-        <input type="checkbox" id="expert-review-check" onchange="window._wantsExpertReview=this.checked" style="margin-top:3px;accent-color:#0B1929;width:16px;height:16px;flex-shrink:0;">
-        <div>
-          <div style="font-size:0.85rem;font-weight:700;color:#0B1929;">Add Expert Review, £300</div>
-          <div style="font-size:0.76rem;color:#78350f;margin-top:2px;line-height:1.6;">A final quality check on every response against the scoring criteria before you submit, for extra assurance. Completed within 48 hours. Tick before generating to add to your order.</div>
-        </div>
-      </label>
+      <!-- Expert help options (members) -->
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;">
+        <label style="display:flex;align-items:flex-start;gap:10px;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
+          <input type="radio" name="member-tier" value="none" checked onchange="setCanaTier('none')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#0B1929;">
+          <span style="flex:1;font-size:0.82rem;color:#0B1929;line-height:1.5;"><strong>Just my responses</strong> <span style="float:right;color:var(--muted);">Included</span><br>Cana writes every answer, ready to submit.</span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
+          <input type="radio" name="member-tier" value="review" onchange="setCanaTier('review')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#0B1929;">
+          <span style="flex:1;font-size:0.82rem;color:#0B1929;line-height:1.5;"><strong>Add Expert Review</strong> <span style="float:right;">+ £300</span><br>A specialist checks and sharpens your responses against the scoring criteria. Within 48 hours.</span>
+        </label>
+        <label style="display:flex;align-items:flex-start;gap:10px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
+          <input type="radio" name="member-tier" value="review_docs" onchange="setCanaTier('review_docs')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#0B1929;">
+          <span style="flex:1;font-size:0.82rem;color:#0B1929;line-height:1.5;"><strong>Expert Review + document completion</strong> <span style="float:right;">+ £1,000</span><br>We review your responses and complete your SQ and all other required tender documents (excluding pricing, which stays with you).</span>
+        </label>
+      </div>
 
       <!-- Generate button -->
       <button class="generate-btn" onclick="memberGenerate()" id="member-generate-btn">
@@ -347,8 +354,7 @@
       <h2>Unlock your complete bid</h2>
       <p>Your full responses are ready — tailored to this specific tender using your company information. Pay once to unlock everything.</p>
       <div class="paywall-price">
-        <span class="paywall-price-amount">£480</span>
-        <span class="paywall-price-label">inc. VAT</span>
+        <span class="paywall-price-amount" id="paywall-price-amount">£480</span>
       </div>
       <div class="paywall-features">
         <div class="paywall-feature"><span>✓</span> All questions answered in full</div>
@@ -356,10 +362,20 @@
         <div class="paywall-feature"><span>✓</span> Written using your company details</div>
         <div class="paywall-feature"><span>✓</span> Copy, download or send straight away</div>
       </div>
-      <label style="display:flex;align-items:flex-start;gap:11px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:0.9rem 1.1rem;margin-bottom:1rem;cursor:pointer;text-align:left;">
-        <input type="checkbox" id="paywall-review-check" onchange="window._wantsExpertReview=this.checked" style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:#00C9E0;">
-        <span style="font-size:0.82rem;color:rgba(255,255,255,0.85);line-height:1.5;"><strong style="color:#fff;">Add Expert Review, £300.</strong> A final quality check on every response against the scoring criteria before you submit, for extra assurance. Completed within 48 hours.</span>
-      </label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1rem;text-align:left;">
+        <label class="cana-tier-opt" style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
+          <input type="radio" name="cana-tier" value="none" checked onchange="setCanaTier('none')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#00C9E0;">
+          <span style="flex:1;font-size:0.82rem;color:rgba(255,255,255,0.9);line-height:1.5;"><strong style="color:#fff;">Just my responses</strong> <span style="float:right;color:#fff;">Included</span><br>Cana writes every answer, ready to submit.</span>
+        </label>
+        <label class="cana-tier-opt" style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
+          <input type="radio" name="cana-tier" value="review" onchange="setCanaTier('review')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#00C9E0;">
+          <span style="flex:1;font-size:0.82rem;color:rgba(255,255,255,0.9);line-height:1.5;"><strong style="color:#fff;">Add Expert Review</strong> <span style="float:right;color:#fff;">+ £300</span><br>A specialist checks and sharpens your responses against the scoring criteria. Within 48 hours.</span>
+        </label>
+        <label class="cana-tier-opt" style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
+          <input type="radio" name="cana-tier" value="review_docs" onchange="setCanaTier('review_docs')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#00C9E0;">
+          <span style="flex:1;font-size:0.82rem;color:rgba(255,255,255,0.9);line-height:1.5;"><strong style="color:#fff;">Expert Review + document completion</strong> <span style="float:right;color:#fff;">+ £1,000</span><br>We review your responses and complete your SQ and all other required tender documents (excluding pricing, which stays with you).</span>
+        </label>
+      </div>
       <button onclick="handlePayNow()" class="paywall-btn" id="paywall-btn">💳 Pay £480 and unlock full bid</button>
       <div class="paywall-note">Secure payment via Stripe · Instant access after payment</div>
     </div>

@@ -48,7 +48,7 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body || '{}');
     jobId = body.jobId;
-    const { tenderId, companyDetails, sessionId, includeSq, wantsReview } = body;
+    const { tenderId, companyDetails, sessionId, includeSq, wantsReview, tier } = body;
 
     if (!jobId) return;
 
@@ -663,12 +663,24 @@ exports.handler = async (event) => {
       } catch(e) { console.log('Client email failed:', e.message); }
     }
 
-    // Send to ICONGRP
+    // Send to ICONGRP — flag the order by tier so the team sees the scope at a glance
     try {
+      var orderTier = tier || (wantsReview ? 'review' : 'none');
+      var subjectPrefix, banner;
+      if (orderTier === 'review_docs') {
+        subjectPrefix = 'REVIEW + DOC COMPLETION: ';
+        banner = '<div style="background:#fee2e2;border:2px solid #dc2626;border-radius:8px;padding:14px 16px;margin-bottom:16px;color:#991b1b;font-weight:700;">REVIEW + DOCUMENT COMPLETION PURCHASED (£1,000 add-on). The client has paid for us to: (1) review and sharpen their responses, AND (2) complete their SQ and all other required tender documents, EXCLUDING pricing. Documents are attached. Please action within agreed turnaround.</div>';
+      } else if (orderTier === 'review') {
+        subjectPrefix = 'REVIEW REQUESTED: ';
+        banner = '<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#92400e;font-weight:700;">EXPERT REVIEW PURCHASED: please review and sharpen the attached responses against the scoring criteria within 48 hours.</div>';
+      } else {
+        subjectPrefix = 'New: ';
+        banner = '';
+      }
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + RESEND, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: 'hello@getcana.co.uk', subject: (wantsReview ? 'REVIEW REQUESTED — ' : 'New — ') + clientName + ' | ' + (tender.title||'').substring(0,40), html: (wantsReview ? '<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#92400e;font-weight:700;">EXPERT REVIEW PURCHASED — please review the attached documents within 48 hours.</div>' : '') + '<p><strong>Client:</strong> ' + clientName + ' | <strong>Email:</strong> ' + clientEmail + '</p>' + emailHtml, attachments })
+        body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: 'hello@getcana.co.uk', subject: subjectPrefix + clientName + ' | ' + (tender.title||'').substring(0,40), html: banner + '<p><strong>Client:</strong> ' + clientName + ' | <strong>Email:</strong> ' + clientEmail + '</p>' + emailHtml, attachments })
       });
     } catch(e) { console.log('ICONGRP email failed:', e.message); }
 

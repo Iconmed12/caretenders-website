@@ -76,6 +76,7 @@
           sessionId: sid,
           includeSq: data.includeSq,
           wantsReview: (function(){ var w = localStorage.getItem('cana_wants_review') === '1'; localStorage.removeItem('cana_wants_review'); return w; })(),
+          tier: (function(){ var t = localStorage.getItem('cana_tier') || 'none'; localStorage.removeItem('cana_tier'); return t; })(),
           companyDetails: data.companyDetails || mergedCo
         })
       }).then(function(r){
@@ -566,6 +567,7 @@
             sessionId: 'member_' + data.jobId,
             includeSq: data.includeSq,
             wantsReview: !!window._wantsExpertReview,
+            tier: window._canaTier || (window._wantsExpertReview ? 'review' : 'none'),
             companyDetails: data.companyDetails || companyDetails
           })
         });
@@ -769,6 +771,7 @@
           tenderId: data.tenderId || tenderId,
           sessionId: 'member_' + data.jobId,
           wantsReview: !!window._wantsExpertReview,
+          tier: window._canaTier || (window._wantsExpertReview ? 'review' : 'none'),
           includeSq: data.includeSq,
           companyDetails: data.companyDetails || mergedCo
         })

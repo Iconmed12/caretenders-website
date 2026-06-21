@@ -8,11 +8,19 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { sessionId, tenderId, tenderTitle, wantsReview } = JSON.parse(event.body);
+    const { sessionId, tenderId, tenderTitle, wantsReview, tier } = JSON.parse(event.body);
     const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
 
-    // Go-live amounts (pence): bid 48000, with review 78000 (48000 + 30000).
-    // TEST: bid 100 (£1), review adds 100 (£1) -> £2 total in test.
+    // Normalise tier (back-compat: old callers send only wantsReview)
+    let chosenTier = tier || (wantsReview ? 'review' : 'none');
+    if (['none','review','review_docs'].indexOf(chosenTier) === -1) chosenTier = 'none';
+
+    // Go-live add-on amounts (pence): review 30000, review_docs 100000.
+    // Base bid go-live 48000. TEST keeps everything at £1 per line item.
+    const addonName = chosenTier === 'review_docs'
+      ? 'Expert Review + document completion (SQ + required tender documents, excluding pricing)'
+      : 'Expert Review — consultant check within 48 hours';
+
     const params = new URLSearchParams({
       'mode': 'payment',
       'line_items[0][price_data][currency]': 'gbp',
@@ -23,14 +31,15 @@ exports.handler = async (event) => {
       'cancel_url': 'https://caretenders-website.netlify.app/cana.html?tender=' + tenderId,
       'metadata[session_id]': sessionId,
       'metadata[tender_id]': tenderId,
-      'metadata[includes_review]': wantsReview ? '1' : '0'
+      'metadata[tier]': chosenTier,
+      'metadata[includes_review]': (chosenTier !== 'none') ? '1' : '0'
     });
 
-    // Optional Expert Review as a second line item on the SAME payment
-    if (wantsReview) {
+    // Add-on line item for review or review+docs tiers (SAME payment)
+    if (chosenTier !== 'none') {
       params.append('line_items[1][price_data][currency]', 'gbp');
-      params.append('line_items[1][price_data][product_data][name]', 'Expert Review — consultant check within 48 hours');
-      params.append('line_items[1][price_data][unit_amount]', '100'); // TEST £1; go-live 30000
+      params.append('line_items[1][price_data][product_data][name]', addonName);
+      params.append('line_items[1][price_data][unit_amount]', '100'); // TEST £1; go-live review 30000 / review_docs 100000
       params.append('line_items[1][quantity]', '1');
     }
 
