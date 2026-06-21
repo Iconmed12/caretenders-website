@@ -69,10 +69,20 @@ exports.handler = async (event) => {
     var tender = (await tRes.json())[0];
     if (!tender) { await setStatus(jobId, 'error'); return; }
 
-    var kbRes = await fetch(sbUrl + '/rest/v1/cana_knowledge?id=eq.global&select=*&limit=1', {
+    // Pick knowledge base by tender sector: commercial tenders use the commercial
+    // KB row; everything else (care, non-CQC) uses the care row 'global'.
+    var kbRowId = (tender.category === 'commercial') ? 'commercial' : 'global';
+    var kbRes = await fetch(sbUrl + '/rest/v1/cana_knowledge?id=eq.' + kbRowId + '&select=*&limit=1', {
       headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey }
     });
     var kb = (await kbRes.json())[0] || {};
+    // Fallback: if a commercial tender has no commercial KB set up yet, use the care KB
+    if (kbRowId === 'commercial' && !kb.writing_style && !kb.commissioner_preferences) {
+      var kbFb = await fetch(sbUrl + '/rest/v1/cana_knowledge?id=eq.global&select=*&limit=1', {
+        headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey }
+      });
+      kb = (await kbFb.json())[0] || {};
+    }
 
     var co           = companyDetails || {};
     var clientEmail  = co.email || '';

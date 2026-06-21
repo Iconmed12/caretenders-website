@@ -3,7 +3,9 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
   try {
     const sbKey = process.env.SUPABASE_ANON_KEY;
-    const res = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/cana_knowledge?id=eq.global&select=*&limit=1',
+    const sector = (event.queryStringParameters && event.queryStringParameters.sector) || 'care';
+    const rowId = sector === 'commercial' ? 'commercial' : 'global';
+    const res = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/cana_knowledge?id=eq.' + rowId + '&select=*&limit=1',
       { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } });
     const rows = await res.json();
     return { statusCode: 200, headers: cors, body: JSON.stringify(rows[0] || {}) };

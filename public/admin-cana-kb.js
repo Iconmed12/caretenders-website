@@ -1,20 +1,37 @@
-// Cana AI — knowledge base. Split from admin-cana.js.
+// Cana knowledge base. Split from admin-cana.js.
 
 var kbData = { winning: [], failed: [], feedback: [] };
+var kbSector = 'care'; // 'care' or 'commercial'
+
+function switchKbSector(sector) {
+  kbSector = (sector === 'commercial') ? 'commercial' : 'care';
+  // Update toggle button styling
+  var careBtn = document.getElementById('kb-sector-care');
+  var commBtn = document.getElementById('kb-sector-commercial');
+  if (careBtn && commBtn) {
+    var on = 'background:#fff;color:#0B1929;font-weight:700;';
+    var off = 'background:transparent;color:#6B8FA3;font-weight:500;';
+    careBtn.style.cssText = 'border:none;font-size:0.82rem;padding:7px 18px;border-radius:6px;cursor:pointer;' + (kbSector==='care'?on:off);
+    commBtn.style.cssText = 'border:none;font-size:0.82rem;padding:7px 18px;border-radius:6px;cursor:pointer;' + (kbSector==='commercial'?on:off);
+  }
+  var note = document.getElementById('kb-sector-note');
+  if (note) note.textContent = 'You are editing the ' + (kbSector==='care'?'Care':'Commercial') + ' guidance. ' + (kbSector==='care'?'Care':'Commercial') + ' tenders use these boxes automatically.';
+  loadKnowledgeBase();
+}
 
 async function loadKnowledgeBase() {
   try {
-    var res = await fetch('/.netlify/functions/get-knowledge-base');
+    var res = await fetch('/.netlify/functions/get-knowledge-base?sector=' + kbSector);
     if (!res.ok) return;
     var d = await res.json();
     var ws = document.getElementById('kb-writing-style');
     var cp = document.getElementById('kb-commissioner-prefs');
     var av = document.getElementById('kb-avoid');
-    if (ws && d.writing_style) ws.value = d.writing_style;
+    if (ws) ws.value = d.writing_style || '';
     var wg = document.getElementById('canaKnowledge');
-    if (wg && d.writing_guidance) wg.value = d.writing_guidance;
-    if (cp && d.commissioner_preferences) cp.value = d.commissioner_preferences;
-    if (av && d.avoid_patterns_text) av.value = d.avoid_patterns_text;
+    if (wg) wg.value = d.writing_guidance || '';
+    if (cp) cp.value = d.commissioner_preferences || '';
+    if (av) av.value = d.avoid_patterns_text || '';
     kbData.winning = d.winning_examples || [];
     kbData.failed = d.failed_examples || [];
     kbData.feedback = d.feedback_examples || [];
@@ -87,6 +104,7 @@ async function saveKnowledgeBase() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        sector: kbSector,
         writing_style: ws ? ws.value : '',
         commissioner_preferences: cp ? cp.value : '',
         avoid_patterns_text: av ? av.value : '',
@@ -112,7 +130,7 @@ async function saveCanaKnowledge() {
     var res = await fetch('/.netlify/functions/save-knowledge-base', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ writing_guidance: textarea.value })
+      body: JSON.stringify({ sector: kbSector, writing_guidance: textarea.value })
     });
     if (!res.ok) throw new Error('Save failed');
     if (savedMsg) { savedMsg.style.display = 'inline'; setTimeout(function(){ savedMsg.style.display = 'none'; }, 2500); }

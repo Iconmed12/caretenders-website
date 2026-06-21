@@ -4,8 +4,10 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body);
     const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sector = body.sector === 'commercial' ? 'commercial' : 'care';
+    const rowId = sector === 'commercial' ? 'commercial' : 'global';
     const payload = {
-      id: 'global',
+      id: rowId,
       writing_guidance: body.writing_guidance || '',
       writing_style: body.writing_style || '',
       commissioner_preferences: body.commissioner_preferences || '',
