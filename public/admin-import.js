@@ -43,25 +43,23 @@ function tiRenderBreakdown() {
     var k = tiSubcat(t);
     if (!counts[k]) counts[k] = { waiting: 0, live: 0 };
     if (t.status === 'pending_review') counts[k].waiting++;
-    else if (t.status === 'live' || t.status === 'needs_docs') counts[k].live++;
+    else if (t.status !== 'rejected') counts[k].live++;
   });
   var rows = TI_SUBCATS.filter(function(s){ return counts[s.key].waiting > 0 || counts[s.key].live > 0; });
   if (!rows.length) { host.innerHTML = ''; return; }
-  host.innerHTML = '<div style="font-size:0.8rem;color:var(--text-light);margin:0 0 8px;">By category, waiting in import vs live on site</div>' +
-    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem;">' +
-    rows.map(function(s){
-      var c = counts[s.key];
-      var active = window._tiSubFilter === s.key;
-      var gap = (c.waiting >= 10 && c.live <= 1)
-        ? '<div style="margin-top:6px;"><span style="background:#fee2e2;color:#991b1b;font-size:0.66rem;font-weight:700;padding:2px 8px;border-radius:999px;">Big gap</span></div>' : '';
-      return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="text-align:center;background:' + (active?'#eef6ff':'#fff') + ';border:1px solid ' + (active?'#90c2f0':'var(--border)') + ';border-radius:10px;padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;">' +
-        '<i class="ti ' + s.icon + '" style="font-size:20px;color:' + s.color + ';"></i>' +
-        '<div style="font-size:1.4rem;font-weight:700;color:var(--text);margin-top:5px;line-height:1;">' + c.waiting + '</div>' +
-        '<div style="font-size:0.78rem;font-weight:600;color:var(--text);margin-top:3px;">' + s.label + '</div>' +
-        '<div style="font-size:0.72rem;color:var(--text-light);margin-top:2px;">' + c.waiting + ' waiting · ' + c.live + ' live</div>' +
-        gap +
-      '</button>';
-    }).join('') + '</div>';
+  var allActive = !window._tiSubFilter;
+  host.innerHTML =
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">' +
+      '<button onclick="tiFilterBySub(\'\')" style="border:1px solid ' + (allActive?'transparent':'var(--border)') + ';background:' + (allActive?'#0B1929':'#fff') + ';color:' + (allActive?'#fff':'var(--text)') + ';font-size:0.78rem;padding:6px 13px;border-radius:999px;cursor:pointer;">All ' + tiAllTenders.length + '</button>' +
+      rows.map(function(s){
+        var c = counts[s.key];
+        var active = window._tiSubFilter === s.key;
+        var dot = (c.waiting >= 10 && c.live <= 1) ? ' <span style="color:#dc2626;">●</span>' : '';
+        return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="border:1px solid ' + (active?'#90c2f0':'var(--border)') + ';background:' + (active?'#eef6ff':'#fff') + ';font-size:0.78rem;padding:6px 13px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;">' +
+          '<i class="ti ' + s.icon + '" style="font-size:13px;color:' + s.color + ';"></i>' + s.label + ' ' + c.waiting + dot +
+        '</button>';
+      }).join('') +
+    '</div>';
 }
 
 function tiFilterBySub(key) {
@@ -110,7 +108,7 @@ function tiRender() {
 
   var filtered = tiAllTenders.filter(function(t) {
     if (tiCurrentFilter === 'live') {
-      if (t.status !== 'live' && t.status !== 'needs_docs') return false;
+      if (t.status === 'pending_review' || t.status === 'rejected') return false;
     } else if (tiCurrentFilter !== 'all' && t.status !== tiCurrentFilter) return false;
     if (cat && t.category !== cat) return false;
     if (window._tiSubFilter && tiSubcat(t) !== window._tiSubFilter) return false;
@@ -140,37 +138,29 @@ function tiRender() {
   };
   list.innerHTML = filtered.map(function(t) {
     var statusColor = t.status === 'live' ? '#166534' : t.status === 'needs_docs' ? '#0369a1' : t.status === 'rejected' ? '#dc2626' : '#92400e';
-    var statusBg    = t.status === 'live' ? '#e8f7ee' : t.status === 'needs_docs' ? '#e0f2fe' : t.status === 'rejected' ? '#fef2f2' : '#fefce8';
-    var statusLabel = t.status === 'live' ? '✓ Live' : t.status === 'needs_docs' ? '📄 Needs docs' : t.status === 'rejected' ? '✗ Rejected' : '⏳ Pending';
-    var deadline    = t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '—';
-    var catBadge    = t.category === 'care' ? '#e0f2fe' : '#fef3c7';
-    var catColor    = t.category === 'care' ? '#0369a1' : '#92400e';
+    var deadline    = t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '-';
+    var subKey      = tiSubcat(t);
+    var subMeta     = TI_SUBCATS.filter(function(s){ return s.key === subKey; })[0] || { label:'Other', color:'#888780' };
+    var actionCell;
+    if (t.status === 'pending_review') {
+      actionCell = '<button data-approve="' + t.id + '" style="background:#166534;color:#fff;border:none;padding:5px 11px;border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;">Approve</button>' +
+                   '<button data-reject="' + t.id + '" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:5px 9px;border-radius:6px;font-size:0.72rem;cursor:pointer;margin-left:5px;">Reject</button>';
+    } else if (t.status === 'rejected') {
+      actionCell = '<button data-approve="' + t.id + '" style="background:#e8f7ee;color:#166534;border:1px solid #9FE1CB;padding:5px 11px;border-radius:6px;font-size:0.72rem;cursor:pointer;">Re-approve</button>';
+    } else {
+      actionCell = '<span style="color:#166534;font-size:0.72rem;font-weight:600;">Live</span>' +
+                   '<button data-reject="' + t.id + '" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:4px 9px;border-radius:6px;font-size:0.7rem;cursor:pointer;margin-left:8px;">Remove</button>';
+    }
+    var link = t.source_url ? '<a href="' + t.source_url + '" target="_blank" style="color:#185FA5;font-size:0.7rem;text-decoration:none;margin-left:6px;">' + (t.source === 'find_a_tender' ? 'FAT↗' : 'CF↗') + '</a>' : '';
 
-    return '<div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:16px 18px;">' +
-      '<div style="display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;">' +
-        '<div style="flex:1;min-width:0;">' +
-          '<div style="font-weight:700;font-size:0.88rem;color:var(--navy);margin-bottom:4px;">' + (t.title||'').substring(0,100) + '</div>' +
-          '<div style="font-size:0.78rem;color:var(--muted);margin-bottom:8px;">' + (t.buyer||t.org||'') + (t.value ? ' · ' + t.value : '') + ' · Deadline: ' + deadline + '</div>' +
-          (t.description ? '<div style="font-size:0.78rem;color:var(--muted);line-height:1.5;margin-bottom:8px;">' + (t.description||'').substring(0,200) + (t.description && t.description.length > 200 ? '...' : '') + '</div>' : '') +
-          '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-            '<span style="background:' + catBg(t.category) + ';color:' + catCol(t.category) + ';font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:999px;">' + (t.category||'').toUpperCase() + '</span>' +
-            (t.source_url ? '<a href="' + t.source_url + '" target="_blank" style="background:#f3f4f6;color:#374151;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:999px;text-decoration:none;">' + (t.source === 'find_a_tender' ? 'View on FAT ↗' : 'View on CF ↗') + '</a>' : '') +
-          '</div>' +
+    return '<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);font-size:0.82rem;">' +
+        '<div style="flex:2;min-width:0;">' +
+          '<div style="font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (t.title||'') + link + '</div>' +
+          '<div style="font-size:0.72rem;color:var(--muted);">' + (t.value ? t.value + ' · ' : '') + 'Deadline ' + deadline + '</div>' +
         '</div>' +
-        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">' +
-          '<span style="background:' + statusBg + ';color:' + statusColor + ';font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;">' + statusLabel + '</span>' +
-          (t.status === 'pending_review' ?
-            '<div style="display:flex;gap:6px;">' +
-              '<button data-approve="' + t.id + '" style="background:#166534;color:#fff;border:none;padding:6px 14px;border-radius:7px;font-size:0.78rem;font-weight:700;cursor:pointer;">&#x2713; Approve</button>' +
-              '<button data-reject="' + t.id + '" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:6px 14px;border-radius:7px;font-size:0.78rem;font-weight:700;cursor:pointer;">&#x2717; Reject</button>' +
-            '</div>'
-          : t.status === 'live' ?
-            '<button data-reject="' + t.id + '" style="background:#fef2f2;color:#dc2626;border:1px solid #fca5a5;padding:5px 12px;border-radius:7px;font-size:0.75rem;cursor:pointer;">Remove</button>'
-          :
-            '<button data-approve="' + t.id + '" style="background:#e8f7ee;color:#166534;border:1px solid #9FE1CB;padding:5px 12px;border-radius:7px;font-size:0.75rem;cursor:pointer;">Re-approve</button>'
-          ) +
-        '</div>' +
-      '</div>' +
+        '<div style="flex:1;min-width:0;color:var(--muted);font-size:0.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (t.buyer||t.org||'') + '</div>' +
+        '<div style="width:96px;flex-shrink:0;"><span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;color:' + subMeta.color + ';"><i class="ti ' + (subMeta.icon||'ti-dots') + '" style="font-size:12px;"></i>' + subMeta.label + '</span></div>' +
+        '<div style="width:155px;flex-shrink:0;text-align:right;">' + actionCell + '</div>' +
     '</div>';
   }).join('');
 }
@@ -235,7 +225,7 @@ async function tiDoApprove(id) {
       if (typeof renderCanaPanels === 'function') renderCanaPanels();
       if (typeof populateCanaTenderSelect === 'function') populateCanaTenderSelect();
     }
-    showToast('Approved — upload documents in Cana AI section, then set live', 'success');
+    showToast('Approved: upload documents in the Cana section, then set live', 'success');
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
