@@ -231,13 +231,14 @@ exports.handler = async (event) => {
           var value = '';
           if (ft.value && ft.value.amount) value = '£' + Number(ft.value.amount).toLocaleString('en-GB');
           var sourceId = fatRelease.ocid || fatRelease.id || '';
+          var noticeId = fatRelease.id || '';  // FAT notice id is nnnnnn-yyyy, used for the public Notice URL
           var sourceUrl = '';
           if (ft.documents) {
             for (var fd of ft.documents) {
               if (fd.documentType === 'tenderNotice' && fd.url) { sourceUrl = fd.url; break; }
             }
           }
-          if (!sourceUrl && sourceId) sourceUrl = 'https://www.find-tender.service.gov.uk/Notice/' + sourceId.replace('ocds-pfh999-','');
+          if (!sourceUrl && noticeId) sourceUrl = 'https://www.find-tender.service.gov.uk/Notice/' + noticeId;
 
           if (!title || !deadline) continue;
 
