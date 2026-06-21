@@ -83,8 +83,25 @@ function tiRenderBreakdown() {
 
 function tiFilterBySub(key) {
   window._tiSubFilter = (window._tiSubFilter === key) ? '' : key;
+  var dd = document.getElementById('ti-cat-dropdown');
+  if (dd) dd.value = window._tiSubFilter || '';
   tiRenderBreakdown();
   tiRender();
+}
+
+function tiCatDropdownChange(key) {
+  window._tiSubFilter = key || '';
+  tiRenderBreakdown();
+  tiRender();
+}
+
+function tiPopulateCatDropdown() {
+  var dd = document.getElementById('ti-cat-dropdown');
+  if (!dd) return;
+  var current = dd.value;
+  dd.innerHTML = '<option value="">All categories</option>' +
+    TI_SUBCATS.map(function(s){ return '<option value="' + s.key + '">' + s.label + '</option>'; }).join('');
+  dd.value = window._tiSubFilter || current || '';
 }
 
 
@@ -113,6 +130,7 @@ function tiUpdateStats() {
   setEl('ti-count-total',    tiAllTenders.length);
   tiRenderBreakdown();
   tiPopulateYears();
+  tiPopulateCatDropdown();
 }
 
 function tiPopulateYears() {
@@ -133,6 +151,7 @@ function tiSetFilter(filter) {
   // The All tab means literally everything: clear category, year and search too
   if (filter === 'all') {
     window._tiSubFilter = '';
+    var cd = document.getElementById('ti-cat-dropdown'); if (cd) cd.value = '';
     var yr = document.getElementById('ti-year-filter'); if (yr) yr.value = '';
     var sr = document.getElementById('ti-search'); if (sr) sr.value = '';
     tiRenderBreakdown();
