@@ -202,8 +202,8 @@ tr:hover td{background:#fafafa}
 .cana-panel-row.pending:hover { background:rgba(245,166,35,0.05); }
 
 /* ── Tender Import tabs ── */
-.ti-tab { background:#f3f4f6; border:1px solid #e5e7eb; color:#374151; padding:7px 16px; border-radius:8px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all 0.15s; }
-.ti-tab:hover { background:#e5e7eb; }
+.ti-tab { background:#f3f4f6; border:1px solid #e5e7eb; color:#374151; padding:7px 16px; border-radius:8px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit; }
+.ti-tab:hover { background:#e9ebee; }
 .ti-tab.active { background:var(--navy); color:#fff; border-color:var(--navy); }
 
 .ti-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:1.5rem; }
