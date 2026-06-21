@@ -37,30 +37,48 @@ function tiSubcat(t) {
 function tiRenderBreakdown() {
   var host = document.getElementById('ti-cat-boxes');
   if (!host) return;
+  var now = Date.now();
+  var fourWeeks = now + (28 * 24 * 60 * 60 * 1000);
   var counts = {};
-  TI_SUBCATS.forEach(function(s){ counts[s.key] = { waiting: 0, live: 0 }; });
+  TI_SUBCATS.forEach(function(s){ counts[s.key] = { live: 0, pending: 0, expiring: 0 }; });
   tiAllTenders.forEach(function(t){
     var k = tiSubcat(t);
-    if (!counts[k]) counts[k] = { waiting: 0, live: 0 };
-    if (t.status === 'pending_review') counts[k].waiting++;
-    else if (t.status !== 'rejected') counts[k].live++;
+    if (!counts[k]) counts[k] = { live: 0, pending: 0, expiring: 0 };
+    if (t.status === 'rejected') return;
+    if (t.status === 'pending_review') counts[k].pending++;
+    else counts[k].live++;
+    if (t.deadline) {
+      var dl = new Date(t.deadline).getTime();
+      if (!isNaN(dl) && dl >= now && dl <= fourWeeks) counts[k].expiring++;
+    }
   });
-  var rows = TI_SUBCATS.filter(function(s){ return counts[s.key].waiting > 0 || counts[s.key].live > 0; });
+  var rows = TI_SUBCATS.filter(function(s){ return counts[s.key].live > 0 || counts[s.key].pending > 0; });
   if (!rows.length) { host.innerHTML = ''; return; }
-  host.innerHTML = rows.map(function(s){
-    var c = counts[s.key];
-    var active = window._tiSubFilter === s.key;
-    return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="text-align:left;background:' + (active?'#eef6ff':'#fff') + ';border:1px solid ' + (active?'#90c2f0':'var(--border)') + ';border-radius:10px;padding:12px 14px;cursor:pointer;">' +
-      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">' +
-        '<i class="ti ' + s.icon + '" style="font-size:15px;color:' + s.color + ';"></i>' +
-        '<span style="font-size:0.78rem;font-weight:600;color:var(--text);">' + s.label + '</span>' +
-      '</div>' +
-      '<div style="display:flex;gap:14px;">' +
-        '<div><div style="font-size:1.25rem;font-weight:700;color:#166534;line-height:1;">' + c.live + '</div><div style="font-size:0.66rem;color:var(--text-muted);text-transform:uppercase;margin-top:2px;">Live</div></div>' +
-        '<div><div style="font-size:1.25rem;font-weight:700;color:var(--text);line-height:1;">' + c.waiting + '</div><div style="font-size:0.66rem;color:var(--text-muted);text-transform:uppercase;margin-top:2px;">Pending</div></div>' +
-      '</div>' +
-    '</button>';
-  }).join('');
+  var cell = 'padding:9px 14px;font-size:0.82rem;border-bottom:1px solid var(--border);';
+  var head = 'padding:9px 14px;font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.03em;border-bottom:1px solid var(--border);text-align:left;';
+  host.innerHTML =
+    '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;">' +
+    '<table style="width:100%;border-collapse:collapse;">' +
+      '<thead><tr>' +
+        '<th style="' + head + '">Category</th>' +
+        '<th style="' + head + '">Live</th>' +
+        '<th style="' + head + '">Pending</th>' +
+        '<th style="' + head + '">Expiring in 4 weeks</th>' +
+      '</tr></thead><tbody>' +
+      rows.map(function(s){
+        var c = counts[s.key];
+        var active = window._tiSubFilter === s.key;
+        var expCell = c.expiring > 0
+          ? '<span style="color:#dc2626;font-weight:700;">' + c.expiring + '</span>'
+          : '<span style="color:var(--text-light);">0</span>';
+        return '<tr onclick="tiFilterBySub(\'' + s.key + '\')" style="cursor:pointer;background:' + (active?'#eef6ff':'transparent') + ';">' +
+          '<td style="' + cell + '"><i class="ti ' + s.icon + '" style="font-size:14px;color:' + s.color + ';vertical-align:-2px;"></i> ' + s.label + '</td>' +
+          '<td style="' + cell + 'color:#166534;font-weight:600;">' + c.live + '</td>' +
+          '<td style="' + cell + 'font-weight:600;">' + c.pending + '</td>' +
+          '<td style="' + cell + '">' + expCell + '</td>' +
+        '</tr>';
+      }).join('') +
+    '</tbody></table></div>';
 }
 
 function tiFilterBySub(key) {
