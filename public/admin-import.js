@@ -48,17 +48,17 @@ function tiRenderBreakdown() {
   var rows = TI_SUBCATS.filter(function(s){ return counts[s.key].waiting > 0 || counts[s.key].live > 0; });
   if (!rows.length) { host.innerHTML = ''; return; }
   host.innerHTML = '<div style="font-size:0.8rem;color:var(--text-light);margin:0 0 8px;">By category, waiting in import vs live on site</div>' +
-    '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem;">' +
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:1.25rem;">' +
     rows.map(function(s){
       var c = counts[s.key];
       var active = window._tiSubFilter === s.key;
       var gap = (c.waiting >= 10 && c.live <= 1)
-        ? '<span style="background:#fee2e2;color:#991b1b;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:999px;">Big gap</span>' : '';
-      return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="text-align:left;background:' + (active?'#eef6ff':'#fff') + ';border:1px solid ' + (active?'#90c2f0':'var(--border)') + ';border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;">' +
-        '<i class="ti ' + s.icon + '" style="font-size:16px;color:' + s.color + ';width:18px;"></i>' +
-        '<span style="flex:1;font-size:0.82rem;font-weight:600;color:var(--text);">' + s.label + '</span>' +
-        '<span style="font-size:0.8rem;color:var(--text-light);"><strong style="color:var(--text);">' + c.waiting + '</strong> waiting</span>' +
-        '<span style="font-size:0.8rem;color:var(--text-light);"><strong style="color:var(--text);">' + c.live + '</strong> live</span>' +
+        ? '<div style="margin-top:6px;"><span style="background:#fee2e2;color:#991b1b;font-size:0.66rem;font-weight:700;padding:2px 8px;border-radius:999px;">Big gap</span></div>' : '';
+      return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="text-align:center;background:' + (active?'#eef6ff':'#fff') + ';border:1px solid ' + (active?'#90c2f0':'var(--border)') + ';border-radius:10px;padding:14px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;">' +
+        '<i class="ti ' + s.icon + '" style="font-size:20px;color:' + s.color + ';"></i>' +
+        '<div style="font-size:1.4rem;font-weight:700;color:var(--text);margin-top:5px;line-height:1;">' + c.waiting + '</div>' +
+        '<div style="font-size:0.78rem;font-weight:600;color:var(--text);margin-top:3px;">' + s.label + '</div>' +
+        '<div style="font-size:0.72rem;color:var(--text-light);margin-top:2px;">' + c.waiting + ' waiting · ' + c.live + ' live</div>' +
         gap +
       '</button>';
     }).join('') + '</div>';
