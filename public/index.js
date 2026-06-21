@@ -289,7 +289,7 @@
     if (link) {
       window.location.href = link;
     } else {
-      window.location.href = 'mailto:consulting@cana.ai?subject=Payment enquiry: ' + encodeURIComponent(title);
+      window.location.href = 'mailto:hello@getcana.co.uk?subject=Payment enquiry: ' + encodeURIComponent(title);
     }
   }
 
