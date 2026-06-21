@@ -14,7 +14,7 @@ async function sbFetch(path, opts) {
 
 async function loadImportedTenders() {
   try {
-    var res = await sbFetch('/rest/v1/tenders?source=eq.contracts_finder&select=*&order=created_at.desc&limit=200');
+    var res = await sbFetch('/rest/v1/tenders?source=in.(contracts_finder,find_a_tender)&select=*&order=created_at.desc&limit=200');
     var data = await res.json();
     tiAllTenders = Array.isArray(data) ? data : [];
     tiUpdateStats();
@@ -220,7 +220,7 @@ async function runManualImport() {
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(async function() {
     try {
-      var res = await sbFetch('/rest/v1/tenders?source=eq.contracts_finder&status=eq.pending_review&select=id');
+      var res = await sbFetch('/rest/v1/tenders?source=in.(contracts_finder,find_a_tender)&status=eq.pending_review&select=id');
       var data = await res.json();
       var badge = document.getElementById('sbImport');
       if (badge && Array.isArray(data)) badge.textContent = data.length;
