@@ -278,10 +278,17 @@ async function tiDoApprove(id) {
 
 async function tiReject(id) {
   try {
-    await sbFetch('/rest/v1/tenders?id=eq.' + id, {
+    var res = await sbFetch('/rest/v1/tenders?id=eq.' + id, {
       method: 'PATCH',
-      body: JSON.stringify({ status: 'rejected' })
+      body: JSON.stringify({ status: 'rejected', rejected_at: new Date().toISOString() })
     });
+    // If rejected_at column doesn't exist yet, retry without it so reject still works
+    if (!res.ok) {
+      await sbFetch('/rest/v1/tenders?id=eq.' + id, {
+        method: 'PATCH',
+        body: JSON.stringify({ status: 'rejected' })
+      });
+    }
     tiAllTenders = tiAllTenders.map(function(t){ return t.id === id ? Object.assign({},t,{status:'rejected'}) : t; });
     tiUpdateStats(); tiRender();
     showToast('Tender rejected', 'success');
