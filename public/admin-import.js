@@ -83,6 +83,7 @@ function tiRenderBreakdown() {
 
 function tiFilterBySub(key) {
   window._tiSubFilter = (window._tiSubFilter === key) ? '' : key;
+  tiRenderBreakdown();
   tiRender();
 }
 
