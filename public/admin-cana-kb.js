@@ -28,8 +28,6 @@ async function loadKnowledgeBase() {
     var cp = document.getElementById('kb-commissioner-prefs');
     var av = document.getElementById('kb-avoid');
     if (ws) ws.value = d.writing_style || '';
-    var wg = document.getElementById('canaKnowledge');
-    if (wg) wg.value = d.writing_guidance || '';
     if (cp) cp.value = d.commissioner_preferences || '';
     if (av) av.value = d.avoid_patterns_text || '';
     kbData.winning = d.winning_examples || [];
@@ -120,21 +118,3 @@ async function saveKnowledgeBase() {
 }
 
 // ── CANA AI QUESTIONS ──────────────────────────────────────
-
-
-async function saveCanaKnowledge() {
-  var textarea = document.getElementById('canaKnowledge');
-  var savedMsg = document.getElementById('canaKnowledgeSaved');
-  if (!textarea) return;
-  try {
-    var res = await fetch('/.netlify/functions/save-knowledge-base', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sector: kbSector, writing_guidance: textarea.value })
-    });
-    if (!res.ok) throw new Error('Save failed');
-    if (savedMsg) { savedMsg.style.display = 'inline'; setTimeout(function(){ savedMsg.style.display = 'none'; }, 2500); }
-  } catch(e) {
-    alert('Could not save knowledge. Please try again.');
-  }
-}
