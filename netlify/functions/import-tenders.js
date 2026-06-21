@@ -297,6 +297,6 @@ function getYesterdayDate() {
 
 function getYesterdayDateISO() {
   var d = new Date();
-  d.setDate(d.getDate() - 1);
+  d.setDate(d.getDate() - 7);
   return d.toISOString().split('.')[0] + 'Z';
 }
