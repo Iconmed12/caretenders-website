@@ -47,17 +47,21 @@ function tiRenderBreakdown() {
   });
   var rows = TI_SUBCATS.filter(function(s){ return counts[s.key].waiting > 0 || counts[s.key].live > 0; });
   if (!rows.length) { host.innerHTML = ''; return; }
-  var allActive = !window._tiSubFilter;
   host.innerHTML =
-    '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 15px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;">' +
-      '<button onclick="tiFilterBySub(\'\')" style="border:none;background:none;cursor:pointer;font-size:0.8rem;font-weight:' + (allActive?'700':'400') + ';color:' + (allActive?'#185FA5':'var(--text-light)') + ';padding:0;">All ' + tiAllTenders.length + '</button>' +
+    '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">' +
+      '<div style="font-size:0.78rem;color:var(--text-light);margin-bottom:12px;">How much is live vs still waiting in import</div>' +
       rows.map(function(s){
         var c = counts[s.key];
+        var total = c.waiting + c.live;
+        var pct = total ? Math.round((c.live / total) * 100) : 0;
         var active = window._tiSubFilter === s.key;
-        var gap = (c.waiting >= 10 && c.live <= 1) ? ' <span style="color:#dc2626;font-size:0.7rem;font-weight:600;">gap</span>' : '';
-        return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="border:none;background:none;cursor:pointer;font-size:0.8rem;padding:0;display:inline-flex;align-items:center;gap:5px;color:var(--text);' + (active?'font-weight:700;':'') + '">' +
-          '<i class="ti ' + s.icon + '" style="font-size:14px;color:' + s.color + ';"></i>' +
-          s.label + ' <strong style="color:var(--text);">' + c.waiting + '</strong>' + gap +
+        var gap = (c.waiting >= 10 && c.live <= 1) ? ' <span style="background:#fee2e2;color:#991b1b;font-size:0.62rem;font-weight:700;padding:1px 7px;border-radius:999px;">gap</span>' : '';
+        return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="display:block;width:100%;text-align:left;border:none;cursor:pointer;background:' + (active?'#f4f8ff':'none') + ';border-radius:7px;padding:8px 9px;margin-bottom:4px;">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;margin-bottom:5px;">' +
+            '<span style="' + (active?'font-weight:700;':'') + 'color:var(--text);"><i class="ti ' + s.icon + '" style="font-size:13px;color:' + s.color + ';"></i> ' + s.label + gap + '</span>' +
+            '<span style="color:var(--text-light);font-size:0.74rem;">' + c.live + ' live · ' + c.waiting + ' waiting</span>' +
+          '</div>' +
+          '<div style="height:7px;background:#eef1f5;border-radius:999px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:' + s.color + ';border-radius:999px;"></div></div>' +
         '</button>';
       }).join('') +
     '</div>';
