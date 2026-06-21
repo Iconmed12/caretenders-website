@@ -111,11 +111,12 @@ function updateCounts() {
   var care=approved.filter(isCare);
   var commercial=approved.filter(function(t){return !isCare(t);});
   var nc=approved.filter(function(t){return isNonCqcEligible(t)||(t.is_non_cqc&&isCare(t));});
-  var withDocs=allTenders.filter(function(t){var f=t.docFlags||{};return f.sq||f.quality||f.spec||f.scoring;});
+  var CANA_PIPELINE=['live','needs_docs','open'];
+  var canaPipeline=allTenders.filter(function(t){return isApproved(t)&&CANA_PIPELINE.indexOf(t.status)!==-1;});
   document.getElementById('sbCare').textContent=care.length;
   document.getElementById('sbCommercial').textContent=commercial.length;
   document.getElementById('sbNonCqc').textContent=nc.length;
-  document.getElementById('sbCana').textContent=withDocs.length;
+  document.getElementById('sbCana').textContent=canaPipeline.length;
   document.getElementById('statTotal').textContent=allTenders.length;
   document.getElementById('statOpen').textContent=approved.filter(function(t){return t.status==='open'||t.status==='live';}).length;
   document.getElementById('statClosing').textContent=approved.filter(function(t){return t.status==='closing'||t.status==='urgent';}).length;
@@ -191,8 +192,8 @@ function renderExpiredTable() {
       '<td style="font-size:0.82rem;color:var(--muted);">' + (t.org||'') + '</td>' +
       '<td style="font-size:0.82rem;color:var(--muted);">' + (t.deadline||'') + '</td>' +
       '<td>' +
-        '<button onclick="restoreTender("' + t.id + '")" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;margin-right:6px;">Restore</button>' +
-        '<button onclick="deleteTender("' + t.id + '")" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;">Delete</button>' +
+        '<button onclick="restoreTender(\'' + t.id + '\')" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:#fff;cursor:pointer;margin-right:6px;">Restore</button>' +
+        '<button onclick="deleteTender(\'' + t.id + '\')" style="font-size:0.75rem;padding:4px 10px;border-radius:6px;border:1px solid #fca5a5;background:#fff;color:#dc2626;cursor:pointer;">Delete</button>' +
       '</td>' +
     '</tr>';
   }).join('');

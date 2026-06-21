@@ -22,7 +22,6 @@ function renderCanaPanels() {
       live.push(t);
     } else {
       var missing = [];
-      if (!hasSq)      missing.push('SQ');
       if (!hasQuality) missing.push('Questions');
       if (!hasSpec)    missing.push('Spec');
       if (!hasScoring) missing.push('Scoring');
@@ -169,7 +168,7 @@ async function loadCanaDocs(){
   var hasSpec = canaDocData.spec.length > 0;
   var hasScoring = canaDocData.scoring.length > 0;
   var hasAny = hasSq || hasQuality || hasSpec || hasScoring;
-  var hasAll = hasSq && hasQuality && hasSpec && hasScoring;
+  var hasAll = hasQuality && hasSpec && hasScoring;
 
   var badge = document.getElementById('canaDocStatus');
   if (!hasAny) {
@@ -182,7 +181,6 @@ async function loadCanaDocs(){
     badge.textContent = '✓ All documents uploaded';
   } else {
     var missing = [];
-    if (!hasSq) missing.push('SQ');
     if (!hasQuality) missing.push('Questions');
     if (!hasSpec) missing.push('Spec');
     if (!hasScoring) missing.push('Scoring');
