@@ -75,8 +75,8 @@
           tenderId: data.tenderId || tenderId,
           sessionId: sid,
           includeSq: data.includeSq,
-          wantsReview: (function(){ var w = localStorage.getItem('cana_wants_review') === '1'; localStorage.removeItem('cana_wants_review'); return w; })(),
-          tier: (function(){ var t = localStorage.getItem('cana_tier') || 'none'; localStorage.removeItem('cana_tier'); return t; })(),
+          wantsReview: (data.tier && data.tier !== 'none') || (function(){ var w = localStorage.getItem('cana_wants_review') === '1'; localStorage.removeItem('cana_wants_review'); return w; })(),
+          tier: data.tier || (function(){ var t = localStorage.getItem('cana_tier') || 'none'; localStorage.removeItem('cana_tier'); return t; })(),
           companyDetails: data.companyDetails || mergedCo
         })
       }).then(function(r){

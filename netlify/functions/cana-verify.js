@@ -22,6 +22,7 @@ exports.handler = async (event) => {
 
     var paid = false;
     var includesReview = false;
+    var paidTier = 'none';
     var formEmail   = (companyDetails && companyDetails.email) || '';
     var stripeEmail = formEmail; // Default: use the email the client typed in the form
 
@@ -35,6 +36,7 @@ exports.handler = async (event) => {
             stripeEmail = s.customer_details.email;
           }
           if (s.metadata.includes_review === '1') includesReview = true;
+          if (s.metadata.tier) paidTier = s.metadata.tier;
           break;
         }
       }
@@ -76,6 +78,8 @@ exports.handler = async (event) => {
         email: stripeEmail,
         tenderId,
         includeSq: !!includeSq,
+        tier: paidTier,
+        wantsReview: paidTier !== 'none',
         companyDetails: { ...(companyDetails || {}), email: stripeEmail }
       })
     };
