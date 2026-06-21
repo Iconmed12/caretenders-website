@@ -11,6 +11,64 @@ async function sbFetch(path, opts) {
   return res;
 }
 
+// ── Fine subcategory classification (client-side, from title + description) ──
+// Broad category stays care/commercial in the data; this is display-only for the breakdown.
+var TI_SUBCATS = [
+  { key:'care',        label:'Care',         icon:'ti-heart',             color:'#1D9E75', kws:['care','social care','domiciliary','residential','nursing','supported living','mental health','learning disabilit','older people','cqc','personal care','home care','homecare','extra care','respite','reablement','care home','foster'] },
+  { key:'cleaning',    label:'Cleaning',     icon:'ti-spray',             color:'#0F6E56', kws:['cleaning','janitorial','custodial'] },
+  { key:'construction',label:'Construction', icon:'ti-tools',             color:'#BA7517', kws:['construction','building works','refurbishment','new build','demolition','civil engineering'] },
+  { key:'facilities',  label:'Facilities',   icon:'ti-building-warehouse', color:'#534AB7', kws:['facilities','facilities management','grounds','caretaking','building maintenance','maintenance','fm '] },
+  { key:'it',          label:'IT & digital', icon:'ti-device-laptop',     color:'#185FA5', kws:['software','digital','technology','ict','cyber','cloud','infrastructure','data '] },
+  { key:'transport',   label:'Transport',    icon:'ti-truck',             color:'#993C1D', kws:['transport','fleet','logistics','waste','recycling','passenger transport'] },
+  { key:'security',    label:'Security',     icon:'ti-shield',            color:'#A32D2D', kws:['security','guarding','cctv'] },
+  { key:'professional',label:'Professional', icon:'ti-briefcase',         color:'#888780', kws:['consultancy','advisory','professional services','training','recruitment','workforce','staffing'] },
+  { key:'other',       label:'Other',        icon:'ti-dots',              color:'#888780', kws:[] }
+];
+
+function tiSubcat(t) {
+  var text = ((t.title||'') + ' ' + (t.description||t.org||'')).toLowerCase();
+  for (var i = 0; i < TI_SUBCATS.length; i++) {
+    var s = TI_SUBCATS[i];
+    if (s.kws.length && s.kws.some(function(kw){ return text.indexOf(kw) !== -1; })) return s.key;
+  }
+  return 'other';
+}
+
+function tiRenderBreakdown() {
+  var host = document.getElementById('ti-breakdown');
+  if (!host) return;
+  var counts = {};
+  TI_SUBCATS.forEach(function(s){ counts[s.key] = { waiting: 0, live: 0 }; });
+  tiAllTenders.forEach(function(t){
+    var k = tiSubcat(t);
+    if (!counts[k]) counts[k] = { waiting: 0, live: 0 };
+    if (t.status === 'pending_review') counts[k].waiting++;
+    else if (t.status === 'live' || t.status === 'needs_docs') counts[k].live++;
+  });
+  var rows = TI_SUBCATS.filter(function(s){ return counts[s.key].waiting > 0 || counts[s.key].live > 0; });
+  if (!rows.length) { host.innerHTML = ''; return; }
+  host.innerHTML = '<div style="font-size:0.8rem;color:var(--text-light);margin:0 0 8px;">By category, waiting in import vs live on site</div>' +
+    '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem;">' +
+    rows.map(function(s){
+      var c = counts[s.key];
+      var active = window._tiSubFilter === s.key;
+      var gap = (c.waiting >= 10 && c.live <= 1)
+        ? '<span style="background:#fee2e2;color:#991b1b;font-size:0.68rem;font-weight:700;padding:2px 8px;border-radius:999px;">Big gap</span>' : '';
+      return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="text-align:left;background:' + (active?'#eef6ff':'#fff') + ';border:1px solid ' + (active?'#90c2f0':'var(--border)') + ';border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:11px;cursor:pointer;">' +
+        '<i class="ti ' + s.icon + '" style="font-size:16px;color:' + s.color + ';width:18px;"></i>' +
+        '<span style="flex:1;font-size:0.82rem;font-weight:600;color:var(--text);">' + s.label + '</span>' +
+        '<span style="font-size:0.8rem;color:var(--text-light);"><strong style="color:var(--text);">' + c.waiting + '</strong> waiting</span>' +
+        '<span style="font-size:0.8rem;color:var(--text-light);"><strong style="color:var(--text);">' + c.live + '</strong> live</span>' +
+        gap +
+      '</button>';
+    }).join('') + '</div>';
+}
+
+function tiFilterBySub(key) {
+  window._tiSubFilter = (window._tiSubFilter === key) ? '' : key;
+  tiRender();
+}
+
 
 async function loadImportedTenders() {
   try {
@@ -35,6 +93,7 @@ function tiUpdateStats() {
   setEl('ti-count-live',     live);
   setEl('ti-count-rejected', rejected);
   setEl('ti-count-total',    tiAllTenders.length);
+  tiRenderBreakdown();
 }
 
 function tiSetFilter(filter) {
@@ -54,6 +113,7 @@ function tiRender() {
       if (t.status !== 'live' && t.status !== 'needs_docs') return false;
     } else if (tiCurrentFilter !== 'all' && t.status !== tiCurrentFilter) return false;
     if (cat && t.category !== cat) return false;
+    if (window._tiSubFilter && tiSubcat(t) !== window._tiSubFilter) return false;
     if (search) {
       var text = ((t.title||'') + ' ' + (t.org||'') + ' ' + (t.buyer||'')).toLowerCase();
       if (!text.includes(search)) return false;
