@@ -213,6 +213,12 @@ exports.handler = async (event) => {
       var fatReleases = fatData.releases || fatData.records || [];
       console.log('FAT page', fatLoop, '— fetched', fatReleases.length, 'records');
 
+      // Diagnostic: if empty, show what FAT actually returned so we can see the shape
+      if (!fatReleases.length) {
+        console.log('FAT response top-level keys:', Object.keys(fatData).join(', '));
+        console.log('FAT response sample:', JSON.stringify(fatData).substring(0, 500));
+      }
+
       // Set up next page from the cursor link FAT returns
       fatNextUrl = (fatData.links && fatData.links.next) ? fatData.links.next : '';
 

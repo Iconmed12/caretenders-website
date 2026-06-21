@@ -195,7 +195,7 @@ async function runManualImport() {
   var btn    = document.getElementById('ti-import-btn');
   var status = document.getElementById('ti-import-status');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Importing...'; }
-  if (status) status.textContent = 'Fetching from Contracts Finder...';
+  if (status) status.textContent = 'Fetching from Contracts Finder and Find a Tender...';
 
   try {
     var res  = await fetch('/.netlify/functions/import-tenders', {
