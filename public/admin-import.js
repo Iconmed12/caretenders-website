@@ -309,14 +309,12 @@ async function tiClearAllRejected() {
   if (!rejected.length) { showToast('No rejected tenders to clear', 'success'); return; }
   if (!confirm('Delete all ' + rejected.length + ' rejected tenders? This is permanent and cannot be undone.')) return;
   try {
-    var res = await sbFetch('/rest/v1/tenders?status=eq.rejected', {
-      method: 'DELETE',
-      headers: { Prefer: 'return=minimal' }
-    });
-    if (!res.ok) throw new Error('Delete failed (' + res.status + ')');
+    var res = await fetch('/.netlify/functions/clear-rejected', { method: 'POST' });
+    var data = await res.json();
+    if (!res.ok) throw new Error(data.error || ('Failed (' + res.status + ')'));
     tiAllTenders = tiAllTenders.filter(function(t){ return t.status !== 'rejected'; });
     tiUpdateStats(); tiRender();
-    showToast('Cleared ' + rejected.length + ' rejected tenders', 'success');
+    showToast('Cleared ' + (data.deleted || rejected.length) + ' rejected tenders', 'success');
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
