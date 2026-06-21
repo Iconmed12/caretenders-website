@@ -48,24 +48,19 @@ function tiRenderBreakdown() {
   var rows = TI_SUBCATS.filter(function(s){ return counts[s.key].waiting > 0 || counts[s.key].live > 0; });
   if (!rows.length) { host.innerHTML = ''; return; }
   var allActive = !window._tiSubFilter;
-  function rowHtml(active, icon, iconColor, label, count, dot) {
-    return '<div style="display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;' +
-      (active ? 'background:#eef6ff;' : '') + '">' +
-      '<i class="ti ' + icon + '" style="font-size:15px;color:' + iconColor + ';width:17px;"></i>' +
-      '<span style="flex:1;font-size:0.82rem;' + (active?'font-weight:600;':'') + 'color:var(--text);">' + label + '</span>' +
-      dot +
-      '<span style="font-size:0.76rem;color:var(--muted);">' + count + '</span>' +
-    '</div>';
-  }
   host.innerHTML =
-    '<div style="font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.03em;padding:4px 10px;margin-bottom:2px;">Categories</div>' +
-    '<div onclick="tiFilterBySub(\'\')">' + rowHtml(allActive, 'ti-layout-grid', '#185FA5', 'All', tiAllTenders.length, '') + '</div>' +
-    rows.map(function(s){
-      var c = counts[s.key];
-      var active = window._tiSubFilter === s.key;
-      var dot = (c.waiting >= 10 && c.live <= 1) ? '<span style="width:6px;height:6px;border-radius:50%;background:#dc2626;display:inline-block;"></span>' : '';
-      return '<div onclick="tiFilterBySub(\'' + s.key + '\')">' + rowHtml(active, s.icon, s.color, s.label, c.waiting, dot) + '</div>';
-    }).join('');
+    '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:11px 15px;display:flex;gap:18px;align-items:center;flex-wrap:wrap;">' +
+      '<button onclick="tiFilterBySub(\'\')" style="border:none;background:none;cursor:pointer;font-size:0.8rem;font-weight:' + (allActive?'700':'400') + ';color:' + (allActive?'#185FA5':'var(--text-light)') + ';padding:0;">All ' + tiAllTenders.length + '</button>' +
+      rows.map(function(s){
+        var c = counts[s.key];
+        var active = window._tiSubFilter === s.key;
+        var gap = (c.waiting >= 10 && c.live <= 1) ? ' <span style="color:#dc2626;font-size:0.7rem;font-weight:600;">gap</span>' : '';
+        return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="border:none;background:none;cursor:pointer;font-size:0.8rem;padding:0;display:inline-flex;align-items:center;gap:5px;color:var(--text);' + (active?'font-weight:700;':'') + '">' +
+          '<i class="ti ' + s.icon + '" style="font-size:14px;color:' + s.color + ';"></i>' +
+          s.label + ' <strong style="color:var(--text);">' + c.waiting + '</strong>' + gap +
+        '</button>';
+      }).join('') +
+    '</div>';
 }
 
 function tiFilterBySub(key) {
@@ -143,30 +138,38 @@ function tiRender() {
     if (rb) tiReject(rb.getAttribute('data-reject'));
   };
   list.innerHTML = filtered.map(function(t) {
-    var statusColor = t.status === 'live' ? '#166534' : t.status === 'needs_docs' ? '#0369a1' : t.status === 'rejected' ? '#dc2626' : '#92400e';
     var deadline    = t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '-';
     var subKey      = tiSubcat(t);
-    var subMeta     = TI_SUBCATS.filter(function(s){ return s.key === subKey; })[0] || { label:'Other', color:'#888780' };
-    var actionCell;
+    var subMeta     = TI_SUBCATS.filter(function(s){ return s.key === subKey; })[0] || { label:'Other', color:'#888780', icon:'ti-dots' };
+    var actions;
     if (t.status === 'pending_review') {
-      actionCell = '<button data-approve="' + t.id + '" style="background:#166534;color:#fff;border:none;padding:5px 11px;border-radius:6px;font-size:0.72rem;font-weight:600;cursor:pointer;">Approve</button>' +
-                   '<button data-reject="' + t.id + '" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:5px 9px;border-radius:6px;font-size:0.72rem;cursor:pointer;margin-left:5px;">Reject</button>';
+      actions = '<button data-approve="' + t.id + '" style="background:#166534;color:#fff;border:none;padding:6px 13px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;">Approve</button>' +
+                '<button data-reject="' + t.id + '" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:6px 13px;border-radius:7px;font-size:0.78rem;cursor:pointer;">Reject</button>';
     } else if (t.status === 'rejected') {
-      actionCell = '<button data-approve="' + t.id + '" style="background:#e8f7ee;color:#166534;border:1px solid #9FE1CB;padding:5px 11px;border-radius:6px;font-size:0.72rem;cursor:pointer;">Re-approve</button>';
+      actions = '<button data-approve="' + t.id + '" style="background:#e8f7ee;color:#166534;border:1px solid #9FE1CB;padding:6px 13px;border-radius:7px;font-size:0.78rem;cursor:pointer;">Re-approve</button>';
     } else {
-      actionCell = '<span style="color:#166534;font-size:0.72rem;font-weight:600;">Live</span>' +
-                   '<button data-reject="' + t.id + '" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:4px 9px;border-radius:6px;font-size:0.7rem;cursor:pointer;margin-left:8px;">Remove</button>';
+      actions = '<button data-reject="' + t.id + '" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:6px 13px;border-radius:7px;font-size:0.78rem;cursor:pointer;">Remove</button>';
     }
-    var link = t.source_url ? '<a href="' + t.source_url + '" target="_blank" style="color:#185FA5;font-size:0.7rem;text-decoration:none;margin-left:6px;">' + (t.source === 'find_a_tender' ? 'FAT↗' : 'CF↗') + '</a>' : '';
+    var statusPill = t.status === 'pending_review' ? '<span style="background:#fefce8;color:#92400e;font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:999px;">Pending</span>'
+                   : t.status === 'rejected' ? '<span style="background:#fef2f2;color:#dc2626;font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:999px;">Rejected</span>'
+                   : '<span style="background:#e8f7ee;color:#166534;font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:999px;">Live</span>';
+    var link = t.source_url ? '<a href="' + t.source_url + '" target="_blank" style="background:#f3f4f6;color:#374151;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:999px;text-decoration:none;">' + (t.source === 'find_a_tender' ? 'View on FAT ↗' : 'View on CF ↗') + '</a>' : '';
 
-    return '<div style="display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--border);font-size:0.82rem;">' +
-        '<div style="flex:2;min-width:0;">' +
-          '<div style="font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (t.title||'') + link + '</div>' +
-          '<div style="font-size:0.72rem;color:var(--muted);">' + (t.value ? t.value + ' · ' : '') + 'Deadline ' + deadline + '</div>' +
+    return '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:15px 17px;">' +
+      '<div style="display:flex;align-items:flex-start;gap:12px;">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<div style="font-weight:600;font-size:0.88rem;color:var(--navy);margin-bottom:3px;">' + (t.title||'') + '</div>' +
+          '<div style="font-size:0.76rem;color:var(--muted);margin-bottom:8px;">' + (t.buyer||t.org||'') + (t.value ? ' · ' + t.value : '') + ' · Deadline ' + deadline + '</div>' +
+          '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' +
+            '<span style="display:inline-flex;align-items:center;gap:4px;background:#f4f6f9;color:' + subMeta.color + ';font-size:0.7rem;font-weight:600;padding:2px 9px;border-radius:999px;"><i class="ti ' + subMeta.icon + '" style="font-size:12px;"></i>' + subMeta.label + '</span>' +
+            link +
+          '</div>' +
         '</div>' +
-        '<div style="flex:1;min-width:0;color:var(--muted);font-size:0.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (t.buyer||t.org||'') + '</div>' +
-        '<div style="width:96px;flex-shrink:0;"><span style="display:inline-flex;align-items:center;gap:4px;font-size:0.7rem;color:' + subMeta.color + ';"><i class="ti ' + (subMeta.icon||'ti-dots') + '" style="font-size:12px;"></i>' + subMeta.label + '</span></div>' +
-        '<div style="width:155px;flex-shrink:0;text-align:right;">' + actionCell + '</div>' +
+        '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">' +
+          statusPill +
+          '<div style="display:flex;gap:6px;">' + actions + '</div>' +
+        '</div>' +
+      '</div>' +
     '</div>';
   }).join('');
 }
