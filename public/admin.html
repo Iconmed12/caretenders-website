@@ -478,18 +478,15 @@
     <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Rejected</div><div style="font-size:1.6rem;font-weight:700;color:#dc2626;" id="ti-count-rejected">0</div></div>
     <div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Total</div><div style="font-size:1.6rem;font-weight:700;color:var(--text);" id="ti-count-total">0</div></div>
   </div>
-  <div id="ti-breakdown"></div>
+  <div style="display:grid;grid-template-columns:185px 1fr;gap:16px;align-items:start;">
+    <div id="ti-breakdown" style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px;"></div>
+    <div>
   <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center;">
     <button onclick="tiSetFilter('pending_review')" class="ti-tab active" id="ti-tab-pending">Pending</button>
     <button onclick="tiSetFilter('live')" class="ti-tab" id="ti-tab-live">Approved</button>
     <button onclick="tiSetFilter('rejected')" class="ti-tab" id="ti-tab-rejected">Rejected</button>
     <button onclick="tiSetFilter('all')" class="ti-tab" id="ti-tab-all">All</button>
     <input type="text" id="ti-search" placeholder="Search..." oninput="tiRender()" style="margin-left:auto;padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;width:160px;">
-    <select id="ti-cat-filter" onchange="tiRender()" style="padding:7px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.82rem;font-family:inherit;outline:none;background:#fff;">
-      <option value="">All categories</option>
-      <option value="care">Care</option>
-      <option value="commercial">Commercial</option>
-    </select>
   </div>
   <div style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
     <div style="display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--border);font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.03em;">
@@ -501,6 +498,8 @@
     <div id="ti-list"></div>
   </div>
   <div id="ti-empty" style="display:none;text-align:center;padding:3rem;color:var(--text-muted);font-size:0.9rem;">No tenders yet. Click <strong>Import Now</strong> to fetch tenders.</div>
+    </div>
+  </div>
 </div>
 </div>
 </div>

@@ -48,18 +48,24 @@ function tiRenderBreakdown() {
   var rows = TI_SUBCATS.filter(function(s){ return counts[s.key].waiting > 0 || counts[s.key].live > 0; });
   if (!rows.length) { host.innerHTML = ''; return; }
   var allActive = !window._tiSubFilter;
-  host.innerHTML =
-    '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">' +
-      '<button onclick="tiFilterBySub(\'\')" style="border:1px solid ' + (allActive?'transparent':'var(--border)') + ';background:' + (allActive?'#0B1929':'#fff') + ';color:' + (allActive?'#fff':'var(--text)') + ';font-size:0.78rem;padding:6px 13px;border-radius:999px;cursor:pointer;">All ' + tiAllTenders.length + '</button>' +
-      rows.map(function(s){
-        var c = counts[s.key];
-        var active = window._tiSubFilter === s.key;
-        var dot = (c.waiting >= 10 && c.live <= 1) ? ' <span style="color:#dc2626;">●</span>' : '';
-        return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="border:1px solid ' + (active?'#90c2f0':'var(--border)') + ';background:' + (active?'#eef6ff':'#fff') + ';font-size:0.78rem;padding:6px 13px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:5px;">' +
-          '<i class="ti ' + s.icon + '" style="font-size:13px;color:' + s.color + ';"></i>' + s.label + ' ' + c.waiting + dot +
-        '</button>';
-      }).join('') +
+  function rowHtml(active, icon, iconColor, label, count, dot) {
+    return '<div style="display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;' +
+      (active ? 'background:#eef6ff;' : '') + '">' +
+      '<i class="ti ' + icon + '" style="font-size:15px;color:' + iconColor + ';width:17px;"></i>' +
+      '<span style="flex:1;font-size:0.82rem;' + (active?'font-weight:600;':'') + 'color:var(--text);">' + label + '</span>' +
+      dot +
+      '<span style="font-size:0.76rem;color:var(--muted);">' + count + '</span>' +
     '</div>';
+  }
+  host.innerHTML =
+    '<div style="font-size:0.68rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.03em;padding:4px 10px;margin-bottom:2px;">Categories</div>' +
+    '<div onclick="tiFilterBySub(\'\')">' + rowHtml(allActive, 'ti-layout-grid', '#185FA5', 'All', tiAllTenders.length, '') + '</div>' +
+    rows.map(function(s){
+      var c = counts[s.key];
+      var active = window._tiSubFilter === s.key;
+      var dot = (c.waiting >= 10 && c.live <= 1) ? '<span style="width:6px;height:6px;border-radius:50%;background:#dc2626;display:inline-block;"></span>' : '';
+      return '<div onclick="tiFilterBySub(\'' + s.key + '\')">' + rowHtml(active, s.icon, s.color, s.label, c.waiting, dot) + '</div>';
+    }).join('');
 }
 
 function tiFilterBySub(key) {
@@ -104,7 +110,7 @@ function tiSetFilter(filter) {
 
 function tiRender() {
   var search = (document.getElementById('ti-search') ? document.getElementById('ti-search').value : '').toLowerCase();
-  var cat    = document.getElementById('ti-cat-filter') ? document.getElementById('ti-cat-filter').value : '';
+  var cat    = '';
 
   var filtered = tiAllTenders.filter(function(t) {
     if (tiCurrentFilter === 'live') {
