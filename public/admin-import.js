@@ -35,7 +35,7 @@ function tiSubcat(t) {
 }
 
 function tiRenderBreakdown() {
-  var host = document.getElementById('ti-breakdown');
+  var host = document.getElementById('ti-cat-boxes');
   if (!host) return;
   var counts = {};
   TI_SUBCATS.forEach(function(s){ counts[s.key] = { waiting: 0, live: 0 }; });
@@ -47,24 +47,20 @@ function tiRenderBreakdown() {
   });
   var rows = TI_SUBCATS.filter(function(s){ return counts[s.key].waiting > 0 || counts[s.key].live > 0; });
   if (!rows.length) { host.innerHTML = ''; return; }
-  host.innerHTML =
-    '<div style="background:#fff;border:1px solid var(--border);border-radius:10px;padding:14px 16px;">' +
-      '<div style="font-size:0.78rem;color:var(--text-light);margin-bottom:12px;">How much is live vs still waiting in import</div>' +
-      rows.map(function(s){
-        var c = counts[s.key];
-        var total = c.waiting + c.live;
-        var pct = total ? Math.round((c.live / total) * 100) : 0;
-        var active = window._tiSubFilter === s.key;
-        var gap = (c.waiting >= 10 && c.live <= 1) ? ' <span style="background:#fee2e2;color:#991b1b;font-size:0.62rem;font-weight:700;padding:1px 7px;border-radius:999px;">gap</span>' : '';
-        return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="display:block;width:100%;text-align:left;border:none;cursor:pointer;background:' + (active?'#f4f8ff':'none') + ';border-radius:7px;padding:8px 9px;margin-bottom:4px;">' +
-          '<div style="display:flex;justify-content:space-between;align-items:center;font-size:0.8rem;margin-bottom:5px;">' +
-            '<span style="' + (active?'font-weight:700;':'') + 'color:var(--text);"><i class="ti ' + s.icon + '" style="font-size:13px;color:' + s.color + ';"></i> ' + s.label + gap + '</span>' +
-            '<span style="color:var(--text-light);font-size:0.74rem;">' + c.live + ' live · ' + c.waiting + ' waiting</span>' +
-          '</div>' +
-          '<div style="height:7px;background:#eef1f5;border-radius:999px;overflow:hidden;"><div style="width:' + pct + '%;height:100%;background:' + s.color + ';border-radius:999px;"></div></div>' +
-        '</button>';
-      }).join('') +
-    '</div>';
+  host.innerHTML = rows.map(function(s){
+    var c = counts[s.key];
+    var active = window._tiSubFilter === s.key;
+    return '<button onclick="tiFilterBySub(\'' + s.key + '\')" style="text-align:left;background:' + (active?'#eef6ff':'#fff') + ';border:1px solid ' + (active?'#90c2f0':'var(--border)') + ';border-radius:10px;padding:12px 14px;cursor:pointer;">' +
+      '<div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">' +
+        '<i class="ti ' + s.icon + '" style="font-size:15px;color:' + s.color + ';"></i>' +
+        '<span style="font-size:0.78rem;font-weight:600;color:var(--text);">' + s.label + '</span>' +
+      '</div>' +
+      '<div style="display:flex;gap:14px;">' +
+        '<div><div style="font-size:1.25rem;font-weight:700;color:#166534;line-height:1;">' + c.live + '</div><div style="font-size:0.66rem;color:var(--text-muted);text-transform:uppercase;margin-top:2px;">Live</div></div>' +
+        '<div><div style="font-size:1.25rem;font-weight:700;color:var(--text);line-height:1;">' + c.waiting + '</div><div style="font-size:0.66rem;color:var(--text-muted);text-transform:uppercase;margin-top:2px;">Pending</div></div>' +
+      '</div>' +
+    '</button>';
+  }).join('');
 }
 
 function tiFilterBySub(key) {
@@ -96,6 +92,7 @@ function tiUpdateStats() {
   setEl('ti-count-live',     live);
   setEl('ti-count-rejected', rejected);
   setEl('ti-count-total',    tiAllTenders.length);
+  tiRenderBreakdown();
   tiPopulateYears();
 }
 
