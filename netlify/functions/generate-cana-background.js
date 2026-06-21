@@ -31,7 +31,15 @@ exports.handler = async (event) => {
       body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: maxTokens || 1500, messages: [{ role: 'user', content: prompt }] })
     });
     var d = await res.json();
-    return d.content && d.content[0] ? d.content[0].text.trim() : '';
+    if (!res.ok) {
+      console.log('AI call failed:', res.status, JSON.stringify(d).substring(0, 300));
+      throw new Error('AI ' + res.status + ': ' + ((d.error && d.error.message) || 'unknown'));
+    }
+    if (!(d.content && d.content[0] && d.content[0].text)) {
+      console.log('AI returned no text:', JSON.stringify(d).substring(0, 300));
+      throw new Error('AI returned empty content');
+    }
+    return d.content[0].text.trim();
   }
 
   // Strip markdown formatting from AI responses

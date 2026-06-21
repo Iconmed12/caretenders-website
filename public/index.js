@@ -217,7 +217,7 @@
     const subtotal = explicitTotal || itemsSum || 0;
     window._currentTenderSubtotal = subtotal;
     window._currentStripeLink = t.stripe_link||'';
-    const totalIncVat = subtotal ? addVat(subtotal) : 0;
+    const totalIncVat = subtotal ? subtotal : 0;
 
     if(pricingItems.length){
       pricingEl.innerHTML=pricingItems.map(p=>`
@@ -233,8 +233,8 @@
     }
 
     // Total inc VAT  - never show POA
-    document.getElementById('modal-total-fee').textContent=totalIncVat?'£'+totalIncVat.toLocaleString('en-GB')+' inc. VAT':'Contact us for pricing';
-    document.getElementById('modal-fee-note').textContent=pricing.note||pricing.fee_note||t.fee_note||'Price shown includes VAT. Payable on engagement.';
+    document.getElementById('modal-total-fee').textContent=totalIncVat?'£'+totalIncVat.toLocaleString('en-GB'):'Contact us for pricing';
+    document.getElementById('modal-fee-note').textContent=pricing.note||pricing.fee_note||t.fee_note||'Payable on engagement.';
     // Store stripe link for Pay Now button
     window._currentStripeLink = t.stripe_link || '';
 
