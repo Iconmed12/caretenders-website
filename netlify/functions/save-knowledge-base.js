@@ -8,7 +8,6 @@ exports.handler = async (event) => {
     const rowId = sector === 'commercial' ? 'commercial' : 'global';
     const payload = {
       id: rowId,
-      writing_guidance: body.writing_guidance || '',
       writing_style: body.writing_style || '',
       commissioner_preferences: body.commissioner_preferences || '',
       avoid_patterns_text: body.avoid_patterns_text || '',
