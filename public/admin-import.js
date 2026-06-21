@@ -96,7 +96,20 @@ function tiUpdateStats() {
   setEl('ti-count-live',     live);
   setEl('ti-count-rejected', rejected);
   setEl('ti-count-total',    tiAllTenders.length);
-  tiRenderBreakdown();
+  tiPopulateYears();
+}
+
+function tiPopulateYears() {
+  var sel = document.getElementById('ti-year-filter');
+  if (!sel) return;
+  var years = {};
+  tiAllTenders.forEach(function(t){
+    if (t.deadline) { var y = new Date(t.deadline).getFullYear(); if (!isNaN(y)) years[y] = true; }
+  });
+  var sorted = Object.keys(years).sort();
+  var current = sel.value;
+  sel.innerHTML = '<option value="">All years</option>' + sorted.map(function(y){ return '<option value="' + y + '">' + y + '</option>'; }).join('');
+  if (current) sel.value = current;
 }
 
 function tiSetFilter(filter) {
@@ -110,12 +123,17 @@ function tiSetFilter(filter) {
 function tiRender() {
   var search = (document.getElementById('ti-search') ? document.getElementById('ti-search').value : '').toLowerCase();
   var cat    = '';
+  var year   = document.getElementById('ti-year-filter') ? document.getElementById('ti-year-filter').value : '';
 
   var filtered = tiAllTenders.filter(function(t) {
     if (tiCurrentFilter === 'live') {
       if (t.status === 'pending_review' || t.status === 'rejected') return false;
     } else if (tiCurrentFilter !== 'all' && t.status !== tiCurrentFilter) return false;
     if (cat && t.category !== cat) return false;
+    if (year) {
+      if (!t.deadline) return false;
+      if (String(new Date(t.deadline).getFullYear()) !== year) return false;
+    }
     if (window._tiSubFilter && tiSubcat(t) !== window._tiSubFilter) return false;
     if (search) {
       var text = ((t.title||'') + ' ' + (t.org||'') + ' ' + (t.buyer||'')).toLowerCase();
