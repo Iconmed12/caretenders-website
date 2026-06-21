@@ -130,6 +130,13 @@ function tiPopulateYears() {
 
 function tiSetFilter(filter) {
   tiCurrentFilter = filter;
+  // The All tab means literally everything: clear category, year and search too
+  if (filter === 'all') {
+    window._tiSubFilter = '';
+    var yr = document.getElementById('ti-year-filter'); if (yr) yr.value = '';
+    var sr = document.getElementById('ti-search'); if (sr) sr.value = '';
+    tiRenderBreakdown();
+  }
   document.querySelectorAll('.ti-tab').forEach(function(b){ b.classList.remove('active'); });
   var tab = document.getElementById('ti-tab-' + (filter === 'pending_review' ? 'pending' : filter));
   if (tab) tab.classList.add('active');
