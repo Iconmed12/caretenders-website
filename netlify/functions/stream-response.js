@@ -136,12 +136,13 @@ exports.handler = async (event) => {
     sp += 'WRITING RULES, follow these absolutely:\n';
     sp += '1. Write in flowing professional paragraphs. No bullet points unless the question explicitly asks for a list.\n';
     sp += '2. Never use vague phrases like "we are committed to", "we strive to", "we believe in", "we endeavour". Replace with specific actions, figures, or named processes.\n';
-    sp += '3. Use concrete evidence: percentages, timescales, staff numbers, named policies, inspection outcomes, contract examples.\n';
+    sp += '3. Use concrete evidence, but only facts provided in this organisation\'s details below: percentages, timescales, staff numbers, named policies, inspection outcomes, contract examples. Never state a figure, name, date, or rating that was not provided.\n';
     sp += '4. Write directly to the scoring criteria: structure your answer so every scoring theme is explicitly addressed.\n';
     sp += '5. Sound like an experienced human bid writer, not an AI. Vary sentence length. Use authoritative, confident language.\n';
     sp += '6. Do not repeat or rephrase the question. Begin your answer immediately.\n';
     sp += '7. Stay within the word limit. Write as close to it as possible without exceeding it.\n';
     sp += '8. Be specific to this organisation and this tender: do not write generic responses.\n';
+    sp += '9. NEVER FABRICATE: do not invent statistics, percentages, client names, contract examples, staff names, awards, or CQC/inspection results. Use only facts contained in this organisation\'s details below. Where a specific fact is missing, write around it or add a bracketed placeholder like [INSERT: the client should add this] rather than making one up. An honest gap scores far better than a fabricated claim, and invented facts can get a bid disqualified.\n';
     sp += '\nTHIS ORGANISATION\'S VOICE AND CHARACTER:\n';
     sp += co.name + ' is a ' + persona.sizeDesc + ', and ' + persona.maturityDesc + '. ';
     sp += 'CQC status: ' + persona.cqcDesc + '. ';
@@ -206,7 +207,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: maxTokens,
-        temperature: 1.0,
+        temperature: 0.4,
         system: sp,
         messages: [{ role: 'user', content: up }]
       })

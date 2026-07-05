@@ -203,7 +203,7 @@ exports.handler = async (event) => {
       var res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-api-key': AI_KEY, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: SONNET, max_tokens: maxTokens || 3500, messages: [{ role: 'user', content: prompt }] })
+        body: JSON.stringify({ model: SONNET, max_tokens: maxTokens || 3500, temperature: 0.4, messages: [{ role: 'user', content: prompt }] })
       });
       if (!res.ok) {
         var errTxt = await res.text();
