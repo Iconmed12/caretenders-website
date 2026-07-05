@@ -68,8 +68,7 @@ exports.handler = async () => {
       var emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body style="margin:0;padding:0;background:#F4F6F9;font-family:Arial,sans-serif;">' +
         '<div style="max-width:560px;margin:40px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(11,25,41,0.08);">' +
         '<div style="background:#0B1929;padding:28px 32px;">' +
-          '<div style="font-size:18px;font-weight:700;color:#ffffff;">Tender <span style="color:#00C9E0;">Experts</span></div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;">by ICONGRP</div>' +
+          '<div style="font-size:18px;font-weight:700;color:#ffffff;"><span style="color:#00C9E0;">Cana</span></div>' +
         '</div>' +
         '<div style="padding:32px;">' +
           '<div style="background:rgba(217,119,6,0.08);border:1px solid rgba(217,119,6,0.25);border-radius:10px;padding:14px 18px;margin-bottom:24px;">' +
@@ -90,7 +89,7 @@ exports.handler = async () => {
           '<p style="font-size:13px;color:#6B8FA3;line-height:1.6;margin:0;">Submitting a tender with expired documents is one of the most common reasons for automatic disqualification. Keep your vault up to date and you\'ll never miss this.</p>' +
         '</div>' +
         '<div style="background:#f8f9fb;padding:20px 32px;border-top:1px solid #eef0f4;">' +
-          '<p style="font-size:12px;color:#6B8FA3;margin:0;">You\'re receiving this because you have an Evidence Vault with Tender Experts. <a href="' + siteUrl + '/dashboard.html" style="color:#00C9E0;text-decoration:none;">Manage account</a></p>' +
+          '<p style="font-size:12px;color:#6B8FA3;margin:0;">You\'re receiving this because you have an Evidence Vault with Cana. <a href="' + siteUrl + '/dashboard.html" style="color:#00C9E0;text-decoration:none;">Manage account</a></p>' +
         '</div>' +
         '</div></body></html>';
 

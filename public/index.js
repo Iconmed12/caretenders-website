@@ -238,10 +238,10 @@
     // Store stripe link for Pay Now button
     window._currentStripeLink = t.stripe_link || '';
 
-    // Cana AI button always shows the same regardless of submission link
+    // Cana button always shows the same regardless of submission link
     const applyBtn=document.getElementById('modal-apply-btn');
     applyBtn.href='/cana.html?tender=' + (t.id||'');
-    applyBtn.innerHTML='<div class="btn-cta-icon">⚡</div><div class="btn-cta-text"><span class="btn-cta-label">Write with Cana AI</span><span class="btn-cta-desc">Let our AI system draft your full tender response instantly</span></div><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    applyBtn.innerHTML='<div class="btn-cta-icon">⚡</div><div class="btn-cta-text"><span class="btn-cta-label">Write with Cana</span><span class="btn-cta-desc">Let our AI system draft your full tender response instantly</span></div><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     applyBtn.className='btn-cta btn-cta--ai';
 
     // Source link  - shown on both public modal and admin

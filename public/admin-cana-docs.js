@@ -322,7 +322,7 @@ async function saveCanaDocs() {
     if (!res.ok || d.error) throw new Error(d.error);
     t.cana_docs = canaDocData;
     t.cana_questions = getCanaQuestions();
-    showToast('Cana AI saved successfully', 'success');
+    showToast('Cana saved successfully', 'success');
     var savedEl = document.getElementById('canaDocSaved');
     if (savedEl) savedEl.style.display = 'inline';
     await loadTenders();

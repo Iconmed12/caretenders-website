@@ -161,7 +161,7 @@
     }).join('');
 
     var html = '<div class="cana-tracker">' +
-      '<div class="cana-tracker-title">' + (isComplete ? '✅ Your documents are ready' : 'Cana AI is preparing your documents') + '</div>' +
+      '<div class="cana-tracker-title">' + (isComplete ? '✅ Your documents are ready' : 'Cana is preparing your documents') + '</div>' +
       '<div class="cana-tracker-email">' + (isComplete ? 'Sent to <strong>' + email + '</strong>' : 'Will be sent to <strong>' + email + '</strong> as Word documents') + '</div>' +
       '<div class="tracker-dots">' + dots + '</div>' +
       '<div class="tracker-current-stage ' + (isComplete ? 'stage-complete' : '') + '">' +
@@ -285,7 +285,7 @@
 
 
       // Set paywall stripe link
-      // Always use the fixed Cana AI payment link
+      // Always use the fixed Cana payment link
       document.getElementById('paywall-btn').href = 'https://buy.stripe.com/5kQfZgcFx0fJeqR3MUcbC03';
 
     initMemberExperience();

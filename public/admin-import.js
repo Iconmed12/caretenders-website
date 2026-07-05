@@ -263,7 +263,7 @@ function tiApprove(id) {
           '<div style="font-weight:700;font-size:0.9rem;color:#166534;padding:4px 0;">&#x2753; Quality questions</div>' +
           '<div style="font-weight:700;font-size:0.9rem;color:#166534;padding:4px 0;">&#x1F3AF; Scoring criteria</div>' +
         '</div>' +
-        '<p style="font-size:0.82rem;color:#6b7280;margin-bottom:18px;">The tender will sit in <strong>Cana AI &rarr; Needs attention</strong> until every document is uploaded and you set it live.</p>' +
+        '<p style="font-size:0.82rem;color:#6b7280;margin-bottom:18px;">The tender will sit in <strong>Cana &rarr; Needs attention</strong> until every document is uploaded and you set it live.</p>' +
         '<div style="display:flex;gap:10px;justify-content:flex-end;">' +
           '<button id="ti-approve-cancel" style="background:#f3f4f6;color:#374151;border:1px solid #e5e7eb;padding:10px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.88rem;">Not yet</button>' +
           '<button id="ti-approve-confirm" style="background:#166534;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.88rem;">&#x2713; Yes &mdash; approve</button>' +
@@ -294,7 +294,7 @@ async function tiDoApprove(id) {
     }
     tiAllTenders = tiAllTenders.map(function(t){ return t.id === id ? Object.assign({},t,{status:'needs_docs'}) : t; });
     tiUpdateStats(); tiRender();
-    // Refresh the Cana AI panels so it appears in Needs Attention immediately
+    // Refresh the Cana panels so it appears in Needs Attention immediately
     if (typeof loadTenders === 'function') {
       await loadTenders();
       if (typeof renderCanaPanels === 'function') renderCanaPanels();

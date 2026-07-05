@@ -1,4 +1,4 @@
-# Cana / Tender Experts -- Launch Checklist
+# Cana - Launch Checklist
 
 Last updated: 2026-06-13 (late)
 

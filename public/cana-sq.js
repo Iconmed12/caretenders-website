@@ -562,7 +562,7 @@ async function confirmSqAndGenerate() {
       '<div style="background:var(--navy,#0B1929);padding:14px 20px;"><span style="color:#00C9E0;font-weight:800;font-size:0.95rem;letter-spacing:0.04em;">YOUR SUBMISSION CHECKLIST</span></div>' +
       '<div style="padding:1.25rem;background:#fff;">';
 
-    html += '<div style="font-size:0.85rem;font-weight:800;color:var(--navy,#0B1929);margin-bottom:6px;">1. Completed by Cana AI</div>';
+    html += '<div style="font-size:0.85rem;font-weight:800;color:var(--navy,#0B1929);margin-bottom:6px;">1. Completed by Cana</div>';
     html += '<div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:10px 14px;margin-bottom:14px;">' +
       '<div style="font-size:0.82rem;color:var(--navy,#0B1929);padding:2px 0;">All responses above, sent to your email as Word documents.</div>' +
       '<div style="font-size:0.82rem;font-weight:800;color:#c53030;margin-top:4px;">READ THROUGH EVERY ANSWER BEFORE SUBMITTING. Check each one reflects your business accurately.</div></div>';

@@ -117,4 +117,4 @@ async function saveKnowledgeBase() {
   } catch(e) { showToast('Save failed: ' + e.message, 'error'); }
 }
 
-// ── CANA AI QUESTIONS ──────────────────────────────────────
+// ── CANA QUESTIONS ──────────────────────────────────────
