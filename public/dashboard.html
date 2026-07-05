@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard — Cana</title>
+<title>Dashboard - Cana</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
   <link rel="icon" href="/favicon.ico" sizes="any">
@@ -206,12 +206,12 @@
     </div>
     <div class="stat-card">
       <div class="stat-label">Profile strength</div>
-      <div class="stat-value" id="stat-profile">—</div>
+      <div class="stat-value" id="stat-profile">-</div>
       <div class="stat-sub">Company profile</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">Member since</div>
-      <div class="stat-value" id="stat-since">—</div>
+      <div class="stat-value" id="stat-since">-</div>
       <div class="stat-sub">Account created</div>
     </div>
   </div>
@@ -230,7 +230,7 @@
     <a href="/profile.html" class="action-card">
       <div class="action-icon amber">🏢</div>
       <h3>Company Profile</h3>
-      <p>Store your company details, CQC info, KPIs and accreditations once — used everywhere.</p>
+      <p>Store your company details, CQC info, KPIs and accreditations once, used everywhere.</p>
       <span class="action-arrow">Edit profile →</span>
     </a>
     <a href="/vault.html" class="action-card">
@@ -316,7 +316,7 @@
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
   async function init() {
-    // Auth check — redirect to login if not signed in
+    // Auth check, redirect to login if not signed in
     var { data: { session } } = await sb.auth.getSession();
     if (!session) {
       window.location.href = '/login.html?redirect=/dashboard.html';

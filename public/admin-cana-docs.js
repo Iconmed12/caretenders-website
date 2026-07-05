@@ -1,4 +1,4 @@
-// Cana AI — tender panels, doc upload, save. Split from admin-cana.js.
+// Cana, tender panels, doc upload, save. Split from admin-cana.js.
 // Loads after admin-core.js (provides canaDocData, allTenders, API) and before admin-import.js.
 
 function renderCanaPanels() {
@@ -124,7 +124,7 @@ function populateCanaTenderSelect(){
       t.cana_docs.quality && t.cana_docs.quality.length &&
       t.cana_docs.spec && t.cana_docs.spec.length &&
       t.cana_docs.scoring && t.cana_docs.scoring.length;
-    opt.textContent = (hasAllDocs ? '✓ ' : '') + t.title + (t.org ? ' — ' + t.org : '');
+    opt.textContent = (hasAllDocs ? '✓ ' : '') + t.title + (t.org ? ' - ' + t.org : '');
     sel.appendChild(opt);
   });
   if(cur) sel.value=cur;
@@ -293,7 +293,7 @@ async function handleCanaDoc(type,files){
             buildCanaQuestionRows(qResult.questions);
             showToast(qResult.questions.length+' questions detected and populated below','success');
           }else{
-            showToast('Could not auto-detect questions — please add manually','error');
+            showToast('Could not auto-detect questions, please add manually','error');
           }
         }catch(qe){showToast('Auto-detection failed: '+qe.message,'error');}
       }

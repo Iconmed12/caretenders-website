@@ -1,4 +1,4 @@
-// Cana AI — question builder, status bar, toast util. Split from admin-cana.js.
+// Cana, question builder, status bar, toast util. Split from admin-cana.js.
 
 function buildCanaQuestionRows(questions) {
   var builder = document.getElementById('canaQuestionsBuilder');
@@ -187,11 +187,11 @@ document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });
 
       statusEl.style.background = 'rgba(56,161,105,0.08)';
       statusEl.style.color = '#1a7a3f';
-      statusEl.textContent = '✓ ' + data.totalFields + ' fields extracted — ' +
+      statusEl.textContent = '✓ ' + data.totalFields + ' fields extracted, ' +
         data.autoFill + ' auto-fillable, ' + data.aiDraft + ' AI-drafted, ' +
         data.clientConfirm + ' need client confirmation';
 
-      showToast('SQ uploaded and extracted — ' + data.totalFields + ' fields', 'success');
+      showToast('SQ uploaded and extracted: ' + data.totalFields + ' fields', 'success');
       // Reload fresh data so sq_data is in allTenders and panels update correctly
       await loadTenders();
       loadCanaDocs();
@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });
     } catch(err) {
       statusEl.style.background = 'rgba(229,62,62,0.08)';
       statusEl.style.color = '#c53030';
-      statusEl.textContent = '✗ ' + (err.message || 'Extraction failed — please try again');
+      statusEl.textContent = '✗ ' + (err.message || 'Extraction failed, please try again');
       showToast('SQ extraction failed: ' + (err.message||'Error'), 'error');
     }
   }
@@ -224,7 +224,7 @@ function renderTenderStatusBar(t) {
   var isLive = status === 'live';
   var color = isLive ? '#166534' : status === 'needs_docs' ? '#0369a1' : '#92400e';
   var bg    = isLive ? '#e8f7ee' : status === 'needs_docs' ? '#e0f2fe' : '#fefce8';
-  var label = isLive ? '&#x2713; LIVE on site' : status === 'needs_docs' ? '&#x1F4C4; Needs documents — not visible to clients' : '&#x23F3; ' + status;
+  var label = isLive ? '&#x2713; LIVE on site' : status === 'needs_docs' ? '&#x1F4C4; Needs documents, not visible to clients' : '&#x23F3; ' + status;
 
   bar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:12px;background:' + bg + ';border:1.5px solid ' + color + '33;border-radius:10px;padding:12px 16px;margin-bottom:1rem;';
   var srcLink = t.source_url

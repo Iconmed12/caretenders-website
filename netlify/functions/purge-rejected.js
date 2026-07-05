@@ -14,7 +14,7 @@ exports.handler = async (event) => {
   const cutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
   try {
-    // First, find what we would delete (for logging) — rejected, with a real
+    // First, find what we would delete (for logging), rejected, with a real
     // rejected_at, older than the cutoff.
     const findUrl =
       `${sbUrl}/rest/v1/tenders?select=id,title,rejected_at` +

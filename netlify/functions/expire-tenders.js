@@ -1,4 +1,4 @@
-// Runs daily at 01:00 UTC — moves past-deadline tenders to 'expired' status.
+// Runs daily at 01:00 UTC, moves past-deadline tenders to 'expired' status.
 // Expired tenders disappear from the public portal but remain visible in the
 // admin under a new Expired tab so nothing is permanently lost.
 
@@ -28,7 +28,7 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers: cors, body: JSON.stringify({ expired: 0, date: today }) };
     }
 
-    // Batch PATCH — set status to 'expired' for all matching rows
+    // Batch PATCH, set status to 'expired' for all matching rows
     const ids = tenders.map(t => t.id);
     const patch = await fetch(
       `${sbUrl}/rest/v1/tenders?id=in.(${ids.map(id => `"${id}"`).join(',')})`,

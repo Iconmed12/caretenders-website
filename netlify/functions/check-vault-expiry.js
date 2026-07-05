@@ -1,5 +1,5 @@
-// v2 — no @netlify/functions dependency
-// Netlify scheduled function — runs daily at 9am UTC (schedule set in netlify.toml)
+// v2, no @netlify/functions dependency
+// Netlify scheduled function, runs daily at 9am UTC (schedule set in netlify.toml)
 // Checks for documents expiring within 14 days and sends email reminders via Resend
 
 exports.handler = async () => {

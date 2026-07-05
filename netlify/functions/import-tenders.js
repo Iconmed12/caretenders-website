@@ -11,10 +11,10 @@ exports.handler = async (event) => {
     }, opts || {}));
   }
 
-  // Business-support / employment programmes are NOT care — checked first, against the TITLE only
+  // Business-support / employment programmes are NOT care, checked first, against the TITLE only
   var BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
 
-  // Categories to import — maps CF keywords to Cana categories.
+  // Categories to import, maps CF keywords to Cana categories.
   // Matching is whole-word (\b boundaries) so e.g. 'care' no longer matches 'careers'.
   const CATEGORY_MAP = [
     { keywords: ['care','social care','domiciliary','residential','nursing','supported living','mental health','learning disabilit','older people','cqc','personal care','home care','homecare','extra care','respite','reablement','care home','foster'], category: 'care' },
@@ -26,7 +26,7 @@ exports.handler = async (event) => {
 
   function kwMatch(text, kw) {
     var esc = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // 'learning disabilit' is a stem — no trailing boundary for stems ending mid-word
+    // 'learning disabilit' is a stem, no trailing boundary for stems ending mid-word
     var trail = /[a-z]$/i.test(kw) && !/disabilit$/.test(kw) ? '\\b' : '';
     return new RegExp('\\b' + esc + trail, 'i').test(text);
   }
@@ -64,7 +64,7 @@ exports.handler = async (event) => {
     var imported = 0, skipped = 0, errors = 0;
     var results = [];
 
-    // Fetch from Contracts Finder API — page through results
+    // Fetch from Contracts Finder API, page through results
     var pages = event.body ? JSON.parse(event.body).pages || 3 : 3;
     
     for (var page = 0; page < pages; page++) {
@@ -87,10 +87,10 @@ exports.handler = async (event) => {
 
       var data = await res.json();
       var releases = data.releases || data.records || [];
-      console.log('Page', page, '— fetched', releases.length, 'records, total:', data.total || 'unknown');
+      console.log('Page', page, 'fetched', releases.length, 'records, total:', data.total || 'unknown');
       
       if (!releases.length) {
-        console.log('No releases on page', page, '— stopping');
+        console.log('No releases on page', page, 'stopping');
         break;
       }
 
@@ -133,7 +133,7 @@ exports.handler = async (event) => {
 
           if (!title || !deadline) { skipped++; continue; }
 
-          // Check not already imported — two guards:
+          // Check not already imported, two guards:
           // 1. Same source_id (same portal, exact record match)
           var existRes = await sbFetch('/rest/v1/tenders?source_id=eq.' + encodeURIComponent(sourceId) + '&select=id&limit=1');
           var existData = await existRes.json();
@@ -211,7 +211,7 @@ exports.handler = async (event) => {
 
       var fatData = await fatRes.json();
       var fatReleases = fatData.releases || fatData.records || [];
-      console.log('FAT page', fatLoop, '— fetched', fatReleases.length, 'records');
+      console.log('FAT page', fatLoop, 'fetched', fatReleases.length, 'records');
 
       // Set up next page from the cursor link FAT returns
       fatNextUrl = (fatData.links && fatData.links.next) ? fatData.links.next : '';
@@ -277,7 +277,7 @@ exports.handler = async (event) => {
       }
     }
 
-    console.log('Import complete — imported:', imported, 'skipped:', skipped, 'errors:', errors);
+    console.log('Import complete, imported:', imported, 'skipped:', skipped, 'errors:', errors);
     return {
       statusCode: 200,
       headers: cors,

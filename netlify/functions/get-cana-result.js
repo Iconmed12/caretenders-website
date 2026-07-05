@@ -23,7 +23,7 @@ exports.handler = async (event) => {
     const job = rows[0];
 
     if (!job) {
-      // Job not yet created by background function — still starting
+      // Job not yet created by background function, still starting
       return { statusCode: 200, headers: cors, body: JSON.stringify({ status: 'pending' }) };
     }
 

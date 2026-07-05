@@ -133,8 +133,8 @@ function renderDashboard() {
 function feeStr(t) {
   var p=t.pricing||{};
   if(p.total) return typeof p.total==='number'?'£'+p.total.toLocaleString()+'+VAT':p.total;
-  if(Array.isArray(p.items)&&p.items.length){var s=p.items.reduce(function(a,i){return a+(parseFloat(i.price)||0);},0);return s>0?'£'+s.toLocaleString()+'+VAT':'—';}
-  return '—';
+  if(Array.isArray(p.items)&&p.items.length){var s=p.items.reduce(function(a,i){return a+(parseFloat(i.price)||0);},0);return s>0?'£'+s.toLocaleString()+'+VAT':'-';}
+  return '-';
 }
 
 function renderCareTable() {
@@ -145,7 +145,7 @@ function renderCareTable() {
   if(!rows.length){tb.innerHTML='<tr><td colspan="8"><div class="empty-state"><i class="ti ti-file-off"></i>No care tenders yet</div></td></tr>';return;}
   tb.innerHTML=rows.map(function(t){
     var nc=isNonCqcEligible(t);
-    var ncBadge=nc?'<span class="td-badge" style="background:#e8f7ee;color:#085041;font-size:10px">Auto</span>':'<span style="color:var(--text-light)">—</span>';
+    var ncBadge=nc?'<span class="td-badge" style="background:#e8f7ee;color:#085041;font-size:10px">Auto</span>':'<span style="color:var(--text-light)">-</span>';
     var publishBtn=t.status==='draft'?'<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;" onclick="publishDraft(\''+t.id+'\')" title="Publish"><i class="ti ti-send"></i></button>':'';
     return '<tr><td><div class="td-title">'+(t.title||'Untitled')+'</div><div class="td-org">'+(t.org||'')+'</div></td><td>'+(t.organisation||t.org||'')+'</td><td>'+(t.value||'')+'</td><td style="color:var(--green);font-weight:600">'+feeStr(t)+'</td><td>'+ncBadge+'</td><td>'+badgeHtml(t.status)+'</td><td style="color:var(--text-muted);font-size:12px">'+fmtDate(t.deadline)+'</td><td><div class="action-btns">'+publishBtn+'<button class="action-btn edit" onclick="openDrawerById(\''+t.id+'\',\'care\')"><i class="ti ti-edit"></i></button><button class="action-btn del" onclick="askDelete(\''+t.id+'\')"><i class="ti ti-trash"></i></button></div></td></tr>';
   }).join('');

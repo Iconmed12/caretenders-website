@@ -1,6 +1,6 @@
 // Supports both:
-// - { companyNumber } — fetch full company profile + officers + PSC
-// - { query } — search by company name, return list of matches
+// - { companyNumber }: fetch full company profile + officers + PSC
+// - { query }: search by company name, return list of matches
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',

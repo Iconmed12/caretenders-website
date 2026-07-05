@@ -29,7 +29,7 @@
 
     try {
       var co = window._companyDetails || {};
-      // Restore from localStorage — Stripe redirect reloads the page and wipes in-memory state
+      // Restore from localStorage, Stripe redirect reloads the page and wipes in-memory state
       if (!co.name && !co.email) {
         try {
           var saved = JSON.parse(localStorage.getItem('cana_company_details') || '{}');
@@ -62,7 +62,7 @@
         return;
       }
 
-      // Payment confirmed — show processing screen immediately
+      // Payment confirmed, show processing screen immediately
       showProcessingScreen(data.jobId, data.email);
 
       // Browser triggers background function directly (more reliable than function-to-function)
@@ -103,7 +103,7 @@
     var p  = document.querySelector('.loading-state p');
     var spinner = document.querySelector('.loading-state .loading-spinner');
     if (spinner) spinner.style.display = 'none';
-    if (h3) { h3.innerHTML = '✅ Payment received — Cana is on it'; }
+    if (h3) { h3.innerHTML = '✅ Payment received, Cana is on it'; }
     if (p)  { p.innerHTML =
       'Your bid responses will be sent to <strong>' + (email||'your email') + '</strong> as Word documents.<br><br>' +
       '<span style="color:var(--muted);font-size:0.88em;">Expect to receive your documents within 1 hour. ' +
@@ -201,7 +201,7 @@
       polls++;
       if (polls > maxPolls) {
         clearInterval(interval);
-        return; // Simple message already showing — just stop polling
+        return; // Simple message already showing, just stop polling
       }
       try {
         var res = await fetch('/.netlify/functions/get-cana-result?jobId=' + encodeURIComponent(jobId));
@@ -493,7 +493,7 @@
     showState('member');
   }
 
-  // Build companyDetails from saved profile — used by both SQ and generation
+  // Build companyDetails from saved profile, used by both SQ and generation
   function memberCompanyDetails() {
     var p = window._memberProfile || {};
     var cpData = p.ch_data ? (typeof p.ch_data === 'string' ? JSON.parse(p.ch_data) : p.ch_data) : {};
@@ -528,7 +528,7 @@
     setStep(2);
     showState('sq');
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    // This is what fills the SQ preview — the CH path calls it, members must too
+    // This is what fills the SQ preview, the CH path calls it, members must too
     if (typeof populateSqStep === 'function') {
       populateSqStep().catch(function(e){ console.warn('SQ populate warning:', e.message); });
     }
@@ -806,7 +806,7 @@
       if (!res.ok || data.error) throw new Error(data.error);
       var results = data.results || [];
       if (!results.length) {
-        dropdown.innerHTML = '<div style="padding:12px 16px;font-size:0.83rem;color:#9ca3af;">No companies found — try a different name or number</div>';
+        dropdown.innerHTML = '<div style="padding:12px 16px;font-size:0.83rem;color:#9ca3af;">No companies found, try a different name or number</div>';
         return;
       }
       dropdown.innerHTML = results.map(function(c, i) {
@@ -825,7 +825,7 @@
       }).join('');
       window._chSearchResults = results;
     } catch(e) {
-      dropdown.innerHTML = '<div style="padding:12px 16px;font-size:0.83rem;color:#c53030;">Search failed — try again</div>';
+      dropdown.innerHTML = '<div style="padding:12px 16px;font-size:0.83rem;color:#c53030;">Search failed, try again</div>';
     }
   }
 
@@ -889,12 +889,12 @@
       { label:'Company number',   value: data.company_number },
       { label:'Registered address', value: data.registered_address },
       { label:'Type',             value: (data.company_type||'').replace(/-/g,' ') },
-      { label:'Directors',        value: data.officers && data.officers.length ? data.officers[0].name : '—' }
+      { label:'Directors',        value: data.officers && data.officers.length ? data.officers[0].name : '-' }
     ];
     document.getElementById('ch-result-grid-cana').innerHTML = fields.map(function(f){
       return '<div style="background:#fff;border-radius:7px;padding:8px 10px;">' +
         '<div style="font-size:0.68rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px;">' + f.label + '</div>' +
-        '<div style="font-size:0.82rem;font-weight:600;color:#166534;">' + escapeHtml(f.value||'—') + '</div>' +
+        '<div style="font-size:0.82rem;font-weight:600;color:#166534;">' + escapeHtml(f.value||'-') + '</div>' +
         '</div>';
     }).join('');
     document.getElementById('ch-result-cana').style.display = 'block';
@@ -918,7 +918,7 @@
       try { setStep(3); showState('sq'); } catch(e2) {}
     }
 
-    // Save profile in background — fire and forget
+    // Save profile in background, fire and forget
     if (window.supabase && window._chData) {
       try {
         var sbClient = sharedSb();

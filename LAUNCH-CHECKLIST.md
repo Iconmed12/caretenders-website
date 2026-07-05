@@ -60,7 +60,7 @@ current state. Claude updates this file as items are completed.
 - [ ] Company-number step: skip the Companies House lookup when the profile
       already has the company number (PARKED, do later)
 
-## 3d. SQ auto-fill — PAUSED for launch (decision)
+## 3d. SQ auto-fill - PAUSED for launch (decision)
 - [x] SQ document auto-fill switched OFF (hidden, not deleted). Reason: never
       fully completed every SQ format; a partly-filled legal form risks more
       work for the client and looks unreliable.

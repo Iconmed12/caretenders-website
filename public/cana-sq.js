@@ -23,11 +23,11 @@ async function populateSqStep() {
       return;
     }
 
-    var companyName = ch.company_name || co.name || '—';
+    var companyName = ch.company_name || co.name || '-';
 
     var h = '';
 
-    // ── 1. COMPANY NAME — visible, auto-filled ──
+    // ── 1. COMPANY NAME, visible, auto-filled ──
     h += '<div style="margin-bottom:1.25rem;">';
     h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;padding-bottom:0.5rem;border-bottom:2px solid #00C9E0;">';
     h += '<div style="font-size:0.8rem;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:#0B1929;">Supplier Name</div>';
@@ -40,7 +40,7 @@ async function populateSqStep() {
     h += '<td style="padding:8px 10px;color:#166534;font-weight:500;">✓ Yes</td></tr>';
     h += '</table></div>';
 
-    // ── 2. GDPR — visible, pre-answered ──
+    // ── 2. GDPR, visible, pre-answered ──
     var gdprLines = [
       'Yes. We confirm that we have in place, and will maintain by the date of contract award, the human and technical resources to perform the contract in full compliance with the UK General Data Protection Regulation (UK GDPR) and to ensure the protection of the rights of all data subjects.',
       '',
@@ -68,7 +68,7 @@ async function populateSqStep() {
     h += '<div style="background:#fafafa;border-radius:8px;padding:12px;font-size:0.82rem;color:#166534;line-height:1.7;white-space:pre-line;">' + gdprAnswer + '</div>';
     h += '</div>';
 
-    // ── 3. ALL OTHER SECTIONS — locked ──
+    // ── 3. ALL OTHER SECTIONS, locked ──
     var lockedSections = [];
     if (td && td.sq_data && td.sq_data.sections) {
       td.sq_data.sections.forEach(function(s) {
@@ -131,7 +131,7 @@ async function populateSqStep() {
 
     var h = '';
 
-    // Split HTML into tables — show first table, lock the rest
+    // Split HTML into tables, show first table, lock the rest
     var tables = htmlPreview.split('</table>');
     var firstTable = tables[0] + (tables.length > 1 ? '</table>' : '');
     var restTables = tables.slice(1).map(function(t, i) {
@@ -196,16 +196,16 @@ async function populateSqStep() {
   }
 
   function renderFromSqData(sqData, ch, co) {
-    // Render from extracted field data — used when HTML preview not yet stored
+    // Render from extracted field data, used when HTML preview not yet stored
     // Admin should re-upload SQ to generate preview
     var el = document.getElementById('sq-sections-cana');
     if (!el) return;
     var sections = sqData.sections || [];
-    var h = '<div style="background:#fff8ed;border:1px solid #fed7aa;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.8rem;color:#92400e;">⚠ Preview unavailable — ask your administrator to re-upload the SQ document to enable the full preview.</div>';
+    var h = '<div style="background:#fff8ed;border:1px solid #fed7aa;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.8rem;color:#92400e;">⚠ Preview unavailable: ask your administrator to re-upload the SQ document to enable the full preview.</div>';
     // Still show company info
     h += '<div style="font-weight:700;font-size:0.85rem;margin-bottom:0.5rem;">Your confirmed details:</div>';
-    var coName = (ch.company_name || co.name || '—');
-    var coNum  = ch.company_number || '—';
+    var coName = (ch.company_name || co.name || '-');
+    var coNum  = ch.company_number || '-';
     h += '<div style="background:#f0fdf4;border-radius:6px;padding:0.75rem 1rem;font-size:0.83rem;"><div style="color:#166534;">✓ ' + escHtml(coName) + ' (' + escHtml(coNum) + ')</div></div>';
     el.innerHTML = h;
   }
@@ -213,7 +213,7 @@ async function populateSqStep() {
   function renderFallbackSq(ch, co) {
     var el = document.getElementById('sq-sections-cana');
     if (!el) return;
-    var coName = ch.company_name || co.name || '—';
+    var coName = ch.company_name || co.name || '-';
     el.innerHTML = '<div style="padding:1.5rem;background:#fff8f0;border-radius:8px;border:1px solid #fed7aa;text-align:center;">' +
       '<div style="font-size:1.25rem;margin-bottom:0.5rem;">📋</div>' +
       '<div style="font-weight:700;font-size:0.9rem;color:#c2410c;margin-bottom:0.5rem;">SQ document not yet uploaded</div>' +
@@ -244,7 +244,7 @@ async function populateSqStep() {
       window.memberStartGeneration();
       return;
     }
-    // Skip preview — go straight to paywall
+    // Skip preview, go straight to paywall
     setStep(4);
     showState('results');
     window.scrollTo({ top: 0, behavior: 'smooth' });

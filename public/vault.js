@@ -192,7 +192,7 @@
     var reviewGroup = document.getElementById('review-group');
     if (!expiryGroup || !reviewGroup) return;
     if (!type) {
-      // No type selected — show both dimmed
+      // No type selected, show both dimmed
       expiryGroup.style.opacity = '0.5';
       reviewGroup.style.opacity = '0.5';
       return;
@@ -201,12 +201,12 @@
       expiryGroup.style.display = 'none';
       reviewGroup.style.display = 'none';
     } else if (REVIEW_DATE_TYPES.includes(type)) {
-      // Policy — review date is primary, hide expiry
+      // Policy: review date is primary, hide expiry
       expiryGroup.style.display = 'none';
       reviewGroup.style.display = '';
       reviewGroup.style.opacity = '1';
     } else {
-      // Insurance/regulatory — expiry is primary, hide review
+      // Insurance/regulatory: expiry is primary, hide review
       expiryGroup.style.display = '';
       reviewGroup.style.display = 'none';
       expiryGroup.style.opacity = '1';
@@ -220,7 +220,7 @@
     document.getElementById('doc-review-input').value = '';
   });
 
-  // Init — show both dimmed on load
+  // Init: show both dimmed on load
   updateDateFields('');
 
   function handleDragOver(e) { e.preventDefault(); document.getElementById('drop-zone').classList.add('drag-over'); }
@@ -310,7 +310,7 @@
               document.getElementById('doc-expiry-input').value = extractedExpiry;
             }
           }
-        } catch(e) { /* extraction failed — no problem, just skip */ }
+        } catch(e) { /* extraction failed, no problem, just skip */ }
       }
 
       // 3. Save metadata to vault_documents
@@ -335,7 +335,7 @@
       closeUploadModal();
       await new Promise(r => setTimeout(r, 800));
       await loadDocs();
-      showToast(extractedExpiry ? isReviewType ? 'Document uploaded — review date: ' : 'Document uploaded — expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
+      showToast(extractedExpiry ? isReviewType ? 'Document uploaded, review date: ' : 'Document uploaded, expiry: ' + extractedExpiry : 'Document uploaded successfully', 'success');
 
     } catch(err) {
       showToast('Upload failed: ' + (err.message||'Unknown error'), 'error');

@@ -90,7 +90,7 @@ exports.handler = async (event) => {
       docBase64 = docBuffer.toString('base64');
     } catch(docErr) {
       console.error('Word doc generation failed:', docErr.message);
-      // Continue — email will send without Word attachment
+      // Continue, email will send without Word attachment
     }
 
     // ── Build completion report HTML section ──
@@ -106,7 +106,7 @@ exports.handler = async (event) => {
       });
 
       reportHtml = '<div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:24px;margin-top:32px;">' +
-        '<h2 style="color:#0B1929;font-size:18px;margin:0 0 6px;">📋 Selection Questionnaire — Completion Report</h2>' +
+        '<h2 style="color:#0B1929;font-size:18px;margin:0 0 6px;">📋 Selection Questionnaire - Completion Report</h2>' +
         '<p style="color:#6b7280;font-size:13px;margin:0 0 20px;">Your completed SQ document is attached. Review before submitting.</p>';
 
       if (autoFields.length) {
@@ -153,10 +153,10 @@ exports.handler = async (event) => {
         '<p style="color:#6b7280;margin:0 0 20px;"><strong>Organisation:</strong> ' + (clientName || '') + '</p>';
 
     // Attached files list
-    var attachedFiles = ['<strong>Cana_AI_Tender_Responses.docx</strong> — ' + (responses ? responses.length : 0) + ' complete bid responses'];
-    if (includeSq && sqDocBase64) attachedFiles.push('<strong>' + (sqFileName || 'Selection_Questionnaire_Completed.docx') + '</strong> — completed SQ document (original template filled in)');
+    var attachedFiles = ['<strong>Cana_AI_Tender_Responses.docx</strong>: ' + (responses ? responses.length : 0) + ' complete bid responses'];
+    if (includeSq && sqDocBase64) attachedFiles.push('<strong>' + (sqFileName || 'Selection_Questionnaire_Completed.docx') + '</strong>: completed SQ document (original template filled in)');
     (completionDocs || []).forEach(function(d) {
-      attachedFiles.push('<strong>' + (d.fileName || d.label || 'Document') + '</strong> — for your completion: ' + (d.label || ''));
+      attachedFiles.push('<strong>' + (d.fileName || d.label || 'Document') + '</strong> - for your completion: ' + (d.label || ''));
     });
 
     htmlBody += '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px 16px;margin-bottom:24px;">' +
@@ -182,7 +182,7 @@ exports.handler = async (event) => {
     checklistHtml += '<div style="font-size:13px;font-weight:800;color:#0B1929;margin-bottom:8px;">1. Completed by Cana (review required)</div>';
     checklistHtml += '<div style="background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:12px 14px;margin-bottom:18px;">';
     if (includeSq && sqDocBase64) {
-      checklistHtml += '<div style="font-size:13px;color:#0B1929;padding:4px 0;">☑ Selection Questionnaire — completed</div>';
+      checklistHtml += '<div style="font-size:13px;color:#0B1929;padding:4px 0;">☑ Selection Questionnaire: completed</div>';
     }
     checklistHtml += '<div style="font-size:13px;color:#0B1929;padding:4px 0;">☑ ' + (responses ? responses.length : 0) + ' tender responses, written by Cana for your review</div>';
     checklistHtml += '<div style="font-size:13px;font-weight:800;color:#c53030;margin-top:8px;">🔴 YOU MUST READ THROUGH EVERY DOCUMENT BEFORE SUBMISSION. Check all answers reflect your business accurately.</div>';
@@ -192,7 +192,7 @@ exports.handler = async (event) => {
       checklistHtml += '<div style="font-size:13px;font-weight:800;color:#0B1929;margin-bottom:8px;">2. Attached for YOUR completion</div>';
       checklistHtml += '<div style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:8px;padding:12px 14px;margin-bottom:18px;">';
       completionDocs.forEach(function(d) {
-        checklistHtml += '<div style="font-size:13px;color:#78350f;padding:4px 0;">☐ ' + (d.label || d.fileName || 'Document') + ' — complete, sign and include with your submission</div>';
+        checklistHtml += '<div style="font-size:13px;color:#78350f;padding:4px 0;">☐ ' + (d.label || d.fileName || 'Document') + ': complete, sign and include with your submission</div>';
       });
       checklistHtml += '</div>';
     }
@@ -209,7 +209,7 @@ exports.handler = async (event) => {
       checklistHtml += '<div style="font-size:13px;color:#166534;padding:2px 0;">Submit via the buyer portal stated in the tender documents.</div>';
     }
     if (tenderDeadline) {
-      checklistHtml += '<div style="font-size:13px;font-weight:700;color:#c53030;padding:6px 0 0;">⏰ Submission deadline: ' + tenderDeadline + ' — do not leave it to the last day.</div>';
+      checklistHtml += '<div style="font-size:13px;font-weight:700;color:#c53030;padding:6px 0 0;">⏰ Submission deadline: ' + tenderDeadline + ', do not leave it to the last day.</div>';
     }
     checklistHtml += '</div></div></div>';
 
@@ -230,7 +230,7 @@ exports.handler = async (event) => {
         content: sqDocBase64
       });
     }
-    // Completion documents — guard total size against email provider limits (~40MB)
+    // Completion documents, guard total size against email provider limits (~40MB)
     var totalAttachBytes = attachments.reduce(function(sum, a) { return sum + Math.ceil((a.content || '').length * 0.75); }, 0);
     var skippedDocs = [];
     (completionDocs || []).forEach(function(d) {
@@ -251,7 +251,7 @@ exports.handler = async (event) => {
         body: JSON.stringify({
           from: 'Cana <' + FROM_EMAIL + '>',
           to: clientEmail,
-          subject: (includeSq ? '📋 Your SQ & Tender Responses — ' : '✅ Your Tender Responses — ') + (tenderTitle || '').substring(0, 50),
+          subject: (includeSq ? '📋 Your SQ & Tender Responses - ' : '✅ Your Tender Responses - ') + (tenderTitle || '').substring(0, 50),
           html: htmlBody,
           attachments: attachments
         })
@@ -263,7 +263,7 @@ exports.handler = async (event) => {
     // ── Send to ICONGRP ──
     var iconHtml = htmlBody.replace(
       '<h2 style="color:#0B1929;font-size:20px;margin:0 0 8px;">',
-      '<h2 style="color:#0B1929;font-size:20px;margin:0 0 8px;">New Sale — '
+      '<h2 style="color:#0B1929;font-size:20px;margin:0 0 8px;">New Sale - '
     ).replace(
       '<p style="color:#6b7280;margin:0 0 4px;"><strong>Tender:</strong>',
       '<div style="background:#e8f7ee;padding:10px 14px;border-radius:6px;margin-bottom:12px;font-size:13px;"><strong>Client:</strong> ' + (clientName||'') + ' | <strong>Email:</strong> ' + (clientEmail||'N/A') + ' | <strong>Ref:</strong> ' + (sessionId||'') + '</div><p style="color:#6b7280;margin:0 0 4px;"><strong>Tender:</strong>'
@@ -275,7 +275,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         from: 'Cana <' + FROM_EMAIL + '>',
         to: ICONGRP_EMAIL,
-        subject: 'New Sale — ' + (clientName||'') + ' | ' + (tenderTitle||'').substring(0,40),
+        subject: 'New Sale - ' + (clientName||'') + ' | ' + (tenderTitle||'').substring(0,40),
         html: iconHtml,
         attachments: attachments
       })

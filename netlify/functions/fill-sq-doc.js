@@ -99,7 +99,7 @@ function buildAnswersMap(co, sqData, sqAnswers) {
       } else if (field.field_type === 'ai_draft') {
         answer = sqAnswers[field.id] || '';
       } else if (field.field_type === 'client_confirm') {
-        answer = 'Yes — confirmed'; // They ticked the declaration
+        answer = 'Yes, confirmed'; // They ticked the declaration
       }
       if (answer) {
         map[field.id] = { question: field.question, answer: answer };

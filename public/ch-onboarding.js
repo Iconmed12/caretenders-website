@@ -61,19 +61,19 @@ function renderResult(data) {
     { label: 'Company number',  value: data.company_number },
     { label: 'Company type',    value: formatType(data.company_type) },
     { label: 'Registered address', value: data.registered_address },
-    { label: 'SIC codes',       value: data.sic_codes || '—' },
+    { label: 'SIC codes',       value: data.sic_codes || '-' },
     { label: 'Directors',       value: data.officers && data.officers.length
         ? data.officers.slice(0,3).map(function(o){ return o.name; }).join(', ')
-        : '—' },
+        : '-' },
     { label: 'PSC',             value: data.pscs && data.pscs.length
         ? data.pscs[0].name
-        : '—' }
+        : '-' }
   ];
 
   document.getElementById('result-grid').innerHTML = fields.map(function(f) {
     return '<div class="result-field">' +
       '<div class="result-field-label">' + f.label + '</div>' +
-      '<div class="result-field-value">' + (f.value || '—') + '</div>' +
+      '<div class="result-field-value">' + (f.value || '-') + '</div>' +
     '</div>';
   }).join('');
 
@@ -90,7 +90,7 @@ function formatDate(d) {
 }
 
 function formatType(t) {
-  if (!t) return '—';
+  if (!t) return '-';
   return t.replace(/-/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
 }
 

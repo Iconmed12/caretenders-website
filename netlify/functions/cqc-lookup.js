@@ -3,7 +3,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode:200, headers:cors, body:'' };
 
   const KEY  = process.env.CQC_API_KEY;
-  // Old public API — no auth required, stable, works for direct lookups
+  // Old public API, no auth required, stable, works for direct lookups
   const BASE = 'https://api.cqc.org.uk/public/v1';
 
   async function cqcFetch(path) {

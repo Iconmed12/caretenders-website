@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tender Experts — Admin · ICONGRP</title>
+<title>Tender Experts - Admin · ICONGRP</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
   <link rel="icon" href="/favicon.ico" sizes="any">
@@ -131,7 +131,7 @@
               <span style="font-size:1rem;">🟢</span>
               <div>
                 <div style="font-weight:700;font-size:0.9rem;color:#1a7a3f;">Live tenders</div>
-                <div style="font-size:0.73rem;color:#2d6a4f;">All documents uploaded — ready for clients</div>
+                <div style="font-size:0.73rem;color:#2d6a4f;">All documents uploaded, ready for clients</div>
               </div>
             </div>
             <span id="liveTenderCount" style="background:#1a7a3f;color:#fff;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;">0</span>
@@ -182,13 +182,13 @@
         </div>
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:0.85rem;margin-bottom:1.25rem;">
 
-          <!-- SELECTION QUESTIONNAIRE CARD — first -->
+          <!-- SELECTION QUESTIONNAIRE CARD - first -->
           <div class="table-card" style="padding:1.25rem;border:1.5px solid rgba(124,58,237,0.2);">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">
               <div style="width:36px;height:36px;background:rgba(124,58,237,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">📋</div>
               <div>
                 <div style="font-weight:600;font-size:0.9rem;">Selection Questionnaire</div>
-                <div style="font-size:0.75rem;color:var(--text-light);">Commissioner's SQ document (.docx) — Cana will extract all fields</div>
+                <div style="font-size:0.75rem;color:var(--text-light);">Commissioner's SQ document (.docx): Cana will extract all fields</div>
               </div>
             </div>
             <div class="cana-drop-zone" id="sqDrop"
@@ -256,7 +256,7 @@
           </div>
           <div id="canaQuestionsBuilder" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
           <div id="canaQuestionsEmpty" style="text-align:center;padding:1.5rem;color:var(--text-light);font-size:0.85rem;background:var(--bg);border-radius:8px;">
-            No questions added yet — click "Add question" to start
+            No questions added yet, click "Add question" to start
           </div>
         </div>
 
@@ -264,7 +264,7 @@
           <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
             <i class="ti ti-sparkles" style="font-size:14px;"></i> Save &amp; train Cana
           </button>
-          <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved — Cana is ready for this tender</span>
+          <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved, Cana is ready for this tender</span>
         </div>
       </div>
 
@@ -315,7 +315,7 @@
 
         <div style="display:flex;align-items:center;gap:12px;margin-top:1.1rem;">
           <button onclick="saveDeliveryPack()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;">Save completion pack</button>
-          <span id="deliverySaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved — pack will be sent with the client delivery</span>
+          <span id="deliverySaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved, pack will be sent with the client delivery</span>
         </div>
       </div>
 
@@ -337,7 +337,7 @@
       </div>
       <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;">
         <div style="font-weight:600;margin-bottom:4px;display:flex;align-items:center;gap:8px;"><i class="ti ti-pencil" style="color:#2563eb;"></i> Writing Style &amp; Structure</div>
-        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;">Tell Cana exactly how to write — tone, structure, what to include in every answer</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;">Tell Cana exactly how to write: tone, structure, what to include in every answer</div>
         <textarea id="kb-writing-style" style="width:100%;min-height:150px;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.85rem;font-family:DM Sans,sans-serif;resize:vertical;line-height:1.6;outline:none;" placeholder="e.g. Always open with a strong statement of commitment. Use specific figures and percentages. Reference CQC ratings early. End each answer with a forward-looking commitment..."></textarea>
       </div>
       <div style="background:white;border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1.25rem;">
@@ -536,7 +536,7 @@
       <div class="preview-pane" id="aiStep3">
         <div class="preview-banner">
           <i class="ti ti-sparkles" style="font-size:20px;color:#7c3aed;flex-shrink:0"></i>
-          <div class="preview-banner-text"><strong>Extraction complete — all fields ready</strong>Click "Open in form" to load everything into the editor. Fields highlighted in purple were auto-filled — check before publishing.</div>
+          <div class="preview-banner-text"><strong>Extraction complete, all fields ready</strong>Click "Open in form" to load everything into the editor. Fields highlighted in purple were auto-filled, check before publishing.</div>
         </div>
         <div class="preview-fields" id="previewFields"></div>
       </div>

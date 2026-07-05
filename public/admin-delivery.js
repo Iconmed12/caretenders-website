@@ -1,4 +1,4 @@
-// Client completion pack — documents the CLIENT must complete themselves
+// Client completion pack: documents the CLIENT must complete themselves
 // (Form of Tender, appendices, pricing schedules) plus the submission portal.
 // Sent with the Cana delivery email as a checklist. Split per tender.
 
@@ -43,7 +43,7 @@ function renderDeliveryFiles() {
     var mb = (total / (1024 * 1024)).toFixed(1);
     totalEl.textContent = deliveryState.docs.length + ' file' + (deliveryState.docs.length === 1 ? '' : 's') + ' · ' + mb + 'MB total';
     totalEl.style.color = total > DELIVERY_TOTAL_WARN ? '#dc2626' : 'var(--text-light)';
-    if (total > DELIVERY_TOTAL_WARN) totalEl.textContent += ' — over 25MB, email may reject attachments';
+    if (total > DELIVERY_TOTAL_WARN) totalEl.textContent += ', over 25MB, email may reject attachments';
   }
 }
 
@@ -105,7 +105,7 @@ async function saveDeliveryPack() {
   }
 
   try {
-    // Send only the pack fields — full tender objects exceed size limits on
+    // Send only the pack fields, full tender objects exceed size limits on
     // tenders that already carry extracted document text.
     var res = await fetch(API + '/patch-tender', {
       method: 'POST',
