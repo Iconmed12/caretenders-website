@@ -68,7 +68,7 @@ exports.handler = async (event) => {
     // attached (subject 'REVIEW REQUESTED'), so no separate alert here.
 
     // ── Trigger background function ──
-    // Return job details to browser — browser will trigger the background function directly
+    // Return job details to browser, browser will trigger the background function directly
     return {
       statusCode: 200,
       headers: cors,

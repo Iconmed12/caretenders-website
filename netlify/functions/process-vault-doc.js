@@ -26,7 +26,7 @@ exports.handler = async (event) => {
       // For policies: find last reviewed date and add 1 year
       prompt = 'Look at this document carefully. Find any date related to when it was last reviewed, approved or written. ' +
         'Look for phrases like "Last reviewed", "Date reviewed", "Review date", "Approved", "Written", "Date", "Version date", "Last updated". ' +
-        'Once you find that date, calculate exactly 1 year (365 days) later — that is the next review date. ' +
+        'Once you find that date, calculate exactly 1 year (365 days) later, that is the next review date. ' +
         'Return ONLY a valid JSON object with no other text:\n' +
         '{"review_date": "DD/MM/YYYY", "last_reviewed": "DD/MM/YYYY"}\n\n' +
         'If you cannot find any date at all, return:\n' +

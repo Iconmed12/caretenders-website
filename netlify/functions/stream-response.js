@@ -76,7 +76,7 @@ exports.handler = async (event) => {
 
     const wordLimit = q.wordLimit ? parseInt(q.wordLimit) : 500;
     // Give generous token headroom: 2.5 tokens per word + 800 overhead for structure
-    // Haiku max output is 8192 — cap at 8000 to never hit the hard limit mid-answer
+    // Haiku max output is 8192, cap at 8000 to never hit the hard limit mid-answer
     const maxTokens = Math.min(Math.ceil(wordLimit * 2.5) + 800, 8000);
     const co = companyDetails;
 
@@ -102,24 +102,24 @@ exports.handler = async (event) => {
             : 'a long-standing provider with over two decades of operational experience';
 
       var cqcDesc = co.cqc && co.cqc.includes('Outstanding')
-        ? 'CQC-rated Outstanding — position this as a differentiator and weave it into evidence points'
+        ? 'CQC-rated Outstanding: position this as a differentiator and weave it into evidence points'
         : co.cqc && co.cqc.includes('Good')
-          ? 'CQC-rated Good — reference the inspection findings as validation of quality processes'
+          ? 'CQC-rated Good: reference the inspection findings as validation of quality processes'
           : co.cqc && co.cqc.includes('Improvement')
-            ? 'on a demonstrable improvement journey — focus on actions taken and progress made'
-            : 'building towards first CQC registration — focus on the rigour of processes being put in place';
+            ? 'on a demonstrable improvement journey: focus on actions taken and progress made'
+            : 'building towards first CQC registration: focus on the rigour of processes being put in place';
 
       var openingApproaches = [
         'Lead with your single strongest piece of evidence for this question, then build the full argument around it.',
         'Open by naming the commissioner\'s core need directly, then demonstrate how your model meets it with specific evidence.',
         'Open with a concrete outcome you have already achieved that is directly relevant, then explain the process behind it.',
         'Open with a clear statement of your organisational approach, then ground every claim in named evidence and figures.',
-        'Open from the service user perspective — what they experience — then show the operational capability that delivers it.'
+        'Open from the service user perspective, what they experience, then show the operational capability that delivers it.'
       ];
       var approach = openingApproaches[Math.floor(Math.random() * openingApproaches.length)];
 
       var rhythmOptions = [
-        'Vary sentence length throughout — mix short punchy sentences with longer evidential ones.',
+        'Vary sentence length throughout: mix short punchy sentences with longer evidential ones.',
         'Use confident, declarative statements. Each paragraph should make one clear claim and then prove it.',
         'Write with authority. Each paragraph should open with a strong assertion and close with specific evidence.',
         'Use a direct, professional tone. Front-load the key point in each paragraph, then elaborate with evidence.'
@@ -133,15 +133,15 @@ exports.handler = async (event) => {
 
     // ── SYSTEM PROMPT ──
     var sp = 'You are a senior UK public sector bid writer with 20 years of experience winning care and support contracts for local authorities and NHS commissioners.\n\n';
-    sp += 'WRITING RULES — follow these absolutely:\n';
+    sp += 'WRITING RULES, follow these absolutely:\n';
     sp += '1. Write in flowing professional paragraphs. No bullet points unless the question explicitly asks for a list.\n';
     sp += '2. Never use vague phrases like "we are committed to", "we strive to", "we believe in", "we endeavour". Replace with specific actions, figures, or named processes.\n';
     sp += '3. Use concrete evidence: percentages, timescales, staff numbers, named policies, inspection outcomes, contract examples.\n';
-    sp += '4. Write directly to the scoring criteria — structure your answer so every scoring theme is explicitly addressed.\n';
+    sp += '4. Write directly to the scoring criteria: structure your answer so every scoring theme is explicitly addressed.\n';
     sp += '5. Sound like an experienced human bid writer, not an AI. Vary sentence length. Use authoritative, confident language.\n';
     sp += '6. Do not repeat or rephrase the question. Begin your answer immediately.\n';
     sp += '7. Stay within the word limit. Write as close to it as possible without exceeding it.\n';
-    sp += '8. Be specific to this organisation and this tender — do not write generic responses.\n';
+    sp += '8. Be specific to this organisation and this tender: do not write generic responses.\n';
     sp += '\nTHIS ORGANISATION\'S VOICE AND CHARACTER:\n';
     sp += co.name + ' is a ' + persona.sizeDesc + ', and ' + persona.maturityDesc + '. ';
     sp += 'CQC status: ' + persona.cqcDesc + '. ';
@@ -154,10 +154,10 @@ exports.handler = async (event) => {
     if (kb.avoid_patterns_text) { sp += '\nNEVER USE: ' + kb.avoid_patterns_text.replace(/\n/g,' ') + '\n'; }
 
     if (kb.winning_examples && kb.winning_examples.length) {
-      sp += '\nWINNING RESPONSE EXAMPLES — match this quality and depth:\n';
+      sp += '\nWINNING RESPONSE EXAMPLES, match this quality and depth:\n';
       kb.winning_examples.slice(0,3).forEach(function(w,i){
         var excerpt = (w.text||'').replace(/\n+/g,' ').trim().substring(0,1500);
-        sp += '\n[Example '+(i+1)+' — '+(w.name||'Winning response')+']\n'+excerpt+'\n';
+        sp += '\n[Example '+(i+1)+': '+(w.name||'Winning response')+']\n'+excerpt+'\n';
       });
       sp += '\n[Match their specificity and confidence.]\n';
     }
@@ -187,7 +187,7 @@ exports.handler = async (event) => {
     if (co.experience)      { up += '- Contract experience: ' + co.experience + '\n'; }
 
     if (specText)      { up += '\nRELEVANT SPECIFICATION SECTION:\n' + specText + '\n'; }
-    if (scoringThemes) { up += '\nSCORING CRITERIA — address every theme explicitly:\n' + scoringThemes + '\n'; }
+    if (scoringThemes) { up += '\nSCORING CRITERIA, address every theme explicitly:\n' + scoringThemes + '\n'; }
     else if (scoringText) { up += '\nSCORING CRITERIA:\n' + scoringText + '\n'; }
 
     up += '\nQUESTION: ' + q.question + '\n';
@@ -195,7 +195,7 @@ exports.handler = async (event) => {
     if (q.wordLimit) { up += 'Word limit: ' + q.wordLimit + ' words\n'; }
     up += '\nWrite the complete tender response now. Address every scoring theme. Use specific evidence. Sound like a human bid writer.';
 
-    // ── CALL HAIKU (fast, reliable — no timeout risk) ──
+    // ── CALL HAIKU (fast, reliable, no timeout risk) ──
     const aiRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {

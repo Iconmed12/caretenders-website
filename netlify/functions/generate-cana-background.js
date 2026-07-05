@@ -167,8 +167,8 @@ exports.handler = async (event) => {
       ? 'the registered manager, the designated safeguarding lead, activity coordinators, training leads'
       : 'the contracts manager, operations/site manager, health and safety (SHEQ) lead, account manager, quality manager';
     var complianceRule = isCare
-      ? '═══ CQC RULE ═══\nOnly state a CQC registration status or rating if it appears verbatim in the company evidence. If the CQC field is empty or unclear, write [INSERT: confirm your CQC registration status and current rating] instead. Never assume a rating — councils verify CQC claims against the public register.\n\n'
-      : '═══ ACCREDITATIONS RULE ═══\nOnly state accreditations and certifications (ISO 9001/14001/45001, CHAS, Constructionline, SafeContractor, Cyber Essentials, SSIP and similar) if they appear verbatim in the company evidence. If relevant accreditations are missing from the evidence, write [INSERT: list your relevant accreditations e.g. ISO 9001, CHAS] — never assume them, buyers verify certificates.\n\n';
+      ? '═══ CQC RULE ═══\nOnly state a CQC registration status or rating if it appears verbatim in the company evidence. If the CQC field is empty or unclear, write [INSERT: confirm your CQC registration status and current rating] instead. Never assume a rating: councils verify CQC claims against the public register.\n\n'
+      : '═══ ACCREDITATIONS RULE ═══\nOnly state accreditations and certifications (ISO 9001/14001/45001, CHAS, Constructionline, SafeContractor, Cyber Essentials, SSIP and similar) if they appear verbatim in the company evidence. If relevant accreditations are missing from the evidence, write [INSERT: list your relevant accreditations e.g. ISO 9001, CHAS], never assume them, buyers verify certificates.\n\n';
 
     // Derive word target from page/word limits in the question text
     function wordTarget(qText) {
@@ -221,20 +221,20 @@ exports.handler = async (event) => {
       var target = qLimits[i+1] || wordTarget(qText);
       console.log('Q' + (i+1) + ': target ' + target + ' words');
 
-      // STAGE A — Draft to the rubric
+      // STAGE A: Draft to the rubric
       var draftPrompt =
         'You are an elite UK public sector bid writer with a 90%+ win rate on local authority contracts. ' +
         'You are writing one quality question response for a live tender.\n\n' +
         '═══ THE SCORING RUBRIC (the evaluator will score 0-10 with this) ═══\n' + scoringFull + '\n\n' +
         '═══ HOW TO SCORE 10/10 ═══\n' +
-        '1. Address EVERY bullet and sub-requirement in the question criteria below — evaluators tick them off; one missed bullet caps the score at 6.\n' +
+        '1. Address EVERY bullet and sub-requirement in the question criteria below, evaluators tick them off; one missed bullet caps the score at 6.\n' +
         '2. Evidence EVERY claim with specifics from the company evidence provided (real numbers, named roles, concrete processes). Generic assurances score 4.\n' +
         '3. End with a short "added value" element: 2-4 concrete commitments that go beyond the stated requirements (this is the explicit difference between 8 and 10 in the rubric).\n' +
         '4. Reference the specification sections the question points to, showing the requirements are understood and will be met in full.\n\n' +
-        '═══ ABSOLUTE RULE No. 1 — ZERO FABRICATION ═══\n' +
-        'You must NEVER invent: names of people, statistics, percentages, staff counts, years of experience, tenure figures, retention rates, case studies, client examples, audit results, or track-record claims. Every specific fact MUST appear in the COMPANY EVIDENCE below. Where evidence is missing, write [INSERT: short description of what the client should provide]. A response containing placeholder flags scores higher than one containing invented facts — fabricated claims get bidders disqualified and blacklisted. This rule overrides all style and persuasiveness goals.\n\n' +
+        '═══ ABSOLUTE RULE No. 1: ZERO FABRICATION ═══\n' +
+        'You must NEVER invent: names of people, statistics, percentages, staff counts, years of experience, tenure figures, retention rates, case studies, client examples, audit results, or track-record claims. Every specific fact MUST appear in the COMPANY EVIDENCE below. Where evidence is missing, write [INSERT: short description of what the client should provide]. A response containing placeholder flags scores higher than one containing invented facts, fabricated claims get bidders disqualified and blacklisted. This rule overrides all style and persuasiveness goals.\n\n' +
         '═══ NAMED ROLES REQUIREMENT ═══\n' +
-        'Evaluators award marks for named accountability. For any content about staffing, safeguarding, management, training, mobilisation or quality assurance, the response MUST identify key individuals by name, role and qualification — e.g. ' + roleExamples + '. Where the company evidence does not contain a name or qualification, write [INSERT: full name and qualification of your <role>] at that exact point. NEVER write around the gap with generic phrasing like "our experienced manager" or "our qualified safeguarding lead" — unnamed roles lose marks; flagged gaps tell the client exactly what to add.\n\n' +
+        'Evaluators award marks for named accountability. For any content about staffing, safeguarding, management, training, mobilisation or quality assurance, the response MUST identify key individuals by name, role and qualification, e.g.' + roleExamples + '. Where the company evidence does not contain a name or qualification, write [INSERT: full name and qualification of your <role>] at that exact point. NEVER write around the gap with generic phrasing like "our experienced manager" or "our qualified safeguarding lead", unnamed roles lose marks; flagged gaps tell the client exactly what to add.\n\n' +
         complianceRule +
         '═══ COMPANY EVIDENCE (the ONLY permitted source of specific facts) ═══\n' + coCtx + '\n\n' +
         (kbContext ? '═══ KNOWLEDGE BASE ═══\n' + kbContext : '') +
@@ -242,15 +242,15 @@ exports.handler = async (event) => {
         '═══ FULL QUALITY QUESTION DOCUMENT (locate this question, its criteria bullets, weighting and page limit) ═══\n' + qualityFull + '\n\n' +
         '═══ THE QUESTION TO ANSWER ═══\n' + qText + '\n\n' +
         '═══ OUTPUT REQUIREMENTS ═══\n' +
-        '- HARD LIMIT: ' + target + ' words — the council REDACTS everything beyond the page limit unread, so exceeding it destroys the response. Write to ' + Math.round(target*0.78) + ' words. Do not exceed ' + Math.round(target*0.85) + ' words under any circumstances.\n' +
+        '- HARD LIMIT: ' + target + ' words, the council REDACTS everything beyond the page limit unread, so exceeding it destroys the response. Write to ' + Math.round(target*0.78) + ' words. Do not exceed ' + Math.round(target*0.85) + ' words under any circumstances.\n' +
         '- Plain flowing prose paragraphs with occasional short headed sections (plain text headings, no markdown symbols).\n' +
         '- ABSOLUTELY NO markdown: no asterisks, no hashes, no bullet symbols. Use sentence-form lists.\n' +
         '- First person plural (we/our). Confident, specific, human. Vary sentence length. No AI tells like "Moreover" chains, "delve", "tapestry", "Furthermore" repetition.\n' +
-        '- Write the response only — no preamble, no meta-commentary.';
+        '- Write the response only: no preamble, no meta-commentary.';
 
       var draft = await callSonnet(draftPrompt, 8000);
 
-      // STAGE B — Adversarial self-score and rewrite
+      // STAGE B: Adversarial self-score and rewrite
       var revisePrompt =
         'You are the council evaluation panel scoring a tender response, then a bid director fixing it.\n\n' +
         '═══ SCORING RUBRIC ═══\n' + scoringFull + '\n\n' +
@@ -260,10 +260,10 @@ exports.handler = async (event) => {
         '═══ DRAFT RESPONSE ═══\n' + draft + '\n\n' +
         '═══ YOUR TASK ═══\n' +
         'Step 1 (do this silently): score the draft 0-10 against the rubric. Identify every criteria bullet that is missing, thin, unevidenced, or generic. Check the added-value element exists and is concrete.\n' +
-        'Step 2 (FABRICATION AUDIT — do this silently): list every specific claim in the draft — named individuals, numbers, percentages, years, counts, case examples, audit results, CQC ratings. For each one, verify it appears in the COMPANY EVIDENCE above. Any claim NOT in the evidence must be replaced with [INSERT: what the client should provide] or rephrased without the invented specific. Be ruthless — invented facts disqualify bidders.\n' +
-        'Step 2b (NAMED ROLES CHECK — do this silently): wherever the draft discusses staffing, safeguarding, management, training or mobilisation, verify it either names real individuals from the evidence (with role and qualification) or carries an [INSERT: full name and qualification of your <role>] flag. Generic unnamed references like "our experienced team" or "a dedicated manager" are gaps — replace them with named individuals or [INSERT] flags.\n' +
-        'Step 3: rewrite the response fixing every identified gap and every fabricated claim. Length is a hard constraint: write to ' + Math.round(target*0.82) + ' words, never exceed ' + Math.round(target*0.9) + ' — the council redacts everything beyond the page limit unread. Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
-        'Output ONLY the final rewritten response — no scores, no commentary.';
+        'Step 2 (FABRICATION AUDIT, do this silently): list every specific claim in the draft: named individuals, numbers, percentages, years, counts, case examples, audit results, CQC ratings. For each one, verify it appears in the COMPANY EVIDENCE above. Any claim NOT in the evidence must be replaced with [INSERT: what the client should provide] or rephrased without the invented specific. Be ruthless: invented facts disqualify bidders.\n' +
+        'Step 2b (NAMED ROLES CHECK, do this silently): wherever the draft discusses staffing, safeguarding, management, training or mobilisation, verify it either names real individuals from the evidence (with role and qualification) or carries an [INSERT: full name and qualification of your <role>] flag. Generic unnamed references like "our experienced team" or "a dedicated manager" are gaps, replace them with named individuals or [INSERT] flags.\n' +
+        'Step 3: rewrite the response fixing every identified gap and every fabricated claim. Length is a hard constraint: write to ' + Math.round(target*0.82) + ' words, never exceed ' + Math.round(target*0.9) + ', the council redacts everything beyond the page limit unread. Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
+        'Output ONLY the final rewritten response: no scores, no commentary.';
 
       var final;
       try {
@@ -282,11 +282,11 @@ exports.handler = async (event) => {
       while (countWords(final) > target * 1.02 && attempts < 2) {
         attempts++;
         var wc = countWords(final);
-        console.log('Q' + (i+1) + ' over limit (' + wc + '/' + target + ') — AI trim attempt ' + attempts);
+        console.log('Q' + (i+1) + ' over limit (' + wc + '/' + target + '), AI trim attempt ' + attempts);
         try {
           var trimmed = await callSonnet(
             'CRITICAL LENGTH VIOLATION. This tender response is ' + wc + ' words; the absolute page limit is ' + target + ' words; the council deletes everything past the limit unread.\n' +
-            'Rewrite it at EXACTLY ' + Math.round(target*0.88) + ' words or fewer. Cut adjectives, merge sentences, drop the weakest examples — but keep every response-criteria point, every piece of company evidence, every [INSERT] flag, and the added-value element.\n' +
+            'Rewrite it at EXACTLY ' + Math.round(target*0.88) + ' words or fewer. Cut adjectives, merge sentences, drop the weakest examples, but keep every response-criteria point, every piece of company evidence, every [INSERT] flag, and the added-value element.\n' +
             'Plain prose, no markdown. Output only the rewritten response.\n\n' + final,
             4000);
           if (trimmed && countWords(trimmed) < wc) final = trimmed;
@@ -295,7 +295,7 @@ exports.handler = async (event) => {
       }
       // Deterministic last resort: truncate at sentence boundary just under the limit
       if (countWords(final) > target * 1.1) {
-        console.log('Q' + (i+1) + ' still over after trims — hard truncation');
+        console.log('Q' + (i+1) + ' still over after trims, hard truncation');
         var words = final.trim().split(/\s+/);
         var cut = words.slice(0, Math.round(target * 1.0)).join(' ');
         var lastStop = Math.max(cut.lastIndexOf('. '), cut.lastIndexOf('.\n'));
@@ -316,7 +316,7 @@ exports.handler = async (event) => {
         return generateOne(idx).catch(function(e) {
           console.log('Q' + (idx+1) + ' failed:', e.message);
           var qq = questions[idx];
-          return { question: (qq.question || qq.text || String(qq)), answer: 'Response unavailable — please contact hello@getcana.co.uk' };
+          return { question: (qq.question || qq.text || String(qq)), answer: 'Response unavailable: please contact hello@getcana.co.uk' };
         });
       }));
       responses.push.apply(responses, results);
@@ -334,8 +334,8 @@ exports.handler = async (event) => {
     });
     if (attachmentNotes.length) {
       responses.push({
-        question: 'IMPORTANT — Required attachments checklist',
-        answer: 'The tender requires the following documents to be attached to your submission. Cana cannot generate these for you — please ensure each is included before submitting:\n\n' + attachmentNotes.join('\n')
+        question: 'IMPORTANT: Required attachments checklist',
+        answer: 'The tender requires the following documents to be attached to your submission. Cana cannot generate these for you, please ensure each is included before submitting:\n\n' + attachmentNotes.join('\n')
       });
     }
 
@@ -344,11 +344,11 @@ exports.handler = async (event) => {
     var sqDocBase64 = null;
     var sqFileName  = null;
 
-    // Resolve storagePath — might be missing if uploaded before storagePath was saved
+    // Resolve storagePath, might be missing if uploaded before storagePath was saved
     var sqStoragePath = (tender.sq_data && tender.sq_data.storagePath) ||
       (tender.sq_data && tender.sq_data.fileName ? tenderId + '/' + tender.sq_data.fileName : null);
 
-    console.log('SQ debug — includeSq:', includeSq,
+    console.log('SQ debug, includeSq:', includeSq,
       '| sq_data exists:', !!(tender.sq_data),
       '| storagePath:', tender.sq_data && tender.sq_data.storagePath,
       '| fileName:', tender.sq_data && tender.sq_data.fileName,
@@ -605,7 +605,7 @@ exports.handler = async (event) => {
     if (docBase64)   attachments.push({ filename: 'Cana_AI_Tender_Responses.docx', content: docBase64 });
     if (sqDocBase64) attachments.push({ filename: sqFileName || 'SQ_Completed.docx', content: sqDocBase64 });
 
-    // ── Completion pack (additive, fully guarded — never blocks the send) ──
+    // ── Completion pack (additive, fully guarded, never blocks the send) ──
     // tender was loaded with select=*, so completion_docs/submission_portal are present.
     var packChecklistHtml = '';
     try {
@@ -630,7 +630,7 @@ exports.handler = async (event) => {
           packChecklistHtml += '<div style="font-size:13px;font-weight:800;color:#0B1929;margin-bottom:6px;">Attached for your completion</div>' +
             '<div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:14px;">';
           completionDocs.forEach(function(d) {
-            packChecklistHtml += '<div style="font-size:13px;color:#78350f;padding:3px 0;">&#9744; ' + (d.label || d.fileName || 'Document') + ' — complete, sign and include with your submission</div>';
+            packChecklistHtml += '<div style="font-size:13px;color:#78350f;padding:3px 0;">&#9744; ' + (d.label || d.fileName || 'Document') + ': complete, sign and include with your submission</div>';
           });
           packChecklistHtml += '</div>';
         }
@@ -675,13 +675,13 @@ exports.handler = async (event) => {
         var r1 = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: 'Bearer ' + RESEND, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: clientEmail, subject: '📄 Your Cana documents — ' + (tender.title||'').substring(0,50), html: emailHtml, attachments })
+          body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: clientEmail, subject: '📄 Your Cana documents: ' + (tender.title||'').substring(0,50), html: emailHtml, attachments })
         });
         console.log('Client email:', r1.status, clientEmail);
       } catch(e) { console.log('Client email failed:', e.message); }
     }
 
-    // Send to ICONGRP — flag the order by tier so the team sees the scope at a glance
+    // Send to ICONGRP, flag the order by tier so the team sees the scope at a glance
     try {
       var orderTier = tier || (wantsReview ? 'review' : 'none');
       var subjectPrefix, banner;

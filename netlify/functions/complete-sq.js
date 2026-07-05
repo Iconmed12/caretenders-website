@@ -33,31 +33,31 @@ exports.handler = async (event) => {
 
       // Insurance confirmations
       { match: ["employers' liability","employer's liability",'employers liability'],
-        answer: function() { return 'Yes — Employers Liability Insurance is held at the required level.'; } },
+        answer: function() { return 'Yes:Employers Liability Insurance is held at the required level.'; } },
       { match: ["public liability",'public liability insurance'],
-        answer: function() { return 'Yes — Public Liability Insurance is held at the required level.'; } },
+        answer: function() { return 'Yes:Public Liability Insurance is held at the required level.'; } },
       { match: ['professional indemnity'],
-        answer: function() { return 'Yes — Professional Indemnity Insurance is in place.'; } },
+        answer: function() { return 'Yes:Professional Indemnity Insurance is in place.'; } },
 
       // Equality & diversity
       { match: ['equality','diversity','equal opportunities'],
-        answer: function() { return 'Yes — We have a comprehensive Equality, Diversity and Inclusion policy in place, reviewed annually, which covers all protected characteristics under the Equality Act 2010.'; } },
+        answer: function() { return 'Yes:We have a comprehensive Equality, Diversity and Inclusion policy in place, reviewed annually, which covers all protected characteristics under the Equality Act 2010.'; } },
 
       // Safeguarding
       { match: ['safeguarding'],
-        answer: function() { return 'Yes — We have a robust Safeguarding Policy in place, reviewed annually, compliant with current legislation and aligned to local safeguarding procedures.'; } },
+        answer: function() { return 'Yes:We have a robust Safeguarding Policy in place, reviewed annually, compliant with current legislation and aligned to local safeguarding procedures.'; } },
 
       // IR35
       { match: ['ir35','off-payroll'],
-        answer: function() { return 'Yes — We are compliant with IR35 off-payroll working rules.'; } },
+        answer: function() { return 'Yes:We are compliant with IR35 off-payroll working rules.'; } },
 
       // Modern slavery
       { match: ['modern slavery','human trafficking'],
-        answer: function() { return 'Yes — We have a Modern Slavery and Human Trafficking Policy in place and publish an annual statement where required by law.'; } },
+        answer: function() { return 'Yes:We have a Modern Slavery and Human Trafficking Policy in place and publish an annual statement where required by law.'; } },
 
       // Environmental
       { match: ['environmental policy','environmental management','iso 14001'],
-        answer: function() { return 'Yes — We have an Environmental Policy in place and are committed to reducing our environmental impact across all operational activities.'; } }
+        answer: function() { return 'Yes:We have an Environmental Policy in place and are committed to reducing our environmental impact across all operational activities.'; } }
     ];
 
     // Collect fields needing AI generation

@@ -19,12 +19,12 @@ exports.handler = async (event) => {
     // Base bid go-live 48000. TEST keeps everything at £1 per line item.
     const addonName = chosenTier === 'review_docs'
       ? 'Expert Review + document completion (SQ + required tender documents, excluding pricing)'
-      : 'Expert Review — consultant check within 48 hours';
+      : 'Expert Review: consultant check within 48 hours';
 
     const params = new URLSearchParams({
       'mode': 'payment',
       'line_items[0][price_data][currency]': 'gbp',
-      'line_items[0][price_data][product_data][name]': 'Cana — TEST £1: ' + (tenderTitle || 'Tender').substring(0, 60),
+      'line_items[0][price_data][product_data][name]': 'Cana - TEST £1: ' + (tenderTitle || 'Tender').substring(0, 60),
       'line_items[0][price_data][unit_amount]': '100',
       'line_items[0][quantity]': '1',
       'success_url': 'https://caretenders-website.netlify.app/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true',

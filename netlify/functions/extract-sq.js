@@ -58,9 +58,9 @@ exports.handler = async (event) => {
 
     var prompt = 'You are analysing a UK public sector Selection Questionnaire (SQ).\n\n' +
       'Extract every field or question a bidder must complete. Classify each as:\n' +
-      '- "auto_fill" — company name, address, company number, VAT, directors, PSC, CQC, insurance yes/no, SME status, incorporation date\n' +
-      '- "ai_draft" — written responses: contract examples, technical capability, GDPR, experience narratives\n' +
-      '- "client_confirm" — personal declarations: exclusions, fraud, bribery, debarment, criminal convictions\n\n' +
+      '- "auto_fill" - company name, address, company number, VAT, directors, PSC, CQC, insurance yes/no, SME status, incorporation date\n' +
+      '- "ai_draft" - written responses: contract examples, technical capability, GDPR, experience narratives\n' +
+      '- "client_confirm" - personal declarations: exclusions, fraud, bribery, debarment, criminal convictions\n\n' +
       'For auto_fill use profile_key from: company_name, company_number, registered_address, vat_number, company_type, founded_year, cqc_status, cqc_provider_id, contact_name, sme_status, directors, psc_details, services, experience, accreditations, insurance_employers, insurance_public, gdpr_policy, ico_number\n\n' +
       'Return ONLY a JSON object starting with {:\n' +
       '{"sq_title":"...","commissioner":"...","sections":[{"section":"Part 1","title":"Supplier Information","fields":[{"id":"1.1a","question":"Full name","field_type":"auto_fill","profile_key":"company_name","hint":"From Companies House"}]}]}\n\n' +
@@ -97,7 +97,7 @@ exports.handler = async (event) => {
     try { parsed = JSON.parse(clean); }
     catch(e) {
       try { parsed = JSON.parse(repairJson(clean)); }
-      catch(e2) { throw new Error('JSON parse failed — try uploading again. (' + e.message + ')'); }
+      catch(e2) { throw new Error('JSON parse failed: try uploading again. (' + e.message + ')'); }
     }
 
     var totalFields = 0, autoFill = 0, aiDraft = 0, clientConfirm = 0;
@@ -110,7 +110,7 @@ exports.handler = async (event) => {
       });
     });
 
-    if (totalFields === 0) throw new Error('No fields extracted — check the document is a valid SQ');
+    if (totalFields === 0) throw new Error('No fields extracted: check the document is a valid SQ');
 
     // ── 4. Save everything to Supabase ──
     var sqData = {
