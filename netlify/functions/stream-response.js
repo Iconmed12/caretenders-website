@@ -23,9 +23,19 @@ exports.handler = async (event) => {
     const tRows = await tRes.json();
     const kbRows = await kbRes.json();
     const t = tRows[0];
-    const kb = kbRows[0] || {};
+    let kb = kbRows[0] || {};
 
     if (!t) return { statusCode: 404, headers: cors, body: JSON.stringify({ error: 'Tender not found' }) };
+
+    // Sector-aware knowledge base: commercial tenders use the commercial KB row.
+    // Care and non-CQC keep the care row 'global' loaded above. Falls back to the
+    // care KB if a commercial KB has not been set up yet (mirrors generate-cana-background).
+    if (t.category === 'commercial') {
+      const cRes = await fetch(sbUrl + '/rest/v1/cana_knowledge?id=eq.commercial&select=*&limit=1',
+        { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } });
+      const cKb = (await cRes.json())[0] || {};
+      if (cKb.writing_style || cKb.commissioner_preferences) kb = cKb;
+    }
 
     const allQ = t.cana_questions || [];
     if (!allQ.length) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'No questions set up yet.' }) };
