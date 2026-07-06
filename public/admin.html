@@ -24,13 +24,26 @@
       <div class="login-logo-mark"><i class="ti ti-heart-handshake"></i></div>
       <span class="login-logo-text">Cana <span>Admin</span></span>
     </div>
-    <div style="margin-bottom:1.5rem"><div style="font-size:20px;font-weight:600;margin-bottom:4px">Admin panel</div><div style="font-size:13px;color:var(--text-muted)">Sign in to manage your tender listings</div></div>
+    <div style="margin-bottom:1.25rem"><div style="font-size:20px;font-weight:600;margin-bottom:4px">Admin panel</div><div style="font-size:13px;color:var(--text-muted)">Sign in to manage your tender listings</div></div>
+    <div style="display:flex;gap:6px;margin-bottom:1.25rem;background:var(--bg-muted,#f1f5f9);padding:4px;border-radius:8px">
+      <button id="modeOwnerBtn" type="button" onclick="setLoginMode('owner')" style="flex:1;padding:8px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;background:#fff;color:var(--text)">Owner</button>
+      <button id="modeStaffBtn" type="button" onclick="setLoginMode('staff')" style="flex:1;padding:8px;border:none;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-muted)">Staff</button>
+    </div>
     <div id="loginError" class="login-error"><i class="ti ti-alert-circle" style="font-size:15px"></i> Sign in failed</div>
-    <label class="login-label">Email</label>
-    <input class="login-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="username" onkeydown="if(event.key==='Enter')doLoginSupabase()">
-    <label class="login-label">Password</label>
-    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLoginSupabase()">
-    <button class="login-btn" onclick="doLoginSupabase()">Sign in to admin panel</button>
+    <div id="ownerLoginFields">
+      <label class="login-label">Email</label>
+      <input class="login-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="username" onkeydown="if(event.key==='Enter')doLoginSupabase()">
+      <label class="login-label">Password</label>
+      <input class="login-input" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLoginSupabase()">
+      <button class="login-btn" onclick="doLoginSupabase()">Sign in to admin panel</button>
+    </div>
+    <div id="staffLoginFields" style="display:none">
+      <label class="login-label">Username</label>
+      <input class="login-input" type="text" id="staffUsername" placeholder="your username" autocomplete="username" onkeydown="if(event.key==='Enter')doStaffLogin()">
+      <label class="login-label">6-digit PIN</label>
+      <input class="login-input" type="password" id="staffPin" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doStaffLogin()">
+      <button class="login-btn" onclick="doStaffLogin()">Sign in</button>
+    </div>
   </div>
 </div>
 
@@ -50,7 +63,8 @@
     <div class="sidebar-nav">
       <button class="nav-item" onclick="showPage('cana',this)"><i class="ti ti-sparkles"></i> Cana <span class="nav-badge" id="sbCana">0</span></button>
 <button class="nav-item" onclick="showPage('tenders-import',this)"><i class="ti ti-cloud-download"></i> Tender Import <span class="nav-badge" id="sbImport">0</span></button>
-<button class="nav-item" onclick="showPage('knowledge',this)"><i class="ti ti-brain"></i> Knowledge Base</button>
+<button class="nav-item" id="navKnowledge" onclick="showPage('knowledge',this)"><i class="ti ti-brain"></i> Knowledge Base</button>
+      <button class="nav-item" id="navStaff" style="display:none" onclick="showPage('staff',this)"><i class="ti ti-users"></i> Staff</button>
       <button class="nav-item" onclick="showPage('settings',this)"><i class="ti ti-settings"></i> Settings</button>
       <button class="nav-item" onclick="window.open('index.html','_blank')"><i class="ti ti-external-link"></i> View live site</button>
     </div>
@@ -415,6 +429,31 @@
     </div>
 
     <!-- SETTINGS PAGE -->
+    <!-- STAFF PAGE (owner/manager only) -->
+    <div class="page" id="page-staff">
+      <div style="max-width:900px">
+        <div class="table-card" style="margin-bottom:1.25rem">
+          <div class="table-header"><h2>Add a staff member</h2></div>
+          <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            <div><label class="login-label">Username</label><input class="login-input" id="newStaffUsername" placeholder="e.g. jane"></div>
+            <div><label class="login-label">Role</label>
+              <select class="login-input" id="newStaffRole">
+                <option value="admin">Admin (tenders only, no Knowledge Base)</option>
+                <option value="manager">Manager (tenders + manage staff)</option>
+              </select>
+            </div>
+            <div><label class="login-label">6-digit PIN</label><input class="login-input" id="newStaffPin" inputmode="numeric" maxlength="6" placeholder="••••••"></div>
+            <div style="display:flex;align-items:flex-end"><button class="login-btn" style="margin:0" onclick="createStaff()">Create login</button></div>
+          </div>
+          <div id="staffCreateMsg" style="padding:0 16px 14px;font-size:13px"></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header"><h2>Staff &amp; managers</h2></div>
+          <table><thead><tr><th>Username</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="staffTable"></tbody></table>
+        </div>
+      </div>
+    </div>
+
     <div class="page" id="page-settings">
       <div style="max-width:640px;">
         <h2 style="font-size:1.1rem;font-weight:600;margin-bottom:0.25rem;">Integrations</h2>
@@ -625,5 +664,6 @@
 <script src="/admin-cana-questions.js"></script>
 <script src="/admin-delivery.js"></script>
 <script src="/admin-import.js"></script>
+<script src="/admin-staff.js"></script>
 </body>
 </html>
