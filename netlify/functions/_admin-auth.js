@@ -1,15 +1,17 @@
 // Shared admin auth + roles (Phase 1 and Phase 5).
 //
 // checkAdmin(event) verifies a Supabase Auth access token and resolves the
-// caller's ROLE:
-//   - owner: email is in the ADMIN_EMAILS env allow-list (guaranteed, so the
-//     founder can never be locked out), OR a row in admin_users with role=owner.
-//   - staff: an active row in the admin_users table with role=staff.
+// caller's ROLE (three tiers):
+//   - owner:   email in the ADMIN_EMAILS env allow-list (guaranteed, never
+//              locked out), OR a row in admin_users with role=owner. Sees the KB.
+//   - manager: active admin_users row, role=manager. Tenders + staff management.
+//   - admin:   active admin_users row, role=admin. Tenders only, no KB.
 //   - otherwise: not authenticated.
 //
-// requireAdmin  -> allows owner or staff (used by tender functions).
-// requireOwner  -> allows owner only (used by the knowledge base and staff mgmt).
-// logAudit      -> writes a timestamped row to admin_audit_log (who/what/when).
+// requireAdmin   -> owner, manager, or admin (tender functions).
+// requireManager -> owner or manager (staff management).
+// requireOwner   -> owner only (the knowledge base).
+// logAudit       -> writes a timestamped row to admin_audit_log (who/what/when).
 //
 // The file name starts with "_" so Netlify does NOT treat it as its own function
 // endpoint; it is bundled as a helper when a function require()s it.
@@ -59,7 +61,7 @@ async function checkAdmin(event) {
         if (row && row.active === false) {
           return { authenticated: false, email: email, role: null, reason: 'account deactivated' };
         }
-        if (row && (row.role === 'owner' || row.role === 'staff')) {
+        if (row && (row.role === 'owner' || row.role === 'manager' || row.role === 'admin')) {
           return { authenticated: true, email: email, role: row.role, reason: 'ok (' + row.role + ' via admin_users)' };
         }
       }
@@ -118,6 +120,25 @@ async function requireOwner(event, fnName, corsHeaders) {
   };
 }
 
+// Enforce: owner or manager. Used for staff management (create/remove logins,
+// change roles, reset PINs).
+async function requireManager(event, fnName, corsHeaders) {
+  var result = await checkAdmin(event);
+  if (event) event._adminIdentity = result;
+  if (result.authenticated && (result.role === 'owner' || result.role === 'manager')) {
+    console.log('[admin-auth][enforce] ' + fnName + ': allow ' + result.role + ' ' + result.email);
+    return null;
+  }
+  var reason = result.authenticated ? 'requires manager/owner (role=' + result.role + ')' : result.reason;
+  console.log('[admin-auth][enforce] ' + fnName + ': DENY(manager) reason=' + reason +
+    ' email=' + (result.email || 'none'));
+  return {
+    statusCode: result.authenticated ? 403 : 401,
+    headers: corsHeaders || { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ error: result.authenticated ? 'Manager access required' : 'Admin authentication required' })
+  };
+}
+
 // Best-effort audit trail. Writes who/what/when to admin_audit_log using the
 // service key. Never throws and never blocks the action: if the log write fails
 // (e.g. table missing), the action still succeeds.
@@ -135,4 +156,4 @@ async function logAudit(event, action, details) {
   }
 }
 
-module.exports = { checkAdmin, logAdminCheck, requireAdmin, requireOwner, logAudit };
+module.exports = { checkAdmin, logAdminCheck, requireAdmin, requireManager, requireOwner, logAudit };
