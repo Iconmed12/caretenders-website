@@ -12,7 +12,7 @@ exports.handler = async (event) => {
     const jobId = event.queryStringParameters && event.queryStringParameters.jobId;
     if (!jobId) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing jobId' }) };
 
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
     const res = await fetch(sbUrl + '/rest/v1/cana_jobs?id=eq.' + jobId + '&select=*&limit=1', {

@@ -2,7 +2,7 @@ const { Document, Packer, Paragraph, TextRun, BorderStyle, AlignmentType, Headin
 const JSZip = require('jszip');
 
 exports.handler = async (event) => {
-  const sbKey  = process.env.SUPABASE_ANON_KEY;
+  const sbKey  = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
   const sbUrl  = 'https://igpjfpncfuawikoyzfcd.supabase.co';
   const RESEND = process.env.RESEND_API_KEY;
   const FROM   = 'noreply@getcana.co.uk';

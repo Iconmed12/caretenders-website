@@ -32,7 +32,7 @@ exports.handler = async (event) => {
     }
     if (!Object.keys(update).length) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'No allowed fields supplied' }) };
 
-    const supabase = createClient('https://igpjfpncfuawikoyzfcd.supabase.co', process.env.SUPABASE_ANON_KEY);
+    const supabase = createClient('https://igpjfpncfuawikoyzfcd.supabase.co', (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY));
     const { error } = await supabase.from('tenders').update(update).eq('id', tenderId);
     if (error) return { statusCode: 500, headers: cors, body: JSON.stringify({ error: error.message }) };
 

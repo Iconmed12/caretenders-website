@@ -24,7 +24,7 @@ exports.handler = async (event) => {
     var tenderDeadline = '';
     if (tenderId) {
       try {
-        var sbKey = process.env.SUPABASE_ANON_KEY;
+        var sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
         var packRes = await fetch(
           'https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/tenders?id=eq.' + encodeURIComponent(tenderId) +
           '&select=deadline,completion_docs,submission_portal',

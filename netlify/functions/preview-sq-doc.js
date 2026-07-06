@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     const { tenderId } = JSON.parse(event.body || '{}');
     if (!tenderId) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing tenderId' }) };
 
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
     // 1. Get tender to find storage path

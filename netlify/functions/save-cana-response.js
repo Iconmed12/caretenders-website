@@ -9,7 +9,7 @@ exports.handler = async (event) => {
 
   try {
     const { sessionId, tenderId, responses } = JSON.parse(event.body);
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
     const res = await fetch(sbUrl + '/rest/v1/cana_responses', {

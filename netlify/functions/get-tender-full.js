@@ -16,7 +16,7 @@ exports.handler = async (event) => {
     const id = event.queryStringParameters && event.queryStringParameters.id;
     if (!id) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing id' }) };
 
-    const supabase = createClient('https://igpjfpncfuawikoyzfcd.supabase.co', process.env.SUPABASE_ANON_KEY);
+    const supabase = createClient('https://igpjfpncfuawikoyzfcd.supabase.co', (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY));
     const { data, error } = await supabase.from('tenders').select('*').eq('id', id).single();
     if (error) return { statusCode: 500, headers: cors, body: JSON.stringify({ error: error.message }) };
 

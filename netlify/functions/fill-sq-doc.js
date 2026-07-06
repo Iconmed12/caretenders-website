@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     const { tenderId, companyDetails, sqAnswers, sqData } = JSON.parse(event.body);
     if (!tenderId || !sqData) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing data' }) };
 
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
     // ── 1. Download original .docx from Supabase Storage ──

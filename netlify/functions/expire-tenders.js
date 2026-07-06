@@ -6,7 +6,7 @@ exports.handler = async (event) => {
   const cors = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
-  const sbKey = process.env.SUPABASE_ANON_KEY;
+  const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
   const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
   const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
 
