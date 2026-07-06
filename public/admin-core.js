@@ -17,6 +17,12 @@ function adminSb() {
   if (window._adminSbClient) return window._adminSbClient;
   if (!window.supabase) return null;
   window._adminSbClient = window.supabase.createClient(SB_URL, SB_ANON);
+  // Keep the admin token fresh: supabase-js auto-refreshes the session in the
+  // background; mirror the latest access token so admin calls never send a
+  // stale one (tokens expire after about an hour).
+  window._adminSbClient.auth.onAuthStateChange(function (_event, session) {
+    window._adminToken = session ? session.access_token : null;
+  });
   return window._adminSbClient;
 }
 
