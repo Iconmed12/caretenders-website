@@ -35,6 +35,17 @@ function adminHeaders(base) {
   return base;
 }
 
+// Update fields on a tender via the authenticated patch-tender function (service
+// key, admin-gated) instead of writing to the tenders table directly with the
+// anon key. This is what lets RLS lock the tenders table to public-read-only.
+async function adminPatchTender(id, fields) {
+  return fetch(API + '/patch-tender', {
+    method: 'POST',
+    headers: adminHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ tenderId: id, fields: fields })
+  });
+}
+
 function showAdminApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'block';
@@ -333,11 +344,7 @@ function renderExpiredTable() {
 
 async function restoreTender(id) {
   if (!confirm('Restore this tender to pending_review?')) return;
-  var res = await sbFetch('/rest/v1/tenders?id=eq.' + id, {
-    method: 'PATCH',
-    body: JSON.stringify({ status: 'pending_review' }),
-    headers: { 'Content-Type': 'application/json', Prefer: 'return=minimal' }
-  });
+  var res = await adminPatchTender(id, { status: 'pending_review' });
   if (res.ok) { showToast('Tender restored', 'success'); await loadTenders(); renderAll(); }
   else showToast('Restore failed', 'error');
 }

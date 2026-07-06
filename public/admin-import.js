@@ -284,10 +284,7 @@ function tiApprove(id) {
 
 async function tiDoApprove(id) {
   try {
-    var res = await sbFetch('/rest/v1/tenders?id=eq.' + id, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'needs_docs' })
-    });
+    var res = await adminPatchTender(id, { status: 'needs_docs' });
     if (!res.ok) {
       var errTxt = await res.text();
       throw new Error('DB update failed (' + res.status + '): ' + errTxt.substring(0, 120));
@@ -320,17 +317,7 @@ async function tiClearAllRejected() {
 
 async function tiReject(id) {
   try {
-    var res = await sbFetch('/rest/v1/tenders?id=eq.' + id, {
-      method: 'PATCH',
-      body: JSON.stringify({ status: 'rejected', rejected_at: new Date().toISOString() })
-    });
-    // If rejected_at column doesn't exist yet, retry without it so reject still works
-    if (!res.ok) {
-      await sbFetch('/rest/v1/tenders?id=eq.' + id, {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'rejected' })
-      });
-    }
+    var res = await adminPatchTender(id, { status: 'rejected', rejected_at: new Date().toISOString() });
     tiAllTenders = tiAllTenders.map(function(t){ return t.id === id ? Object.assign({},t,{status:'rejected'}) : t; });
     tiUpdateStats(); tiRender();
     showToast('Tender rejected', 'success');
