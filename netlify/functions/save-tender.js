@@ -1,5 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
-const { requireAdmin } = require('./_admin-auth');
+const { requireAdmin, logAudit } = require('./_admin-auth');
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -22,6 +22,7 @@ exports.handler = async (event) => {
   // Phase 1b ENFORCE: reject callers without a valid admin token.
   var _denied = await requireAdmin(event, 'save-tender', corsHeaders);
   if (_denied) return _denied;
+  await logAudit(event, 'save-tender', (function(){ try { var b = JSON.parse(event.body); return { action: b.action, tenderId: b.tender && b.tender.id }; } catch(e){ return null; } })());
 
   try {
     const supabaseUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
