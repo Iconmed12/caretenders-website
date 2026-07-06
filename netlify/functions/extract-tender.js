@@ -1,4 +1,4 @@
-const { checkAdmin, logAdminCheck } = require('./_admin-auth');
+const { requireAdmin } = require('./_admin-auth');
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -13,13 +13,14 @@ exports.handler = async (event) => {
     };
   }
 
-  // Phase 1a MONITOR MODE: log who is calling, do not block yet.
-  logAdminCheck('extract-tender', await checkAdmin(event));
-
   const corsHeaders = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*'
   };
+
+  // Phase 1b ENFORCE: reject callers without a valid admin token.
+  var _denied = await requireAdmin(event, 'extract-tender', corsHeaders);
+  if (_denied) return _denied;
 
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;

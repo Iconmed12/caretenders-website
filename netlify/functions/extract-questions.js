@@ -1,4 +1,4 @@
-const { checkAdmin, logAdminCheck } = require('./_admin-auth');
+const { requireAdmin } = require('./_admin-auth');
 
 exports.handler = async (event) => {
   const cors = {
@@ -8,8 +8,9 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
-  // Phase 1a MONITOR MODE: log who is calling, do not block yet.
-  logAdminCheck('extract-questions', await checkAdmin(event));
+  // Phase 1b ENFORCE: reject callers without a valid admin token.
+  var _denied = await requireAdmin(event, 'extract-questions', cors);
+  if (_denied) return _denied;
 
   try {
     const { text } = JSON.parse(event.body);
