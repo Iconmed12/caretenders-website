@@ -244,12 +244,7 @@ function renderTenderStatusBar(t) {
 
 async function setTenderStatus(id, newStatus) {
   try {
-    const sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
-    var res = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/tenders?id=eq.' + encodeURIComponent(id), {
-      method: 'PATCH',
-      headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
-      body: JSON.stringify({ status: newStatus })
-    });
+    var res = await adminPatchTender(id, { status: newStatus });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     var t = allTenders.find(function(x){ return x.id === id; });
     if (t) t.status = newStatus;

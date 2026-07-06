@@ -6,7 +6,7 @@ const { requireAdmin, logAudit } = require('./_admin-auth');
 
 const ALLOWED_FIELDS = [
   'cana_docs', 'cana_questions', 'sq_data',
-  'completion_docs', 'submission_portal', 'status'
+  'completion_docs', 'submission_portal', 'status', 'rejected_at'
 ];
 
 exports.handler = async (event) => {
