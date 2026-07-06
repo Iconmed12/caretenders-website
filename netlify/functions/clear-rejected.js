@@ -1,7 +1,7 @@
 // Manually deletes ALL rejected tenders. Called by the admin "Clear all
 // rejected" button. Uses the service key because the anon key cannot delete.
 
-const { requireAdmin } = require('./_admin-auth');
+const { requireAdmin, logAudit } = require('./_admin-auth');
 
 exports.handler = async (event) => {
   const cors = {
@@ -15,6 +15,7 @@ exports.handler = async (event) => {
   // Phase 1b ENFORCE: reject callers without a valid admin token.
   var _denied = await requireAdmin(event, 'clear-rejected', cors);
   if (_denied) return _denied;
+  await logAudit(event, 'clear-rejected', null);
 
   const sbKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
   const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
