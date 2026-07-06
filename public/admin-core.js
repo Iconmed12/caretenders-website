@@ -39,10 +39,75 @@ function showAdminApp() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('appScreen').style.display = 'block';
   if (typeof loadTenders === 'function') loadTenders();
+  fetchAdminRole();
 }
 function showAdminLogin() {
   document.getElementById('appScreen').style.display = 'none';
   document.getElementById('loginScreen').style.display = 'flex';
+}
+
+// Switch the login card between Owner (email + password) and Staff (username + PIN).
+function setLoginMode(mode) {
+  var owner = document.getElementById('ownerLoginFields');
+  var staff = document.getElementById('staffLoginFields');
+  var ob = document.getElementById('modeOwnerBtn');
+  var sb = document.getElementById('modeStaffBtn');
+  var err = document.getElementById('loginError');
+  if (err) err.style.display = 'none';
+  var isStaff = mode === 'staff';
+  if (owner) owner.style.display = isStaff ? 'none' : 'block';
+  if (staff) staff.style.display = isStaff ? 'block' : 'none';
+  if (ob) { ob.style.background = isStaff ? 'transparent' : '#fff'; ob.style.color = isStaff ? 'var(--text-muted)' : 'var(--text)'; }
+  if (sb) { sb.style.background = isStaff ? '#fff' : 'transparent'; sb.style.color = isStaff ? 'var(--text)' : 'var(--text-muted)'; }
+}
+
+// Staff / manager sign-in by username + 6-digit PIN. Under the hood this is a
+// real Supabase login (username maps to a synthetic email, PIN is the password),
+// so it yields the same token everything else already checks.
+async function doStaffLogin() {
+  var username = ((document.getElementById('staffUsername') || {}).value || '').trim().toLowerCase();
+  var pin = (document.getElementById('staffPin') || {}).value || '';
+  var errEl = document.getElementById('loginError');
+  var sb = adminSb();
+  if (!sb) { if (errEl) { errEl.textContent = 'Login service unavailable, please refresh and try again'; errEl.style.display = 'flex'; } return; }
+  if (!username || !/^[0-9]{6}$/.test(pin)) {
+    if (errEl) { errEl.innerHTML = '<i class="ti ti-alert-circle" style="font-size:15px"></i> Enter your username and 6-digit PIN'; errEl.style.display = 'flex'; }
+    return;
+  }
+  try {
+    var email = username + '@staff.getcana.co.uk';
+    var r = await sb.auth.signInWithPassword({ email: email, password: pin });
+    if (r.error || !r.data || !r.data.session) {
+      if (errEl) { errEl.innerHTML = '<i class="ti ti-alert-circle" style="font-size:15px"></i> Wrong username or PIN'; errEl.style.display = 'flex'; }
+      return;
+    }
+    window._adminToken = r.data.session.access_token;
+    window._adminEmail = (r.data.session.user.email || '').toLowerCase();
+    showAdminApp();
+  } catch (e) {
+    if (errEl) { errEl.textContent = 'Sign in error: ' + e.message; errEl.style.display = 'flex'; }
+  }
+}
+
+// Fetch the signed-in person's role, then show/hide sections accordingly.
+async function fetchAdminRole() {
+  try {
+    var res = await fetch('/.netlify/functions/admin-whoami', { headers: adminHeaders() });
+    var d = await res.json();
+    window._adminRole = (d && d.role) ? d.role : null;
+  } catch (e) { window._adminRole = null; }
+  applyRoleVisibility();
+}
+
+// Owner sees everything. Manager: no Knowledge Base. Admin: no KB, no Staff tab.
+function applyRoleVisibility() {
+  var role = window._adminRole;
+  var isOwner = role === 'owner';
+  var isManagerUp = role === 'owner' || role === 'manager';
+  var kb = document.getElementById('navKnowledge');
+  if (kb) kb.style.display = isOwner ? '' : 'none';
+  var staff = document.getElementById('navStaff');
+  if (staff) staff.style.display = isManagerUp ? '' : 'none';
 }
 
 async function doLoginSupabase() {
@@ -146,7 +211,7 @@ function showPage(page, btn) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   btn.classList.add('active');
-  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana', knowledge:'Knowledge Base', 'tenders-import':'Tender Import', settings:'Settings' };
+  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana', knowledge:'Knowledge Base', 'tenders-import':'Tender Import', staff:'Staff', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[page] || page;
   ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(function(id) {
     var el = document.getElementById(id); if(el) el.style.display = 'none';
@@ -156,6 +221,7 @@ function showPage(page, btn) {
   if (page === 'noncqc') { document.getElementById('aiNonCqcBtn').style.display='flex'; document.getElementById('addNonCqcBtn').style.display='flex'; renderNonCqcTable(); }
   if (page === 'expired') { renderExpiredTable(); }
   if (page === 'knowledge') { loadKnowledgeBase(); }
+  if (page === 'staff' && typeof loadStaff === 'function') { loadStaff(); }
   if (page === 'cana') { populateCanaTenderSelect(); }
 }
 
