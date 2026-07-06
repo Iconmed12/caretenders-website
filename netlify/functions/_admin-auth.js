@@ -59,4 +59,23 @@ function logAdminCheck(fnName, result) {
     ' reason=' + result.reason);
 }
 
-module.exports = { checkAdmin, logAdminCheck };
+// Enforce mode (Phase 1b): returns null when the caller is a valid admin (the
+// function should proceed), or a ready-to-return 401 response object when not.
+// Usage:  var denied = await requireAdmin(event, 'save-tender', cors);
+//         if (denied) return denied;
+async function requireAdmin(event, fnName, corsHeaders) {
+  var result = await checkAdmin(event);
+  if (result.authenticated) {
+    console.log('[admin-auth][enforce] ' + fnName + ': allow email=' + result.email);
+    return null;
+  }
+  console.log('[admin-auth][enforce] ' + fnName + ': DENY reason=' + result.reason +
+    ' email=' + (result.email || 'none'));
+  return {
+    statusCode: 401,
+    headers: corsHeaders || { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ error: 'Admin authentication required' })
+  };
+}
+
+module.exports = { checkAdmin, logAdminCheck, requireAdmin };

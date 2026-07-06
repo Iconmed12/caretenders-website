@@ -1,6 +1,5 @@
 
 const API = '/.netlify/functions';
-const ADMIN_PASSWORD = 'CareTenders2024!';
 let allTenders = [];
 let deleteTarget = { id: null };
 let currentSection = 'care';
@@ -8,9 +7,9 @@ let extractedData = null;
 let selectedFile = null;
 let nextId = 1;
 
-// ── Phase 1: Supabase Auth admin login ──
-// This is the primary sign-in. The legacy password (doLogin, below) is kept as a
-// temporary fallback until the new login is confirmed working; Phase 1b removes it.
+// ── Admin login (Supabase Auth) ──
+// The only way into the admin panel. Sign-in yields a token that the admin
+// functions verify server-side against the ADMIN_EMAILS allow-list.
 const SB_URL  = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
 
@@ -18,6 +17,12 @@ function adminSb() {
   if (window._adminSbClient) return window._adminSbClient;
   if (!window.supabase) return null;
   window._adminSbClient = window.supabase.createClient(SB_URL, SB_ANON);
+  // Keep the admin token fresh: supabase-js auto-refreshes the session in the
+  // background; mirror the latest access token so admin calls never send a
+  // stale one (tokens expire after about an hour).
+  window._adminSbClient.auth.onAuthStateChange(function (_event, session) {
+    window._adminToken = session ? session.access_token : null;
+  });
   return window._adminSbClient;
 }
 
@@ -46,7 +51,7 @@ async function doLoginSupabase() {
   var errEl = document.getElementById('loginError');
   var sb = adminSb();
   if (!sb) {
-    if (errEl) { errEl.textContent = 'Login service unavailable, use the legacy password link below'; errEl.style.display = 'flex'; }
+    if (errEl) { errEl.textContent = 'Login service unavailable, please refresh and try again'; errEl.style.display = 'flex'; }
     return;
   }
   try {
@@ -57,7 +62,6 @@ async function doLoginSupabase() {
     }
     window._adminToken = r.data.session.access_token;
     window._adminEmail = (r.data.session.user.email || '').toLowerCase();
-    localStorage.setItem('adminLoggedIn', 'true'); // keeps the panel open across reloads during transition
     showAdminApp();
   } catch (e) {
     if (errEl) { errEl.textContent = 'Sign in error: ' + e.message; errEl.style.display = 'flex'; }
@@ -79,31 +83,13 @@ async function initAdminAuth() {
       }
     }
   } catch (e) {}
-  if (localStorage.getItem('adminLoggedIn') === 'true') return showAdminApp(); // legacy fallback
   showAdminLogin();
 }
 document.addEventListener('DOMContentLoaded', initAdminAuth);
 
-// Legacy password sign-in. TEMPORARY fallback, kept alongside the new login so
-// you cannot be locked out during transition. Phase 1b removes this.
-function doLogin() {
-  var p = document.getElementById('loginPass') ? document.getElementById('loginPass').value : '';
-  var valid = ['CareTenders2024!', 'CanaAdmin2024!', 'Cana2024!'];
-  if (valid.includes(p)) {
-    localStorage.setItem('adminLoggedIn', 'true');
-    sessionStorage.setItem('adminLoggedIn', 'true');
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appScreen').style.display = 'block';
-    loadTenders();
-  } else if (p !== '') {
-    document.getElementById('loginError').style.display = 'flex';
-  }
-}
 async function doLogout() {
   try { var sb = adminSb(); if (sb) await sb.auth.signOut(); } catch (e) {}
   window._adminToken = null;
-  localStorage.removeItem('adminLoggedIn');
-  sessionStorage.removeItem('adminLoggedIn');
   showAdminLogin();
 }
 

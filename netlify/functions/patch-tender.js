@@ -2,7 +2,7 @@
 // which exceeded request limits once tenders carried extracted document text.
 
 const { createClient } = require('@supabase/supabase-js');
-const { checkAdmin, logAdminCheck } = require('./_admin-auth');
+const { requireAdmin } = require('./_admin-auth');
 
 const ALLOWED_FIELDS = [
   'cana_docs', 'cana_questions', 'sq_data',
@@ -17,8 +17,9 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
-  // Phase 1a MONITOR MODE: log who is calling, do not block yet.
-  logAdminCheck('patch-tender', await checkAdmin(event));
+  // Phase 1b ENFORCE: reject callers without a valid admin token.
+  var _denied = await requireAdmin(event, 'patch-tender', cors);
+  if (_denied) return _denied;
 
   try {
     const { tenderId, fields } = JSON.parse(event.body);
