@@ -24,6 +24,25 @@ exports.handler = async (event) => {
     catch(e) { console.log('setStatus failed:', e.message); }
   }
 
+  // Phase 2: atomically claim the job before spending any AI credit. Flips the
+  // status pending -> processing ONLY if it is currently 'pending' (the state a
+  // verified payment or membership left it in). Returns true only if this call
+  // won the claim. Forged job IDs (no row) and replays of an already-processed
+  // job (status not 'pending') update zero rows and are refused, so neither can
+  // ever reach the Anthropic API. Two racing calls: the database lets one win.
+  async function claimJob(id) {
+    try {
+      var res = await fetch(sbUrl + '/rest/v1/cana_jobs?id=eq.' + encodeURIComponent(id) + '&status=eq.pending', {
+        method: 'PATCH',
+        headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+        body: JSON.stringify({ status: 'processing' })
+      });
+      if (!res.ok) { console.log('claimJob PATCH failed:', res.status); return false; }
+      var rows = await res.json();
+      return Array.isArray(rows) && rows.length === 1;
+    } catch (e) { console.log('claimJob error:', e.message); return false; }
+  }
+
   async function callAI(prompt, maxTokens) {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -60,7 +79,13 @@ exports.handler = async (event) => {
 
     if (!jobId) return;
 
-    await setStatus(jobId, 'processing');
+    // Phase 2: refuse to spend AI credit unless we can claim a genuine, unused
+    // job. This replaces the old unconditional "processing" status set.
+    var claimed = await claimJob(jobId);
+    if (!claimed) {
+      console.log('Job not claimable (missing, not pending, or already running):', jobId);
+      return;
+    }
 
     // ── 1. Load tender + knowledge base ──
     var tRes = await fetch(sbUrl + '/rest/v1/tenders?id=eq.' + tenderId + '&select=*&limit=1', {
