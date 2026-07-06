@@ -7,7 +7,7 @@ exports.handler = async (event) => {
   var _denied = await requireOwner(event, 'get-knowledge-base', cors);
   if (_denied) return _denied;
   try {
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sector = (event.queryStringParameters && event.queryStringParameters.sector) || 'care';
     const rowId = sector === 'commercial' ? 'commercial' : 'global';
     const res = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/cana_knowledge?id=eq.' + rowId + '&select=*&limit=1',

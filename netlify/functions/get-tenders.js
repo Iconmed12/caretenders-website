@@ -8,7 +8,7 @@ exports.handler = async (event) => {
 
   try {
     const supabaseUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
-    const supabaseKey = process.env.SUPABASE_ANON_KEY;
+    const supabaseKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
 
     if (!supabaseKey) {
       return {

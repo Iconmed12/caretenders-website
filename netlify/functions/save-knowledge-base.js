@@ -9,7 +9,7 @@ exports.handler = async (event) => {
   await logAudit(event, 'save-knowledge-base', { sector: (function(){ try { return JSON.parse(event.body).sector; } catch(e){ return null; } })() });
   try {
     const body = JSON.parse(event.body);
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sector = body.sector === 'commercial' ? 'commercial' : 'care';
     const rowId = sector === 'commercial' ? 'commercial' : 'global';
     const payload = {

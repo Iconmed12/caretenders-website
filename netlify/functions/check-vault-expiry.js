@@ -4,7 +4,7 @@
 
 exports.handler = async () => {
   try {
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
     const resendKey = process.env.RESEND_API_KEY;
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'noreply@getcana.co.uk';

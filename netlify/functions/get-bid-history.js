@@ -3,7 +3,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode:200, headers:cors, body:'' };
 
   try {
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
     const { email } = JSON.parse(event.body || '{}');
     if (!email) return { statusCode:400, headers:cors, body: JSON.stringify({ error:'Missing email' }) };

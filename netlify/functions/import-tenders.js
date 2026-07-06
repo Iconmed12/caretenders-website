@@ -10,7 +10,7 @@ exports.handler = async (event) => {
   logAdminCheck('import-tenders', await checkAdmin(event));
 
   var SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
-  var SB_KEY = process.env.SUPABASE_ANON_KEY;
+  var SB_KEY = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
   
   function sbFetch(path, opts) {
     return fetch(SB_URL + path, Object.assign({

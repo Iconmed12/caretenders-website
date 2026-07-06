@@ -17,7 +17,7 @@ exports.handler = async (event) => {
     const { tenderId, docText, base64Doc, fileName } = JSON.parse(event.body);
     if (!tenderId || !docText) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing data' }) };
 
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
     // ── 1. Save original .docx to Supabase Storage ──
