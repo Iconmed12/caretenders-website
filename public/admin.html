@@ -137,58 +137,44 @@
         <i class="ti ti-sparkles" style="font-size:16px;flex-shrink:0;"></i>
         <span>Upload documents for each tender so Cana knows exactly how to write the responses. You can upload multiple files per section.</span>
       </div>
-      <!-- LIVE / NEEDS ATTENTION PANELS -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;" id="canaStatusPanels">
+      <style>
+        .cana-shell{display:grid;grid-template-columns:250px 1fr;gap:1.25rem;align-items:start}
+        @media(max-width:900px){.cana-shell{grid-template-columns:1fr}}
+        .cana-rail{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px;position:sticky;top:12px}
+        .cana-rail .rh{font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text);margin:2px 4px 12px}
+        .cana-railgrp{margin-bottom:12px}
+        .cana-railgrp .lbl{display:flex;align-items:center;gap:7px;font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text-light);padding:2px 4px 6px}
+        .cana-railgrp .lbl .c{margin-left:auto;background:#eef3f6;border-radius:999px;padding:1px 8px;color:var(--text-light)}
+        .cana-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:1.25rem}
+        .cana-tab{font-family:inherit;font-size:0.9rem;font-weight:600;color:var(--text-light);background:none;border:0;border-bottom:2px solid transparent;padding:10px 15px;cursor:pointer;margin-bottom:-1px}
+        .cana-tab.on{color:var(--text);border-bottom-color:#00C9E0}
+        .cana-panel[hidden]{display:none}
+      </style>
 
-        <!-- LIVE TENDERS -->
-        <div style="background:#fff;border:1.5px solid #9FE1CB;border-radius:12px;overflow:hidden;">
-          <div style="background:#e8f7ee;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:1rem;">🟢</span>
-              <div>
-                <div style="font-weight:700;font-size:0.9rem;color:#1a7a3f;">Live tenders</div>
-                <div style="font-size:0.73rem;color:#2d6a4f;">All documents uploaded, ready for clients</div>
-              </div>
-            </div>
-            <span id="liveTenderCount" style="background:#1a7a3f;color:#fff;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;">0</span>
+      <div class="cana-shell">
+        <aside class="cana-rail" id="canaStatusPanels">
+          <div class="rh">Tenders</div>
+          <div class="cana-railgrp">
+            <div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:#1a7a3f;display:inline-block;"></span> Live <span class="c" id="liveTenderCount">0</span></div>
+            <div id="liveTenderList"><div style="padding:10px;text-align:center;font-size:0.8rem;color:var(--text-light);">No live tenders yet</div></div>
           </div>
-          <div id="liveTenderList" style="padding:8px;max-height:240px;overflow-y:auto;">
-            <div style="padding:12px;text-align:center;font-size:0.82rem;color:var(--text-light);">No live tenders yet</div>
+          <div class="cana-railgrp">
+            <div class="lbl"><span style="width:7px;height:7px;border-radius:50%;background:#92400e;display:inline-block;"></span> Needs attention <span class="c" id="pendingTenderCount">0</span></div>
+            <div id="pendingTenderList"><div style="padding:10px;text-align:center;font-size:0.8rem;color:var(--text-light);">Loading...</div></div>
           </div>
-        </div>
+          <select id="canaTenderSelect" onchange="localStorage.setItem('cana_last_tender', this.value); loadCanaDocs()" style="display:none;"><option value="">Choose a tender...</option></select>
+        </aside>
 
-        <!-- NEEDS ATTENTION -->
-        <div style="background:#fff;border:1.5px solid rgba(245,166,35,0.4);border-radius:12px;overflow:hidden;">
-          <div style="background:rgba(245,166,35,0.08);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <span style="font-size:1rem;">⚠️</span>
-              <div>
-                <div style="font-weight:700;font-size:0.9rem;color:#92400e;">Needs attention</div>
-                <div style="font-size:0.73rem;color:#92400e;opacity:0.8;">Missing documents before going live</div>
-              </div>
-            </div>
-            <span id="pendingTenderCount" style="background:#92400e;color:#fff;font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;">0</span>
-          </div>
-          <div id="pendingTenderList" style="padding:8px;max-height:240px;overflow-y:auto;">
-            <div style="padding:12px;text-align:center;font-size:0.82rem;color:var(--text-light);">Loading...</div>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- TENDER SELECT -->
-      <div class="table-card" style="margin-bottom:1.25rem;padding:1.25rem;">
-        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
-          <div style="flex:1;">
-            <label style="font-size:0.78rem;font-weight:600;color:var(--text-light);text-transform:uppercase;letter-spacing:0.06em;display:block;margin-bottom:6px;">Select tender to manage</label>
-            <select id="canaTenderSelect" onchange="localStorage.setItem('cana_last_tender', this.value); loadCanaDocs()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:8px;font-size:0.9rem;font-family:'DM Sans',sans-serif;outline:none;color:var(--text);">
-              <option value="">Choose a tender...</option>
-            </select>
-          </div>
-          <div id="canaDocStatus" style="display:none;border-radius:8px;padding:8px 14px;font-size:0.82rem;font-weight:500;white-space:nowrap;"></div>
-        </div>
-      </div>
+        <main class="cana-work">
+          <div id="canaDocStatus" style="display:none;border-radius:8px;padding:8px 14px;font-size:0.82rem;font-weight:500;white-space:nowrap;margin-bottom:1rem;"></div>
       <div id="canaDocArea" style="display:none;">
+        <div class="cana-tabs">
+          <button type="button" class="cana-tab on" data-ct="docs" onclick="canaTab('docs')">Documents</button>
+          <button type="button" class="cana-tab" data-ct="questions" onclick="canaTab('questions')">Questions</button>
+          <button type="button" class="cana-tab" data-ct="pack" onclick="canaTab('pack')">Completion pack</button>
+        </div>
+
+        <div class="cana-panel" data-cp="docs">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
           <div style="font-weight:600;font-size:0.9rem;">Tender documents</div>
           <div id="canaDocProgressLabel" style="font-size:0.8rem;color:var(--text-light);">0 of 3</div>
@@ -259,6 +245,15 @@
           </div>
 
         </div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+            <i class="ti ti-sparkles" style="font-size:14px;"></i> Save &amp; train Cana
+          </button>
+          <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved, Cana is ready for this tender</span>
+        </div>
+        </div><!-- /docs panel -->
+
+        <div class="cana-panel" data-cp="questions" hidden>
         <!-- QUESTIONS ENTRY -->
         <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem;">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
@@ -276,13 +271,14 @@
           </div>
         </div>
 
-        <div style="display:flex;align-items:center;gap:1rem;">
-          <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
+        <div style="margin-top:.25rem;">
+          <button onclick="saveCanaDocs()" style="background:#0B1929;color:white;border:none;border-radius:8px;padding:11px 24px;font-size:0.9rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
             <i class="ti ti-sparkles" style="font-size:14px;"></i> Save &amp; train Cana
           </button>
-          <span id="canaDocSaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved, Cana is ready for this tender</span>
         </div>
-      </div>
+        </div><!-- /questions panel -->
+
+        <div class="cana-panel" data-cp="pack" hidden>
 
       <!-- CLIENT COMPLETION PACK -->
       <div class="table-card" style="margin-top:1.25rem;padding:1.5rem;">
@@ -334,6 +330,10 @@
           <span id="deliverySaved" style="display:none;font-size:0.82rem;color:#1a7a3f;">Saved, pack will be sent with the client delivery</span>
         </div>
       </div>
+        </div><!-- /pack panel -->
+      </div><!-- /canaDocArea -->
+        </main>
+      </div><!-- /cana-shell -->
 
     </div>
 

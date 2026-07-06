@@ -106,6 +106,16 @@ function selectCanaFromPanel(tenderId) {
   }
 }
 
+// Redesign: switch the workspace between Documents / Questions / Completion pack.
+function canaTab(key) {
+  document.querySelectorAll('#page-cana .cana-tab').forEach(function(t){
+    t.classList.toggle('on', t.getAttribute('data-ct') === key);
+  });
+  document.querySelectorAll('#page-cana .cana-panel').forEach(function(p){
+    p.hidden = (p.getAttribute('data-cp') !== key);
+  });
+}
+
 function populateCanaTenderSelect(){
   var sel=document.getElementById('canaTenderSelect');
   if(!sel) return;
