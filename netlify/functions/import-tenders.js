@@ -1,6 +1,13 @@
+const { checkAdmin, logAdminCheck } = require('./_admin-auth');
+
 exports.handler = async (event) => {
   const cors = { 'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'*' };
   if (event.httpMethod === 'OPTIONS') return { statusCode:200, headers:cors, body:'' };
+
+  // Phase 1a MONITOR MODE: log who is calling, do not block yet. NOTE: this
+  // function is ALSO run by cron (no token); enforcement in Phase 1b must allow
+  // the scheduled run as well as an admin token.
+  logAdminCheck('import-tenders', await checkAdmin(event));
 
   var SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
   var SB_KEY = process.env.SUPABASE_ANON_KEY;

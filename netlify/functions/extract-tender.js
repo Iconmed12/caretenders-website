@@ -1,15 +1,20 @@
+const { checkAdmin, logAdminCheck } = require('./_admin-auth');
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'POST, OPTIONS'
       },
       body: ''
     };
   }
+
+  // Phase 1a MONITOR MODE: log who is calling, do not block yet.
+  logAdminCheck('extract-tender', await checkAdmin(event));
 
   const corsHeaders = {
     'Content-Type': 'application/json',

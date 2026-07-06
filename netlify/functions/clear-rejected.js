@@ -1,15 +1,19 @@
 // Manually deletes ALL rejected tenders. Called by the admin "Clear all
 // rejected" button. Uses the service key because the anon key cannot delete.
 
+const { checkAdmin, logAdminCheck } = require('./_admin-auth');
+
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: cors, body: JSON.stringify({ error: 'Method not allowed' }) };
+  // Phase 1a MONITOR MODE: log who is calling, do not block yet.
+  logAdminCheck('clear-rejected', await checkAdmin(event));
 
   const sbKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
   const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';

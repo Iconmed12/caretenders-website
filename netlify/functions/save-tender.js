@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { checkAdmin, logAdminCheck } = require('./_admin-auth');
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
@@ -6,12 +7,15 @@ exports.handler = async (event) => {
       statusCode: 200,
       headers: {
         'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
         'Access-Control-Allow-Methods': 'POST, PUT, DELETE, OPTIONS'
       },
       body: ''
     };
   }
+
+  // Phase 1a MONITOR MODE: log who is calling, do not block yet.
+  logAdminCheck('save-tender', await checkAdmin(event));
 
   const corsHeaders = {
     'Content-Type': 'application/json',

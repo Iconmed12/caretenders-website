@@ -14,25 +14,28 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <link rel="stylesheet" href="/admin.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
-<div id="loginScreen" style="display:none;">
+<div id="loginScreen" style="display:flex;">
   <div class="login-card">
     <div class="login-logo">
       <div class="login-logo-mark"><i class="ti ti-heart-handshake"></i></div>
       <span class="login-logo-text">Cana <span>Admin</span></span>
     </div>
     <div style="margin-bottom:1.5rem"><div style="font-size:20px;font-weight:600;margin-bottom:4px">Admin panel</div><div style="font-size:13px;color:var(--text-muted)">Sign in to manage your tender listings</div></div>
-    <div id="loginError" class="login-error"><i class="ti ti-alert-circle" style="font-size:15px"></i> Incorrect password</div>
+    <div id="loginError" class="login-error"><i class="ti ti-alert-circle" style="font-size:15px"></i> Sign in failed</div>
+    <label class="login-label">Email</label>
+    <input class="login-input" type="email" id="loginEmail" placeholder="you@example.com" autocomplete="username" onkeydown="if(event.key==='Enter')doLoginSupabase()">
     <label class="login-label">Password</label>
-    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
-    <button class="login-btn" onclick="doLogin()">Sign in to admin panel</button>
-    <div class="login-hint">Use the password you set up</div>
+    <input class="login-input" type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLoginSupabase()">
+    <button class="login-btn" onclick="doLoginSupabase()">Sign in to admin panel</button>
+    <div class="login-hint" style="margin-top:14px"><a href="#" onclick="doLogin();return false;" style="color:var(--text-muted);font-size:12px;text-decoration:underline">Use legacy password (temporary)</a></div>
   </div>
 </div>
 
-<div id="appScreen" style="display:block;">
+<div id="appScreen" style="display:none;">
 <div class="layout">
   <aside class="sidebar">
     <div class="sidebar-logo"><div class="sidebar-logo-inner"><div class="sidebar-logo-mark"><i class="ti ti-heart-handshake"></i></div><span class="sidebar-logo-text">Cana <span>Admin</span></span></div></div>

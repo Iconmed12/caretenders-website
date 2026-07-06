@@ -309,7 +309,7 @@ async function tiClearAllRejected() {
   if (!rejected.length) { showToast('No rejected tenders to clear', 'success'); return; }
   if (!confirm('Delete all ' + rejected.length + ' rejected tenders? This is permanent and cannot be undone.')) return;
   try {
-    var res = await fetch('/.netlify/functions/clear-rejected', { method: 'POST' });
+    var res = await fetch('/.netlify/functions/clear-rejected', { method: 'POST', headers: adminHeaders() });
     var data = await res.json();
     if (!res.ok) throw new Error(data.error || ('Failed (' + res.status + ')'));
     tiAllTenders = tiAllTenders.filter(function(t){ return t.status !== 'rejected'; });
@@ -346,7 +346,7 @@ async function runManualImport() {
   try {
     var res  = await fetch('/.netlify/functions/import-tenders', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ pages: 3 })
     });
     var data = await res.json();
