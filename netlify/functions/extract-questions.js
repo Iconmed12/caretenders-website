@@ -1,11 +1,15 @@
+const { checkAdmin, logAdminCheck } = require('./_admin-auth');
+
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
+  // Phase 1a MONITOR MODE: log who is calling, do not block yet.
+  logAdminCheck('extract-questions', await checkAdmin(event));
 
   try {
     const { text } = JSON.parse(event.body);

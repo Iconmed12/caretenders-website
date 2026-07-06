@@ -178,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });
 
       var res = await fetch('/.netlify/functions/extract-sq', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: adminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ tenderId: tenderId, docText: docText, base64Doc: fileBase64, fileName: sqSelectedFile.name })
       });
 

@@ -273,7 +273,7 @@ async function handleCanaDoc(type,files){
       });
       var resp=await fetch('/.netlify/functions/extract-cana-doc',{
         method:'POST',
-        headers:{'Content-Type':'application/json'},
+        headers:adminHeaders({'Content-Type':'application/json'}),
         body:JSON.stringify({fileBase64:b64,fileName:file.name,fileType:file.type})
       });
       var result=await resp.json();
@@ -285,7 +285,7 @@ async function handleCanaDoc(type,files){
         try{
           var qResp=await fetch('/.netlify/functions/extract-questions',{
             method:'POST',
-            headers:{'Content-Type':'application/json'},
+            headers:adminHeaders({'Content-Type':'application/json'}),
             body:JSON.stringify({text:result.text})
           });
           var qResult=await qResp.json();
@@ -312,7 +312,7 @@ async function saveCanaDocs() {
     // once a tender carries extracted document text.
     var res = await fetch(API + '/patch-tender', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         tenderId: id,
         fields: { cana_docs: canaDocData, cana_questions: getCanaQuestions() }

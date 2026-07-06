@@ -109,7 +109,7 @@ async function saveDeliveryPack() {
     // tenders that already carry extracted document text.
     var res = await fetch(API + '/patch-tender', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         tenderId: id,
         fields: {

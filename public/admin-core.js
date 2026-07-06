@@ -8,6 +8,84 @@ let extractedData = null;
 let selectedFile = null;
 let nextId = 1;
 
+// ── Phase 1: Supabase Auth admin login ──
+// This is the primary sign-in. The legacy password (doLogin, below) is kept as a
+// temporary fallback until the new login is confirmed working; Phase 1b removes it.
+const SB_URL  = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
+
+function adminSb() {
+  if (window._adminSbClient) return window._adminSbClient;
+  if (!window.supabase) return null;
+  window._adminSbClient = window.supabase.createClient(SB_URL, SB_ANON);
+  return window._adminSbClient;
+}
+
+// Adds the admin bearer token to a headers object when signed in via Supabase.
+// Every admin function call routes its headers through this so the backend can
+// see who is calling (Phase 1a logs it; Phase 1b will enforce it).
+function adminHeaders(base) {
+  base = base || {};
+  if (window._adminToken) base['Authorization'] = 'Bearer ' + window._adminToken;
+  return base;
+}
+
+function showAdminApp() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  if (typeof loadTenders === 'function') loadTenders();
+}
+function showAdminLogin() {
+  document.getElementById('appScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+}
+
+async function doLoginSupabase() {
+  var email = (document.getElementById('loginEmail') || {}).value || '';
+  var pass  = (document.getElementById('loginPass')  || {}).value || '';
+  var errEl = document.getElementById('loginError');
+  var sb = adminSb();
+  if (!sb) {
+    if (errEl) { errEl.textContent = 'Login service unavailable, use the legacy password link below'; errEl.style.display = 'flex'; }
+    return;
+  }
+  try {
+    var r = await sb.auth.signInWithPassword({ email: email.trim(), password: pass });
+    if (r.error || !r.data || !r.data.session) {
+      if (errEl) { errEl.innerHTML = '<i class="ti ti-alert-circle" style="font-size:15px"></i> ' + ((r.error && r.error.message) || 'Sign in failed'); errEl.style.display = 'flex'; }
+      return;
+    }
+    window._adminToken = r.data.session.access_token;
+    window._adminEmail = (r.data.session.user.email || '').toLowerCase();
+    localStorage.setItem('adminLoggedIn', 'true'); // keeps the panel open across reloads during transition
+    showAdminApp();
+  } catch (e) {
+    if (errEl) { errEl.textContent = 'Sign in error: ' + e.message; errEl.style.display = 'flex'; }
+  }
+}
+
+// On load: reveal the app if a valid Supabase session exists, else fall back to
+// the legacy flag, else show the login screen. Restoring the session here also
+// re-populates the admin token so calls stay authenticated after a refresh.
+async function initAdminAuth() {
+  try {
+    var sb = adminSb();
+    if (sb) {
+      var r = await sb.auth.getSession();
+      if (r && r.data && r.data.session) {
+        window._adminToken = r.data.session.access_token;
+        window._adminEmail = (r.data.session.user.email || '').toLowerCase();
+        return showAdminApp();
+      }
+    }
+  } catch (e) {}
+  if (localStorage.getItem('adminLoggedIn') === 'true') return showAdminApp(); // legacy fallback
+  showAdminLogin();
+}
+document.addEventListener('DOMContentLoaded', initAdminAuth);
+
+// Legacy password sign-in. TEMPORARY fallback, kept alongside the new login so
+// you cannot be locked out during transition. Phase 1b removes this.
 function doLogin() {
   var p = document.getElementById('loginPass') ? document.getElementById('loginPass').value : '';
   var valid = ['CareTenders2024!', 'CanaAdmin2024!', 'Cana2024!'];
@@ -21,10 +99,12 @@ function doLogin() {
     document.getElementById('loginError').style.display = 'flex';
   }
 }
-function doLogout() {
+async function doLogout() {
+  try { var sb = adminSb(); if (sb) await sb.auth.signOut(); } catch (e) {}
+  window._adminToken = null;
   localStorage.removeItem('adminLoggedIn');
-  document.getElementById('appScreen').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
+  sessionStorage.removeItem('adminLoggedIn');
+  showAdminLogin();
 }
 
 const CARE_CATS = ['care','domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
@@ -265,7 +345,7 @@ async function runAiExtraction() {
       var text=await readFileAsText(selectedFile);
       payload={text:text,filename:selectedFile.name};
     }
-    var res=await fetch(API+'/extract-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    var res=await fetch(API+'/extract-tender',{method:'POST',headers:adminHeaders({'Content-Type':'application/json'}),body:JSON.stringify(payload)});
     var rawText=await res.text();
     if(!rawText||rawText.trim()==='') throw new Error('Empty response from server (status '+res.status+')');
     var data;
@@ -476,7 +556,7 @@ async function saveTender(draft){
   document.getElementById('saveIcon').style.display='none';
   document.getElementById('publishBtn').disabled=true;
   try {
-    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:tender})});
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:adminHeaders({'Content-Type':'application/json'}),body:JSON.stringify({action:'upsert',tender:tender})});
     var data=await res.json();
     if(data.error) throw new Error(data.error);
     var idx=allTenders.findIndex(function(x){return x.id===tender.id;});
@@ -498,7 +578,7 @@ async function publishDraft(id){
   if(!t) return;
   t.status='open';
   try {
-    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'upsert',tender:t})});
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:adminHeaders({'Content-Type':'application/json'}),body:JSON.stringify({action:'upsert',tender:t})});
     var data=await res.json();
     if(!res.ok||data.error) throw new Error(data.error);
     showToast('Tender published to live site','success');
@@ -511,7 +591,7 @@ async function confirmDelete(){
   var id=deleteTarget.id;
   document.getElementById('confirmOverlay').classList.remove('open');
   try {
-    var res=await fetch(API+'/save-tender',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',tender:{id:id}})});
+    var res=await fetch(API+'/save-tender',{method:'POST',headers:adminHeaders({'Content-Type':'application/json'}),body:JSON.stringify({action:'delete',tender:{id:id}})});
     var data=await res.json();
     if(data.error) throw new Error(data.error);
     allTenders=allTenders.filter(function(x){return x.id!==id;});
