@@ -199,11 +199,13 @@ exports.handler = async (event) => {
     var responses = [];
     var SONNET = 'claude-sonnet-4-6';
 
-    async function callSonnet(prompt, maxTokens) {
+    async function callSonnet(prompt, maxTokens, systemBlocks) {
+      var payload = { model: SONNET, max_tokens: maxTokens || 3500, temperature: 0.4, messages: [{ role: 'user', content: prompt }] };
+      if (systemBlocks) payload.system = systemBlocks;
       var res = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': AI_KEY, 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: SONNET, max_tokens: maxTokens || 3500, temperature: 0.4, messages: [{ role: 'user', content: prompt }] })
+        headers: { 'Content-Type': 'application/json', 'x-api-key': AI_KEY, 'anthropic-version': '2023-06-01', 'anthropic-beta': 'prompt-caching-2024-07-31' },
+        body: JSON.stringify(payload)
       });
       if (!res.ok) {
         var errTxt = await res.text();
@@ -215,31 +217,41 @@ exports.handler = async (event) => {
       return d.content && d.content[0] ? d.content[0].text.trim() : '';
     }
 
+    // Shared reference block, built once per job and cached by the AI so it is
+    // not re-billed at full price on every question. Byte-identical across all
+    // questions because it is assembled here once and reused. This is the exact
+    // top half of the draft prompt (persona through the full quality document).
+    var sharedContext =
+      'You are an elite UK public sector bid writer with a 90%+ win rate on local authority contracts. ' +
+      'You are writing one quality question response for a live tender.\n\n' +
+      '═══ THE SCORING RUBRIC (the evaluator will score 0-10 with this) ═══\n' + scoringFull + '\n\n' +
+      '═══ HOW TO SCORE 10/10 ═══\n' +
+      '1. Address EVERY bullet and sub-requirement in the question criteria below, evaluators tick them off; one missed bullet caps the score at 6.\n' +
+      '2. Evidence EVERY claim with specifics from the company evidence provided (real numbers, named roles, concrete processes). Generic assurances score 4.\n' +
+      '3. End with a short "added value" element: 2-4 concrete commitments that go beyond the stated requirements (this is the explicit difference between 8 and 10 in the rubric).\n' +
+      '4. Reference the specification sections the question points to, showing the requirements are understood and will be met in full.\n\n' +
+      '═══ ABSOLUTE RULE No. 1: ZERO FABRICATION ═══\n' +
+      'You must NEVER invent: names of people, statistics, percentages, staff counts, years of experience, tenure figures, retention rates, case studies, client examples, audit results, or track-record claims. Every specific fact MUST appear in the COMPANY EVIDENCE below. Where evidence is missing, write [INSERT: short description of what the client should provide]. A response containing placeholder flags scores higher than one containing invented facts, fabricated claims get bidders disqualified and blacklisted. This rule overrides all style and persuasiveness goals.\n\n' +
+      '═══ NAMED ROLES REQUIREMENT ═══\n' +
+      'Evaluators award marks for named accountability. For any content about staffing, safeguarding, management, training, mobilisation or quality assurance, the response MUST identify key individuals by name, role and qualification, e.g.' + roleExamples + '. Where the company evidence does not contain a name or qualification, write [INSERT: full name and qualification of your <role>] at that exact point. NEVER write around the gap with generic phrasing like "our experienced manager" or "our qualified safeguarding lead", unnamed roles lose marks; flagged gaps tell the client exactly what to add.\n\n' +
+      complianceRule +
+      '═══ COMPANY EVIDENCE (the ONLY permitted source of specific facts) ═══\n' + coCtx + '\n\n' +
+      (kbContext ? '═══ KNOWLEDGE BASE ═══\n' + kbContext : '') +
+      '═══ SERVICE SPECIFICATION ═══\n' + specFull + '\n\n' +
+      '═══ FULL QUALITY QUESTION DOCUMENT (locate this question, its criteria bullets, weighting and page limit) ═══\n' + qualityFull + '\n\n';
+
+    var sharedSystem = [{ type: 'text', text: sharedContext, cache_control: { type: 'ephemeral' } }];
+
     async function generateOne(i) {
       var q = questions[i];
       var qText = q.question || q.text || String(q);
       var target = qLimits[i+1] || wordTarget(qText);
       console.log('Q' + (i+1) + ': target ' + target + ' words');
 
-      // STAGE A: Draft to the rubric
+      // STAGE A: Draft to the rubric. The shared reference material (rubric,
+      // rules, company evidence, KB, spec, quality document) is sent once via
+      // the cached sharedSystem block; only the changing parts go here.
       var draftPrompt =
-        'You are an elite UK public sector bid writer with a 90%+ win rate on local authority contracts. ' +
-        'You are writing one quality question response for a live tender.\n\n' +
-        '═══ THE SCORING RUBRIC (the evaluator will score 0-10 with this) ═══\n' + scoringFull + '\n\n' +
-        '═══ HOW TO SCORE 10/10 ═══\n' +
-        '1. Address EVERY bullet and sub-requirement in the question criteria below, evaluators tick them off; one missed bullet caps the score at 6.\n' +
-        '2. Evidence EVERY claim with specifics from the company evidence provided (real numbers, named roles, concrete processes). Generic assurances score 4.\n' +
-        '3. End with a short "added value" element: 2-4 concrete commitments that go beyond the stated requirements (this is the explicit difference between 8 and 10 in the rubric).\n' +
-        '4. Reference the specification sections the question points to, showing the requirements are understood and will be met in full.\n\n' +
-        '═══ ABSOLUTE RULE No. 1: ZERO FABRICATION ═══\n' +
-        'You must NEVER invent: names of people, statistics, percentages, staff counts, years of experience, tenure figures, retention rates, case studies, client examples, audit results, or track-record claims. Every specific fact MUST appear in the COMPANY EVIDENCE below. Where evidence is missing, write [INSERT: short description of what the client should provide]. A response containing placeholder flags scores higher than one containing invented facts, fabricated claims get bidders disqualified and blacklisted. This rule overrides all style and persuasiveness goals.\n\n' +
-        '═══ NAMED ROLES REQUIREMENT ═══\n' +
-        'Evaluators award marks for named accountability. For any content about staffing, safeguarding, management, training, mobilisation or quality assurance, the response MUST identify key individuals by name, role and qualification, e.g.' + roleExamples + '. Where the company evidence does not contain a name or qualification, write [INSERT: full name and qualification of your <role>] at that exact point. NEVER write around the gap with generic phrasing like "our experienced manager" or "our qualified safeguarding lead", unnamed roles lose marks; flagged gaps tell the client exactly what to add.\n\n' +
-        complianceRule +
-        '═══ COMPANY EVIDENCE (the ONLY permitted source of specific facts) ═══\n' + coCtx + '\n\n' +
-        (kbContext ? '═══ KNOWLEDGE BASE ═══\n' + kbContext : '') +
-        '═══ SERVICE SPECIFICATION ═══\n' + specFull + '\n\n' +
-        '═══ FULL QUALITY QUESTION DOCUMENT (locate this question, its criteria bullets, weighting and page limit) ═══\n' + qualityFull + '\n\n' +
         '═══ THE QUESTION TO ANSWER ═══\n' + qText + '\n\n' +
         '═══ OUTPUT REQUIREMENTS ═══\n' +
         '- HARD LIMIT: ' + target + ' words, the council REDACTS everything beyond the page limit unread, so exceeding it destroys the response. Write to ' + Math.round(target*0.78) + ' words. Do not exceed ' + Math.round(target*0.85) + ' words under any circumstances.\n' +
@@ -248,7 +260,7 @@ exports.handler = async (event) => {
         '- First person plural (we/our). Confident, specific, human. Vary sentence length. No AI tells like "Moreover" chains, "delve", "tapestry", "Furthermore" repetition.\n' +
         '- Write the response only: no preamble, no meta-commentary.';
 
-      var draft = await callSonnet(draftPrompt, 8000);
+      var draft = await callSonnet(draftPrompt, 8000, sharedSystem);
 
       // STAGE B: Adversarial self-score and rewrite
       var revisePrompt =
