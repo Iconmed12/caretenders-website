@@ -1,3 +1,11 @@
+// PHASE 2 OFF-SWITCH: this on-screen answer generator is not used by any live
+// customer flow (its only caller, runGeneration/confirmSqAndGenerate, is unwired
+// dead code; real generation goes through generate-cana-background). It is left
+// deployed but disabled so it cannot be called directly to burn Anthropic credit.
+// To revive it, set STREAM_RESPONSE_ENABLED and add proper auth for the intended
+// callers first. Nothing below this guard runs while disabled.
+const STREAM_RESPONSE_ENABLED = false;
+
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',
@@ -7,6 +15,12 @@ exports.handler = async (event) => {
   };
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
+
+  // Disabled: refuse every call before any AI credit can be spent.
+  if (!STREAM_RESPONSE_ENABLED) {
+    console.log('stream-response called while disabled (Phase 2 off-switch)');
+    return { statusCode: 403, headers: cors, body: JSON.stringify({ error: 'This endpoint is disabled.' }) };
+  }
 
   try {
     const { tenderId, companyDetails, questionIndex } = JSON.parse(event.body);
