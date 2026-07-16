@@ -1,4 +1,4 @@
-const CACHE = 'cana-v4';
+const CACHE = 'cana-v5';
 const SHELL = [
   '/', '/dashboard.html', '/cana.html', '/vault.html', '/profile.html',
   '/cana-core.js', '/cana-sq.js', '/cana.css',

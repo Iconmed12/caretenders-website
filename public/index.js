@@ -55,13 +55,13 @@
   function showHome() {
     document.getElementById('home-view').style.display = '';
     document.getElementById('care-section').classList.remove('active');
-    document.getElementById('commercial-section').classList.remove('active');
+    document.getElementById('commercial-section')?.classList.remove('active');
     window.scrollTo({top:0,behavior:'smooth'});
   }
   function showSection(type) {
     document.getElementById('home-view').style.display = 'none';
     document.getElementById('care-section').classList.remove('active');
-    document.getElementById('commercial-section').classList.remove('active');
+    document.getElementById('commercial-section')?.classList.remove('active');
     document.getElementById(type+'-section').classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
   }
@@ -319,18 +319,18 @@
       const lc=allCareTenders.filter(t=>t.status!=='Draft').length;
       const lm=allCommercialTenders.filter(t=>t.status!=='Draft').length;
       document.getElementById('stat-care-count').textContent       = lc||'0';
-      document.getElementById('stat-commercial-count').textContent = lm||'0';
+      var _scc = document.getElementById('stat-commercial-count'); if (_scc) _scc.textContent = lm||'0';
 
       renderTenders('care');
-      renderTenders('commercial');
+      // commercial-hidden-for-launch: renderTenders('commercial');
       renderNonCQC();
-      initTicker(data);
-      initBentoFeed(data);
+      initTicker(allCareTenders);
+      initBentoFeed(allCareTenders);
     } catch(e) {
       console.error('loadData error:', e.message, e.stack);
       var msg = '<div class="empty-state"><h3>Could not load tenders</h3><p>Please try refreshing the page.</p></div>';
       document.getElementById('care-tenders-list').innerHTML = msg;
-      document.getElementById('commercial-tenders-list').innerHTML = msg;
+      var _ctl = document.getElementById('commercial-tenders-list'); if (_ctl) _ctl.innerHTML = msg;
     }
   }
 

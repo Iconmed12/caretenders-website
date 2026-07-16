@@ -20,7 +20,7 @@
   <ul>
     <li><a href="#" onclick="showHome(); return false;">Home</a></li>
     <li><a href="#" onclick="showSection('care'); return false;">Care Tenders</a></li>
-    <li><a href="#" onclick="showSection('commercial'); return false;">Commercial</a></li>
+    <!-- commercial-hidden-for-launch: <li><a href="#" onclick="showSection('commercial'); return false;">Commercial</a></li> -->
     <li><a href="/plans.html">Membership</a></li>
     <li><a href="/case-studies.html">Case Studies</a></li>
     
@@ -53,7 +53,7 @@
         <p>The intelligence platform for UK contract opportunities. Find the tenders worth winning, then let Cana write your responses in under an hour, not weeks.</p>
         <div class="hero-actions">
           <a href="#" onclick="showSection('care'); return false;" class="btn-primary">Browse care tenders</a>
-          <a href="#" onclick="showSection('commercial'); return false;" class="btn-ghost">Commercial tenders →</a>
+          <!-- commercial-hidden-for-launch: <a href="#" onclick="showSection('commercial'); return false;" class="btn-ghost">Commercial tenders →</a> -->
         </div>
         <div class="hero-trust">
           <span class="trust-item"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4" stroke="#00C9E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> No setup required</span>
@@ -114,10 +114,12 @@
       <span class="stat-num" id="stat-care-count">&middot;</span>
       <span class="stat-label">Care tenders live</span>
     </div>
+    <!-- commercial-hidden-for-launch:
     <div class="stat stat-divider">
       <span class="stat-num" id="stat-commercial-count">&middot;</span>
       <span class="stat-label">Commercial tenders</span>
     </div>
+    -->
     <div class="stat stat-divider">
       <span class="stat-num">UK wide</span>
       <span class="stat-label">Coverage</span>
@@ -325,6 +327,7 @@
         <div class="card-tags"><span class="tag">Domiciliary</span><span class="tag">Residential</span><span class="tag">Supported living</span><span class="tag">Pre-CQC</span></div>
         <div class="card-cta">Browse care tenders <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </a>
+      <!-- commercial-hidden-for-launch:
       <a class="portal-card commercial" href="#" onclick="showSection('commercial'); return false;">
         <div class="card-icon">🏗️</div>
         <div class="card-label">Commercial sector</div>
@@ -333,6 +336,7 @@
         <div class="card-tags"><span class="tag">Construction</span><span class="tag">Facilities</span><span class="tag">Consultancy</span><span class="tag">IT &amp; Services</span></div>
         <div class="card-cta">Browse commercial tenders <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       </a>
+      -->
     </div>
   </div>
 
@@ -396,6 +400,7 @@
 </div>
 
 <!-- ══ COMMERCIAL SECTION ══ -->
+<!-- commercial-hidden-for-launch:
 <div id="commercial-section" class="section commercial-section">
   <div class="section-header">
     <div class="section-title"><span style="font-size:1.35rem;">🏗️</span><h2>Commercial Tenders</h2></div>
@@ -414,6 +419,7 @@
   </div>
   <div class="tenders-grid" id="commercial-tenders-list"><div class="loading-msg">Loading commercial tenders…</div></div>
 </div>
+-->
 
 <!-- ══ TENDER DETAIL MODAL ══ -->
 <div class="modal-overlay" id="modal-overlay" onclick="closeModalOnBg(event)">
