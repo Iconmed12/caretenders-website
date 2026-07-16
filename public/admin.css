@@ -5,7 +5,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 #loginScreen{position:fixed;inset:0;background:linear-gradient(160deg,#064e3b,#065f46 50%,#047857);display:flex;align-items:center;justify-content:center;z-index:999}
 .login-card{background:#fff;border-radius:var(--radius-xl);padding:2.5rem;width:100%;max-width:400px;box-shadow:var(--shadow-lg)}
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:2rem}
-.login-logo-mark{width:42px;height:42px;background:linear-gradient(135deg,var(--green-dark),var(--green));border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
+.login-logo-mark{width:42px;height:42px;background:#0B1929;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:20px}
 .login-logo-text{font-family:'DM Serif Display',serif;font-size:22px}
 .login-logo-text span{color:var(--green)}
 .login-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px}
@@ -20,7 +20,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .sidebar{width:240px;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:40}
 .sidebar-logo{padding:1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,0.06)}
 .sidebar-logo-inner{display:flex;align-items:center;gap:9px}
-.sidebar-logo-mark{width:34px;height:34px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
+.sidebar-logo-mark{width:34px;height:34px;background:#0B1929;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px}
 .sidebar-logo-text{font-family:'DM Serif Display',serif;font-size:17px;color:#fff}
 .sidebar-logo-text span{color:#6ee7b7}
 .sidebar-section{padding:1.25rem 1rem 0.5rem;font-size:10px;font-weight:700;color:rgba(255,255,255,0.3);text-transform:uppercase;letter-spacing:0.1em}
