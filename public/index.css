@@ -21,6 +21,9 @@
   .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
   .nav-logo-main span { color:var(--teal); }
   .nav-logo-by { font-size:0.7rem; color:rgba(255,255,255,0.35); letter-spacing:0.04em; font-weight:400; }
+  .cb-mark { height:42px; width:42px; display:block; flex:none; }
+  .cb-wm { font-family:"Space Grotesk","Inter",sans-serif; font-weight:700; font-size:1.6rem; letter-spacing:-0.02em; color:var(--white); line-height:1; }
+  .cb-wm span { color:var(--teal); margin-left:0.3em; }
   nav ul { list-style:none; display:flex; gap:1.75rem; align-items:center; }
   nav ul a { color:rgba(255,255,255,0.65); text-decoration:none; font-size:0.88rem; transition:color 0.2s; }
   nav ul a:hover { color:var(--white); }
