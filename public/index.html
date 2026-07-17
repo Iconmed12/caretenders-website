@@ -156,7 +156,9 @@ nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-fi
 .op-rail::-webkit-scrollbar{height:8px}
 .op-rail::-webkit-scrollbar-thumb{background:#d3e0e6;border-radius:9px}
 .op-rail::-webkit-scrollbar-track{background:transparent}
-.op-card{flex:1 1 240px;min-width:240px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:var(--sh);display:flex;flex-direction:column;transition:transform .14s,box-shadow .14s}
+.op-card{flex:0 0 268px;scroll-snap-align:start;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 16px 14px;box-shadow:var(--sh);display:flex;flex-direction:column;transition:transform .14s,box-shadow .14s}
+.op-loading,.op-empty{color:var(--muted);font-size:14px;padding:24px 4px;font-weight:500}
+.op-empty a{color:var(--teal-dk);font-weight:700}
 .op-card:hover{transform:translateY(-4px);box-shadow:var(--sh-lg)}
 .op-card h3{font-size:14.5px;line-height:1.3;color:var(--navy);min-height:37px}
 .op-card .auth{font-size:12px;color:var(--muted2);margin-top:4px}
@@ -504,54 +506,10 @@ footer ul a:hover{color:var(--cyan)}
   <div class="op-intro">
     <h2>Care opportunities do not wait. Neither should you.</h2>
     <p>See new local authority, NHS and integrated care opportunities as they arrive, save the right contracts and move directly into bid preparation.</p>
-    <a class="op-more" href="#">View more live opportunities <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    <a class="op-more" href="/tenders.html">View more live opportunities <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
   </div>
-  <div class="op-rail">
-    <!-- 1 -->
-    <div class="op-card">
-      <h3>Domiciliary Care Framework</h3>
-      <div class="auth">Reading Borough Council</div>
-      <span class="tag"><span class="d"></span>Adult social care</span>
-      <div class="val">£4.2m</div>
-      <div class="close">Closing in 8 days</div>
-      <div class="lines">
-        <div><svg viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Reading, UK</div>
-        <div><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>CQC: Required</div>
-        <div><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M9 13h6M9 17h4"/></svg>Framework</div>
-      </div>
-      <div class="match"><span class="ring"></span>92% match</div>
-      <div class="acts"><a class="save"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save</a><a class="view">View details</a></div>
-    </div>
-    <!-- 2 -->
-    <div class="op-card">
-      <h3>Supported Living Services</h3>
-      <div class="auth">Kent County Council</div>
-      <span class="tag"><span class="d"></span>Learning disabilities &amp; autism</span>
-      <div class="val">£3.6m</div>
-      <div class="close">Closing in 11 days</div>
-      <div class="lines">
-        <div><svg viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Kent, UK</div>
-        <div><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>CQC: Required</div>
-        <div><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M9 13h6M9 17h4"/></svg>Dynamic Purchasing System</div>
-      </div>
-      <div class="match"><span class="ring"></span>88% match</div>
-      <div class="acts"><a class="save"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save</a><a class="view">View details</a></div>
-    </div>
-    <!-- 3 -->
-    <div class="op-card">
-      <h3>Children's Residential Care Framework</h3>
-      <div class="auth">Bristol City Council</div>
-      <span class="tag"><span class="d"></span>Children's services</span>
-      <div class="val">£5.1m</div>
-      <div class="close">Closing in 15 days</div>
-      <div class="lines">
-        <div><svg viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>Bristol, UK</div>
-        <div><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>Ofsted regulated</div>
-        <div><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M9 13h6M9 17h4"/></svg>Framework</div>
-      </div>
-      <div class="match"><span class="ring"></span>84% match</div>
-      <div class="acts"><a class="save"><svg viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Save</a><a class="view">View details</a></div>
-    </div>
+  <div class="op-rail" id="op-rail">
+    <div class="op-loading">Loading live care opportunities…</div>
   </div>
 </div></section>
 
@@ -794,6 +752,89 @@ footer ul a:hover{color:var(--cyan)}
     <span>hello@getcana.co.uk</span>
   </div>
 </div></footer>
+
+<script>
+/* ── Live care opportunities: pull real tenders from the admin/back end ── */
+(function(){
+  var rail = document.getElementById('op-rail');
+  if (!rail) return;
+
+  // Which categories count as care (mirrors index.js / admin)
+  var COMMERCIAL_CATS = ['commercial','construction','facilities','facilities management','cleaning','consultancy','it & digital','it','digital','it & services','logistics','transport','waste','security','employment','business support','marketing','enterprise','training','recruitment','other'];
+  var CARE_CATS = ['domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
+  var BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
+
+  function isCare(t){
+    if (BUSINESS_TITLE_RE.test(t.title || '')) return false;
+    var cat = (t.category || '').toLowerCase().trim();
+    if (!cat) return !!t.is_non_cqc;
+    if (COMMERCIAL_CATS.indexOf(cat) !== -1) return false;
+    if (CARE_CATS.indexOf(cat) !== -1) return true;
+    var ck = ['construction','facilit','cleaning','consultanc','logistic'];
+    for (var i=0;i<ck.length;i++){ if (cat.indexOf(ck[i]) !== -1) return false; }
+    return true;
+  }
+  function isLive(t){ return t.status !== 'pending_review' && t.status !== 'rejected' && t.status !== 'Draft'; }
+
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  function fmtValue(t){
+    var n = t.contract_value != null ? Number(t.contract_value) : null;
+    if (n && !isNaN(n)) {
+      if (n >= 1000000) return '£' + (n/1000000).toFixed(1).replace(/\.0$/,'') + 'm';
+      if (n >= 1000) return '£' + Math.round(n/1000) + 'k';
+      return '£' + n.toLocaleString('en-GB');
+    }
+    return t.value || '';
+  }
+  function closingText(t){
+    if (!t.deadline) return '';
+    var d = new Date(t.deadline);
+    if (isNaN(d.getTime())) return 'Closes ' + t.deadline;
+    var days = Math.ceil((d.getTime() - Date.now()) / 86400000);
+    if (days > 1) return 'Closing in ' + days + ' days';
+    if (days === 1) return 'Closing in 1 day';
+    if (days === 0) return 'Closing today';
+    return 'Recently closed';
+  }
+
+  var PIN = '<svg viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>';
+  var SHIELD = '<svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>';
+  var BOOKMARK = '<svg viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18l-6-4-6 4z"/></svg>';
+
+  function cardHTML(t){
+    var region = t.region || 'UK';
+    var cqc = t.is_non_cqc ? 'Open to new / pre-CQC providers' : 'CQC: Required';
+    var tag = t.category ? '<span class="tag"><span class="d"></span>' + esc(t.category) + '</span>' : '';
+    return '<div class="op-card">'
+      + '<h3>' + esc(t.title) + '</h3>'
+      + '<div class="auth">' + esc(t.org || t.organisation || '') + '</div>'
+      + tag
+      + '<div class="val">' + esc(fmtValue(t)) + '</div>'
+      + '<div class="close">' + esc(closingText(t)) + '</div>'
+      + '<div class="lines">'
+        + '<div>' + PIN + esc(region) + '</div>'
+        + '<div>' + SHIELD + esc(cqc) + '</div>'
+      + '</div>'
+      + '<div class="acts"><a class="save" href="/tenders.html">' + BOOKMARK + 'Save</a><a class="view" href="/tenders.html">View details</a></div>'
+    + '</div>';
+  }
+
+  function fallback(msg){
+    rail.innerHTML = '<div class="op-empty">' + msg + ' <a href="/tenders.html">Browse care tenders &rarr;</a></div>';
+  }
+
+  fetch('/.netlify/functions/get-tenders')
+    .then(function(r){ if (!r.ok) throw new Error('fetch failed'); return r.json(); })
+    .then(function(data){
+      if (!Array.isArray(data)) { fallback('New care opportunities arriving soon.'); return; }
+      var care = data.filter(function(t){ return isCare(t) && isLive(t); }).slice(0, 3);
+      if (!care.length) { fallback('New care opportunities arriving soon.'); return; }
+      rail.innerHTML = care.map(cardHTML).join('');
+    })
+    .catch(function(){ fallback('Live opportunities are loading.'); });
+})();
+</script>
 
 </body>
 </html>

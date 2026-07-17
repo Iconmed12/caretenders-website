@@ -379,7 +379,7 @@
 <div id="care-section" class="section care-section">
   <div class="section-header">
     <div class="section-title"><span style="font-size:1.35rem;">🏥</span><h2>Care Tenders</h2></div>
-    <button class="back-btn" onclick="showHome()">← Back to portal</button>
+    <button class="back-btn" onclick="location.href='/'">← Back to home</button>
   </div>
   <div class="search-bar"><input type="text" id="care-search" placeholder="Search by title, region or organisation…" oninput="renderTenders('care')"></div>
   <div class="filter-strip" id="care-filters">
@@ -571,5 +571,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="/index.js"></script>
+<script>
+  /* This page is the dedicated tender browser: open straight to the Care Tenders list */
+  window.addEventListener('load', function(){
+    try { if (typeof showSection === 'function') showSection('care'); } catch (e) {}
+  });
+</script>
 </body>
 </html>
