@@ -138,6 +138,9 @@ exports.handler = async (event) => {
           var category = detectCategory(title, desc);
           var isCqc = detectCqc(title, desc);
 
+          // Care-only launch: do not import non-care (commercial) tenders
+          if (category !== 'care') { skipped++; continue; }
+
           if (!title || !deadline) { skipped++; continue; }
 
           // Check not already imported, two guards:
@@ -263,6 +266,10 @@ exports.handler = async (event) => {
 
           var category = detectCategory(title, desc);
           var isCqc = detectCqc(title, desc);
+
+          // Care-only launch: do not import non-care (commercial) tenders
+          if (category !== 'care') { skipped++; continue; }
+
           var tenderId = 'T-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*900)+100);
 
           var fatObj = {
