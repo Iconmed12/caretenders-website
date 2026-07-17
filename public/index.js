@@ -92,6 +92,21 @@
     pin:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>',
     bm:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18l-6-4-6 4z"/></svg>'
   };
+  /* Saved tenders (browser-local until user accounts exist) */
+  function getSaved(){ try{ return JSON.parse(localStorage.getItem('cana_saved')||'[]'); }catch(e){ return []; } }
+  function isSaved(id){ return getSaved().indexOf(String(id))!==-1; }
+  function toggleSave(id, ev){
+    if(ev){ ev.stopPropagation(); }
+    id=String(id);
+    var s=getSaved(); var i=s.indexOf(id);
+    if(i===-1) s.push(id); else s.splice(i,1);
+    try{ localStorage.setItem('cana_saved', JSON.stringify(s)); }catch(e){}
+    var saved=s.indexOf(id)!==-1;
+    var btn=ev&&ev.currentTarget;
+    if(btn){ btn.classList.toggle('is-saved', saved); var l=btn.querySelector('.tc-save-label'); if(l) l.textContent = saved?'Saved':'Save'; }
+  }
+  window.toggleSave = toggleSave;
+
   function careCardHTML(t){
     var json=JSON.stringify(t).replace(/'/g,"&#39;");
     var org=String(t.org||t.organisation||'').toUpperCase();
@@ -103,14 +118,15 @@
     if(val) meta+='<span>'+CT_ICONS.pound+val+'</span>';
     if(t.duration) meta+='<span>'+CT_ICONS.clock+t.duration+'</span>';
     if(t.region) meta+='<span>'+CT_ICONS.pin+t.region+'</span>';
-    var desc=t.description?'<p class="tc-desc">'+t.description+'</p>':'';
+    var rawId=t.id!=null?t.id:(t.title||'');
+    var sid=String(rawId).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+    var saved=isSaved(rawId);
     return '<div class="tc-card" onclick=\'openModal('+json+')\'>'
-      +'<button class="tc-save" onclick="event.stopPropagation()">'+CT_ICONS.bm+'Save</button>'
+      +'<button class="tc-save'+(saved?' is-saved':'')+'" onclick="toggleSave(\''+sid+'\',event)">'+CT_ICONS.bm+'<span class="tc-save-label">'+(saved?'Saved':'Save')+'</span></button>'
       +'<div class="tc-head-row"><span class="tc-badge">'+(t.status||'Open')+'</span><span class="tc-org">'+org+reg+'</span></div>'
       +'<h3 class="tc-title">'+(t.title||'')+'</h3>'
       +tags
       +'<div class="tc-meta">'+meta+'</div>'
-      +desc
       +'<span class="tc-view">View details &amp; pricing →</span>'
       +'</div>';
   }
