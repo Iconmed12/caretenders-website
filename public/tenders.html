@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cana Procurement Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo" onclick="showHome(); return false;" aria-label="Cana Bids home">
+    <svg viewBox="0 0 64 64" class="cb-mark" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="cb-wm">Cana<span>Bids</span></span>
+  </a>
+  <ul>
+    <li><a href="#" onclick="showHome(); return false;">Home</a></li>
+    <li><a href="#" onclick="showSection('care'); return false;">Care Tenders</a></li>
+    <!-- commercial-hidden-for-launch: <li><a href="#" onclick="showSection('commercial'); return false;">Commercial</a></li> -->
+    <li><a href="/plans.html">Membership</a></li>
+    <li><a href="/case-studies.html">Case Studies</a></li>
+    
+    
+  </ul>
+  <div class="nav-auth" id="nav-auth">
+    <a href="/login.html" class="nav-signin">Sign in</a>
+    <a href="/register.html" class="nav-register">Get started free</a>
+  </div>
+</nav>
+
+<!-- ══ HOME ══ -->
+<div id="home-view">
+
+  <!-- ══ HERO ══ -->
+  <div class="hero">
+    <!-- Animated grid background -->
+    <div class="hero-grid" aria-hidden="true"></div>
+    <!-- Floating orbs -->
+    <div class="orb orb-1" aria-hidden="true"></div>
+    <div class="orb orb-2" aria-hidden="true"></div>
+
+    <div class="hero-inner">
+      <div class="hero-left">
+        <div class="hero-eyebrow">
+          <span class="eyebrow-dot"></span>
+          UK Procurement Intelligence Platform
+        </div>
+        <h1>Win more tenders.<br><em>Work less.</em></h1>
+        <p>The intelligence platform for UK contract opportunities. Find the tenders worth winning, then let Cana write your responses in under an hour, not weeks.</p>
+        <div class="hero-actions">
+          <a href="#" onclick="showSection('care'); return false;" class="btn-primary">Browse care tenders</a>
+          <!-- commercial-hidden-for-launch: <a href="#" onclick="showSection('commercial'); return false;" class="btn-ghost">Commercial tenders →</a> -->
+        </div>
+        <div class="hero-trust">
+          <span class="trust-item"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4" stroke="#00C9E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> No setup required</span>
+          <span class="trust-sep">·</span>
+          <span class="trust-item"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4" stroke="#00C9E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Updated daily</span>
+          <span class="trust-sep">·</span>
+          <span class="trust-item"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 8l3.5 3.5L13 4" stroke="#00C9E0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> UK-wide coverage</span>
+        </div>
+      </div>
+
+      <!-- Cana live demo card -->
+      <div class="hero-right">
+        <div class="demo-card">
+          <div class="demo-card-header">
+            <div class="demo-card-dot dot-red"></div>
+            <div class="demo-card-dot dot-amber"></div>
+            <div class="demo-card-dot dot-green"></div>
+            <span class="demo-card-title">Cana generating response</span>
+            <span class="demo-card-badge">Live</span>
+          </div>
+          <div class="demo-card-tender">
+            <div class="demo-card-label">Tender loaded</div>
+            <div class="demo-card-tender-name" id="demo-tender-name">Domiciliary Care Framework, Reading Borough Council</div>
+          </div>
+          <div class="demo-card-question">
+            <div class="demo-card-label">Question 1 of 6</div>
+            <div class="demo-card-q" id="demo-question">Describe your organisation's approach to person-centred care and how you ensure care plans reflect individual needs.</div>
+          </div>
+          <div class="demo-card-response">
+            <div class="demo-card-label">Cana response</div>
+            <div class="demo-card-text" id="demo-response-text"></div>
+            <span class="demo-cursor" id="demo-cursor">|</span>
+          </div>
+          <div class="demo-card-footer">
+            <div class="demo-progress">
+              <div class="demo-progress-bar" id="demo-progress-bar"></div>
+            </div>
+            <span class="demo-progress-label" id="demo-progress-label">Writing…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ LIVE TICKER ══ -->
+  <div class="ticker-strip">
+    <span class="ticker-label">LIVE</span>
+    <div class="ticker-track">
+      <div class="ticker-inner" id="ticker-inner">
+        <span class="ticker-loading">Loading live opportunities…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ STATS ══ -->
+  <div class="stats-strip">
+    <div class="stat">
+      <span class="stat-num" id="stat-care-count">&middot;</span>
+      <span class="stat-label">Care tenders live</span>
+    </div>
+    <!-- commercial-hidden-for-launch:
+    <div class="stat stat-divider">
+      <span class="stat-num" id="stat-commercial-count">&middot;</span>
+      <span class="stat-label">Commercial tenders</span>
+    </div>
+    -->
+    <div class="stat stat-divider">
+      <span class="stat-num">UK wide</span>
+      <span class="stat-label">Coverage</span>
+    </div>
+    <div class="stat stat-divider">
+      <span class="stat-num">£4.2M+</span>
+      <span class="stat-label">Contract value won</span>
+    </div>
+  </div>
+
+  <!-- ══ COMPARISON ══ -->
+  <div class="compare-section">
+    <div class="compare-inner">
+      <div class="compare-heading-row">
+        <h2 class="compare-heading">Bidding shouldn't take <em>weeks</em></h2>
+        <p class="compare-sub">Most businesses lose tenders before they even start writing. Here is the difference.</p>
+      </div>
+      <div class="compare-grid" id="compare-grid">
+        <div class="compare-vs"><span>VS</span></div>
+        <div class="compare-col compare-old">
+          <div class="compare-col-label">The old way</div>
+          <ul class="compare-list">
+            <li class="cmp-item cmp-old-item"><span class="cx">✕</span> <span class="cmp-text">Days lost searching portals for the right opportunities</span></li>
+            <li class="cmp-item cmp-old-item"><span class="cx">✕</span> <span class="cmp-text">Reading 80-page specs before writing a single word</span></li>
+            <li class="cmp-item cmp-old-item"><span class="cx">✕</span> <span class="cmp-text">Generic template answers that evaluators see straight through</span></li>
+            <li class="cmp-item cmp-old-item"><span class="cx">✕</span> <span class="cmp-text">Agency bid writers charging thousands per submission</span></li>
+            <li class="cmp-item cmp-old-item"><span class="cx">✕</span> <span class="cmp-text">Deadlines missed, opportunities wasted</span></li>
+          </ul>
+        </div>
+        <div class="compare-col compare-new">
+          <div class="compare-shimmer"></div>
+          <div class="compare-col-label compare-col-label-new">With Cana</div>
+          <ul class="compare-list">
+            <li class="cmp-item cmp-new-item"><span class="cv">✓</span> Opportunities matched to your business, updated daily</li>
+            <li class="cmp-item cmp-new-item"><span class="cv">✓</span> Tender questions already loaded. Nothing to read, paste or upload</li>
+            <li class="cmp-item cmp-new-item"><span class="cv">✓</span> Responses written around your company, scored against the actual criteria</li>
+            <li class="cmp-item cmp-new-item"><span class="cv">✓</span> A fraction of agency cost. Expert review available whenever you want it</li>
+            <li class="cmp-item cmp-new-item"><span class="cv">✓</span> Submission ready in under an hour</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ BENTO FEATURES ══ -->
+  <div class="bento-section">
+    <div class="bento-inner">
+      <div class="bento-heading-row">
+        <h2 class="bento-heading">Built to give you the <em>unfair advantage</em></h2>
+        <p class="bento-sub">Intelligence, speed and expertise in one platform.</p>
+      </div>
+      <div class="bento-grid">
+
+        <!-- Tile 1: live pipeline feed (wide) -->
+        <div class="bento-tile bento-wide">
+          <div class="bento-tile-glow"></div>
+          <div class="bento-tile-head">
+            <div class="bento-tile-title">Your pipeline, always full</div>
+            <div class="bento-live-pill"><span class="bento-live-dot"></span><span id="bento-live-count">&middot;</span> live now</div>
+          </div>
+          <div class="bento-tile-desc">New contract opportunities land every single day, often before your competitors have seen them.</div>
+          <div class="bento-feed" id="bento-feed">
+            <div class="bento-feed-row"><span class="bento-feed-dot"></span><span class="bento-feed-text">Loading opportunities…</span></div>
+          </div>
+        </div>
+
+        <!-- Tile 2: value scale -->
+        <div class="bento-tile">
+          <div class="bento-tile-glow"></div>
+          <div class="bento-tile-title">Opportunities at every level</div>
+          <div class="bento-tile-desc">From your first public contract to multi-million frameworks, including entry routes for businesses still building their track record.</div>
+          <div class="bento-scale">
+            <div class="bento-scale-track"><div class="bento-scale-fill"></div></div>
+            <div class="bento-scale-labels"><span>£25k</span><span>£215M+</span></div>
+          </div>
+        </div>
+
+        <!-- Tile 3: turnaround ring -->
+        <div class="bento-tile">
+          <div class="bento-tile-glow"></div>
+          <div class="bento-tile-title">Spec to submission in an hour</div>
+          <div class="bento-tile-desc">Cana already knows the tender. While others are still reading the spec, your responses are written.</div>
+          <div class="bento-ring-wrap">
+            <svg class="bento-ring" viewBox="0 0 90 90" width="90" height="90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="6"/>
+              <circle class="bento-ring-fill" cx="45" cy="45" r="38" fill="none" stroke="#00C9E0" stroke-width="6" stroke-linecap="round" stroke-dasharray="238.76" stroke-dashoffset="238.76" transform="rotate(-90 45 45)"/>
+            </svg>
+            <div class="bento-ring-center"><span class="bento-ring-num">&lt;1</span><span class="bento-ring-unit">hour</span></div>
+          </div>
+        </div>
+
+        <!-- Tile 4: AI -> human pipeline (wide) -->
+        <div class="bento-tile bento-wide">
+          <div class="bento-tile-glow"></div>
+          <div class="bento-tile-title">Cana writes. You submit.</div>
+          <div class="bento-tile-desc">No waiting on anyone. Cana drafts, you give it your final read, you submit the same day. Expert review available on any tender, whenever you want it.</div>
+          <div class="bento-pipeline">
+            <div class="bento-stage">
+              <div class="bento-stage-icon">⚡</div>
+              <div class="bento-stage-label">Cana drafts</div>
+              <div class="bento-stage-sub">Tailored to the tender</div>
+            </div>
+            <div class="bento-flow"><div class="bento-flow-pulse"></div></div>
+            <div class="bento-stage">
+              <div class="bento-stage-icon">👤</div>
+              <div class="bento-stage-label">You review</div>
+              <div class="bento-stage-sub">Your final check</div>
+            </div>
+            <div class="bento-flow"><div class="bento-flow-pulse" style="animation-delay:1.4s;"></div></div>
+            <div class="bento-stage bento-stage-done">
+              <div class="bento-stage-icon">✓</div>
+              <div class="bento-stage-label">You submit</div>
+              <div class="bento-stage-sub">Same day</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CANA SECTION ══ -->
+  <div class="cana-section">
+    <div class="cana-inner">
+      <div class="cana-badge">
+        <span class="cana-badge-dot"></span>
+        New
+      </div>
+      <div class="cana-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;">
+        <div>
+          <h2 class="cana-heading">Meet <em>Cana</em>. Tender responses written specifically for you, in under an hour</h2>
+          <p class="cana-body">Cana already knows the tender. When you select an opportunity on our portal, Cana loads the actual questions from that specific tender automatically, so you never have to paste or upload anything.</p>
+          <p class="cana-body" style="margin-top:0.85rem;">All we ask is a few questions about your company. Cana then writes fully tailored responses using your organisation's own information. Not generic text, not a template. A real, submission-ready bid in under 60 minutes.</p>
+          <ul class="cana-checklist">
+            <li><span class="check">✓</span> Tender questions loaded automatically, nothing to copy or paste</li>
+            <li><span class="check">✓</span> Answers written specifically for your company, not a generic template</li>
+            <li><span class="check">✓</span> Every response tailored to the exact tender you are bidding for</li>
+            <li><span class="check">✓</span> Full submission ready in under 1 hour, with expert review whenever you want it</li>
+          </ul>
+          <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:2rem;">
+            <a href="https://caretenders-website.netlify.app" target="_blank" class="btn-primary">⚡ Try Cana now →</a>
+            <a href="/case-studies.html" class="cana-link">See tenders won →</a>
+          </div>
+        </div>
+        <div class="how-card">
+          <div class="how-card-label">How it works</div>
+          <div class="how-steps">
+            <div class="how-step">
+              <div class="how-num">1</div>
+              <div><div class="how-title">Choose your tender</div><div class="how-desc">Browse the portal and select the opportunity you want to bid for</div></div>
+            </div>
+            <div class="how-connector"></div>
+            <div class="how-step">
+              <div class="how-num">2</div>
+              <div><div class="how-title">Tell Cana about your company</div><div class="how-desc">Answer a few simple questions. Cana already has the tender questions loaded</div></div>
+            </div>
+            <div class="how-connector"></div>
+            <div class="how-step">
+              <div class="how-num">3</div>
+              <div><div class="how-title">Receive your completed bid</div><div class="how-desc">Every question answered using your company's information, tailored to that specific tender, reviewed and ready to submit</div></div>
+            </div>
+          </div>
+          <div class="how-footer">
+            <span style="font-size:1.1rem;">⚡</span>
+            <div>
+              <div class="how-footer-title">Average turnaround: under 1 hour</div>
+              <div class="how-footer-sub">Across all tender types and categories</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══ SECTOR BAND ══ -->
+  <div class="sector-band">
+    <div class="sector-band-inner">
+      <span class="sector-band-label">Covering every major sector</span>
+      <div class="sector-chips">
+        <span class="sector-chip">Health &amp; Social Care</span>
+        <span class="sector-chip">Construction</span>
+        <span class="sector-chip">Facilities Management</span>
+        <span class="sector-chip">IT &amp; Digital</span>
+        <span class="sector-chip">Consultancy</span>
+        <span class="sector-chip">Logistics &amp; Transport</span>
+        <span class="sector-chip">Cleaning</span>
+        <span class="sector-chip">Recruitment</span>
+        <span class="sector-chip">Professional Services</span>
+        <span class="sector-chip">Grounds &amp; Environment</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PORTAL CARDS ══ -->
+  <div class="portal-section">
+    <div class="portal-heading">Choose your portal</div>
+    <div class="portal-grid">
+      <a class="portal-card care" href="#" onclick="showSection('care'); return false;">
+        <div class="card-icon">🏥</div>
+        <div class="card-label">Care sector</div>
+        <h3>Care Tenders</h3>
+        <p>Domiciliary care, residential, nursing, supported living, mental health and hospital discharge, including specialist routes for new and pre-CQC providers.</p>
+        <div class="card-tags"><span class="tag">Domiciliary</span><span class="tag">Residential</span><span class="tag">Supported living</span><span class="tag">Pre-CQC</span></div>
+        <div class="card-cta">Browse care tenders <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </a>
+      <!-- commercial-hidden-for-launch:
+      <a class="portal-card commercial" href="#" onclick="showSection('commercial'); return false;">
+        <div class="card-icon">🏗️</div>
+        <div class="card-label">Commercial sector</div>
+        <h3>Commercial Tenders</h3>
+        <p>Construction, facilities management, cleaning, consultancy, logistics, IT services and all other non-care public and private sector contracts across the UK.</p>
+        <div class="card-tags"><span class="tag">Construction</span><span class="tag">Facilities</span><span class="tag">Consultancy</span><span class="tag">IT &amp; Services</span></div>
+        <div class="card-cta">Browse commercial tenders <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </a>
+      -->
+    </div>
+  </div>
+
+  <!-- ══ PROOF BAND ══ -->
+  <div class="proof-section" id="proof-section">
+    <div class="proof-inner">
+      <div class="proof-eyebrow">The record so far</div>
+      <div class="proof-stats">
+        <div class="proof-stat">
+          <span class="proof-num" data-count="4.2" data-prefix="£" data-suffix="M+" data-decimals="1">£0M+</span>
+          <span class="proof-label">Contract value won</span>
+          <span class="proof-bar"><span class="proof-bar-fill" data-width="78"></span></span>
+        </div>
+        <div class="proof-stat">
+          <span class="proof-num" data-count="47" data-suffix=" min">0 min</span>
+          <span class="proof-label">Average turnaround</span>
+          <span class="proof-bar"><span class="proof-bar-fill" data-width="60"></span></span>
+        </div>
+        <div class="proof-stat">
+          <span class="proof-num" data-count="38" data-suffix="+">0+</span>
+          <span class="proof-label">Tenders submitted</span>
+          <span class="proof-bar"><span class="proof-bar-fill" data-width="85"></span></span>
+        </div>
+      </div>
+      <div class="proof-quote-card">
+        <div class="proof-quote-mark">"</div>
+        <p class="proof-quote">We'd been losing tenders for two years. Not because our service wasn't good enough, but because we couldn't write the bids well enough. Cana changed that completely. We won our first contract within three weeks.</p>
+        <div class="proof-attr-row">
+          <div class="proof-attr">West Midlands · Domiciliary Care Framework · £1.2M contract value</div>
+          <div class="proof-won-pill">✓ Tender won</div>
+        </div>
+      </div>
+      <a href="/case-studies.html" class="proof-cta">See the tenders won with Cana →</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ CARE SECTION ══ -->
+<div id="care-section" class="section care-section">
+  <div class="section-header">
+    <div class="section-title"><span style="font-size:1.35rem;">🏥</span><h2>Care Tenders</h2></div>
+    <button class="back-btn" onclick="showHome()">← Back to portal</button>
+  </div>
+  <div class="search-bar"><input type="text" id="care-search" placeholder="Search by title, region or organisation…" oninput="renderTenders('care')"></div>
+  <div class="filter-strip" id="care-filters">
+    <button class="filter-btn active" onclick="setFilter('care','all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('care','Domiciliary care',this)">Domiciliary care</button>
+    <button class="filter-btn" onclick="setFilter('care','Residential',this)">Residential</button>
+    <button class="filter-btn" onclick="setFilter('care','Nursing',this)">Nursing</button>
+    <button class="filter-btn" onclick="setFilter('care','Supported living',this)">Supported living</button>
+    <button class="filter-btn" onclick="setFilter('care','Mental health',this)">Mental health</button>
+    <button class="filter-btn" onclick="setFilter('care','Hospital discharge',this)">Hospital discharge</button>
+  </div>
+  <div class="tenders-grid" id="care-tenders-list"><div class="loading-msg">Loading care tenders…</div></div>
+  <div class="precqc-block">
+    <h3>Not yet CQC rated or registered?</h3>
+    <p>We've handpicked opportunities ideal for new and emerging care providers lower-barrier contracts to help you build your track record and prepare for full CQC registration.</p>
+    <div id="non-cqc-list"><div class="loading-msg">Loading opportunities…</div></div>
+  </div>
+</div>
+
+<!-- ══ COMMERCIAL SECTION ══ -->
+<!-- commercial-hidden-for-launch:
+<div id="commercial-section" class="section commercial-section">
+  <div class="section-header">
+    <div class="section-title"><span style="font-size:1.35rem;">🏗️</span><h2>Commercial Tenders</h2></div>
+    <button class="back-btn" onclick="showHome()">← Back to portal</button>
+  </div>
+  <div class="search-bar"><input type="text" id="commercial-search" placeholder="Search by title, region or organisation…" oninput="renderTenders('commercial')"></div>
+  <div class="filter-strip" id="commercial-filters">
+    <button class="filter-btn active" onclick="setFilter('commercial','all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('commercial','Construction',this)">Construction</button>
+    <button class="filter-btn" onclick="setFilter('commercial','Facilities',this)">Facilities</button>
+    <button class="filter-btn" onclick="setFilter('commercial','Cleaning',this)">Cleaning</button>
+    <button class="filter-btn" onclick="setFilter('commercial','Consultancy',this)">Consultancy</button>
+    <button class="filter-btn" onclick="setFilter('commercial','IT & Digital',this)">IT &amp; Digital</button>
+    <button class="filter-btn" onclick="setFilter('commercial','Logistics',this)">Logistics</button>
+    <button class="filter-btn" onclick="setFilter('commercial','Other',this)">Other</button>
+  </div>
+  <div class="tenders-grid" id="commercial-tenders-list"><div class="loading-msg">Loading commercial tenders…</div></div>
+</div>
+-->
+
+<!-- ══ TENDER DETAIL MODAL ══ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModalOnBg(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <div class="modal-header">
+      <div class="modal-badge">
+        <span id="modal-status-badge"></span>
+        <span id="modal-category-badge" style="background:rgba(0,201,224,0.15);border:1px solid rgba(0,201,224,0.25);border-radius:999px;padding:3px 10px;font-size:0.72rem;color:var(--teal);font-weight:500;"></span>
+      </div>
+      <div class="modal-org" id="modal-org"></div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-meta-row">
+        <div class="modal-meta-pill" id="modal-value-pill"></div>
+        <div class="modal-meta-pill" id="modal-region-pill"></div>
+        <div class="modal-meta-pill" id="modal-deadline-pill"></div>
+        <div class="modal-meta-pill" id="modal-duration-pill"></div>
+      </div>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Description -->
+      <div class="modal-section" id="modal-desc-section">
+        <div class="modal-section-title">About this tender</div>
+        <p id="modal-desc"></p>
+      </div>
+
+      <!-- Eligibility -->
+      <div class="modal-section" id="modal-req-section">
+        <div class="modal-section-title">Eligibility requirements</div>
+        <ul class="req-list" id="modal-req-list"></ul>
+      </div>
+
+      <!-- RUNG 1: CANA (hero) -->
+      <div style="position:relative;background:#fff;border:2px solid var(--teal);border-radius:14px;padding:1.4rem 1.5rem 1.25rem;margin-bottom:0;box-shadow:0 6px 24px rgba(0,201,224,0.12);">
+        <div style="position:absolute;top:-11px;left:1.25rem;display:flex;gap:8px;">
+          <span style="background:var(--teal);color:var(--navy);font-size:0.66rem;font-weight:800;letter-spacing:0.07em;padding:4px 12px;border-radius:999px;text-transform:uppercase;">Most popular</span>
+          <span style="background:var(--navy);color:#fff;font-size:0.66rem;font-weight:700;letter-spacing:0.07em;padding:4px 12px;border-radius:999px;text-transform:uppercase;">Written for you</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin:0.35rem 0 0.75rem;">
+          <div>
+            <div style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:3px;">⚡ Write with Cana</div>
+            <div style="font-size:0.78rem;color:var(--muted);line-height:1.55;">Cana writes your tender responses, tailored to this specific tender using your company information. You review and submit.</div>
+          </div>
+          <div style="background:rgba(0,201,224,0.1);border:1px solid rgba(0,201,224,0.25);border-radius:8px;padding:6px 12px;text-align:center;flex-shrink:0;">
+            <div style="font-size:1rem;font-weight:700;color:var(--teal-dk);">From £480</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:1rem;">
+          <div style="display:flex;align-items:center;gap:7px;font-size:0.76rem;color:var(--muted);"><span style="color:var(--teal-dk);font-weight:700;">✓</span> Tender questions already loaded, nothing to copy</div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:0.76rem;color:var(--muted);"><span style="color:var(--teal-dk);font-weight:700;">✓</span> Answers tailored to your company and this tender</div>
+          <div style="display:flex;align-items:center;gap:7px;font-size:0.76rem;color:var(--muted);"><span style="color:var(--teal-dk);font-weight:700;">✓</span> Submission checklist, portal link and completion documents included</div>
+        </div>
+        <!-- Source link, populated by openModal() -->
+        <div id="modal-source-link" style="display:none;margin-bottom:1rem;"></div>
+
+        <a id="modal-apply-btn" href="https://caretenders-website.netlify.app" target="_blank"
+           style="display:flex;align-items:center;justify-content:space-between;background:var(--teal);color:var(--navy);border-radius:8px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:0.88rem;">
+          <span>⚡ Write with Cana</span>
+          <span style="background:rgba(11,25,41,0.12);border-radius:5px;padding:2px 10px;font-size:0.8rem;">From £480</span>
+        </a>
+      </div>
+
+      <!-- MEMBERSHIP STRIP (rung between) -->
+      <a href="/plans.html" style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(0,201,224,0.06);border:1.5px dashed rgba(0,168,188,0.45);border-radius:10px;padding:10px 14px;margin-top:0.85rem;text-decoration:none;">
+        <span style="font-size:0.78rem;color:#33475b;line-height:1.5;"><strong style="color:var(--navy);">Bidding regularly?</strong> Members bid unlimited tenders from £897 per 3-month term. Cana writes, you submit.</span>
+        <span style="font-size:0.78rem;font-weight:700;color:var(--teal-dk);white-space:nowrap;">View membership →</span>
+      </a>
+
+      <!-- LADDER CONNECTOR -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin:1rem 0;">
+        <div style="width:1.5px;height:14px;background:var(--border);"></div>
+        <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">Want the whole submission handled for you?</span>
+        <div style="width:1.5px;height:14px;background:var(--border);"></div>
+      </div>
+
+      <!-- RUNG 2: FULL BID SUPPORT (premium) -->
+      <div class="pricing-box">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="background:rgba(255,255,255,0.12);color:#fff;font-size:0.64rem;font-weight:800;letter-spacing:0.08em;padding:3px 11px;border-radius:999px;text-transform:uppercase;">Premium</span>
+          <span style="background:rgba(0,201,224,0.15);color:var(--teal);font-size:0.64rem;font-weight:700;letter-spacing:0.08em;padding:3px 11px;border-radius:999px;text-transform:uppercase;">Done for you</span>
+        </div>
+        <div class="pricing-box-title">Full bid support: our consultants complete this tender for you</div>
+        <div class="pricing-items" id="modal-pricing-items"></div>
+        <hr class="pricing-divider">
+        <div class="pricing-total-row">
+          <span class="pricing-total-label">Total</span>
+          <span class="pricing-total-amount" id="modal-total-fee"></span>
+        </div>
+        <div class="pricing-note" id="modal-fee-note"></div>
+        <button id="modal-pay-btn" onclick="handlePayNow()"
+           style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.1rem;background:var(--teal);color:var(--navy);border-radius:10px;padding:13px 18px;font-weight:700;font-size:0.9rem;transition:background 0.2s;width:100%;border:none;cursor:pointer;">
+          <span id="modal-pay-label">💳 Pay for bid support</span>
+          <span id="modal-pay-amount" style="background:rgba(11,25,41,0.15);border-radius:6px;padding:3px 10px;font-size:0.85rem;white-space:nowrap;"></span>
+        </button>
+        <div style="text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.3);margin-top:8px;">Secure payment via Stripe · Invoice provided on receipt</div>
+      </div>
+
+      <!-- CTA -->
+      <div class="modal-cta">
+        <a href="https://calendly.com/cana" target="_blank" class="btn-cta btn-cta--teal">
+          <div class="btn-cta-icon">📅</div>
+          <div class="btn-cta-text">
+            <span class="btn-cta-label">Book a consultant call</span>
+            <span class="btn-cta-desc">Speak with an expert who'll walk you through your options</span>
+          </div>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <a href="mailto:hello@getcana.co.uk?subject=Callback request" class="btn-cta btn-cta--outline">
+          <div class="btn-cta-icon">📞</div>
+          <div class="btn-cta-text">
+            <span class="btn-cta-label">Request a callback</span>
+            <span class="btn-cta-desc">Leave your details and we'll call you back within 2 hours</span>
+          </div>
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
+      <div class="cta-reassurance">
+        Cana Consulting Solutions &nbsp;·&nbsp; <strong>01268 20 30 10</strong> &nbsp;·&nbsp; <strong>hello@getcana.co.uk</strong>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <p>Cana</p>
+      <span>Procurement Intelligence Consulting Solutions</span>
+    </div>
+    <div class="footer-contact">
+      <a href="tel:01268203010">01268 20 30 10</a><br>
+      <a href="mailto:hello@getcana.co.uk">hello@getcana.co.uk</a><br>
+      Unit A11 Harben House, Tickford Street<br>
+      Newport Pagnell, Milton Keynes MK16 9EY
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Cana. All rights reserved.</span>
+    <span></span>
+  </div>
+</footer>
+
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="/index.js"></script>
+</body>
+</html>
