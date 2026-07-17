@@ -42,7 +42,7 @@ function renderCanaPanels() {
       liveList.innerHTML = '<div style="padding:12px;text-align:center;font-size:0.82rem;color:var(--text-light);">No live tenders yet</div>';
     } else {
       liveList.innerHTML = live.map(function(t, i) {
-        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:2px;transition:background 0.15s;" class="cana-panel-row">' +
+        return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:8px;margin-bottom:2px;transition:background 0.15s;" class="cana-panel-row">' +
           '<span style="font-size:0.75rem;font-weight:700;color:#2d6a4f;min-width:18px;">' + (i+1) + ')</span>' +
           '<div data-tid="' + t.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="flex:1;min-width:0;cursor:pointer;">' +
             '<div style="font-size:0.85rem;font-weight:600;color:#1a7a3f;line-height:1.3;word-break:break-word;">' + t.title + '</div>' +
@@ -65,7 +65,7 @@ function renderCanaPanels() {
         var missingBadges = item.missing.map(function(m) {
           return '<span style="font-size:0.68rem;font-weight:700;background:rgba(229,62,62,0.1);color:#c53030;padding:1px 6px;border-radius:4px;margin-left:3px;">' + m + '</span>';
         }).join('');
-        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:2px;transition:background 0.15s;" class="cana-panel-row pending">' +
+        return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:8px;margin-bottom:2px;transition:background 0.15s;" class="cana-panel-row pending">' +
           '<span style="font-size:0.75rem;font-weight:700;color:#92400e;min-width:18px;">' + (i+1) + ')</span>' +
           '<div data-tid="' + item.tender.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="flex:1;min-width:0;cursor:pointer;">' +
             '<div style="font-size:0.85rem;font-weight:600;color:var(--text);line-height:1.3;word-break:break-word;">' + item.tender.title + '</div>' +
