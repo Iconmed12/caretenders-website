@@ -3,14 +3,90 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cana Procurement Intelligence</title>
+<title>Care Tenders | Cana Bids</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/index.css">
+<style id="ct-redesign">
+/* ══ CARE TENDERS PAGE REDESIGN (scoped to body.ct #care-section.active) ══ */
+body.ct{background:#f4f8fa}
+body.ct{--ct-navy:#0b1929;--ct-teal:#0891a3;--ct-cyan:#00c9e0;--ct-ink:#1c3040;--ct-muted:#5b6b78;--ct-muted2:#93a6b1;--ct-line:#e5eef2;--ct-line2:#eef4f7;--ct-bg3:#e6f5f7;--ct-fh:'Space Grotesk','Segoe UI',sans-serif;--ct-sh:0 1px 2px rgba(11,25,41,.04),0 14px 34px -22px rgba(11,25,41,.20)}
+body.ct #home-view{display:none!important}
+/* app grid */
+body.ct #care-section.ct-app{display:grid;grid-template-columns:248px minmax(0,1fr) 300px;gap:24px;max-width:1360px;margin:0 auto;padding:26px 24px 60px;background:transparent;box-shadow:none;border:0}
+@media(max-width:1160px){body.ct #care-section.ct-app{grid-template-columns:minmax(0,1fr) 300px}body.ct .ct-side{display:none}}
+@media(max-width:860px){body.ct #care-section.ct-app{grid-template-columns:1fr}body.ct .ct-track{display:none}}
+body.ct .ct-panel{background:#fff;border:1px solid var(--ct-line);border-radius:16px;padding:16px;box-shadow:var(--ct-sh);margin-bottom:18px}
+body.ct .ct-panel-h{font-family:var(--ct-fh);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ct-muted2);margin:0 0 12px;padding:0 4px}
+/* left nav */
+body.ct .ct-nav a{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;font-size:14px;font-weight:600;color:var(--ct-muted);cursor:pointer}
+body.ct .ct-nav a.on{background:var(--ct-bg3);color:var(--ct-teal)}
+body.ct .ct-nav a:hover{color:var(--ct-teal)}
+body.ct .ct-nav svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7;flex:none}
+/* filters */
+body.ct .ct-field{margin-bottom:14px}
+body.ct .ct-field label{display:block;font-size:11.5px;font-weight:700;color:var(--ct-muted2);margin-bottom:6px}
+body.ct .ct-field select{width:100%;appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2393a6b1' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 12px center;border:1px solid var(--ct-line);border-radius:10px;padding:11px 34px 11px 12px;font-size:13.5px;color:var(--ct-ink);font-family:inherit;cursor:pointer}
+body.ct .ct-apply{width:100%;background:var(--ct-teal);color:#fff;border:0;border-radius:10px;padding:12px;font-size:14px;font-weight:650;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+body.ct .ct-apply:hover{background:#0aa8bd}
+body.ct .ct-clear{display:block;text-align:center;width:100%;background:none;border:0;color:var(--ct-teal);font-size:13.5px;font-weight:650;cursor:pointer;padding:10px 0 2px}
+/* main */
+body.ct .ct-main{min-width:0}
+body.ct .ct-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}
+body.ct .ct-head h1{font-family:var(--ct-fh);font-size:30px;font-weight:700;color:var(--ct-navy);letter-spacing:-.02em;margin:0}
+body.ct .ct-head p{font-size:15px;color:var(--ct-muted);margin:6px 0 0}
+body.ct .ct-back{flex:none;background:#fff;border:1px solid var(--ct-line);border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:600;color:var(--ct-ink);cursor:pointer;display:flex;align-items:center;gap:7px}
+body.ct .ct-back:hover{border-color:var(--ct-teal);color:var(--ct-teal)}
+/* search */
+body.ct .ct-search{position:relative;margin-bottom:16px}
+body.ct .ct-search svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:19px;height:19px;stroke:var(--ct-muted2);fill:none;stroke-width:2}
+body.ct #care-search{width:100%;background:#fff;border:1px solid var(--ct-line);border-radius:14px;padding:16px 18px 16px 48px;font-size:15px;color:var(--ct-ink);font-family:inherit;box-shadow:var(--ct-sh)}
+body.ct #care-search:focus{outline:none;border-color:var(--ct-cyan)}
+/* chips */
+body.ct #care-filters.ct-chips{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:22px}
+body.ct .ct-chips .filter-btn{background:#fff;border:1px solid var(--ct-line);border-radius:999px;padding:9px 16px;font-size:13.5px;font-weight:600;color:var(--ct-muted);cursor:pointer;display:inline-flex;align-items:center;gap:7px;font-family:inherit}
+body.ct .ct-chips .filter-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7}
+body.ct .ct-chips .filter-btn:hover{border-color:var(--ct-teal);color:var(--ct-teal)}
+body.ct .ct-chips .filter-btn.active{background:var(--ct-teal);border-color:var(--ct-teal);color:#fff}
+/* rich tender cards (rendered by index.js) */
+body.ct #care-tenders-list,body.ct #non-cqc-list{display:flex;flex-direction:column;gap:16px}
+body.ct .tc-card{background:#fff;border:1px solid var(--ct-line);border-radius:16px;padding:22px 24px;box-shadow:var(--ct-sh);cursor:pointer;position:relative;transition:transform .14s,box-shadow .14s}
+body.ct .tc-card:hover{transform:translateY(-2px);box-shadow:0 22px 46px -24px rgba(11,25,41,.32)}
+body.ct .tc-badge{display:inline-block;background:#e4f7ec;color:#0e9f6e;font-size:10.5px;font-weight:800;letter-spacing:.05em;padding:4px 10px;border-radius:6px;text-transform:uppercase}
+body.ct .tc-save{position:absolute;top:20px;right:22px;background:#fff;border:1px solid var(--ct-line);border-radius:9px;padding:7px 13px;font-size:12.5px;font-weight:650;color:var(--ct-ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+body.ct .tc-save:hover{border-color:var(--ct-teal);color:var(--ct-teal)}
+body.ct .tc-save svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8}
+body.ct .tc-head-row{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding-right:92px}
+body.ct .tc-org{font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ct-teal)}
+body.ct .tc-title{font-family:var(--ct-fh);font-size:19px;font-weight:700;color:var(--ct-navy);letter-spacing:-.01em;margin:0 0 12px;padding-right:80px}
+body.ct .tc-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+body.ct .tc-tags span{background:var(--ct-bg3);color:var(--ct-teal);font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:999px}
+body.ct .tc-meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-bottom:12px}
+body.ct .tc-meta span{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ct-ink);font-weight:500}
+body.ct .tc-meta svg{width:15px;height:15px;stroke:var(--ct-muted2);fill:none;stroke-width:1.7;flex:none}
+body.ct .tc-desc{font-size:13.5px;color:var(--ct-muted);line-height:1.55;margin:0 0 14px;max-width:70ch}
+body.ct .tc-view{color:var(--ct-teal);font-size:13.5px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+/* pre-CQC block */
+body.ct .ct-precqc{background:#eaf3f7;border:1px solid #d8e8ee;border-radius:16px;padding:24px;margin-top:26px}
+body.ct .ct-precqc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:16px}
+body.ct .ct-precqc h3{font-family:var(--ct-fh);font-size:18px;color:var(--ct-navy);margin:0 0 6px}
+body.ct .ct-precqc p{font-size:13.5px;color:var(--ct-muted);margin:0;max-width:60ch}
+body.ct .ct-precqc-btn{flex:none;background:#fff;border:1px solid var(--ct-line);border-radius:10px;padding:11px 16px;font-size:13px;font-weight:650;color:var(--ct-teal);cursor:pointer;white-space:nowrap}
+/* right track panel */
+body.ct .ct-track .ct-panel-h{font-family:var(--ct-fh);font-size:15px;font-weight:700;color:var(--ct-navy);text-transform:none;letter-spacing:-.01em}
+body.ct .ct-item{display:flex;gap:12px;margin-bottom:18px}
+body.ct .ct-item .ic{width:34px;height:34px;border-radius:9px;background:var(--ct-bg3);color:var(--ct-teal);display:grid;place-items:center;flex:none}
+body.ct .ct-item .ic svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.7}
+body.ct .ct-item h5{font-size:13.5px;font-weight:700;color:var(--ct-navy);margin:0 0 3px}
+body.ct .ct-item p{font-size:12.5px;color:var(--ct-muted);margin:0;line-height:1.5}
+body.ct .ct-assure{background:var(--ct-bg3);border-radius:12px;padding:14px;font-size:12.5px;color:var(--ct-teal);font-weight:600;display:flex;gap:9px;align-items:flex-start}
+body.ct .ct-assure svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;flex:none;margin-top:1px}
+body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px}
+</style>
 </head>
-<body>
+<body class="ct">
 
 <nav>
   <a href="#" class="nav-logo" onclick="showHome(); return false;" aria-label="Cana Bids home">
@@ -375,28 +451,76 @@
 
 </div>
 
-<!-- ══ CARE SECTION ══ -->
-<div id="care-section" class="section care-section">
-  <div class="section-header">
-    <div class="section-title"><span style="font-size:1.35rem;">🏥</span><h2>Care Tenders</h2></div>
-    <button class="back-btn" onclick="location.href='/'">← Back to home</button>
-  </div>
-  <div class="search-bar"><input type="text" id="care-search" placeholder="Search by title, region or organisation…" oninput="renderTenders('care')"></div>
-  <div class="filter-strip" id="care-filters">
-    <button class="filter-btn active" onclick="setFilter('care','all',this)">All</button>
-    <button class="filter-btn" onclick="setFilter('care','Domiciliary care',this)">Domiciliary care</button>
-    <button class="filter-btn" onclick="setFilter('care','Residential',this)">Residential</button>
-    <button class="filter-btn" onclick="setFilter('care','Nursing',this)">Nursing</button>
-    <button class="filter-btn" onclick="setFilter('care','Supported living',this)">Supported living</button>
-    <button class="filter-btn" onclick="setFilter('care','Mental health',this)">Mental health</button>
-    <button class="filter-btn" onclick="setFilter('care','Hospital discharge',this)">Hospital discharge</button>
-  </div>
-  <div class="tenders-grid" id="care-tenders-list"><div class="loading-msg">Loading care tenders…</div></div>
-  <div class="precqc-block">
-    <h3>Not yet CQC rated or registered?</h3>
-    <p>We've handpicked opportunities ideal for new and emerging care providers lower-barrier contracts to help you build your track record and prepare for full CQC registration.</p>
-    <div id="non-cqc-list"><div class="loading-msg">Loading opportunities…</div></div>
-  </div>
+<!-- ══ CARE SECTION (redesigned 3-column app) ══ -->
+<div id="care-section" class="section ct-app active">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="ct-side">
+    <div class="ct-panel">
+      <div class="ct-panel-h">Care Tenders</div>
+      <div class="ct-nav">
+        <a class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>All Opportunities</a>
+        <a><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>Saved Searches</a>
+        <a><svg viewBox="0 0 24 24"><path d="M12 3l2.6 5.6 6.1.7-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6L3.3 9.3l6.1-.7z"/></svg>Watchlist</a>
+      </div>
+    </div>
+    <div class="ct-panel">
+      <div class="ct-panel-h">Refine your search</div>
+      <div class="ct-field"><label>Location</label><select><option>All UK regions</option><option>South East</option><option>London</option><option>North West</option><option>Midlands</option><option>South West</option><option>North East</option><option>Yorkshire</option><option>Scotland</option><option>Wales</option></select></div>
+      <div class="ct-field"><label>Service Type</label><select><option>All service types</option><option>Domiciliary care</option><option>Residential</option><option>Nursing</option><option>Supported living</option><option>Mental health</option><option>Hospital discharge</option></select></div>
+      <div class="ct-field"><label>Contract Value</label><select><option>Any value</option><option>Under £250k</option><option>£250k – £1m</option><option>£1m – £5m</option><option>£5m+</option></select></div>
+      <div class="ct-field"><label>Closing Date</label><select><option>Anytime</option><option>Next 7 days</option><option>Next 30 days</option><option>Next 90 days</option></select></div>
+      <button class="ct-apply"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5h18M6 12h12M10 19h4"/></svg>Apply Filters</button>
+      <button class="ct-clear" onclick="document.getElementById('care-search').value='';renderTenders('care')">Clear filters</button>
+    </div>
+  </aside>
+
+  <!-- CENTER -->
+  <main class="ct-main">
+    <div class="ct-head">
+      <div>
+        <h1>Care Tenders</h1>
+        <p>Discover and track live care sector opportunities across the UK.</p>
+      </div>
+      <button class="ct-back" onclick="location.href='/'"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>Back to home</button>
+    </div>
+    <div class="ct-search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input type="text" id="care-search" placeholder="Search by title, region, organisation or keyword…" oninput="renderTenders('care')">
+    </div>
+    <div class="filter-strip ct-chips" id="care-filters">
+      <button class="filter-btn active" onclick="setFilter('care','all',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>All</button>
+      <button class="filter-btn" onclick="setFilter('care','Domiciliary care',this)"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6M6 10v9h12v-9"/></svg>Domiciliary care</button>
+      <button class="filter-btn" onclick="setFilter('care','Residential',this)"><svg viewBox="0 0 24 24"><path d="M5 20V6l7-3 7 3v14"/><path d="M9 20v-4h6v4"/></svg>Residential</button>
+      <button class="filter-btn" onclick="setFilter('care','Nursing',this)"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.5-7 10-7 10z"/></svg>Nursing</button>
+      <button class="filter-btn" onclick="setFilter('care','Supported living',this)"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0"/><path d="M16 6a3 3 0 010 6M18 20a6 6 0 00-3-5.2"/></svg>Supported living</button>
+      <button class="filter-btn" onclick="setFilter('care','Mental health',this)"><svg viewBox="0 0 24 24"><path d="M12 3a5 5 0 00-5 5c0 3 5 8 5 8s5-5 5-8a5 5 0 00-5-5z"/></svg>Mental health</button>
+      <button class="filter-btn" onclick="setFilter('care','Hospital discharge',this)">Hospital discharge</button>
+    </div>
+    <div id="care-tenders-list"><div class="loading-msg">Loading care tenders…</div></div>
+    <div class="ct-precqc">
+      <div class="ct-precqc-top">
+        <div>
+          <h3>Not yet CQC rated or registered?</h3>
+          <p>We've handpicked opportunities ideal for new and emerging care providers and lower-barrier contracts to help you build your track record and prepare for full CQC registration.</p>
+        </div>
+        <button class="ct-precqc-btn">Explore new provider opportunities</button>
+      </div>
+      <div id="non-cqc-list"><div class="loading-msg">Loading opportunities…</div></div>
+    </div>
+  </main>
+
+  <!-- RIGHT PANEL -->
+  <aside class="ct-track">
+    <div class="ct-panel">
+      <div class="ct-panel-h">Track with confidence</div>
+      <div class="ct-item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></div><div><h5>Live opportunity alerts</h5><p>Get notified about new care tenders that match your interests.</p></div></div>
+      <div class="ct-item"><div class="ic"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M9 13h6M9 17h4"/></svg></div><div><h5>All your evidence</h5><p>Store policies, case studies and compliance docs in one secure place.</p></div></div>
+      <div class="ct-item"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></div><div><h5>Work securely</h5><p>Give your team and consultants the right access, every time.</p></div></div>
+      <div class="ct-assure"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>UK based. CQC aligned. Built for care providers, by care experts.</div>
+    </div>
+  </aside>
+
 </div>
 
 <!-- ══ COMMERCIAL SECTION ══ -->

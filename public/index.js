@@ -78,6 +78,43 @@
     return `<span class="tender-badge ${map[s]||'badge-new'}">${s||'Open'}</span>`;
   }
 
+  /* ── RICH CARE CARD (for the redesigned Care Tenders page) ── */
+  function fmtCloseDate(d){
+    if(!d) return '';
+    var dt=new Date(d);
+    if(isNaN(dt.getTime())) return String(d);
+    return dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  }
+  var CT_ICONS={
+    cal:'<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>',
+    pound:'<svg viewBox="0 0 24 24"><path d="M7 20h10M9 20c1.6-1.6 2-3 2-5V8a3 3 0 016 0M7 13h6"/></svg>',
+    clock:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+    pin:'<svg viewBox="0 0 24 24"><path d="M12 21s-7-6-7-11a7 7 0 0114 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.4"/></svg>',
+    bm:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 3h12v18l-6-4-6 4z"/></svg>'
+  };
+  function careCardHTML(t){
+    var json=JSON.stringify(t).replace(/'/g,"&#39;");
+    var org=String(t.org||t.organisation||'').toUpperCase();
+    var reg=t.region?' · '+String(t.region).toUpperCase():'';
+    var val=t.value||(t.contract_value?'£'+Number(t.contract_value).toLocaleString('en-GB'):'');
+    var tags=t.category?'<div class="tc-tags"><span>'+t.category+'</span></div>':'';
+    var meta='';
+    if(t.deadline) meta+='<span>'+CT_ICONS.cal+'Closes '+fmtCloseDate(t.deadline)+'</span>';
+    if(val) meta+='<span>'+CT_ICONS.pound+val+'</span>';
+    if(t.duration) meta+='<span>'+CT_ICONS.clock+t.duration+'</span>';
+    if(t.region) meta+='<span>'+CT_ICONS.pin+t.region+'</span>';
+    var desc=t.description?'<p class="tc-desc">'+t.description+'</p>':'';
+    return '<div class="tc-card" onclick=\'openModal('+json+')\'>'
+      +'<button class="tc-save" onclick="event.stopPropagation()">'+CT_ICONS.bm+'Save</button>'
+      +'<div class="tc-head-row"><span class="tc-badge">'+(t.status||'Open')+'</span><span class="tc-org">'+org+reg+'</span></div>'
+      +'<h3 class="tc-title">'+(t.title||'')+'</h3>'
+      +tags
+      +'<div class="tc-meta">'+meta+'</div>'
+      +desc
+      +'<span class="tc-view">View details &amp; pricing →</span>'
+      +'</div>';
+  }
+
   /* ── RENDER LIST ── */
   function renderTenders(type) {
     const list   = type==='care' ? allCareTenders : allCommercialTenders;
@@ -98,24 +135,7 @@
       return;
     }
 
-    el.innerHTML=items.map(t=>`
-      <div class="tender-card" onclick='openModal(${JSON.stringify(t).replace(/'/g,"&#39;")})'>
-        <div>
-          <div class="tender-org">${t.org||t.organisation||'Unknown'} · ${t.region||''}</div>
-          <div class="tender-title">${t.title}</div>
-          <div class="tender-meta">
-            ${statusBadge(t.status)}
-            ${t.category?`<span>${t.category}</span>`:''}
-            ${t.duration?`<span>${t.duration}</span>`:''}
-          </div>
-          <span class="tender-view-btn">View details &amp; pricing →</span>
-        </div>
-        <div class="tender-right">
-          <div class="tender-value">${t.value||''}</div>
-          <div class="tender-deadline">${t.deadline?'Closes '+t.deadline:''}</div>
-        </div>
-      </div>
-    `).join('');
+    el.innerHTML=items.map(careCardHTML).join('');
   }
 
   /* ── RENDER NON-CQC ── */
@@ -141,20 +161,7 @@
       el.innerHTML=`<p style="color:var(--muted);font-size:0.88rem;padding:0.5rem 0;">No pre-CQC listings at the moment check back soon.</p>`;
       return;
     }
-    el.innerHTML=list.map(t=>`
-      <div class="tender-card" style="margin-bottom:0.75rem;" onclick='openModal(${JSON.stringify(t).replace(/'/g,"&#39;")})'>
-        <div>
-          <div class="tender-org">${t.org||t.organisation||''} · ${t.region||''}</div>
-          <div class="tender-title">${t.title}</div>
-          <div class="tender-meta">${statusBadge(t.status)}${t.why_new_providers?`<span style="color:var(--muted);font-size:0.8rem;">${t.why_new_providers}</span>`:''}</div>
-          <span class="tender-view-btn">View details &amp; pricing →</span>
-        </div>
-        <div class="tender-right">
-          <div class="tender-value">${t.value||''}</div>
-          <div class="tender-deadline">${t.deadline?'Closes '+t.deadline:''}</div>
-        </div>
-      </div>
-    `).join('');
+    el.innerHTML=list.map(careCardHTML).join('');
   }
 
   /* ── MODAL ── */
