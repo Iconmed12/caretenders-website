@@ -39,15 +39,19 @@ exports.handler = async (event) => {
     var qs = event.queryStringParameters || {};
 
     if (qs.confirm === 'REMOVE-NON-CARE') {
+      var ids = nonCare.map(function(t){ return t.id; }).filter(function(x){ return x != null; });
       var removed = 0, failed = 0, failSample = [];
-      for (var t of nonCare) {
-        var d = await sb('/rest/v1/tenders?id=eq.' + encodeURIComponent(t.id), {
+      for (var i = 0; i < ids.length; i += 100) {
+        var chunk = ids.slice(i, i + 100);
+        var inList = chunk.map(function(id){ return '%22' + encodeURIComponent(String(id)) + '%22'; }).join(',');
+        var d = await sb('/rest/v1/tenders?id=in.(' + inList + ')', {
           method: 'DELETE',
           headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, Prefer: 'return=minimal' }
         });
-        if (d.ok) { removed++; } else { failed++; if (failSample.length < 5) failSample.push({ id:t.id, status:d.status }); }
+        if (d.ok) { removed += chunk.length; }
+        else { failed += chunk.length; if (failSample.length < 3) { var tx = await d.text(); failSample.push({ status:d.status, body: tx.slice(0,150) }); } }
       }
-      return { statusCode:200, headers:cors, body: JSON.stringify({ mode:'executed', totalTenders: all.length, removed, failed, failSample }) };
+      return { statusCode:200, headers:cors, body: JSON.stringify({ mode:'executed', totalTenders: all.length, attempted: ids.length, removed, failed, failSample }) };
     }
 
     return { statusCode:200, headers:cors, body: JSON.stringify({
