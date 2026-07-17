@@ -305,23 +305,26 @@ footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;
 footer ul a:hover{color:var(--cyan)}
 .foot-bottom{border-top:1px solid rgba(255,255,255,.09);margin-top:44px;padding-top:22px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;color:#6f8593;font-size:13px}
 .preview-note{background:#fff4e2;color:#8a5a12;text-align:center;font-size:12.5px;padding:8px 16px;font-weight:600}
+.nav-account{display:inline-flex;align-items:center;gap:9px;font-size:14.5px;font-weight:600;color:var(--navy)}
+.nav-account:hover{color:var(--teal-dk)}
+.nav-dot{width:30px;height:30px;border-radius:50%;background:var(--cyan);color:#04303a;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
 <nav><div class="wrap nav-in">
-  <a class="nav-logo" href="#">
+  <a class="nav-logo" href="/">
     <svg viewBox="0 0 64 64" width="34" height="34"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#0b1929" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00c9e0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span class="wm">Cana <b>Bids</b></span>
   </a>
   <div class="nav-links">
     <a href="#how">How it works</a>
     <a href="#features">Features</a>
-    <a href="#pricing">Pricing</a>
+    <a href="/plans.html">Pricing</a>
     <a href="#faq">Resources</a>
   </div>
-  <div class="nav-right">
+  <div class="nav-right" id="nav-right">
     <a class="nav-signin" href="/login.html">Log in</a>
     <a class="btn btn-cyan" style="padding:11px 18px" href="/register.html">Get started</a>
   </div>
@@ -752,6 +755,31 @@ footer ul a:hover{color:var(--cyan)}
     <span>hello@getcana.co.uk</span>
   </div>
 </div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ── Show logged-in state in the nav (account + dashboard) ── */
+(function(){
+  if (typeof supabase === 'undefined') return;
+  var _sb = supabase.createClient('https://igpjfpncfuawikoyzfcd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA');
+  window._sbHome = _sb;
+  window.handleHomeSignOut = function(){ _sb.auth.signOut().then(function(){ location.reload(); }); };
+  _sb.auth.getSession().then(function(r){
+    var s = r && r.data && r.data.session;
+    var nav = document.getElementById('nav-right');
+    if (!nav || !s || !s.user) return;
+    var meta = s.user.user_metadata || {};
+    var fn = meta.first_name || '';
+    var ln = meta.last_name || '';
+    var name = (fn + ' ' + ln).trim() || s.user.email || 'My account';
+    var initials = ((fn || s.user.email || '?').charAt(0) + (ln.charAt(0) || '')).toUpperCase();
+    nav.innerHTML =
+      '<a class="nav-account" href="/dashboard.html"><span class="nav-dot">' + initials + '</span>' + name + '</a>' +
+      '<a class="btn btn-cyan" href="/dashboard.html" style="padding:11px 18px">My dashboard</a>' +
+      '<a href="#" class="nav-signin" onclick="handleHomeSignOut();return false;">Sign out</a>';
+  }).catch(function(){});
+})();
+</script>
 
 <script>
 /* ── Live care opportunities: pull real tenders from the admin/back end ── */
