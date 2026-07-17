@@ -45,7 +45,7 @@ function renderCanaPanels() {
         return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:2px;transition:background 0.15s;" class="cana-panel-row">' +
           '<span style="font-size:0.75rem;font-weight:700;color:#2d6a4f;min-width:18px;">' + (i+1) + ')</span>' +
           '<div data-tid="' + t.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="flex:1;min-width:0;cursor:pointer;">' +
-            '<div style="font-size:0.85rem;font-weight:600;color:#1a7a3f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + t.title + '</div>' +
+            '<div style="font-size:0.85rem;font-weight:600;color:#1a7a3f;line-height:1.3;word-break:break-word;">' + t.title + '</div>' +
             '<div style="font-size:0.73rem;color:#2d6a4f;">' + (t.org||'') + '</div>' +
           '</div>' +
           '<span style="font-size:0.7rem;font-weight:700;color:#1a7a3f;background:#e8f7ee;padding:2px 8px;border-radius:999px;flex-shrink:0;">● Live</span>' +
@@ -68,7 +68,7 @@ function renderCanaPanels() {
         return '<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;margin-bottom:2px;transition:background 0.15s;" class="cana-panel-row pending">' +
           '<span style="font-size:0.75rem;font-weight:700;color:#92400e;min-width:18px;">' + (i+1) + ')</span>' +
           '<div data-tid="' + item.tender.id + '" onclick="selectCanaFromPanel(this.dataset.tid)" style="flex:1;min-width:0;cursor:pointer;">' +
-            '<div style="font-size:0.85rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + item.tender.title + '</div>' +
+            '<div style="font-size:0.85rem;font-weight:600;color:var(--text);line-height:1.3;word-break:break-word;">' + item.tender.title + '</div>' +
             '<div style="font-size:0.73rem;color:var(--text-light);margin-top:2px;">Missing:' + missingBadges + '</div>' +
           '</div>' +
           '<button data-tid="' + item.tender.id + '" data-title="' + item.tender.title.replace(/"/g,"'") + '" onclick="removeTenderFromLive(this.dataset.tid, this.dataset.title)" style="background:none;border:none;color:#c53030;font-size:0.9rem;cursor:pointer;padding:2px 4px;flex-shrink:0;opacity:0.6;transition:opacity 0.2s;" title="Move back to Needs Attention" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6">✕</button>' +
