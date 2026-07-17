@@ -190,6 +190,34 @@ nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-fi
 .split-img{width:100%;height:auto;display:block;border-radius:18px;box-shadow:0 34px 70px -36px rgba(11,25,41,.42)}
 .phone-crop{max-width:300px;margin:0 auto;aspect-ratio:39/64;border-radius:22px;overflow:hidden;box-shadow:0 34px 70px -34px rgba(11,25,41,.42)}
 .phone-crop img{width:100%;height:100%;object-fit:cover;object-position:76% 50%;display:block}
+/* CSS phone mockup (mobile-app section) */
+.mp-media{display:flex;justify-content:center}
+.mp-phone{width:238px;background:#0b1017;border-radius:36px;padding:7px;box-shadow:0 40px 74px -34px rgba(11,25,41,.42)}
+.mp-screen{background:#fff;border-radius:30px;overflow:hidden;position:relative;padding-top:6px}
+.mp-island{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:68px;height:18px;background:#0b1017;border-radius:12px;z-index:2}
+.mp-head{display:flex;align-items:center;justify-content:space-between;padding:22px 15px 6px}
+.mp-head .lg{display:inline-flex;align-items:center;gap:5px;font-family:var(--f-head);font-weight:700;font-size:13.5px;color:var(--navy)}
+.mp-head .lg b{color:var(--teal-dk)}
+.mp-head .lg svg{width:14px;height:14px}
+.mp-head > svg{width:16px;height:16px;stroke:#8194a1;fill:none;stroke-width:1.8}
+.mp-title{font-family:var(--f-head);font-weight:700;font-size:16px;color:var(--navy);padding:8px 15px 8px}
+.mp-tabs{display:flex;gap:15px;padding:0 15px}
+.mp-tabs span{font-size:11px;font-weight:600;color:#9aabb5;padding-bottom:9px}
+.mp-tabs span.on{color:var(--teal-dk);box-shadow:inset 0 -2px 0 var(--teal-dk)}
+.mp-list{border-top:1px solid #eef4f7}
+.mp-row{display:flex;align-items:center;gap:10px;padding:11px 15px;border-bottom:1px solid #f2f6f8}
+.mp-row .ic{width:30px;height:30px;border-radius:8px;background:#e7f6f9;color:var(--teal-dk);display:grid;place-items:center;flex:none}
+.mp-row .ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7}
+.mp-row .b{flex:1;min-width:0}
+.mp-row .b b{display:block;font-size:11px;color:var(--navy);line-height:1.25}
+.mp-row .b span{font-size:9.5px;color:#9aabb5}
+.mp-rowmeta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}
+.mp-rowmeta .date{font-size:8px;color:#9aabb5;white-space:nowrap}
+.mp-rowmeta .open{font-size:8.5px;font-weight:700;color:#0e9f6e;background:#e4f7ec;padding:3px 8px;border-radius:6px}
+.mp-nav{display:flex;justify-content:space-around;padding:9px 2px 12px;border-top:1px solid #eef4f7}
+.mp-nav span{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:7.5px;color:#aeb9c1;font-weight:600}
+.mp-nav span.on{color:var(--teal-dk)}
+.mp-nav i{width:13px;height:13px;border:1.6px solid currentColor;border-radius:4px;display:block}
 .media-card{background:linear-gradient(150deg,var(--navy),var(--navy2) 60%,var(--teal-dk));border-radius:22px;min-height:360px;position:relative;overflow:hidden;box-shadow:var(--sh-lg);display:grid;place-items:center}
 .media-card .ph-tag{position:absolute;left:14px;bottom:14px;background:rgba(255,255,255,.14);color:#fff;font-size:11px;font-weight:600;padding:5px 11px;border-radius:8px;backdrop-filter:blur(4px)}
 .media-card .ph-ico{color:rgba(255,255,255,.4)}
@@ -609,9 +637,21 @@ footer ul a:hover{color:var(--cyan)}
 </div></section>
 
 <!-- MOBILE APP -->
-<section class="sec" style="background:var(--bg2)"><div class="wrap split rev">
-  <div class="split-media">
-    <div class="phone-crop"><img src="/img/device.png" alt="Cana Bids mobile app showing live care opportunities on the go."></div>
+<section class="sec" style="background:#fff"><div class="wrap split rev">
+  <div class="split-media mp-media">
+    <div class="mp-phone"><div class="mp-screen">
+      <div class="mp-island"></div>
+      <div class="mp-head"><span class="lg"><svg viewBox="0 0 64 64"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#0b1929" stroke-width="8" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00c9e0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Cana <b>Bids</b></span><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></div>
+      <div class="mp-title">Opportunities</div>
+      <div class="mp-tabs"><span class="on">All</span><span>Tenders</span><span>PQs</span><span>Frameworks</span></div>
+      <div class="mp-list">
+        <div class="mp-row"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div><div class="b"><b>Domiciliary Care Framework</b><span>Birmingham City Council</span></div><div class="mp-rowmeta"><span class="open">Open</span></div></div>
+        <div class="mp-row"><div class="ic"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M9 13h6M9 17h4"/></svg></div><div class="b"><b>Supported Living Services</b><span>Leeds City Council</span></div><div class="mp-rowmeta"><span class="date">24 May 2025</span><span class="open">Open</span></div></div>
+        <div class="mp-row"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6M6 10v9h12v-9"/></svg></div><div class="b"><b>Children's Residential Care</b><span>Essex County Council</span></div><div class="mp-rowmeta"><span class="date">30 May 2025</span><span class="open">Open</span></div></div>
+        <div class="mp-row"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0"/><path d="M16 6a3 3 0 010 6"/></svg></div><div class="b"><b>Mental Health Community Support</b><span>Kent County Council</span></div><div class="mp-rowmeta"><span class="date">02 Jun 2025</span><span class="open">Open</span></div></div>
+      </div>
+      <div class="mp-nav"><span><i></i>Home</span><span class="on"><i></i>Opportunities</span><span><i></i>Messages</span><span><i></i>Alerts</span><span><i></i>More</span></div>
+    </div></div>
   </div>
   <div>
     <span class="eyebrow"><span class="dot"></span> Mobile app</span>
