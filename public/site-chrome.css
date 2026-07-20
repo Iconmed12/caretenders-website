@@ -7,6 +7,10 @@ nav{background:rgba(255,255,255,.94)!important;backdrop-filter:blur(10px);border
 nav ul a{color:#1c3040!important;font-weight:500}
 nav ul a:hover,nav ul a.active,nav ul a.nav-active{color:#0891a3!important}
 nav .nav-signin{color:#1c3040!important}
+/* Logo was drawn white for the old dark nav, so recolour it for the white nav.
+   The "Bids" half stays teal via its own rule. */
+nav .cb-mark path[stroke="#fff"]{stroke:#0b1929}
+nav .cb-wm{color:#0b1929!important}
 
 /* ── FOOTER: same structure and styling as the homepage ── */
 footer{background:#0b1929;color:#93a8b6;padding:64px 0 34px;font-size:14px;text-align:left}
