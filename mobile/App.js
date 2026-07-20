@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -11,6 +11,9 @@ import TenderDetailScreen from './src/screens/TenderDetailScreen';
 import GeneratingScreen from './src/screens/GeneratingScreen';
 import BidReadyScreen from './src/screens/BidReadyScreen';
 import EvidenceScreen from './src/screens/EvidenceScreen';
+import ProfileScreen from './src/screens/ProfileScreen';
+import SignInScreen from './src/screens/SignInScreen';
+import { AuthProvider, useAuth } from './src/auth';
 import { c } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -48,12 +51,20 @@ function OpportunitiesStack() {
   );
 }
 
-export default function App() {
+// Held while we check AsyncStorage for a saved session, so a returning member
+// does not see the sign in screen flash up before their tenders load.
+function Splash() {
   return (
-    <SafeAreaProvider>
-      <StatusBar style="dark" />
-      <NavigationContainer>
-        <Tabs.Navigator
+    <View style={{ flex: 1, backgroundColor: c.navy, alignItems: 'center', justifyContent: 'center' }}>
+      <ActivityIndicator color={c.cyan} size="large" />
+    </View>
+  );
+}
+
+function SignedInApp() {
+  return (
+    <NavigationContainer>
+      <Tabs.Navigator
           screenOptions={{
             headerShown: false,
             tabBarActiveTintColor: c.teal,
@@ -80,12 +91,34 @@ export default function App() {
           </Tabs.Screen>
           <Tabs.Screen
             name="Profile"
+            component={ProfileScreen}
             options={{ tabBarIcon: ({ focused }) => <TabIcon label="👤" focused={focused} /> }}
-          >
-            {() => <Placeholder title="Profile" note="Sign in with your Cana Bids account to generate bids." />}
-          </Tabs.Screen>
+          />
         </Tabs.Navigator>
-      </NavigationContainer>
+    </NavigationContainer>
+  );
+}
+
+// Members only: no session, no app. The auth listener swaps these over the
+// moment someone signs in or out, so neither screen needs to navigate.
+function Root() {
+  const { session, loading } = useAuth();
+  // Signed out and loading are both navy screens, so the clock and battery
+  // need to be white there and dark once the app proper is showing.
+  return (
+    <>
+      <StatusBar style={session && !loading ? 'dark' : 'light'} />
+      {loading ? <Splash /> : session ? <SignedInApp /> : <SignInScreen />}
+    </>
+  );
+}
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AuthProvider>
+        <Root />
+      </AuthProvider>
     </SafeAreaProvider>
   );
 }
