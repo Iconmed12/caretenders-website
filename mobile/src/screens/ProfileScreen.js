@@ -1,7 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c } from '../theme';
 import { supabase, useAuth } from '../auth';
+import { IconFolder, IconChevron } from '../icons';
+
+function longDate(value) {
+  if (!value) return '';
+  const d = new Date(value);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+}
 
 function initialsOf(email, meta) {
   const first = (meta && (meta.first_name || meta.firstName)) || '';
@@ -17,7 +26,8 @@ function nameOf(email, meta) {
   return full || email || '';
 }
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const { session } = useAuth();
   const user = (session && session.user) || {};
   const meta = user.user_metadata || {};
@@ -63,12 +73,16 @@ export default function ProfileScreen() {
     ]);
   }
 
-  const renews = membership.renews
-    ? new Date(membership.renews).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
-    : '';
+  const renews = longDate(membership.renews);
+  // Supabase stamps the account when it is created, so this is the real
+  // sign up date rather than anything we have to store ourselves.
+  const memberSince = longDate(user.created_at);
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ padding: 16, paddingTop: 28 }}>
+    <ScrollView
+      style={s.wrap}
+      contentContainerStyle={{ padding: 16, paddingTop: insets.top + 18, paddingBottom: 28 }}
+    >
       <View style={s.head}>
         <View style={s.avatar}><Text style={s.avatarText}>{initialsOf(user.email, meta)}</Text></View>
         <Text style={s.name}>{nameOf(user.email, meta)}</Text>
@@ -96,7 +110,29 @@ export default function ProfileScreen() {
         {!!renews && membership.state === 'active' && (
           <Text style={s.rowMuted}>Renews {renews}</Text>
         )}
+
+        {!!memberSince && (
+          <>
+            <View style={s.sep} />
+            <Text style={s.rowLabel}>MEMBER SINCE</Text>
+            <Text style={[s.rowValue, { fontWeight: '700', color: c.navy }]}>{memberSince}</Text>
+          </>
+        )}
       </View>
+
+      {/* Evidence lives here now rather than in the tab bar. */}
+      <TouchableOpacity
+        style={s.tap}
+        activeOpacity={0.8}
+        onPress={() => navigation.navigate('Evidence')}
+      >
+        <IconFolder size={19} color={c.teal} />
+        <View style={s.tapText}>
+          <Text style={s.tapTitle}>Evidence library</Text>
+          <Text style={s.tapSub}>Documents Cana uses to answer your tenders</Text>
+        </View>
+        <IconChevron size={16} color={c.muted2} />
+      </TouchableOpacity>
 
       <Text style={s.note}>
         Membership and billing are managed on getcana.co.uk
@@ -131,6 +167,14 @@ const s = StyleSheet.create({
   badgeText: { fontSize: 12.5, fontWeight: '700' },
   badgeTextOn: { color: c.good },
   badgeTextOff: { color: c.muted },
+  tap: {
+    flexDirection: 'row', alignItems: 'center', gap: 11,
+    backgroundColor: c.white, borderWidth: 1, borderColor: c.line,
+    borderRadius: 14, padding: 14, marginTop: 12,
+  },
+  tapText: { flex: 1, gap: 2 },
+  tapTitle: { fontSize: 14, fontWeight: '700', color: c.navy },
+  tapSub: { fontSize: 11.5, color: c.muted2, lineHeight: 16 },
   note: { fontSize: 12.5, color: c.muted2, textAlign: 'center', marginTop: 18, lineHeight: 19 },
   signOut: {
     borderWidth: 1, borderColor: c.line, backgroundColor: c.white,

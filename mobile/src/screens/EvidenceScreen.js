@@ -14,7 +14,7 @@ const DOCS = [
 export default function EvidenceScreen() {
   return (
     <View style={s.wrap}>
-      <Text style={s.h1}>Evidence</Text>
+      {/* No heading here: it opens from Profile with a header that names it. */}
       <TextInput style={s.search} placeholder="Search your documents" placeholderTextColor={c.muted2} />
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 24 }}>
         {DOCS.map((d) => (

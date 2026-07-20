@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { c, t } from '../theme';
-import { closingLabel, valueLabel } from '../api';
+import { closingLabel, valueLabel, fetchOngoing, jobState } from '../api';
+import { useAuth } from '../auth';
 
 // Placeholder question set. Once the tender's own questions are stored against
 // the record, this reads them from the tender instead.
@@ -19,6 +21,46 @@ export default function TenderDetailScreen({ route, navigation }) {
   const questions = Array.isArray(tender.questions) && tender.questions.length
     ? tender.questions
     : FALLBACK_QUESTIONS;
+
+  const { session } = useAuth();
+  const email = (session && session.user && session.user.email) || '';
+  // If this tender has already been started, the button takes them to it
+  // instead of paying to write the same bid twice.
+  const [existing, setExisting] = useState(null);
+
+  useFocusEffect(useCallback(() => {
+    let alive = true;
+    fetchOngoing(email)
+      .then((jobs) => {
+        if (!alive) return;
+        const mine = jobs.filter((j) => j.tender_id === tender.id);
+        setExisting(mine.length ? mine[0] : null);
+      })
+      .catch(() => { if (alive) setExisting(null); });
+    return () => { alive = false; };
+  }, [email, tender.id]));
+
+  const state = existing ? jobState(existing) : null;
+  const alreadyRunning = state === 'running' || state === 'queued';
+  const alreadyDone = state === 'ready';
+
+  function onPress() {
+    if (alreadyRunning) {
+      navigation.getParent()?.navigate('Ongoing');
+      return;
+    }
+    if (alreadyDone) {
+      navigation.navigate('BidReady', { tender });
+      return;
+    }
+    navigation.navigate('Generating', { tender, questions });
+  }
+
+  const ctaText = alreadyRunning
+    ? 'Already writing, see progress'
+    : alreadyDone
+      ? 'View your bid'
+      : 'Generate responses';
 
   const meta = [
     { label: 'Value', value: valueLabel(tender) || 'Not stated' },
@@ -60,12 +102,17 @@ export default function TenderDetailScreen({ route, navigation }) {
 
       <View style={s.footer}>
         <TouchableOpacity
-          style={s.cta}
+          style={[s.cta, (alreadyRunning || alreadyDone) && s.ctaQuiet]}
           activeOpacity={0.85}
-          onPress={() => navigation.navigate('Generating', { tender, questions })}
+          onPress={onPress}
         >
-          <Text style={s.ctaText}>Generate responses</Text>
+          <Text style={[s.ctaText, (alreadyRunning || alreadyDone) && s.ctaQuietText]}>
+            {ctaText}
+          </Text>
         </TouchableOpacity>
+        {alreadyDone && (
+          <Text style={s.ctaNote}>You have already generated a bid for this tender.</Text>
+        )}
       </View>
     </View>
   );
@@ -88,4 +135,7 @@ const s = StyleSheet.create({
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: c.line2, backgroundColor: c.white },
   cta: { backgroundColor: c.cyan, borderRadius: 13, paddingVertical: 16, alignItems: 'center' },
   ctaText: { fontSize: 15, fontWeight: '700', color: '#04303a' },
+  ctaQuiet: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line },
+  ctaQuietText: { color: c.navy },
+  ctaNote: { fontSize: 11.5, color: c.muted2, textAlign: 'center', marginTop: 9 },
 });

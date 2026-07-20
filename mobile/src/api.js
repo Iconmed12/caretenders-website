@@ -58,3 +58,47 @@ export async function fetchTenders() {
   if (!Array.isArray(data)) return [];
   return data.filter((t) => isCare(t) && isLive(t));
 }
+
+/**
+ * Every bid this member has started, running or finished.
+ *
+ * Generation happens on the server, so this list is the truth about what is
+ * happening. Closing the app does not stop a run and does not lose it.
+ */
+export async function fetchOngoing(email) {
+  if (!email) return [];
+  const res = await fetch(`${API_BASE}/.netlify/functions/get-bid-history`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) throw new Error('Could not load your bids');
+  const data = await res.json();
+  return Array.isArray(data) ? data : [];
+}
+
+// The server records a run as pending, processing, done or error. Everything
+// the app shows hangs off these three buckets.
+export function jobState(job) {
+  const st = String((job && job.status) || '').toLowerCase();
+  if (st === 'done' || st === 'complete' || st === 'completed') return 'ready';
+  if (st === 'error' || st === 'failed') return 'failed';
+  if (st === 'pending' || st === 'queued') return 'queued';
+  return 'running';
+}
+
+/** "2 hours ago", "yesterday", for the ongoing list. */
+export function agoLabel(dateStr) {
+  if (!dateStr) return '';
+  const then = new Date(dateStr).getTime();
+  if (isNaN(then)) return '';
+  const mins = Math.floor((Date.now() - then) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return mins + (mins === 1 ? ' min ago' : ' mins ago');
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + (hrs === 1 ? ' hour ago' : ' hours ago');
+  const days = Math.floor(hrs / 24);
+  if (days === 1) return 'yesterday';
+  if (days < 7) return days + ' days ago';
+  return new Date(then).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+}

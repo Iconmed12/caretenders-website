@@ -17,7 +17,22 @@ export default function BidReadyScreen({ route, navigation }) {
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 8 }} showsVerticalScrollIndicator={false}>
         <View style={s.okCircle}><Text style={s.okTick}>✓</Text></View>
         <Text style={s.h1}>Your bid is ready</Text>
-        <Text style={s.sub}>{questions.length} answers for {tender.title}</Text>
+        <Text style={s.sub}>
+          {questions.length
+            ? questions.length + ' answers for ' + tender.title
+            : tender.title}
+        </Text>
+
+        {/* Opened from Ongoing we have the run but not the answer text yet, so
+            say so rather than showing an empty page. */}
+        {!questions.length && (
+          <View style={s.ans}>
+            <Text style={s.ansBody}>
+              This bid has finished writing. Reading the answers on your phone is coming shortly.
+              For now, tap below and we will email you the full document.
+            </Text>
+          </View>
+        )}
 
         {questions.map((q, i) => {
           const name = typeof q === 'string' ? q : q.title;

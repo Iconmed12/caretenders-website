@@ -4,49 +4,58 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import OpportunitiesScreen from './src/screens/OpportunitiesScreen';
 import TenderDetailScreen from './src/screens/TenderDetailScreen';
 import GeneratingScreen from './src/screens/GeneratingScreen';
 import BidReadyScreen from './src/screens/BidReadyScreen';
+import OngoingScreen from './src/screens/OngoingScreen';
 import EvidenceScreen from './src/screens/EvidenceScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SignInScreen from './src/screens/SignInScreen';
 import { AuthProvider, useAuth } from './src/auth';
+import { IconFind, IconOngoing, IconAlerts, IconProfile } from './src/icons';
 import { c } from './src/theme';
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
 
-// Simple text glyphs stand in for the icon set until we add one.
-function TabIcon({ label, focused }) {
-  return <Text style={{ fontSize: 17, opacity: focused ? 1 : 0.45 }}>{label}</Text>;
-}
-
 function Placeholder({ title, note }) {
+  const insets = useSafeAreaInsets();
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', padding: 30 }}>
+    <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', padding: 30, paddingTop: insets.top }}>
       <Text style={{ fontSize: 18, fontWeight: '700', color: c.navy }}>{title}</Text>
       <Text style={{ fontSize: 13, color: c.muted, textAlign: 'center', marginTop: 8 }}>{note}</Text>
     </View>
   );
 }
 
+const stackOptions = {
+  headerStyle: { backgroundColor: c.white },
+  headerTintColor: c.navy,
+  headerTitleStyle: { fontWeight: '700' },
+  headerShadowVisible: false,
+};
+
 function OpportunitiesStack() {
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: c.white },
-        headerTintColor: c.navy,
-        headerTitleStyle: { fontWeight: '700' },
-        headerShadowVisible: false,
-      }}
-    >
+    <Stack.Navigator screenOptions={stackOptions}>
       <Stack.Screen name="Opportunities" component={OpportunitiesScreen} options={{ headerShown: false }} />
       <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
       <Stack.Screen name="Generating" component={GeneratingScreen} options={{ title: 'Writing', headerBackVisible: false }} />
       <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
+    </Stack.Navigator>
+  );
+}
+
+// Evidence sits under Profile rather than in the tab bar, so it opens with a
+// back arrow instead of taking a slot along the bottom.
+function ProfileStack() {
+  return (
+    <Stack.Navigator screenOptions={stackOptions}>
+      <Stack.Screen name="ProfileHome" component={ProfileScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Evidence" component={EvidenceScreen} options={{ title: 'Evidence library' }} />
     </Stack.Navigator>
   );
 }
@@ -65,36 +74,39 @@ function SignedInApp() {
   return (
     <NavigationContainer>
       <Tabs.Navigator
-          screenOptions={{
-            headerShown: false,
-            tabBarActiveTintColor: c.teal,
-            tabBarInactiveTintColor: '#aebac2',
-            tabBarStyle: { backgroundColor: c.white, borderTopColor: c.line2, height: 84, paddingTop: 8 },
-            tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: c.teal,
+          tabBarInactiveTintColor: c.muted2,
+          tabBarStyle: { backgroundColor: c.white, borderTopColor: c.line, height: 84, paddingTop: 8 },
+          tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        }}
+      >
+        <Tabs.Screen
+          name="Find"
+          component={OpportunitiesStack}
+          options={{
+            title: 'Find',
+            tabBarIcon: ({ color }) => <IconFind size={22} color={color} />,
           }}
+        />
+        <Tabs.Screen
+          name="Ongoing"
+          component={OngoingScreen}
+          options={{ tabBarIcon: ({ color }) => <IconOngoing size={22} color={color} /> }}
+        />
+        <Tabs.Screen
+          name="Alerts"
+          options={{ tabBarIcon: ({ color }) => <IconAlerts size={22} color={color} /> }}
         >
-          <Tabs.Screen
-            name="Find"
-            component={OpportunitiesStack}
-            options={{ title: 'Opportunities', tabBarIcon: ({ focused }) => <TabIcon label="🔍" focused={focused} /> }}
-          />
-          <Tabs.Screen
-            name="Evidence"
-            component={EvidenceScreen}
-            options={{ tabBarIcon: ({ focused }) => <TabIcon label="📁" focused={focused} /> }}
-          />
-          <Tabs.Screen
-            name="Alerts"
-            options={{ tabBarIcon: ({ focused }) => <TabIcon label="🔔" focused={focused} /> }}
-          >
-            {() => <Placeholder title="Alerts" note="New care tenders matching your services will appear here." />}
-          </Tabs.Screen>
-          <Tabs.Screen
-            name="Profile"
-            component={ProfileScreen}
-            options={{ tabBarIcon: ({ focused }) => <TabIcon label="👤" focused={focused} /> }}
-          />
-        </Tabs.Navigator>
+          {() => <Placeholder title="Alerts" note="New care tenders matching your services will appear here." />}
+        </Tabs.Screen>
+        <Tabs.Screen
+          name="Profile"
+          component={ProfileStack}
+          options={{ tabBarIcon: ({ color }) => <IconProfile size={22} color={color} /> }}
+        />
+      </Tabs.Navigator>
     </NavigationContainer>
   );
 }

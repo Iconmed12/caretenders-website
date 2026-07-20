@@ -98,9 +98,20 @@ export default function GeneratingScreen({ route, navigation }) {
         })}
       </ScrollView>
 
-      <TouchableOpacity style={s.ghost} onPress={() => navigation.popToTop()} activeOpacity={0.85}>
-        <Text style={s.ghostText}>Carry on in the background</Text>
-      </TouchableOpacity>
+      {/* The run lives on the server, so leaving is safe. Drop them straight on
+          Ongoing rather than back to the list, so they can see it still going. */}
+      <View style={s.footer}>
+        <TouchableOpacity
+          style={s.ghost}
+          onPress={() => navigation.getParent()?.navigate('Ongoing')}
+          activeOpacity={0.85}
+        >
+          <Text style={s.ghostText}>Carry on in the background</Text>
+        </TouchableOpacity>
+        <Text style={s.footNote}>
+          You can close the app. We will keep writing and it will be waiting under Ongoing.
+        </Text>
+      </View>
     </View>
   );
 }
@@ -121,6 +132,8 @@ const s = StyleSheet.create({
   dotText: { fontSize: 11, fontWeight: '800', color: c.muted2 },
   rowText: { flex: 1, fontSize: 14, color: c.ink },
   status: { fontSize: 11, fontWeight: '700', color: c.muted2 },
-  ghost: { borderWidth: 1, borderColor: c.line, borderRadius: 13, paddingVertical: 15, alignItems: 'center', marginBottom: 16 },
+  footer: { paddingBottom: 16 },
+  ghost: { borderWidth: 1, borderColor: c.line, borderRadius: 13, paddingVertical: 15, alignItems: 'center' },
   ghostText: { fontSize: 14, fontWeight: '700', color: c.navy },
+  footNote: { fontSize: 11.5, color: c.muted2, textAlign: 'center', marginTop: 9, lineHeight: 17 },
 });
