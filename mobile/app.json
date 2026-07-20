@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Cana Bids",
+    "slug": "cana-bids",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "canabids",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0b1929",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "co.uk.getcana.bids"
+    },
+    "android": {
+      "package": "co.uk.getcana.bids",
+      "adaptiveIcon": {
+        "backgroundColor": "#0b1929"
+      }
+    },
+    "extra": {
+      "supabaseUrl": "https://igpjfpncfuawikoyzfcd.supabase.co",
+      "apiBase": "https://caretenders-website.netlify.app"
+    },
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
