@@ -41,6 +41,25 @@ export function IconDoc(p) {
   return <Base {...p}><Path d="M14 3H7a1.5 1.5 0 00-1.5 1.5v15A1.5 1.5 0 007 21h10a1.5 1.5 0 001.5-1.5V7.5z" /><Path d="M14 3v4.5h4.5" /></Base>;
 }
 
+export function IconEye(p) {
+  return (
+    <Base {...p}>
+      <Path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z" />
+      <Circle cx={12} cy={12} r={2.9} />
+    </Base>
+  );
+}
+
+export function IconEyeOff(p) {
+  return (
+    <Base {...p}>
+      <Path d="M9.6 6.2A8.9 8.9 0 0112 6c6 0 9.5 6 9.5 6a15.6 15.6 0 01-3.4 4M6.4 8A15.6 15.6 0 002.5 12s3.5 6 9.5 6a8.9 8.9 0 003-.5" />
+      <Path d="M10 10a2.9 2.9 0 004 4" />
+      <Path d="M3.5 3.5l17 17" />
+    </Base>
+  );
+}
+
 export function IconChevron(p) {
   return <Base {...p}><Path d="M9 5l7 7-7 7" /></Base>;
 }

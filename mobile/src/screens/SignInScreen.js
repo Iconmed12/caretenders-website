@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { c } from '../theme';
 import { supabase, friendlyAuthError } from '../auth';
+import { IconEye, IconEyeOff } from '../icons';
 
 /**
  * The front door. Cana Bids is members only, so this is the whole app until
@@ -18,6 +19,7 @@ import { supabase, friendlyAuthError } from '../auth';
 export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -89,20 +91,33 @@ export default function SignInScreen() {
           />
 
           <Text style={[s.label, { marginTop: 14 }]}>Password</Text>
-          <TextInput
-            style={s.input}
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Your password"
-            placeholderTextColor={c.muted2}
-            secureTextEntry
-            autoCapitalize="none"
-            autoCorrect={false}
-            textContentType="password"
-            returnKeyType="go"
-            onSubmitEditing={signIn}
-            editable={!busy}
-          />
+          <View style={s.passwordRow}>
+            <TextInput
+              style={s.passwordInput}
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Your password"
+              placeholderTextColor={c.muted2}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              autoCorrect={false}
+              textContentType="password"
+              returnKeyType="go"
+              onSubmitEditing={signIn}
+              editable={!busy}
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword((on) => !on)}
+              style={s.eye}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityRole="button"
+              accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword
+                ? <IconEyeOff size={20} color={c.muted} />
+                : <IconEye size={20} color={c.muted2} />}
+            </TouchableOpacity>
+          </View>
 
           {!!error && <Text style={s.error}>{error}</Text>}
 
@@ -143,6 +158,17 @@ const s = StyleSheet.create({
     paddingHorizontal: 13, paddingVertical: 13,
     fontSize: 15, color: c.ink, backgroundColor: c.white,
   },
+  // The border moves to the row so the eye sits inside the field rather than
+  // beside it.
+  passwordRow: {
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderColor: c.line, borderRadius: 12, backgroundColor: c.white,
+  },
+  passwordInput: {
+    flex: 1, paddingHorizontal: 13, paddingVertical: 13,
+    fontSize: 15, color: c.ink,
+  },
+  eye: { paddingHorizontal: 13, paddingVertical: 12 },
   error: {
     fontSize: 13, color: '#b4232a', backgroundColor: '#fdeaea',
     borderRadius: 10, padding: 11, marginTop: 14, lineHeight: 18,
