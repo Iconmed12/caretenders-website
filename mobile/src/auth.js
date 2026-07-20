@@ -38,12 +38,24 @@ export function AuthProvider({ children }) {
   useEffect(() => {
     let alive = true;
 
+    // If the session check stalls, show the sign in screen rather than leaving
+    // them stuck on a loading screen with no way forward.
+    const bail = setTimeout(() => {
+      if (alive) setLoading(false);
+    }, 6000);
+
     // Existing session, if they signed in on a previous launch.
-    supabase.auth.getSession().then(({ data }) => {
-      if (!alive) return;
-      setSession(data.session || null);
-      setLoading(false);
-    });
+    supabase.auth.getSession()
+      .then(({ data }) => {
+        if (!alive) return;
+        setSession(data.session || null);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!alive) return;
+        clearTimeout(bail);
+        setLoading(false);
+      });
 
     // Fires on sign in, sign out and token refresh.
     const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
@@ -54,6 +66,7 @@ export function AuthProvider({ children }) {
 
     return () => {
       alive = false;
+      clearTimeout(bail);
       sub.subscription.unsubscribe();
     };
   }, []);

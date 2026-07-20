@@ -29,24 +29,18 @@ const stackOptions = {
   headerShadowVisible: false,
 };
 
-// A tender can be opened from Home or from Find, so both tabs carry the same
-// detail, writing and bid screens behind their own root.
-function tenderScreens() {
-  return (
-    <>
-      <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
-      <Stack.Screen name="Generating" component={GeneratingScreen} options={{ title: 'Writing', headerBackVisible: false }} />
-      <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
-    </>
-  );
-}
+// A tender can be opened from Home or from Find, so both tabs carry their own
+// copy of the detail, writing and bid screens. Listed out in full in both
+// rather than shared, because a navigator wants Screen elements directly.
 
 // Home is the landing screen: greeting, what is waiting, a few tenders.
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
       <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-      {tenderScreens()}
+      <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
+      <Stack.Screen name="Generating" component={GeneratingScreen} options={{ title: 'Writing', headerBackVisible: false }} />
+      <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
     </Stack.Navigator>
   );
 }
@@ -56,7 +50,9 @@ function FindStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
       <Stack.Screen name="Opportunities" component={OpportunitiesScreen} options={{ headerShown: false }} />
-      {tenderScreens()}
+      <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
+      <Stack.Screen name="Generating" component={GeneratingScreen} options={{ title: 'Writing', headerBackVisible: false }} />
+      <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
     </Stack.Navigator>
   );
 }
