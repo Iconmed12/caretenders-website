@@ -3,7 +3,7 @@
 //  - reset : send that user a password-reset email (they set their own new one)
 // Password resets go out as an email link on purpose: nobody, including an
 // admin, ever sees or sets the customer's password.
-const { requireManager, logAudit } = require('./_admin-auth');
+const { requireManager, requireOwner, logAudit } = require('./_admin-auth');
 
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
@@ -11,7 +11,15 @@ exports.handler = async (event) => {
   const cors = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': '*' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
-  const gate = await requireManager(event, 'admin-users', cors);
+  let body = {};
+  try { body = JSON.parse(event.body || '{}'); } catch (e) {}
+  const action = body.action || 'list';
+
+  // Deleting an account is permanent, so it is owner-only. Listing and sending
+  // a reset link stay available to managers.
+  const gate = action === 'delete'
+    ? await requireOwner(event, 'admin-users:delete', cors)
+    : await requireManager(event, 'admin-users', cors);
   if (gate) return gate;
 
   const srv = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -19,10 +27,6 @@ exports.handler = async (event) => {
   if (!srv) return { statusCode: 500, headers: cors, body: JSON.stringify({ error: 'Service key not configured' }) };
 
   const svcHeaders = { apikey: srv, Authorization: 'Bearer ' + srv, 'Content-Type': 'application/json' };
-
-  let body = {};
-  try { body = JSON.parse(event.body || '{}'); } catch (e) {}
-  const action = body.action || 'list';
 
   try {
     if (action === 'list') {
@@ -105,6 +109,40 @@ exports.handler = async (event) => {
 
       try { await logAudit(event, 'admin-users', 'password_reset_sent', { email: email }); } catch (e) {}
       return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, sent: email }) };
+    }
+
+    if (action === 'delete') {
+      const id = String(body.id || '').trim();
+      const email = String(body.email || '').trim().toLowerCase();
+      if (!id) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing user id' }) };
+
+      // Never let an owner delete themselves out of the system.
+      const me = String((event._adminIdentity && event._adminIdentity.email) || '').toLowerCase();
+      if (email && me && email === me) {
+        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'You cannot delete your own account' }) };
+      }
+
+      // Staff logins belong to the Staff tab, which also cleans up admin_users.
+      if (email.indexOf('@staff.getcana.co.uk') !== -1) {
+        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Staff logins are managed on the Staff tab' }) };
+      }
+
+      // Protect anyone on the owner allow-list.
+      const owners = String(process.env.ADMIN_EMAILS || '').split(',').map(function (s) { return s.trim().toLowerCase(); }).filter(Boolean);
+      if (email && owners.indexOf(email) !== -1) {
+        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'That is an owner account and cannot be deleted here' }) };
+      }
+
+      const r = await fetch(SB_URL + '/auth/v1/admin/users/' + encodeURIComponent(id), { method: 'DELETE', headers: svcHeaders });
+      if (!r.ok) {
+        const t = await r.text();
+        return { statusCode: 502, headers: cors, body: JSON.stringify({ error: 'Could not delete user', detail: t.slice(0, 160) }) };
+      }
+
+      // Subscription rows are deliberately left in place: they are the billing
+      // record. Deleting the login does not cancel Stripe billing.
+      try { await logAudit(event, 'admin-users', 'user_deleted', { email: email, id: id }); } catch (e) {}
+      return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, deleted: email || id }) };
     }
 
     return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Unknown action' }) };

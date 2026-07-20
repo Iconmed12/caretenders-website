@@ -50,7 +50,15 @@ function renderUsersTable(list) {
       '<td>' + membershipCell(u.membership) + '</td>' +
       '<td style="font-size:13px">' + fmtDate(u.created_at) + '</td>' +
       '<td style="font-size:13px">' + fmtDate(u.last_sign_in_at) + '</td>' +
-      '<td><button style="' + UBTN + '" data-email="' + String(u.email || '').replace(/"/g, '&quot;') + '" onclick="resetUserPassword(this.dataset.email, this)">Send password reset</button></td>' +
+      '<td style="white-space:nowrap">' +
+        '<button style="' + UBTN + '" data-email="' + String(u.email || '').replace(/"/g, '&quot;') + '" onclick="resetUserPassword(this.dataset.email, this)">Send password reset</button>' +
+        (u.is_staff ? '' :
+          '<button style="' + UBTN + 'margin-left:6px;color:#c53030;border-color:#f0c2c2" ' +
+            'data-id="' + String(u.id || '') + '" ' +
+            'data-email="' + String(u.email || '').replace(/"/g, '&quot;') + '" ' +
+            'data-member="' + (u.membership && u.membership.member ? '1' : '') + '" ' +
+            'onclick="deleteUser(this.dataset.id, this.dataset.email, this.dataset.member, this)">Delete</button>') +
+      '</td>' +
     '</tr>';
   }).join('');
 }
@@ -82,6 +90,37 @@ async function loadUsers() {
     filterUsers();
   } catch (e) {
     if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="color:#c53030;padding:16px">' + e.message + '</td></tr>';
+  }
+}
+
+async function deleteUser(id, email, isMember, btn) {
+  if (!id) return;
+
+  var warning = 'Permanently delete ' + email + '?\n\n' +
+    'This removes their login for good. It cannot be undone and they would have to sign up again.';
+  if (isMember) {
+    warning += '\n\nWARNING: this person is an ACTIVE MEMBER. Deleting the login does NOT cancel their Stripe billing, ' +
+               'so cancel their subscription in Stripe first or they may keep being charged.';
+  }
+  warning += '\n\nTheir billing history is kept for your records.';
+  if (!confirm(warning)) return;
+
+  var typed = prompt('To confirm, type the email address exactly:\n\n' + email);
+  if (typed === null) return;
+  if (String(typed).trim().toLowerCase() !== String(email).trim().toLowerCase()) {
+    alert('That did not match, so nothing was deleted.');
+    return;
+  }
+
+  var original = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
+  try {
+    await usersApi({ action: 'delete', id: id, email: email });
+    if (typeof showToast === 'function') showToast(email + ' deleted', 'success');
+    loadUsers();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = original; }
+    if (typeof showToast === 'function') showToast(e.message, 'error'); else alert(e.message);
   }
 }
 
