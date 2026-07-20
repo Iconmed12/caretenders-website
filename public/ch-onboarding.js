@@ -44,7 +44,7 @@ async function lookupCompany() {
   } catch(err) {
     showError(err.message || 'Could not find company. Please check the number and try again.');
   }
-  btn.disabled = false; btn.textContent = 'Look up →';
+  btn.disabled = false; btn.textContent = 'Look up';
 }
 
 function renderResult(data) {
@@ -130,7 +130,7 @@ async function saveAndContinue() {
 
   } catch(err) {
     showError('Save failed: ' + (err.message || 'Please try again'));
-    btn.disabled = false; btn.textContent = 'Save & continue to SQ Assist →';
+    btn.disabled = false; btn.textContent = 'Save & continue to SQ Assist';
   }
 }
 

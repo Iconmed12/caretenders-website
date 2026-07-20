@@ -289,7 +289,7 @@
       });
       if (uploadErr) throw uploadErr;
 
-      // 2. AI extraction of expiry date
+      // 2. Automatic extraction of expiry date
       var extractedExpiry = manualExpiry || null;
       if (!manualExpiry && selectedFile.size < 4 * 1024 * 1024) {
         setProgress(55, 'Scanning document for expiry date...');

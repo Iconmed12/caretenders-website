@@ -124,7 +124,7 @@
         promptDiv.innerHTML =
           '<div style="font-family:\'Playfair Display\',serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Save your details for next time</div>' +
           '<p style="color:var(--muted);font-size:0.88rem;margin-bottom:1rem;line-height:1.6;">Create a free account to track this bid, store your company profile and CQC rating, and complete future bids in minutes instead of starting from scratch.</p>' +
-          '<a href="/register.html?email=' + encodeURIComponent(email||'') + '" style="display:inline-block;background:var(--navy);color:#fff;padding:11px 28px;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Create free account →</a>';
+          '<a href="/register.html?email=' + encodeURIComponent(email||'') + '" style="display:inline-block;background:var(--navy);color:#fff;padding:11px 28px;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Create free account</a>';
         loadingState.appendChild(promptDiv);
       };
       if (sb && sb.auth) {
@@ -910,7 +910,7 @@
       setStep(3);
       showState('sq');
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      if (btn) { btn.disabled = false; btn.textContent = 'Next step →'; }
+      if (btn) { btn.disabled = false; btn.textContent = 'Next step'; }
       populateSqStep().catch(function(e){ console.warn('SQ populate warning:', e.message); });
     } catch(err) {
       console.error('canaChContinue error:', err.message);

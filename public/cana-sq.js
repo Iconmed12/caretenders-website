@@ -582,7 +582,7 @@ async function confirmSqAndGenerate() {
     html += '<div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:8px;padding:10px 14px;">';
     if (portal && portal.name) {
       html += '<div style="font-size:0.82rem;color:#166534;">Portal: <strong>' + portal.name + '</strong></div>';
-      if (portal.url) html += '<div style="padding-top:8px;"><a href="' + portal.url + '" target="_blank" rel="noopener" style="display:inline-block;background:#166534;color:#fff;font-size:0.8rem;font-weight:700;padding:8px 16px;border-radius:7px;text-decoration:none;">Go to submission portal →</a></div>';
+      if (portal.url) html += '<div style="padding-top:8px;"><a href="' + portal.url + '" target="_blank" rel="noopener" style="display:inline-block;background:#166534;color:#fff;font-size:0.8rem;font-weight:700;padding:8px 16px;border-radius:7px;text-decoration:none;">Go to submission portal</a></div>';
     } else {
       html += '<div style="font-size:0.82rem;color:#166534;">Submit via the buyer portal stated in the tender documents.</div>';
     }

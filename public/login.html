@@ -103,7 +103,7 @@
         <span class="field-error" id="err-password">Please enter your password</span>
       </div>
 
-      <button class="btn-primary" id="login-btn" onclick="handleLogin()">Sign in to my account →</button>
+      <button class="btn-primary" id="login-btn" onclick="handleLogin()">Sign in to my account</button>
 
       <div class="auth-footer">
         Don't have an account? <a href="/register.html">Create one free</a>
@@ -126,7 +126,7 @@
         <input class="form-input" type="email" id="reset-email" placeholder="sarah@yourcompany.co.uk">
       </div>
 
-      <button class="btn-primary" id="reset-btn" onclick="handleReset()">Send reset link →</button>
+      <button class="btn-primary" id="reset-btn" onclick="handleReset()">Send reset link</button>
     </div>
 
   </div>
@@ -189,13 +189,13 @@
           '<a href="#" onclick="resendVerification(\'' + resendEmail + '\'); return false;" ' +
           'style="color:var(--teal);font-weight:600;text-decoration:underline;">Resend verification email</a>';
         document.getElementById('error-alert').classList.add('show');
-        btn.disabled = false; btn.textContent = 'Sign in to my account →';
+        btn.disabled = false; btn.textContent = 'Sign in to my account';
         return;
       }
       document.getElementById('error-alert').textContent = msg;
       document.getElementById('error-alert').classList.add('show');
       btn.disabled = false;
-      btn.textContent = 'Sign in to my account →';
+      btn.textContent = 'Sign in to my account';
     }
   }
 
@@ -223,7 +223,7 @@
       document.getElementById('reset-error').classList.add('show');
     }
     btn.disabled = false;
-    btn.textContent = 'Send reset link →';
+    btn.textContent = 'Send reset link';
   }
 
   async function resendVerification(email) {

@@ -62,7 +62,7 @@
       <div id="form-error" class="error-msg" style="display:none;"></div>
       <div id="prefill-badge" style="display:none;align-items:center;gap:8px;background:#e8f7ee;border:1px solid #9FE1CB;border-radius:8px;padding:10px 14px;margin-bottom:1rem;font-size:0.84rem;color:#166534;">
         <span>✓</span><span>Form pre-filled from your company profile, check and update if needed</span>
-        <a href="/profile.html" style="margin-left:auto;color:#166534;font-weight:600;font-size:0.8rem;">Edit profile →</a>
+        <a href="/profile.html" style="margin-left:auto;color:#166534;font-weight:600;font-size:0.8rem;">Edit profile</a>
       </div>
       <div class="form-grid">
         <div class="form-group">
@@ -91,7 +91,7 @@
         </div>
         <div class="form-group form-full">
           <label class="form-label">Services you provide</label>
-          <textarea class="form-textarea" id="f-services" placeholder="e.g. Domiciliary care, supported living, personal care for adults with learning disabilities..."></textarea>
+          <textarea class="form-textarea" id="f-services" placeholder="e.g. Domiciliary care, supported living, dementia care"></textarea>
         </div>
         <div class="form-group form-full">
           <label class="form-label">Regions you operate in</label>
@@ -106,23 +106,23 @@
         </div>
         <div class="form-group form-full">
           <label class="form-label">Previous contract experience <span>(optional)</span></label>
-          <textarea class="form-textarea" id="f-experience" placeholder="e.g. We have delivered domiciliary care contracts for Birmingham City Council since 2019, supporting 120 service users across 3 localities..."></textarea>
+          <textarea class="form-textarea" id="f-experience" placeholder="e.g. Domiciliary care for Birmingham City Council since 2019"></textarea>
         </div>
         <div class="form-group form-full">
           <label class="form-label">Key achievements &amp; awards <span>(optional)</span></label>
-          <textarea class="form-textarea" id="f-achievements" placeholder="e.g. Named 'Outstanding Provider of the Year' at the West Midlands Care Awards 2023. Achieved 97% service user satisfaction in our 2024 annual survey. Zero safeguarding incidents in last 3 years..."></textarea>
+          <textarea class="form-textarea" id="f-achievements" placeholder="e.g. Outstanding Provider of the Year 2023, 97% satisfaction"></textarea>
         </div>
         <div class="form-group form-full">
           <label class="form-label">Named policies &amp; frameworks you use <span>(optional)</span></label>
-          <textarea class="form-textarea" id="f-policies" placeholder="e.g. Care Act 2014 compliant assessment process, Mental Capacity Act framework, NICE guidelines for dementia care, MarketSoft care management system, monthly MDT review process..."></textarea>
+          <textarea class="form-textarea" id="f-policies" placeholder="e.g. Care Act 2014, Mental Capacity Act, NICE dementia guidelines"></textarea>
         </div>
         <div class="form-group form-full">
           <label class="form-label">Accreditations &amp; memberships <span>(optional)</span></label>
-          <input class="form-input" type="text" id="f-accreditations" placeholder="e.g. UKHCA member, Investors in People Silver, ISO 9001, Skills for Care endorsed employer">
+          <input class="form-input" type="text" id="f-accreditations" placeholder="e.g. UKHCA member, ISO 9001, Skills for Care endorsed">
         </div>
         <div class="form-group form-full">
           <label class="form-label">Performance KPIs &amp; outcomes data <span>(optional)</span></label>
-          <textarea class="form-textarea" id="f-kpis" placeholder="e.g. 98.7% on-time visit rate, average carer tenure 4.2 years, hospital admission rate 12% below local average, 94% of service users rated care as Good or Excellent..."></textarea>
+          <textarea class="form-textarea" id="f-kpis" placeholder="e.g. 98% on-time visits, average carer tenure 4.2 years"></textarea>
         </div>
       </div>
     </div>
@@ -130,7 +130,6 @@
     <button class="generate-btn" onclick="generateResponses()">
       Generate my tender responses
     </button>
-    <div style="text-align:center;font-size:0.78rem;color:var(--muted);margin-top:0.75rem;">Takes about 30 seconds · Preview is free · Pay to unlock the full bid</div>
 
   </div>
 
@@ -166,7 +165,7 @@
       <div id="member-profile-summary" style="background:#f8fafc;border:1.5px solid var(--border);border-radius:12px;padding:1.1rem 1.4rem;margin-bottom:1.5rem;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem;">
           <div style="font-weight:700;font-size:0.88rem;color:var(--navy);" id="member-company-name">Your company</div>
-          <a href="/profile.html" style="font-size:0.75rem;color:var(--teal-dk);font-weight:600;text-decoration:none;">Update profile →</a>
+          <a href="/profile.html" style="font-size:0.75rem;color:var(--teal-dk);font-weight:600;text-decoration:none;">Update profile</a>
         </div>
         <div id="member-profile-lines" style="font-size:0.8rem;color:var(--muted);line-height:1.8;"></div>
       </div>
@@ -238,7 +237,7 @@
 
       <!-- Continue -->
       <button id="ch-continue-btn-cana" onclick="canaChContinue()" style="display:none;width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.75rem;">
-        Next step →
+        Next step
       </button>
       <div style="text-align:center;">
         <button onclick="canaChSkip()" style="background:none;border:none;color:var(--muted);font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;">
@@ -309,7 +308,7 @@
       </div>
 
       <button onclick="sqContinue()" style="width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.75rem;transition:background 0.2s;">
-        ✓ Confirmed, generate my responses →
+        ✓ Confirmed, generate my responses
       </button>
       <div style="text-align:center;">
         <button onclick="setStep(2);showState('ch');" style="background:none;border:none;color:var(--muted);font-size:0.83rem;cursor:pointer;font-family:'DM Sans',sans-serif;">← Back to company lookup</button>

@@ -37,9 +37,9 @@
       // No category fall back to is_non_cqc flag (care side) or treat as unknown
       return !!t.is_non_cqc;
     }
-    // If it matches commercial list → commercial
+    // If it matches commercial list commercial
     if (COMMERCIAL_CATS.includes(cat)) return false;
-    // If it matches care list → care
+    // If it matches care list care
     if (CARE_CATS.includes(cat)) return true;
     // Partial match fallback if it contains a commercial keyword
     const commercialKeywords = ['construction','facilit','cleaning','consultanc','logistic'];
@@ -127,7 +127,7 @@
       +'<h3 class="tc-title">'+(t.title||'')+'</h3>'
       +tags
       +'<div class="tc-meta">'+meta+'</div>'
-      +'<span class="tc-view">View details &amp; pricing →</span>'
+      +'<span class="tc-view">View details &amp; pricing</span>'
       +'</div>';
   }
 
@@ -269,7 +269,7 @@
     // Cana button always shows the same regardless of submission link
     const applyBtn=document.getElementById('modal-apply-btn');
     applyBtn.href='/cana.html?tender=' + (t.id||'');
-    applyBtn.innerHTML='<div class="btn-cta-icon"></div><div class="btn-cta-text"><span class="btn-cta-label">Write with Cana</span><span class="btn-cta-desc">Let Cana draft your full tender response instantly</span></div><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    applyBtn.innerHTML='<div class="btn-cta-icon"></div><div class="btn-cta-text"><span class="btn-cta-label">Write with Cana</span><span class="btn-cta-desc">Let Cana draft your full tender response instantly</span></div>';
     applyBtn.className='btn-cta btn-cta--ai';
 
     // Source link  - shown on both public modal and admin
