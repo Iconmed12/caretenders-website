@@ -17,6 +17,10 @@ export function IconFind(p) {
   return <Base {...p}><Circle cx={11} cy={11} r={6.5} /><Path d="M16 16l4.5 4.5" /></Base>;
 }
 
+export function IconHome(p) {
+  return <Base {...p}><Path d="M4 11l8-6.5 8 6.5" /><Path d="M6.5 9.8V20h11V9.8" /></Base>;
+}
+
 export function IconOngoing(p) {
   return <Base {...p}><Path d="M4 7h16M4 12h16M4 17h9" /></Base>;
 }

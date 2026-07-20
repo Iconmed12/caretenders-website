@@ -1,14 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c, t } from '../theme';
 import { fetchTenders, closingLabel, valueLabel } from '../api';
 
 const FILTERS = ['All', 'Domiciliary care', 'Supported living', 'Residential', 'Nursing', 'Mental health'];
 
 export default function OpportunitiesScreen({ navigation }) {
-  // This screen has no header, so it has to clear the notch itself.
-  const insets = useSafeAreaInsets();
   const [all, setAll] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -55,9 +52,9 @@ export default function OpportunitiesScreen({ navigation }) {
   );
 
   return (
-    <View style={[s.wrap, { paddingTop: insets.top + 10 }]}>
-      <Text style={s.h1}>Opportunities</Text>
-
+    <View style={s.wrap}>
+      {/* Opens from Home with a header that names it, so no heading here and
+          the header already clears the notch. */}
       <TextInput
         style={s.search}
         placeholder="Search care tenders"
@@ -94,7 +91,7 @@ export default function OpportunitiesScreen({ navigation }) {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16, paddingTop: 8 },
+  wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16, paddingTop: 12 },
   h1: { ...t.h1, marginBottom: 12 },
   search: {
     backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 12,

@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import HomeScreen from './src/screens/HomeScreen';
 import OpportunitiesScreen from './src/screens/OpportunitiesScreen';
 import TenderDetailScreen from './src/screens/TenderDetailScreen';
 import GeneratingScreen from './src/screens/GeneratingScreen';
@@ -15,7 +16,7 @@ import EvidenceScreen from './src/screens/EvidenceScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SignInScreen from './src/screens/SignInScreen';
 import { AuthProvider, useAuth } from './src/auth';
-import { IconFind, IconOngoing, IconProfile } from './src/icons';
+import { IconHome, IconOngoing, IconProfile } from './src/icons';
 import { c } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -28,10 +29,14 @@ const stackOptions = {
   headerShadowVisible: false,
 };
 
-function OpportunitiesStack() {
+// Home is the landing screen. The full tender list sits one step behind it,
+// reached from See all, so opening the app greets you rather than dropping you
+// straight into a list.
+function HomeStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
-      <Stack.Screen name="Opportunities" component={OpportunitiesScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Opportunities" component={OpportunitiesScreen} options={{ title: 'Opportunities' }} />
       <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
       <Stack.Screen name="Generating" component={GeneratingScreen} options={{ title: 'Writing', headerBackVisible: false }} />
       <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
@@ -74,10 +79,10 @@ function SignedInApp() {
       >
         <Tabs.Screen
           name="Find"
-          component={OpportunitiesStack}
+          component={HomeStack}
           options={{
-            title: 'Find',
-            tabBarIcon: ({ color }) => <IconFind size={22} color={color} />,
+            title: 'Home',
+            tabBarIcon: ({ color }) => <IconHome size={22} color={color} />,
           }}
         />
         <Tabs.Screen
