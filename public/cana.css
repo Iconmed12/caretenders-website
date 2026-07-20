@@ -155,3 +155,22 @@
 /* Completed list */
 .tracker-completed-list { display:flex; flex-direction:column; gap:4px; }
 .tracker-done-item { font-size:0.82rem; color:#38a169; font-weight:500; }
+
+/* ── Phones ──
+   This page was built for a desktop width: the step bar sits on one line and
+   the container and cards carry desktop padding, which together pushed the
+   page wider than the screen. */
+@media (max-width: 680px) {
+  .steps-bar { padding: 0.85rem 1rem; gap: 0; overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; }
+  .steps-bar::-webkit-scrollbar { display: none; }
+  .step { flex: none; font-size: 0.76rem; }
+  .step-divider { width: 18px; margin: 0 0.35rem; }
+  .container { padding: 1.5rem 1rem 3.5rem; }
+  .section { padding: 1.1rem; border-radius: 12px; }
+  .tender-header { padding: 1.15rem; }
+  .tender-header h1 { font-size: 1.15rem; }
+}
+
+/* A select sizes itself to its longest option, so a long CQC status pushed the
+   page wider than a small phone. Let form controls shrink to their container. */
+.form-select, .form-input, .form-textarea, .form-group { min-width: 0; max-width: 100%; }

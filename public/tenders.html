@@ -76,6 +76,7 @@ body.ct .ct-precqc-top{display:flex;align-items:flex-start;justify-content:space
 body.ct .ct-precqc h3{font-family:var(--ct-fh);font-size:18px;color:var(--ct-navy);margin:0 0 6px}
 body.ct .ct-precqc p{font-size:13.5px;color:var(--ct-muted);margin:0;max-width:60ch}
 body.ct .ct-precqc-btn{flex:none;background:#fff;border:1px solid var(--ct-line);border-radius:10px;padding:11px 16px;font-size:13px;font-weight:650;color:var(--ct-teal);cursor:pointer;white-space:nowrap}
+@media(max-width:640px){body.ct .ct-precqc{padding:16px}body.ct .ct-precqc-top{flex-direction:column;gap:12px}body.ct .ct-precqc-btn{width:100%;white-space:normal}}
 /* right track panel */
 body.ct .ct-track .ct-panel-h{font-family:var(--ct-fh);font-size:15px;font-weight:700;color:var(--ct-navy);text-transform:none;letter-spacing:-.01em}
 body.ct .ct-item{display:flex;gap:12px;margin-bottom:18px}
@@ -671,5 +672,6 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
     try { if (typeof showSection === 'function') showSection('care'); } catch (e) {}
   });
 </script>
+<script src="/mobile-nav.js" defer></script>
 </body>
 </html>
