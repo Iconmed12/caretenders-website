@@ -4,8 +4,8 @@ import {
   ActivityIndicator, StyleSheet,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c } from '../theme';
+import ScreenHeader from '../components/ScreenHeader';
 import { useAuth } from '../auth';
 import {
   fetchTenders, fetchOngoing, jobState, agoLabel,
@@ -48,7 +48,6 @@ function initialsOf(user) {
  * Every number here is counted from data we already load. Nothing is invented.
  */
 export default function HomeScreen({ navigation }) {
-  const insets = useSafeAreaInsets();
   const { session } = useAuth();
   const user = (session && session.user) || {};
 
@@ -100,12 +99,10 @@ export default function HomeScreen({ navigation }) {
           <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={c.teal} />
         }
       >
-        <View style={[s.hero, { paddingTop: insets.top + 8 }]}>
-          <View style={s.heroTop}>
-            <View style={{ flex: 1 }}>
-              <Text style={s.greet}>{greeting()}</Text>
-              <Text style={s.who}>{firstNameOf(user)}</Text>
-            </View>
+        <ScreenHeader
+          subtitle={greeting()}
+          title={firstNameOf(user)}
+          right={
             <TouchableOpacity
               style={s.avatar}
               activeOpacity={0.8}
@@ -113,8 +110,8 @@ export default function HomeScreen({ navigation }) {
             >
               <Text style={s.avatarText}>{initialsOf(user)}</Text>
             </TouchableOpacity>
-          </View>
-
+          }
+        >
           <View style={s.stats}>
             <View style={s.stat}>
               <Text style={s.statNum}>{tenders.length}</Text>
@@ -129,7 +126,7 @@ export default function HomeScreen({ navigation }) {
               <Text style={s.statLabel}>BID WRITING</Text>
             </View>
           </View>
-        </View>
+        </ScreenHeader>
 
         <View style={s.body}>
           {running.length > 0 && (
@@ -187,10 +184,6 @@ const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
   centre: { alignItems: 'center', justifyContent: 'center' },
 
-  hero: { backgroundColor: c.navy, paddingHorizontal: 17, paddingBottom: 18, borderBottomLeftRadius: 22, borderBottomRightRadius: 22 },
-  heroTop: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  greet: { fontSize: 12.5, color: '#8fa7b8', fontWeight: '600' },
-  who: { fontSize: 23, fontWeight: '800', color: '#fff', letterSpacing: -0.4, marginTop: 1 },
   avatar: {
     width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.11)',
     alignItems: 'center', justifyContent: 'center',

@@ -4,8 +4,8 @@ import {
   ActivityIndicator, StyleSheet,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c } from '../theme';
+import ScreenHeader from '../components/ScreenHeader';
 import { useAuth } from '../auth';
 import { fetchOngoing, jobState, agoLabel } from '../api';
 
@@ -18,7 +18,6 @@ import { fetchOngoing, jobState, agoLabel } from '../api';
  * come back to this tab and the state is current.
  */
 export default function OngoingScreen({ navigation }) {
-  const insets = useSafeAreaInsets();
   const { session } = useAuth();
   const email = (session && session.user && session.user.email) || '';
 
@@ -97,20 +96,25 @@ export default function OngoingScreen({ navigation }) {
     );
   }
 
+  const running = jobs.filter((j) => ['running', 'queued'].includes(jobState(j))).length;
+
   if (loading) {
     return (
-      <View style={[s.wrap, s.centre, { paddingTop: insets.top }]}>
-        <ActivityIndicator color={c.teal} />
+      <View style={s.wrap}>
+        <ScreenHeader title="Ongoing tenders" subtitle="Everything you have started" />
+        <View style={s.centre}><ActivityIndicator color={c.teal} /></View>
       </View>
     );
   }
 
   return (
-    <View style={[s.wrap, { paddingTop: insets.top }]}>
-      <View style={s.head}>
-        <Text style={s.h1}>Ongoing tenders</Text>
-        <Text style={s.sub}>Everything you have started</Text>
-      </View>
+    <View style={s.wrap}>
+      <ScreenHeader
+        title="Ongoing tenders"
+        subtitle={running > 0
+          ? running + (running === 1 ? ' bid being written' : ' bids being written')
+          : 'Everything you have started'}
+      />
 
       <FlatList
         data={jobs}
@@ -136,10 +140,7 @@ export default function OngoingScreen({ navigation }) {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
-  centre: { alignItems: 'center', justifyContent: 'center' },
-  head: { paddingHorizontal: 16, paddingTop: 10, paddingBottom: 12, backgroundColor: c.white, borderBottomWidth: 1, borderBottomColor: c.line2 },
-  h1: { fontSize: 22, fontWeight: '800', color: c.navy, letterSpacing: -0.3 },
-  sub: { fontSize: 12.5, color: c.muted2, marginTop: 2 },
+  centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
   card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 13, marginTop: 10, gap: 7 },
   title: { fontSize: 14.5, fontWeight: '700', color: c.navy, lineHeight: 19 },

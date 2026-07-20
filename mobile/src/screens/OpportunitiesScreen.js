@@ -1,14 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c, t } from '../theme';
+import ScreenHeader from '../components/ScreenHeader';
 import { fetchTenders, closingLabel, valueLabel } from '../api';
 
 const FILTERS = ['All', 'Domiciliary care', 'Supported living', 'Residential', 'Nursing', 'Mental health'];
 
 export default function OpportunitiesScreen({ navigation }) {
-  // Root of its own tab with no header, so it clears the notch itself.
-  const insets = useSafeAreaInsets();
   const [all, setAll] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -55,9 +53,13 @@ export default function OpportunitiesScreen({ navigation }) {
   );
 
   return (
-    <View style={[s.wrap, { paddingTop: insets.top + 10 }]}>
-      <Text style={s.h1}>Find tenders</Text>
+    <View style={s.wrap}>
+      <ScreenHeader
+        title="Find tenders"
+        subtitle={visible.length + (visible.length === 1 ? ' care contract open' : ' care contracts open')}
+      />
 
+      <View style={s.inner}>
       <TextInput
         style={s.search}
         placeholder="Search care tenders"
@@ -89,13 +91,14 @@ export default function OpportunitiesScreen({ navigation }) {
           ListEmptyComponent={<View style={s.empty}><Text style={s.emptyText}>No care tenders match that search.</Text></View>}
         />
       )}
+      </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16, paddingTop: 12 },
-  h1: { ...t.h1, marginBottom: 12 },
+  wrap: { flex: 1, backgroundColor: c.bg },
+  inner: { flex: 1, paddingHorizontal: 16, paddingTop: 14 },
   search: {
     backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: c.ink, marginBottom: 10,

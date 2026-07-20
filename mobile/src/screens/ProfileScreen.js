@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c } from '../theme';
+import ScreenHeader from '../components/ScreenHeader';
 import { supabase, useAuth } from '../auth';
 import { IconFolder, IconChevron } from '../icons';
 
@@ -27,7 +27,6 @@ function nameOf(email, meta) {
 }
 
 export default function ProfileScreen({ navigation }) {
-  const insets = useSafeAreaInsets();
   const { session } = useAuth();
   const user = (session && session.user) || {};
   const meta = user.user_metadata || {};
@@ -79,16 +78,16 @@ export default function ProfileScreen({ navigation }) {
   const memberSince = longDate(user.created_at);
 
   return (
-    <ScrollView
-      style={s.wrap}
-      contentContainerStyle={{ padding: 16, paddingTop: insets.top + 18, paddingBottom: 28 }}
-    >
-      <View style={s.head}>
-        <View style={s.avatar}><Text style={s.avatarText}>{initialsOf(user.email, meta)}</Text></View>
-        <Text style={s.name}>{nameOf(user.email, meta)}</Text>
-        {!!meta.company && <Text style={s.company}>{meta.company}</Text>}
-      </View>
+    <View style={s.wrap}>
+      <ScreenHeader
+        title={nameOf(user.email, meta)}
+        subtitle={meta.company || 'Your account'}
+        right={
+          <View style={s.avatar}><Text style={s.avatarText}>{initialsOf(user.email, meta)}</Text></View>
+        }
+      />
 
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
       <View style={s.card}>
         <Text style={s.rowLabel}>EMAIL</Text>
         <Text style={s.rowValue}>{user.email}</Text>
@@ -141,20 +140,18 @@ export default function ProfileScreen({ navigation }) {
       <TouchableOpacity style={s.signOut} onPress={confirmSignOut} activeOpacity={0.85}>
         <Text style={s.signOutText}>Sign out</Text>
       </TouchableOpacity>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
-  head: { alignItems: 'center', marginBottom: 22 },
   avatar: {
-    width: 66, height: 66, borderRadius: 33, backgroundColor: c.navy,
+    width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.11)',
     alignItems: 'center', justifyContent: 'center',
   },
-  avatarText: { color: c.cyan, fontSize: 24, fontWeight: '700' },
-  name: { fontSize: 18, fontWeight: '700', color: c.navy, marginTop: 12 },
-  company: { fontSize: 13, color: c.muted, marginTop: 3 },
+  avatarText: { fontSize: 12.5, fontWeight: '800', color: c.cyan },
   card: { backgroundColor: c.white, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: c.line },
   rowLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.6, color: c.muted2 },
   rowValue: { fontSize: 15, color: c.ink, marginTop: 4 },
