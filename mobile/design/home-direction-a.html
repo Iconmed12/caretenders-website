@@ -1,0 +1,316 @@
+<title>Cana Bids home, direction A</title>
+<style>
+  :root{
+    --navy:#0b1929; --navy2:#12293f; --ink:#1c3040; --cyan:#00c9e0; --teal:#0891a3;
+    --muted:#5b6b78; --muted2:#93a6b1; --line:#e9eff3; --line2:#f2f6f8;
+    --appbg:#f4f8fa; --white:#ffffff; --good:#0e9f6e; --goodbg:#e6f8ef;
+    --amber:#b7791f; --amberbg:#fdf3e2; --red:#b4232a; --redbg:#fdeaea;
+    --page:#eef2f5; --panel:#ffffff; --pageink:#16232e; --pagemuted:#5e7183;
+    --rule:#dbe4ea; --shadow:rgba(11,25,41,.13);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --page:#0d151c; --panel:#141f28; --pageink:#e7eef3; --pagemuted:#93a6b1; --rule:#243542; --shadow:rgba(0,0,0,.5); }
+  }
+  :root[data-theme="dark"]{ --page:#0d151c; --panel:#141f28; --pageink:#e7eef3; --pagemuted:#93a6b1; --rule:#243542; --shadow:rgba(0,0,0,.5); }
+  :root[data-theme="light"]{ --page:#eef2f5; --panel:#ffffff; --pageink:#16232e; --pagemuted:#5e7183; --rule:#dbe4ea; --shadow:rgba(11,25,41,.13); }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--page); color:var(--pageink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.55; padding:40px 20px 70px;
+  }
+  .wrap{max-width:1180px; margin:0 auto}
+  header.top{max-width:660px; margin:0 auto 44px}
+  .eyebrow{font-size:11px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--teal); margin:0 0 12px}
+  h1{font-size:clamp(27px,4.3vw,38px); line-height:1.12; letter-spacing:-.022em; font-weight:800; margin:0 0 14px; text-wrap:balance}
+  header.top p{margin:0; color:var(--pagemuted); font-size:16px; max-width:62ch}
+
+  .grid{display:grid; gap:38px 26px; grid-template-columns:repeat(auto-fit,minmax(286px,1fr)); align-items:start}
+  figure{margin:0; display:flex; flex-direction:column; gap:14px}
+  .cap{display:flex; flex-direction:column; gap:5px}
+  .cap b{font-size:15px; font-weight:700; letter-spacing:-.01em}
+  .cap span{font-size:13.5px; color:var(--pagemuted); line-height:1.5}
+  .tag{align-self:flex-start; font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; padding:4px 9px; border-radius:999px; background:var(--teal); color:#fff}
+  .tag.q{background:transparent; color:var(--pagemuted); border:1px solid var(--rule)}
+
+  .screen{
+    width:100%; max-width:300px; background:var(--appbg); border-radius:30px; overflow:hidden;
+    border:1px solid var(--rule); box-shadow:0 14px 34px -12px var(--shadow);
+    display:flex; flex-direction:column; color:var(--ink);
+  }
+  .status{height:26px; flex:none; display:flex; align-items:center; justify-content:space-between; padding:0 17px; font-size:10px; font-weight:700; color:#fff; background:var(--navy)}
+  .bars{display:flex; gap:2.5px; align-items:flex-end}
+  .bars i{width:2.5px; background:currentColor; border-radius:1px; display:block}
+  .hero{background:var(--navy); color:#fff; padding:6px 17px 16px}
+  .heroTop{display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+  .greet{font-size:11.5px; color:#8fa7b8; font-weight:600}
+  .who{font-size:20px; font-weight:800; letter-spacing:-.02em; margin-top:1px}
+  .av{width:32px; height:32px; border-radius:50%; background:rgba(255,255,255,.11); display:flex; align-items:center; justify-content:center; font-size:11.5px; font-weight:800; color:var(--cyan); flex:none}
+  .body{padding:13px; display:flex; flex-direction:column; gap:11px; min-height:392px}
+  .tabs{display:flex; background:var(--white); border-top:1px solid var(--line); padding:8px 0 13px}
+  .tab{flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; color:var(--muted2)}
+  .tab.on{color:var(--teal)}
+  .tab span{font-size:8.5px; font-weight:700}
+
+  .feat{background:linear-gradient(155deg,#12293f 0%,#0b1929 62%); border-radius:17px; padding:15px; color:#fff; position:relative; overflow:hidden}
+  .feat::after{content:''; position:absolute; width:150px; height:150px; border-radius:50%; right:-56px; top:-62px; background:rgba(0,201,224,.13)}
+  .featTop{display:flex; align-items:center; justify-content:space-between; gap:8px; position:relative}
+  .kicker{font-size:8.5px; font-weight:800; letter-spacing:.13em; color:var(--cyan)}
+  .urg{background:rgba(255,255,255,.1); border-radius:999px; padding:4px 9px; font-size:9.5px; font-weight:800; color:#ffd9d9}
+  .urg.calm{color:#cfe3ee}
+  .featVal{font-size:33px; font-weight:800; letter-spacing:-.03em; margin-top:11px; line-height:1; position:relative}
+  .featValSub{font-size:10px; color:#8fa7b8; font-weight:600; margin-top:5px; position:relative}
+  .featTitle{font-size:14px; font-weight:700; line-height:1.35; margin-top:13px; position:relative}
+  .featOrg{font-size:11px; color:#8fa7b8; margin-top:3px; position:relative}
+  .featChips{display:flex; gap:6px; margin-top:11px; position:relative}
+  .fchip{background:rgba(255,255,255,.1); border-radius:999px; padding:4px 9px; font-size:9.5px; font-weight:700; color:#cfe3ee}
+  .featBtn{background:var(--cyan); color:#04303a; border-radius:11px; padding:12px; text-align:center; font-size:12.5px; font-weight:800; margin-top:14px; position:relative}
+  .featBtn.quiet{background:rgba(255,255,255,.12); color:#fff}
+  .countdown{margin-top:12px; position:relative}
+  .cdBar{height:5px; background:rgba(255,255,255,.12); border-radius:3px; overflow:hidden}
+  .cdBar i{display:block; height:100%; border-radius:3px}
+  .cdLabel{display:flex; justify-content:space-between; font-size:8.5px; color:#8fa7b8; font-weight:700; margin-top:5px}
+  .dots{display:flex; gap:5px; justify-content:center; margin-top:10px}
+  .dots i{width:5px; height:5px; border-radius:50%; background:var(--line); display:block}
+  .dots i.on{background:var(--teal); width:15px; border-radius:3px}
+
+  .card{background:var(--white); border:1px solid var(--line); border-radius:14px; padding:13px}
+  .chead{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:11px}
+  .ctitle{font-size:13px; font-weight:800; color:var(--navy); letter-spacing:-.01em}
+  .cmeta{font-size:10px; font-weight:800; color:var(--teal)}
+  .prog{height:5px; background:var(--line); border-radius:3px; overflow:hidden; margin-bottom:12px}
+  .prog i{display:block; height:100%; background:var(--cyan); border-radius:3px}
+  .step{display:flex; align-items:center; gap:10px; padding:7px 0}
+  .tick{width:20px; height:20px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:800}
+  .tick.done{background:var(--goodbg); color:var(--good)}
+  .tick.todo{background:var(--line); color:var(--muted2)}
+  .step .tx{flex:1}
+  .step .tx b{display:block; font-size:11.5px; font-weight:700; color:var(--navy)}
+  .step .tx span{font-size:9.5px; color:var(--muted2)}
+  .step.done .tx b{color:var(--muted2); text-decoration:line-through}
+  .go{font-size:10px; font-weight:800; color:var(--teal)}
+
+  .resume{background:var(--white); border:1px solid var(--line); border-left:3px solid var(--cyan); border-radius:13px; padding:11px 12px}
+  .resume .k{font-size:8.5px; font-weight:800; letter-spacing:.09em; color:var(--teal)}
+  .resume .t{font-size:12px; font-weight:700; color:var(--navy); line-height:1.3; margin-top:4px}
+  .resume .m{font-size:10px; color:var(--muted2); margin-top:3px}
+  .resume .bar{height:4px; background:var(--line); border-radius:3px; overflow:hidden; margin-top:8px}
+  .resume .bar i{display:block; height:100%; width:45%; background:var(--cyan); border-radius:3px}
+
+  .row{display:flex; align-items:center; gap:9px; padding:8px 0; border-top:1px solid var(--line2)}
+  .row.first{border-top:0; padding-top:0}
+  .row .tx{flex:1; min-width:0}
+  .row .tx b{display:block; font-size:11.5px; font-weight:700; color:var(--navy); line-height:1.3}
+  .row .tx span{font-size:9.5px; color:var(--muted2)}
+  .pill{font-size:9px; font-weight:800; padding:3.5px 7px; border-radius:999px; white-space:nowrap}
+  .pill.red{background:var(--redbg); color:var(--red)}
+  .pill.amb{background:var(--amberbg); color:var(--amber)}
+  .pill.ok{background:var(--goodbg); color:var(--good)}
+
+  .track{display:flex; gap:8px}
+  .tk{flex:1; background:var(--white); border:1px solid var(--line); border-radius:13px; padding:11px; text-align:center}
+  .tk b{display:block; font-size:18px; font-weight:800; color:var(--navy); line-height:1}
+  .tk span{display:block; font-size:8px; font-weight:700; letter-spacing:.04em; color:var(--muted2); margin-top:4px}
+
+  .none{background:var(--white); border:1px dashed var(--rule); border-radius:16px; padding:26px 18px; text-align:center}
+  .noneIc{width:46px; height:46px; border-radius:50%; background:var(--appbg); display:flex; align-items:center; justify-content:center; margin:0 auto 12px; color:var(--muted2)}
+  .none b{display:block; font-size:14px; font-weight:800; color:var(--navy)}
+  .none span{display:block; font-size:11.5px; color:var(--muted); margin-top:6px; line-height:1.5}
+  .noneBtn{background:var(--appbg); border:1px solid var(--line); border-radius:10px; padding:10px; font-size:11.5px; font-weight:800; color:var(--navy); margin-top:14px}
+
+  .note{max-width:660px; margin:56px auto 0; background:var(--panel); border:1px solid var(--rule); border-radius:14px; padding:22px 24px}
+  .note h3{margin:0 0 12px; font-size:16px; font-weight:800}
+  .note ul{margin:0; padding-left:19px; color:var(--pagemuted); font-size:14.5px}
+  .note li{margin-bottom:10px}
+  .note li:last-child{margin-bottom:0}
+  .note b{color:var(--pageink)}
+</style>
+
+<div class="wrap">
+
+  <header class="top">
+    <p class="eyebrow">Direction A, in detail</p>
+    <h1>The same screen, four days apart</h1>
+    <p>How the home screen behaves as your account fills up. The first one is exactly what you would see today.</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- 1. TODAY -->
+    <figure>
+      <span class="tag">What you would see today</span>
+      <div class="screen">
+        <div class="status"><b>9:41</b><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span></div>
+        <div class="hero"><div class="heroTop"><div><div class="greet">Good morning</div><div class="who">Joel</div></div><div class="av">JM</div></div></div>
+        <div class="body">
+          <div class="feat">
+            <div class="featTop"><span class="kicker">OPEN NOW</span><span class="urg">Closes in 4 days</span></div>
+            <div class="featVal">&pound;3.1m</div>
+            <div class="featValSub">Contract value</div>
+            <div class="featTitle">Targeted Short Breaks</div>
+            <div class="featOrg">Reading Borough Council</div>
+            <div class="featChips"><span class="fchip">Mental health</span><span class="fchip">6 questions</span></div>
+            <div class="countdown">
+              <div class="cdBar"><i style="width:14%;background:#ff8b8b"></i></div>
+              <div class="cdLabel"><span>OPENED 12 JUN</span><span>CLOSES 24 JUL</span></div>
+            </div>
+            <div class="featBtn">Generate responses</div>
+          </div>
+          <div class="card">
+            <div class="chead"><span class="ctitle">Finish setting up</span><span class="cmeta">1 of 3</span></div>
+            <div class="prog"><i style="width:33%"></i></div>
+            <div class="step done"><span class="tick done">&#10003;</span><span class="tx"><b>Create your account</b><span>Done</span></span></div>
+            <div class="step"><span class="tick todo">2</span><span class="tx"><b>Add your evidence</b><span>Policies, insurance, certificates</span></span><span class="go">Add</span></div>
+            <div class="step"><span class="tick todo">3</span><span class="tx"><b>Complete your company profile</b><span>Used in every bid</span></span><span class="go">Open</span></div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"/><path d="M6.5 9.8V20h11V9.8"/></svg><span>Home</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><span>Find</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h9"/></svg><span>Ongoing</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.7"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg><span>Profile</span></div>
+        </div>
+      </div>
+      <figcaption class="cap">
+        <b>One tender, made to matter</b>
+        <span>Real figures: three point one million, four days left, mental health. The bar underneath is nearly drained, so the deadline is something you see before you read it.</span>
+      </figcaption>
+    </figure>
+
+    <!-- 2. MID BID -->
+    <figure>
+      <span class="tag">While a bid is writing</span>
+      <div class="screen">
+        <div class="status"><b>9:41</b><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span></div>
+        <div class="hero"><div class="heroTop"><div><div class="greet">Good afternoon</div><div class="who">Joel</div></div><div class="av">JM</div></div></div>
+        <div class="body">
+          <div class="resume">
+            <div class="k">PICK UP WHERE YOU LEFT OFF</div>
+            <div class="t">Targeted Short Breaks</div>
+            <div class="m">Building documents, started 4 minutes ago</div>
+            <div class="bar"><i></i></div>
+          </div>
+          <div class="feat">
+            <div class="featTop"><span class="kicker">ALREADY STARTED</span><span class="urg">Closes in 4 days</span></div>
+            <div class="featVal">&pound;3.1m</div>
+            <div class="featValSub">Contract value</div>
+            <div class="featTitle">Targeted Short Breaks</div>
+            <div class="featOrg">Reading Borough Council</div>
+            <div class="countdown">
+              <div class="cdBar"><i style="width:14%;background:#ff8b8b"></i></div>
+              <div class="cdLabel"><span>OPENED 12 JUN</span><span>CLOSES 24 JUL</span></div>
+            </div>
+            <div class="featBtn quiet">See progress</div>
+          </div>
+          <div class="track">
+            <div class="tk"><b>3</b><span>BIDS THIS YEAR</span></div>
+            <div class="tk"><b>2</b><span>COMPLETED</span></div>
+            <div class="tk"><b>12h</b><span>SAVED, EST.</span></div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"/><path d="M6.5 9.8V20h11V9.8"/></svg><span>Home</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><span>Find</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h9"/></svg><span>Ongoing</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.7"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg><span>Profile</span></div>
+        </div>
+      </div>
+      <figcaption class="cap">
+        <b>The featured card knows</b>
+        <span>Once a bid is running the button stops saying generate and starts saying see progress, so the same tender cannot be paid for twice. Setup is done, so that card has gone.</span>
+      </figcaption>
+    </figure>
+
+    <!-- 3. WITH VOLUME -->
+    <figure>
+      <span class="tag">Once the importer fills up</span>
+      <div class="screen">
+        <div class="status"><b>9:41</b><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span></div>
+        <div class="hero"><div class="heroTop"><div><div class="greet">Good morning</div><div class="who">Joel</div></div><div class="av">JM</div></div></div>
+        <div class="body">
+          <div class="feat">
+            <div class="featTop"><span class="kicker">OPEN NOW</span><span class="urg calm">Closes in 19 days</span></div>
+            <div class="featVal">&pound;4.8m</div>
+            <div class="featValSub">Contract value</div>
+            <div class="featTitle">Supported Living Framework, Lot 2</div>
+            <div class="featOrg">Leeds City Council</div>
+            <div class="featChips"><span class="fchip">Supported living</span><span class="fchip">8 questions</span></div>
+            <div class="countdown">
+              <div class="cdBar"><i style="width:62%;background:var(--cyan)"></i></div>
+              <div class="cdLabel"><span>OPENED 2 JUL</span><span>CLOSES 8 AUG</span></div>
+            </div>
+            <div class="featBtn">Generate responses</div>
+          </div>
+          <div class="dots"><i class="on"></i><i></i><i></i></div>
+          <div class="card">
+            <div class="chead"><span class="ctitle">Closing this week</span><span class="cmeta">See all</span></div>
+            <div class="row first"><div class="tx"><b>Targeted Short Breaks</b><span>Reading Borough Council</span></div><span class="pill red">4 days</span></div>
+            <div class="row"><div class="tx"><b>Extra Care Housing Support</b><span>Birmingham City Council</span></div><span class="pill amb">6 days</span></div>
+          </div>
+          <div class="track">
+            <div class="tk"><b>9</b><span>BIDS THIS YEAR</span></div>
+            <div class="tk"><b>7</b><span>COMPLETED</span></div>
+            <div class="tk"><b>42h</b><span>SAVED, EST.</span></div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"/><path d="M6.5 9.8V20h11V9.8"/></svg><span>Home</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><span>Find</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h9"/></svg><span>Ongoing</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.7"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg><span>Profile</span></div>
+        </div>
+      </div>
+      <figcaption class="cap">
+        <b>It grows into volume</b>
+        <span>The featured card becomes swipeable, three dots underneath. Closing this week returns as a short list, because now there is genuinely a list to show.</span>
+      </figcaption>
+    </figure>
+
+    <!-- 4. NOTHING OPEN -->
+    <figure>
+      <span class="tag q">When nothing is open</span>
+      <div class="screen">
+        <div class="status"><b>9:41</b><span class="bars"><i style="height:4px"></i><i style="height:6px"></i><i style="height:8px"></i><i style="height:10px"></i></span></div>
+        <div class="hero"><div class="heroTop"><div><div class="greet">Good evening</div><div class="who">Joel</div></div><div class="av">JM</div></div></div>
+        <div class="body">
+          <div class="none">
+            <div class="noneIc">
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>
+            </div>
+            <b>Nothing open right now</b>
+            <span>We check for new care contracts every day. You will get an alert the moment one lands.</span>
+            <div class="noneBtn">See recently closed</div>
+          </div>
+          <div class="track">
+            <div class="tk"><b>9</b><span>BIDS THIS YEAR</span></div>
+            <div class="tk"><b>7</b><span>COMPLETED</span></div>
+            <div class="tk"><b>42h</b><span>SAVED, EST.</span></div>
+          </div>
+        </div>
+        <div class="tabs">
+          <div class="tab on"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"/><path d="M6.5 9.8V20h11V9.8"/></svg><span>Home</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg><span>Find</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h9"/></svg><span>Ongoing</span></div>
+          <div class="tab"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.7"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg><span>Profile</span></div>
+        </div>
+      </div>
+      <figcaption class="cap">
+        <b>Even empty is designed</b>
+        <span>Rather than a blank screen, it says what is happening and what will happen next. Their track record stays, so the app still shows them something of theirs.</span>
+      </figcaption>
+    </figure>
+
+  </div>
+
+  <section class="note">
+    <h3>What makes this different from the last attempt</h3>
+    <ul>
+      <li><b>Last time the screen laid things out in rows and hid them when empty.</b> With one tender and no documents, almost everything hid. That is how you got a bare screen.</li>
+      <li><b>This time the screen always has a subject.</b> A tender if there is one, a setup list if there is not, a track record either way. There is no arrangement of your current data that produces a blank page.</li>
+      <li><b>The countdown bar is the piece of craft.</b> It costs nothing, uses dates we already hold, and turns a deadline into something felt rather than read.</li>
+      <li><b>Finish setting up earns its place.</b> Your vault is empty and there is no company profile row yet, so today it would show one of three done. It disappears for good once all three are ticked.</li>
+    </ul>
+  </section>
+
+</div>

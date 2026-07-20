@@ -6,19 +6,18 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { c } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
+import FeaturedTender from '../components/FeaturedTender';
+import SetupChecklist from '../components/SetupChecklist';
+import { IconFind } from '../icons';
 import { useAuth } from '../auth';
 import {
-  fetchTenders, fetchOngoing, fetchVaultDocs, jobState, agoLabel,
-  daysUntil, docDaysLeft, docLabelOf, parseVaultDate,
+  fetchTenders, fetchOngoing, fetchVaultDocs, fetchCompanyProfile,
+  jobState, agoLabel, daysUntil, pickFeatured,
 } from '../api';
 
 // Anything closing inside a week is worth flagging: too little time to write a
 // bid comfortably, still enough to be worth trying.
 const SOON_DAYS = 7;
-
-// Matches the vault expiry reminder emails, which warn well ahead so there is
-// time to actually renew a certificate.
-const EXPIRY_WARN_DAYS = 90;
 
 // Deliberately conservative, and always shown as an estimate. Writing a full
 // tender response set by hand is a day or more of someone's time; claiming a
@@ -51,10 +50,9 @@ function initialsOf(user) {
 }
 
 /**
- * The landing screen. Greets the member, says what is waiting, and offers to
- * pick up anything already being written, before showing a few tenders.
- *
- * Every number here is counted from data we already load. Nothing is invented.
+ * The landing screen. There is always a subject: a tender if one is open, a
+ * setup list if the account is bare, a track record either way. No arrangement
+ * of the data produces a blank page.
  */
 export default function HomeScreen({ navigation }) {
   const { session } = useAuth();
@@ -63,21 +61,24 @@ export default function HomeScreen({ navigation }) {
   const [tenders, setTenders] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [docs, setDocs] = useState([]);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
 
   const load = useCallback(async (isPull) => {
     if (isPull) setRefreshing(true);
-    // The three feeds are independent, so one failing should not blank the others.
-    const [tRes, jRes, dRes] = await Promise.allSettled([
+    // Independent feeds, so one failing should not blank the others.
+    const [tRes, jRes, dRes, pRes] = await Promise.allSettled([
       fetchTenders(),
       fetchOngoing(user.email),
       fetchVaultDocs(user.id),
+      fetchCompanyProfile(user.id),
     ]);
     setTenders(tRes.status === 'fulfilled' ? tRes.value : []);
     setJobs(jRes.status === 'fulfilled' ? jRes.value : []);
     setDocs(dRes.status === 'fulfilled' ? dRes.value : []);
+    setProfile(pRes.status === 'fulfilled' ? pRes.value : null);
     setError(tRes.status === 'rejected' ? 'Could not load tenders. Pull down to try again.' : '');
     setLoading(false);
     setRefreshing(false);
@@ -85,35 +86,56 @@ export default function HomeScreen({ navigation }) {
 
   useFocusEffect(useCallback(() => { load(false); }, [load]));
 
+  const featured = pickFeatured(tenders);
+  const hero = featured[0];
+
+  // What this member has already done with the featured tender, so it never
+  // offers to write a bid that exists.
+  function stateForTender(tenderId) {
+    const mine = jobs.filter((j) => j.tender_id === tenderId);
+    if (!mine.length) return null;
+    return jobState(mine[0]);
+  }
+
+  const running = jobs.filter((j) => ['running', 'queued'].includes(jobState(j)));
+
+  // Closing this week, excluding whatever is already the hero.
   const closingSoon = tenders
     .filter((t) => {
+      if (hero && t.id === hero.id) return false;
       const d = daysUntil(t.deadline);
       return d !== null && d >= 0 && d <= SOON_DAYS;
     })
     .sort((a, b) => daysUntil(a.deadline) - daysUntil(b.deadline));
 
-  const running = jobs.filter((j) => {
-    const st = jobState(j);
-    return st === 'running' || st === 'queued';
-  });
-
-  // Anything already expired or inside the warning window, soonest first.
-  const expiring = docs
-    .filter((d) => {
-      const left = docDaysLeft(d);
-      return left !== null && left <= EXPIRY_WARN_DAYS;
-    })
-    .sort((a, b) => docDaysLeft(a) - docDaysLeft(b));
-  const inDate = docs.length - expiring.length;
-
   const thisYear = new Date().getFullYear();
   const bidsThisYear = jobs.filter((j) => new Date(j.created_at).getFullYear() === thisYear).length;
   const completed = jobs.filter((j) => jobState(j) === 'ready').length;
 
+  function openHero() {
+    if (hero) navigation.navigate('TenderDetail', { tender: hero });
+  }
+
+  function heroAction() {
+    if (!hero) return;
+    const st = stateForTender(hero.id);
+    if (st === 'running' || st === 'queued') {
+      navigation.getParent()?.navigate('Ongoing');
+      return;
+    }
+    if (st === 'ready') {
+      navigation.navigate('BidReady', { tender: hero });
+      return;
+    }
+    // Same step the tender screen's own button takes, one tap earlier.
+    navigation.navigate('TenderDetail', { tender: hero });
+  }
+
   if (loading) {
     return (
-      <View style={[s.wrap, s.centre]}>
-        <ActivityIndicator color={c.teal} />
+      <View style={s.wrap}>
+        <ScreenHeader subtitle={greeting()} title={firstNameOf(user)} />
+        <View style={s.centre}><ActivityIndicator color={c.teal} /></View>
       </View>
     );
   }
@@ -139,22 +161,7 @@ export default function HomeScreen({ navigation }) {
               <Text style={s.avatarText}>{initialsOf(user)}</Text>
             </TouchableOpacity>
           }
-        >
-          <View style={s.stats}>
-            <View style={s.stat}>
-              <Text style={s.statNum}>{tenders.length}</Text>
-              <Text style={s.statLabel}>OPEN NOW</Text>
-            </View>
-            <View style={s.stat}>
-              <Text style={[s.statNum, closingSoon.length > 0 && { color: c.cyan }]}>{closingSoon.length}</Text>
-              <Text style={s.statLabel}>CLOSING SOON</Text>
-            </View>
-            <View style={s.stat}>
-              <Text style={s.statNum}>{running.length}</Text>
-              <Text style={s.statLabel}>BID WRITING</Text>
-            </View>
-          </View>
-        </ScreenHeader>
+        />
 
         <View style={s.body}>
           {running.length > 0 && (
@@ -172,8 +179,30 @@ export default function HomeScreen({ navigation }) {
             </TouchableOpacity>
           )}
 
-          {/* Closing this week. Deadline pressure, not browsing: Find is where
-              you browse. Hidden entirely when nothing is close. */}
+          {hero ? (
+            <FeaturedTender
+              tender={hero}
+              state={stateForTender(hero.id)}
+              onPress={heroAction}
+              onOpen={openHero}
+            />
+          ) : (
+            <View style={s.none}>
+              <View style={s.noneIcon}><IconFind size={21} color={c.muted2} /></View>
+              <Text style={s.noneTitle}>{error ? 'Could not load' : 'Nothing open right now'}</Text>
+              <Text style={s.noneText}>
+                {error || 'We check for new care contracts every day. You will hear from us the moment one lands.'}
+              </Text>
+            </View>
+          )}
+
+          <SetupChecklist
+            hasDocs={docs.length > 0}
+            hasProfile={!!profile}
+            onAddEvidence={() => navigation.getParent()?.navigate('Profile', { screen: 'Evidence' })}
+            onOpenProfile={() => navigation.getParent()?.navigate('Profile')}
+          />
+
           {closingSoon.length > 0 && (
             <View style={s.card}>
               <View style={s.cardHead}>
@@ -206,57 +235,6 @@ export default function HomeScreen({ navigation }) {
             </View>
           )}
 
-          {/* Evidence check. Real documents from the same vault as the website. */}
-          {docs.length > 0 && (
-            <View style={s.card}>
-              <View style={s.cardHead}>
-                <Text style={s.cardHeadTitle}>Evidence check</Text>
-                <TouchableOpacity
-                  onPress={() => navigation.getParent()?.navigate('Profile', { screen: 'Evidence' })}
-                  activeOpacity={0.7}
-                >
-                  <Text style={s.cardHeadLink}>Open</Text>
-                </TouchableOpacity>
-              </View>
-
-              {expiring.slice(0, 2).map((d, i) => {
-                const left = docDaysLeft(d);
-                const gone = left !== null && left < 0;
-                return (
-                  <View key={String(d.id)} style={[s.row, i === 0 && s.rowFirst]}>
-                    <View style={s.rowText}>
-                      <Text style={s.rowTitle}>{docLabelOf(d)}</Text>
-                      <Text style={s.rowSub}>
-                        {gone ? 'Expired' : 'Expires ' + parseVaultDate(d.expiry_date || d.review_date)
-                          .toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
-                      </Text>
-                    </View>
-                    <View style={[s.pill, gone || left <= 30 ? s.pillRed : s.pillAmber]}>
-                      <Text style={[s.pillText, gone || left <= 30 ? s.pillRedText : s.pillAmberText]}>
-                        {gone ? 'Expired' : left + ' days'}
-                      </Text>
-                    </View>
-                  </View>
-                );
-              })}
-
-              {inDate > 0 && (
-                <View style={[s.row, expiring.length === 0 && s.rowFirst]}>
-                  <View style={s.rowText}>
-                    <Text style={s.rowTitle}>
-                      {inDate} {inDate === 1 ? 'document' : 'documents'}
-                    </Text>
-                    <Text style={s.rowSub}>Nothing expiring soon</Text>
-                  </View>
-                  <View style={[s.pill, s.pillGood]}>
-                    <Text style={[s.pillText, s.pillGoodText]}>Ready</Text>
-                  </View>
-                </View>
-              )}
-            </View>
-          )}
-
-          {/* Your track record, counted from bids already recorded. */}
           {jobs.length > 0 && (
             <View style={s.track}>
               <View style={s.trackCell}>
@@ -273,8 +251,6 @@ export default function HomeScreen({ navigation }) {
               </View>
             </View>
           )}
-
-          {!!error && <Text style={s.error}>{error}</Text>}
         </View>
       </ScrollView>
     </View>
@@ -283,7 +259,7 @@ export default function HomeScreen({ navigation }) {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
-  centre: { alignItems: 'center', justifyContent: 'center' },
+  centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
   avatar: {
     width: 36, height: 36, borderRadius: 18, backgroundColor: 'rgba(255,255,255,0.11)',
@@ -291,22 +267,28 @@ const s = StyleSheet.create({
   },
   avatarText: { fontSize: 12.5, fontWeight: '800', color: c.cyan },
 
-  stats: { flexDirection: 'row', gap: 8, marginTop: 16 },
-  stat: { flex: 1, backgroundColor: 'rgba(255,255,255,0.07)', borderRadius: 12, paddingVertical: 10, paddingHorizontal: 11 },
-  statNum: { fontSize: 19, fontWeight: '800', color: '#fff', lineHeight: 22 },
-  statLabel: { fontSize: 9, fontWeight: '700', letterSpacing: 0.5, color: '#8fa7b8', marginTop: 3 },
-
-  body: { paddingHorizontal: 14, paddingTop: 14, gap: 10 },
+  body: { paddingHorizontal: 14, paddingTop: 14, gap: 11 },
 
   resume: {
     backgroundColor: c.white, borderWidth: 1, borderColor: c.line,
-    borderLeftWidth: 3, borderLeftColor: c.cyan, borderRadius: 13, padding: 12, gap: 5,
+    borderLeftWidth: 3, borderLeftColor: c.cyan, borderRadius: 13, padding: 12, gap: 4,
   },
   resumeKey: { fontSize: 9, fontWeight: '800', letterSpacing: 0.8, color: c.teal },
   resumeTitle: { fontSize: 13.5, fontWeight: '700', color: c.navy, lineHeight: 18 },
   resumeMeta: { fontSize: 11, color: c.muted2 },
 
-  card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 13, padding: 13 },
+  none: {
+    backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderStyle: 'dashed',
+    borderRadius: 16, paddingVertical: 30, paddingHorizontal: 22, alignItems: 'center',
+  },
+  noneIcon: {
+    width: 48, height: 48, borderRadius: 24, backgroundColor: c.bg,
+    alignItems: 'center', justifyContent: 'center', marginBottom: 13,
+  },
+  noneTitle: { fontSize: 15, fontWeight: '800', color: c.navy },
+  noneText: { fontSize: 12.5, color: c.muted, textAlign: 'center', marginTop: 7, lineHeight: 19 },
+
+  card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 14 },
   cardHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10 },
   cardHeadTitle: { fontSize: 13.5, fontWeight: '800', color: c.navy, letterSpacing: -0.15 },
   cardHeadLink: { fontSize: 12, fontWeight: '700', color: c.teal },
@@ -321,7 +303,6 @@ const s = StyleSheet.create({
   pillText: { fontSize: 10, fontWeight: '800', letterSpacing: 0.2 },
   pillRed: { backgroundColor: '#fdeaea' }, pillRedText: { color: '#b4232a' },
   pillAmber: { backgroundColor: '#fdf3e2' }, pillAmberText: { color: '#b7791f' },
-  pillGood: { backgroundColor: c.goodBg }, pillGoodText: { color: c.good },
 
   track: { flexDirection: 'row', gap: 8 },
   trackCell: {
@@ -330,6 +311,4 @@ const s = StyleSheet.create({
   },
   trackNum: { fontSize: 19, fontWeight: '800', color: c.navy, lineHeight: 22 },
   trackLabel: { fontSize: 8.5, fontWeight: '700', letterSpacing: 0.4, color: c.muted2, marginTop: 4 },
-
-  error: { fontSize: 13, color: c.muted, lineHeight: 20, paddingVertical: 14 },
 });

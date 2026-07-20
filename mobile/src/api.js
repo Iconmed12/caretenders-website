@@ -88,6 +88,61 @@ export function jobState(job) {
   return 'running';
 }
 
+// ── featured tender ──
+
+/** "£3.1m" rather than "£3,100,000", for the big figure on the home card. */
+export function valueCompact(t) {
+  const raw = t.contract_value != null ? t.contract_value : t.value;
+  const n = Number(String(raw == null ? '' : raw).replace(/[^0-9.]/g, ''));
+  if (!n || isNaN(n)) return '';
+  if (n >= 1000000) return '£' + (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'm';
+  if (n >= 1000) return '£' + Math.round(n / 1000) + 'k';
+  return '£' + n.toLocaleString('en-GB');
+}
+
+/** When the tender went live. Falls back to when we first saw it. */
+export function openedDate(t) {
+  const d = new Date(t.published_date || t.created_at);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * How much of the bidding window has gone, 0 to 1, for the countdown bar.
+ * Returns null when we cannot work out both ends honestly.
+ */
+export function deadlineProgress(t) {
+  const start = openedDate(t);
+  const end = t.deadline ? new Date(t.deadline) : null;
+  if (!start || !end || isNaN(end.getTime())) return null;
+  const span = end.getTime() - start.getTime();
+  if (span <= 0) return null;
+  const gone = Date.now() - start.getTime();
+  return Math.min(1, Math.max(0, gone / span));
+}
+
+/** The tender to feature: the biggest one open. */
+export function pickFeatured(tenders) {
+  const withValue = tenders.slice().sort((a, b) => {
+    const av = Number(String(a.contract_value != null ? a.contract_value : a.value || '').replace(/[^0-9.]/g, '')) || 0;
+    const bv = Number(String(b.contract_value != null ? b.contract_value : b.value || '').replace(/[^0-9.]/g, '')) || 0;
+    return bv - av;
+  });
+  return withValue.slice(0, 3);
+}
+
+// ── company profile ──
+// Used by the setup checklist, and by the writer to fill in company details.
+export async function fetchCompanyProfile(userId) {
+  if (!userId) return null;
+  const { data, error } = await supabase
+    .from('company_profiles')
+    .select('user_id,company_name')
+    .eq('user_id', userId)
+    .limit(1);
+  if (error) return null;
+  return (data && data[0]) || null;
+}
+
 // ── evidence vault ──
 // The same documents the website's vault holds, per member.
 
