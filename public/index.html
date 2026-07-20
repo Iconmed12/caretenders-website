@@ -19,6 +19,8 @@
   --muted:#5b6b78; --muted2:#8ba0ad;
   --line:#e5eef2; --line2:#eef4f7;
   --bg:#ffffff; --bg2:#f4f8fa; --bg3:#eef6f9;
+  /* Section tint: alternates with white so each band reads as its own section */
+  --tint:#e8f1f6;
   --good:#12a06b; --amber:#e8912b;
   --f-head:"Space Grotesk","Segoe UI",system-ui,sans-serif;
   --f-body:"Inter","Segoe UI",system-ui,sans-serif;
@@ -284,7 +286,7 @@ nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-fi
 .res-note{text-align:center;color:#7d94a2;font-size:12px;margin-top:22px}
 
 /* ── STORY ── */
-.story{background:var(--bg2)}
+.story{background:#fff}
 .story-card{max-width:900px;margin:0 auto;background:#fff;border:1px solid var(--line);border-radius:22px;padding:44px;box-shadow:var(--sh);text-align:center}
 .story-quote{font-family:var(--f-head);font-weight:500;font-size:clamp(20px,2.6vw,27px);line-height:1.4;color:var(--navy)}
 .story-mark{font-family:var(--f-head);font-size:56px;color:var(--cyan);line-height:.6;height:26px}
@@ -567,7 +569,7 @@ footer ul a:hover{color:var(--cyan)}
 </div></section>
 
 <!-- DEVICE SYNC -->
-<section class="sec" id="features" style="background:var(--bg2)"><div class="wrap split">
+<section class="sec" id="features" style="background:var(--tint)"><div class="wrap split">
   <div>
     <span class="eyebrow"><span class="dot"></span> Desktop and mobile</span>
     <h2 class="h2" style="margin-top:16px">Start at your desk. Keep moving on your phone.</h2>
@@ -597,7 +599,7 @@ footer ul a:hover{color:var(--cyan)}
 </div></section>
 
 <!-- BID PREPARATION -->
-<section class="sec" style="background:var(--bg2)"><div class="wrap">
+<section class="sec" style="background:var(--tint)"><div class="wrap">
   <div class="sec-head">
     <span class="eyebrow"><span class="dot"></span> Bid preparation</span>
     <h2 class="h2" style="margin-top:16px">Care-focused preparation without losing human judgement.</h2>
@@ -671,7 +673,7 @@ footer ul a:hover{color:var(--cyan)}
 </div></section>
 
 <!-- FAQ -->
-<section class="sec" id="faq" style="background:var(--bg2)"><div class="wrap">
+<section class="sec" id="faq" style="background:var(--tint)"><div class="wrap">
   <div class="sec-head">
     <span class="eyebrow"><span class="dot"></span> FAQ</span>
     <h2 class="h2" style="margin-top:16px">Care tender questions, answered</h2>
