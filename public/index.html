@@ -200,20 +200,28 @@ nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.9);backdrop-fi
 .mp-head .lg b{color:var(--teal-dk)}
 .mp-head .lg svg{width:14px;height:14px}
 .mp-head > svg{width:16px;height:16px;stroke:#8194a1;fill:none;stroke-width:1.8}
-.mp-title{font-family:var(--f-head);font-weight:700;font-size:16px;color:var(--navy);padding:8px 15px 8px}
-.mp-tabs{display:flex;gap:15px;padding:0 15px}
-.mp-tabs span{font-size:11px;font-weight:600;color:#9aabb5;padding-bottom:9px}
-.mp-tabs span.on{color:var(--teal-dk);box-shadow:inset 0 -2px 0 var(--teal-dk)}
-.mp-list{border-top:1px solid #eef4f7}
-.mp-row{display:flex;align-items:center;gap:10px;padding:11px 15px;border-bottom:1px solid #f2f6f8}
-.mp-row .ic{width:30px;height:30px;border-radius:8px;background:#e7f6f9;color:var(--teal-dk);display:grid;place-items:center;flex:none}
-.mp-row .ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.7}
-.mp-row .b{flex:1;min-width:0}
-.mp-row .b b{display:block;font-size:11px;color:var(--navy);line-height:1.25}
-.mp-row .b span{font-size:9.5px;color:#9aabb5}
-.mp-rowmeta{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex:none}
-.mp-rowmeta .date{font-size:8px;color:#9aabb5;white-space:nowrap}
-.mp-rowmeta .open{font-size:8.5px;font-weight:700;color:#0e9f6e;background:#e4f7ec;padding:3px 8px;border-radius:6px}
+.mp-tender{padding:10px 15px 11px;border-top:1px solid #eef4f7;border-bottom:1px solid #eef4f7}
+.mp-t-name{font-family:var(--f-head);font-weight:700;font-size:14px;color:var(--navy);line-height:1.25}
+.mp-t-org{font-size:9.5px;color:#9aabb5;margin-top:4px}
+.mp-cana{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 15px 8px}
+.mp-cana b{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;color:var(--teal-dk);background:#e7f6f9;padding:5px 10px;border-radius:999px}
+.mp-cana b svg{width:11px;height:11px}
+.mp-cana span{font-size:9.5px;color:#9aabb5;font-weight:600}
+.mp-prog{padding:0 15px 11px}
+.mp-prog .lab{display:flex;justify-content:space-between;font-size:9.5px;color:#7d8e99;font-weight:600;margin-bottom:5px}
+.mp-prog .bar{height:5px;background:#eef4f7;border-radius:9px;overflow:hidden}
+.mp-prog .bar i{display:block;height:100%;width:67%;background:var(--cyan);border-radius:9px}
+.mp-qs{padding:0 15px}
+.mp-q{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #f4f8fa;font-size:10.5px;color:var(--ink)}
+.mp-q .dot{width:16px;height:16px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:8px;font-weight:800;background:#eef4f7;color:#9aabb5;line-height:1}
+.mp-q.done .dot{background:#e4f7ec;color:#0e9f6e}
+.mp-q.live .dot{background:#e7f6f9;color:var(--teal-dk)}
+.mp-q .nm{flex:1;min-width:0}
+.mp-q em{font-style:normal;font-size:8.5px;color:#9aabb5;font-weight:700;flex:none}
+.mp-q.done em{color:#0e9f6e}
+.mp-q.live em{color:var(--teal-dk)}
+.mp-gen{margin:13px 15px;background:var(--cyan);color:#04303a;border-radius:11px;padding:12px;text-align:center;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px}
+.mp-gen svg{width:14px;height:14px}
 .mp-nav{display:flex;justify-content:space-around;padding:9px 2px 12px;border-top:1px solid #eef4f7}
 .mp-nav span{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:7.5px;color:#aeb9c1;font-weight:600}
 .mp-nav span.on{color:var(--teal-dk)}
@@ -642,14 +650,25 @@ footer ul a:hover{color:var(--cyan)}
     <div class="mp-phone"><div class="mp-screen">
       <div class="mp-island"></div>
       <div class="mp-head"><span class="lg"><svg viewBox="0 0 64 64"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#0b1929" stroke-width="8" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00c9e0" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/></svg>Cana <b>Bids</b></span><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 01-3.4 0"/></svg></div>
-      <div class="mp-title">Opportunities</div>
-      <div class="mp-tabs"><span class="on">All</span><span>Tenders</span><span>PQs</span><span>Frameworks</span></div>
-      <div class="mp-list">
-        <div class="mp-row"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div><div class="b"><b>Domiciliary Care Framework</b><span>Birmingham City Council</span></div><div class="mp-rowmeta"><span class="open">Open</span></div></div>
-        <div class="mp-row"><div class="ic"><svg viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M9 13h6M9 17h4"/></svg></div><div class="b"><b>Supported Living Services</b><span>Leeds City Council</span></div><div class="mp-rowmeta"><span class="date">24 May 2025</span><span class="open">Open</span></div></div>
-        <div class="mp-row"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 11l8-6 8 6M6 10v9h12v-9"/></svg></div><div class="b"><b>Children's Residential Care</b><span>Essex County Council</span></div><div class="mp-rowmeta"><span class="date">30 May 2025</span><span class="open">Open</span></div></div>
-        <div class="mp-row"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0112 0"/><path d="M16 6a3 3 0 010 6"/></svg></div><div class="b"><b>Mental Health Community Support</b><span>Kent County Council</span></div><div class="mp-rowmeta"><span class="date">02 Jun 2025</span><span class="open">Open</span></div></div>
+      <div class="mp-tender">
+        <div class="mp-t-name">Domiciliary Care Framework</div>
+        <div class="mp-t-org">Birmingham City Council · closes in 5 days</div>
       </div>
+      <div class="mp-cana">
+        <b><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></svg>Write with Cana</b>
+        <span>6 questions</span>
+      </div>
+      <div class="mp-prog">
+        <div class="lab"><span>Responses drafted</span><span>4 of 6</span></div>
+        <div class="bar"><i></i></div>
+      </div>
+      <div class="mp-qs">
+        <div class="mp-q done"><span class="dot">✓</span><span class="nm">Person-centred care</span><em>Done</em></div>
+        <div class="mp-q done"><span class="dot">✓</span><span class="nm">Safeguarding</span><em>Done</em></div>
+        <div class="mp-q live"><span class="dot">•</span><span class="nm">Workforce &amp; retention</span><em>Writing…</em></div>
+        <div class="mp-q"><span class="dot">○</span><span class="nm">Mobilisation plan</span><em>Queued</em></div>
+      </div>
+      <div class="mp-gen">Generate responses <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
       <div class="mp-nav"><span><i></i>Home</span><span class="on"><i></i>Opportunities</span><span><i></i>Messages</span><span><i></i>Alerts</span><span><i></i>More</span></div>
     </div></div>
   </div>
