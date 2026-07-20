@@ -49,6 +49,15 @@ function jsFilesForHtml(htmlFile) {
   return files;
 }
 
+/** Code written directly into the page in <script> blocks with no src. */
+function inlineScripts(htmlFile) {
+  const html = fs.readFileSync(path.join(PUB, htmlFile), 'utf8');
+  const re = /<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/gi;
+  let out = '', m;
+  while ((m = re.exec(html))) out += m[1] + '\n';
+  return out;
+}
+
 function stripCommentsAndStrings(code) {
   // Crude but effective: remove strings, template literals, comments, regex literals
   return code
@@ -122,6 +131,10 @@ for (const page of pages) {
 
   let allCode = '';
   for (const s of scripts) allCode += fs.readFileSync(path.join(PUB, s), 'utf8') + '\n';
+  // Plenty of pages define their handlers in an inline <script> rather than an
+  // external file. Without these the checker reports functions as undefined
+  // that are sitting right there in the page.
+  allCode += inlineScripts(page) + '\n';
   const cleaned = stripCommentsAndStrings(allCode);
 
   const defined = definedNames(cleaned);
