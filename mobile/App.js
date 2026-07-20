@@ -16,7 +16,7 @@ import EvidenceScreen from './src/screens/EvidenceScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SignInScreen from './src/screens/SignInScreen';
 import { AuthProvider, useAuth } from './src/auth';
-import { IconHome, IconOngoing, IconProfile } from './src/icons';
+import { IconHome, IconFind, IconOngoing, IconProfile } from './src/icons';
 import { c } from './src/theme';
 
 const Stack = createNativeStackNavigator();
@@ -29,17 +29,34 @@ const stackOptions = {
   headerShadowVisible: false,
 };
 
-// Home is the landing screen. The full tender list sits one step behind it,
-// reached from See all, so opening the app greets you rather than dropping you
-// straight into a list.
+// A tender can be opened from Home or from Find, so both tabs carry the same
+// detail, writing and bid screens behind their own root.
+function tenderScreens() {
+  return (
+    <>
+      <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
+      <Stack.Screen name="Generating" component={GeneratingScreen} options={{ title: 'Writing', headerBackVisible: false }} />
+      <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
+    </>
+  );
+}
+
+// Home is the landing screen: greeting, what is waiting, a few tenders.
 function HomeStack() {
   return (
     <Stack.Navigator screenOptions={stackOptions}>
       <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
-      <Stack.Screen name="Opportunities" component={OpportunitiesScreen} options={{ title: 'Opportunities' }} />
-      <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
-      <Stack.Screen name="Generating" component={GeneratingScreen} options={{ title: 'Writing', headerBackVisible: false }} />
-      <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
+      {tenderScreens()}
+    </Stack.Navigator>
+  );
+}
+
+// Find keeps its own tab: the full list, with search and filters.
+function FindStack() {
+  return (
+    <Stack.Navigator screenOptions={stackOptions}>
+      <Stack.Screen name="Opportunities" component={OpportunitiesScreen} options={{ headerShown: false }} />
+      {tenderScreens()}
     </Stack.Navigator>
   );
 }
@@ -78,12 +95,17 @@ function SignedInApp() {
         }}
       >
         <Tabs.Screen
-          name="Find"
+          name="HomeTab"
           component={HomeStack}
           options={{
             title: 'Home',
             tabBarIcon: ({ color }) => <IconHome size={22} color={color} />,
           }}
+        />
+        <Tabs.Screen
+          name="Find"
+          component={FindStack}
+          options={{ tabBarIcon: ({ color }) => <IconFind size={22} color={color} /> }}
         />
         <Tabs.Screen
           name="Ongoing"

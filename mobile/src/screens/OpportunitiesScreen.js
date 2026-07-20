@@ -1,11 +1,14 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c, t } from '../theme';
 import { fetchTenders, closingLabel, valueLabel } from '../api';
 
 const FILTERS = ['All', 'Domiciliary care', 'Supported living', 'Residential', 'Nursing', 'Mental health'];
 
 export default function OpportunitiesScreen({ navigation }) {
+  // Root of its own tab with no header, so it clears the notch itself.
+  const insets = useSafeAreaInsets();
   const [all, setAll] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -52,9 +55,9 @@ export default function OpportunitiesScreen({ navigation }) {
   );
 
   return (
-    <View style={s.wrap}>
-      {/* Opens from Home with a header that names it, so no heading here and
-          the header already clears the notch. */}
+    <View style={[s.wrap, { paddingTop: insets.top + 10 }]}>
+      <Text style={s.h1}>Find tenders</Text>
+
       <TextInput
         style={s.search}
         placeholder="Search care tenders"

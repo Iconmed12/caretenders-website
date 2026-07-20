@@ -149,7 +149,9 @@ export default function HomeScreen({ navigation }) {
 
           <View style={s.secHead}>
             <Text style={s.secTitle}>Open opportunities</Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Opportunities')} activeOpacity={0.7}>
+            {/* Find has its own tab, so See all switches to it rather than
+                pushing a second copy of the list on top of Home. */}
+            <TouchableOpacity onPress={() => navigation.getParent()?.navigate('Find')} activeOpacity={0.7}>
               <Text style={s.secLink}>See all</Text>
             </TouchableOpacity>
           </View>
