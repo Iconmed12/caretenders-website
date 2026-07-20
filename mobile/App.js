@@ -1,10 +1,10 @@
 import React from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import OpportunitiesScreen from './src/screens/OpportunitiesScreen';
 import TenderDetailScreen from './src/screens/TenderDetailScreen';
@@ -15,21 +15,11 @@ import EvidenceScreen from './src/screens/EvidenceScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import SignInScreen from './src/screens/SignInScreen';
 import { AuthProvider, useAuth } from './src/auth';
-import { IconFind, IconOngoing, IconAlerts, IconProfile } from './src/icons';
+import { IconFind, IconOngoing, IconProfile } from './src/icons';
 import { c } from './src/theme';
 
 const Stack = createNativeStackNavigator();
 const Tabs = createBottomTabNavigator();
-
-function Placeholder({ title, note }) {
-  const insets = useSafeAreaInsets();
-  return (
-    <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', padding: 30, paddingTop: insets.top }}>
-      <Text style={{ fontSize: 18, fontWeight: '700', color: c.navy }}>{title}</Text>
-      <Text style={{ fontSize: 13, color: c.muted, textAlign: 'center', marginTop: 8 }}>{note}</Text>
-    </View>
-  );
-}
 
 const stackOptions = {
   headerStyle: { backgroundColor: c.white },
@@ -95,12 +85,9 @@ function SignedInApp() {
           component={OngoingScreen}
           options={{ tabBarIcon: ({ color }) => <IconOngoing size={22} color={color} /> }}
         />
-        <Tabs.Screen
-          name="Alerts"
-          options={{ tabBarIcon: ({ color }) => <IconAlerts size={22} color={color} /> }}
-        >
-          {() => <Placeholder title="Alerts" note="New care tenders matching your services will appear here." />}
-        </Tabs.Screen>
+        {/* Alerts is hidden until it does something. The screen is written and
+            the icon is drawn, so putting it back is a matter of restoring this
+            block once matching tenders actually push a notification. */}
         <Tabs.Screen
           name="Profile"
           component={ProfileStack}
