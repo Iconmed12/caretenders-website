@@ -48,9 +48,15 @@ export default function BidReadyScreen({ route, navigation }) {
       </ScrollView>
 
       <View style={s.footer}>
-        <TouchableOpacity style={s.cta} activeOpacity={0.85}>
-          <Text style={s.ctaText}>Email me the full bid</Text>
-        </TouchableOpacity>
+        {/* The server emails the documents itself as the last step of the run,
+            so there is nothing to tap. Say so rather than offering a button
+            that would only repeat what already happened. */}
+        <View style={s.sent}>
+          <Text style={s.sentTitle}>Sent to your inbox</Text>
+          <Text style={s.sentBody}>
+            The full bid and your Word documents have been emailed to you.
+          </Text>
+        </View>
         <TouchableOpacity
           style={s.ghost}
           activeOpacity={0.85}
@@ -73,6 +79,9 @@ const s = StyleSheet.create({
   ansTitle: { fontSize: 14, fontWeight: '700', color: c.navy },
   ansBody: { fontSize: 12.5, color: c.muted, lineHeight: 19, marginTop: 6 },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: c.line2 },
+  sent: { backgroundColor: c.goodBg, borderRadius: 13, padding: 14 },
+  sentTitle: { fontSize: 14, fontWeight: '700', color: c.good },
+  sentBody: { fontSize: 12.5, color: c.ink, marginTop: 4, lineHeight: 18 },
   cta: { backgroundColor: c.cyan, borderRadius: 13, paddingVertical: 16, alignItems: 'center' },
   ctaText: { fontSize: 15, fontWeight: '700', color: '#04303a' },
   ghost: { borderWidth: 1, borderColor: c.line, borderRadius: 13, paddingVertical: 15, alignItems: 'center', marginTop: 10 },

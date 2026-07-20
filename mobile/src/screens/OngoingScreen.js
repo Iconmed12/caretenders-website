@@ -7,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { c } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import { useAuth } from '../auth';
-import { fetchOngoing, jobState, agoLabel } from '../api';
+import { fetchOngoing, jobState, jobStageLabel, agoLabel } from '../api';
 
 /**
  * Everything this member has started, so a bid is never started twice and a
@@ -56,7 +56,7 @@ export default function OngoingScreen({ navigation }) {
   function renderItem({ item }) {
     const state = jobState(item);
     const chip = {
-      running: { text: 'Writing', style: s.chipRun, textStyle: s.chipRunText },
+      running: { text: jobStageLabel(item), style: s.chipRun, textStyle: s.chipRunText },
       queued: { text: 'Queued', style: s.chipWait, textStyle: s.chipWaitText },
       ready: { text: 'Ready', style: s.chipDone, textStyle: s.chipDoneText },
       failed: { text: 'Did not finish', style: s.chipFail, textStyle: s.chipFailText },

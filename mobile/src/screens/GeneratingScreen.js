@@ -109,7 +109,8 @@ export default function GeneratingScreen({ route, navigation }) {
           <Text style={s.ghostText}>Carry on in the background</Text>
         </TouchableOpacity>
         <Text style={s.footNote}>
-          You can close the app. We will keep writing and it will be waiting under Ongoing.
+          You can close the app. We will keep writing, email you the finished bid,
+          and it will be waiting under Ongoing.
         </Text>
       </View>
     </View>

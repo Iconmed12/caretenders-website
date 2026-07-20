@@ -87,6 +87,23 @@ export function jobState(job) {
   return 'running';
 }
 
+// The writer already records which stage it has reached, so a running bid can
+// say what it is actually doing without any change to the generation engine.
+const STAGES = {
+  pending: 'Queued',
+  queued: 'Queued',
+  processing: 'Starting',
+  generating_responses: 'Writing answers',
+  completing_sq: 'Completing your SQ',
+  building_documents: 'Building documents',
+  sending_email: 'Sending your email',
+};
+
+export function jobStageLabel(job) {
+  const st = String((job && job.status) || '').toLowerCase();
+  return STAGES[st] || 'Writing';
+}
+
 /** "2 hours ago", "yesterday", for the ongoing list. */
 export function agoLabel(dateStr) {
   if (!dateStr) return '';
