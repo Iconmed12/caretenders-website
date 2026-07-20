@@ -61,6 +61,7 @@
       <button class="nav-item" onclick="showPage('cana',this)"><i class="ti ti-sparkles"></i> Cana <span class="nav-badge" id="sbCana">0</span></button>
 <button class="nav-item" onclick="showPage('tenders-import',this)"><i class="ti ti-cloud-download"></i> Tender Import <span class="nav-badge" id="sbImport">0</span></button>
 <button class="nav-item" id="navKnowledge" onclick="showPage('knowledge',this)"><i class="ti ti-brain"></i> Knowledge Base</button>
+      <button class="nav-item" id="navUsers" style="display:none" onclick="showPage('users',this)"><i class="ti ti-user-circle"></i> Users <span class="nav-badge" id="sbUsers">0</span></button>
       <button class="nav-item" id="navStaff" style="display:none" onclick="showPage('staff',this)"><i class="ti ti-users"></i> Staff</button>
       <button class="nav-item" onclick="showPage('settings',this)"><i class="ti ti-settings"></i> Settings</button>
       <button class="nav-item" onclick="window.open('index.html','_blank')"><i class="ti ti-external-link"></i> View live site</button>
@@ -427,6 +428,28 @@
 
     <!-- SETTINGS PAGE -->
     <!-- STAFF PAGE (owner/manager only) -->
+    <div class="page" id="page-users">
+      <div style="max-width:1100px">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.25rem">
+          <div class="table-card" style="padding:16px"><div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-light)">Total users</div><div style="font-size:26px;font-weight:700;margin-top:4px" id="uCountTotal">-</div></div>
+          <div class="table-card" style="padding:16px"><div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-light)">Members</div><div style="font-size:26px;font-weight:700;margin-top:4px;color:#1a7a3f" id="uCountMembers">-</div></div>
+          <div class="table-card" style="padding:16px"><div style="font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-light)">Staff logins</div><div style="font-size:26px;font-weight:700;margin-top:4px" id="uCountStaff">-</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header" style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <h2>Users</h2>
+            <div style="display:flex;align-items:center;gap:12px">
+              <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-light)"><input type="checkbox" id="userHideStaff" onchange="filterUsers()" checked> Hide staff logins</label>
+              <input class="login-input" id="userSearch" oninput="filterUsers()" placeholder="Search name, email or company..." style="margin:0;width:280px">
+              <button style="font-size:12px;padding:6px 11px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-family:inherit" onclick="loadUsers()">Refresh</button>
+            </div>
+          </div>
+          <table><thead><tr><th>User</th><th>Membership</th><th>Joined</th><th>Last sign-in</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table>
+        </div>
+        <p style="font-size:12px;color:var(--text-light);margin-top:10px">Password resets are sent as an email link, so the customer sets their own new password. Nobody here ever sees it. Every reset is written to the admin audit log.</p>
+      </div>
+    </div>
+
     <div class="page" id="page-staff">
       <div style="max-width:900px">
         <div class="table-card" style="margin-bottom:1.25rem">
@@ -662,5 +685,6 @@
 <script src="/admin-delivery.js"></script>
 <script src="/admin-import.js"></script>
 <script src="/admin-staff.js"></script>
+<script src="/admin-users.js"></script>
 </body>
 </html>

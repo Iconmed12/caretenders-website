@@ -119,6 +119,8 @@ function applyRoleVisibility() {
   if (kb) kb.style.display = isOwner ? '' : 'none';
   var staff = document.getElementById('navStaff');
   if (staff) staff.style.display = isManagerUp ? '' : 'none';
+  var usersNav = document.getElementById('navUsers');
+  if (usersNav) usersNav.style.display = isManagerUp ? '' : 'none';
 }
 
 async function doLoginSupabase() {
@@ -222,7 +224,7 @@ function showPage(page, btn) {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   btn.classList.add('active');
-  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana', knowledge:'Knowledge Base', 'tenders-import':'Tender Import', staff:'Staff', settings:'Settings' };
+  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana', knowledge:'Knowledge Base', 'tenders-import':'Tender Import', staff:'Staff', users:'Users', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[page] || page;
   ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(function(id) {
     var el = document.getElementById(id); if(el) el.style.display = 'none';
@@ -233,6 +235,7 @@ function showPage(page, btn) {
   if (page === 'expired') { renderExpiredTable(); }
   if (page === 'knowledge') { loadKnowledgeBase(); }
   if (page === 'staff' && typeof loadStaff === 'function') { loadStaff(); }
+  if (page === 'users' && typeof loadUsers === 'function') { loadUsers(); }
   if (page === 'cana') { populateCanaTenderSelect(); }
 }
 
