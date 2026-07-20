@@ -1,6 +1,7 @@
 // Talks to the same Netlify functions and Supabase project as the website,
 // so the app shows the same live care tenders the site does.
 import Constants from 'expo-constants';
+import { supabase } from './auth';
 
 const extra = (Constants.expoConfig && Constants.expoConfig.extra) || {};
 export const API_BASE = extra.apiBase || 'https://caretenders-website.netlify.app';
@@ -85,6 +86,47 @@ export function jobState(job) {
   if (st === 'error' || st === 'failed') return 'failed';
   if (st === 'pending' || st === 'queued') return 'queued';
   return 'running';
+}
+
+// ── evidence vault ──
+// The same documents the website's vault holds, per member.
+
+/**
+ * The vault stores expiry as DD/MM/YYYY, which `new Date()` reads as American
+ * and gets wrong. Parse it the way check-vault-expiry.js does, and still cope
+ * if a row ever holds a plain ISO date.
+ */
+export function parseVaultDate(value) {
+  if (!value) return null;
+  const parts = String(value).split('/');
+  if (parts.length === 3) {
+    const d = new Date(Number(parts[2]), Number(parts[1]) - 1, Number(parts[0]));
+    return isNaN(d.getTime()) ? null : d;
+  }
+  const iso = new Date(value);
+  return isNaN(iso.getTime()) ? null : iso;
+}
+
+/** Days until a document expires. Null when it has no expiry at all. */
+export function docDaysLeft(doc) {
+  const d = parseVaultDate(doc && (doc.expiry_date || doc.review_date));
+  if (!d) return null;
+  return Math.ceil((d.getTime() - Date.now()) / 86400000);
+}
+
+export async function fetchVaultDocs(userId) {
+  if (!userId) return [];
+  const { data, error } = await supabase
+    .from('vault_documents')
+    .select('id,doc_type,doc_label,file_name,expiry_date,review_date,uploaded_at')
+    .eq('user_id', userId)
+    .order('uploaded_at', { ascending: false });
+  if (error) throw new Error('Could not load your documents');
+  return data || [];
+}
+
+export function docLabelOf(doc) {
+  return (doc && (doc.doc_label || doc.doc_type || doc.file_name)) || 'Document';
 }
 
 // The writer already records which stage it has reached, so a running bid can

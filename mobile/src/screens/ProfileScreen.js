@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Linking } from 'react-native';
 import { c } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import { supabase, useAuth } from '../auth';
@@ -25,6 +25,11 @@ function nameOf(email, meta) {
   const full = [first, last].filter(Boolean).join(' ');
   return full || email || '';
 }
+
+// Waiting on the new Calendly link. Until it lands this opens an email, which
+// still reaches a human. Drop the booking URL in here and it takes over.
+const BOOKING_URL = '';
+const HELP_EMAIL = 'hello@getcana.co.uk';
 
 export default function ProfileScreen({ navigation }) {
   const { session } = useAuth();
@@ -64,6 +69,14 @@ export default function ProfileScreen({ navigation }) {
 
     return () => { alive = false; };
   }, [user.email]);
+
+  function bookCall() {
+    const url = BOOKING_URL
+      || 'mailto:' + HELP_EMAIL + '?subject=' + encodeURIComponent('Can we book a call?');
+    Linking.openURL(url).catch(() => {
+      Alert.alert('Could not open', 'Please email ' + HELP_EMAIL + ' and we will get straight back to you.');
+    });
+  }
 
   function confirmSignOut() {
     Alert.alert('Sign out', 'You will need your password to get back in.', [
@@ -133,6 +146,16 @@ export default function ProfileScreen({ navigation }) {
         <IconChevron size={16} color={c.muted2} />
       </TouchableOpacity>
 
+      <View style={s.help}>
+        <Text style={s.helpTitle}>Not sure where to start?</Text>
+        <Text style={s.helpBody}>
+          Book fifteen minutes with a bid writer who knows the care sector.
+        </Text>
+        <TouchableOpacity style={s.helpBtn} activeOpacity={0.85} onPress={bookCall}>
+          <Text style={s.helpBtnText}>Book a call</Text>
+        </TouchableOpacity>
+      </View>
+
       <Text style={s.note}>
         Membership and billing are managed on getcana.co.uk
       </Text>
@@ -172,6 +195,11 @@ const s = StyleSheet.create({
   tapText: { flex: 1, gap: 2 },
   tapTitle: { fontSize: 14, fontWeight: '700', color: c.navy },
   tapSub: { fontSize: 11.5, color: c.muted2, lineHeight: 16 },
+  help: { backgroundColor: c.navy, borderRadius: 14, padding: 16, marginTop: 12 },
+  helpTitle: { fontSize: 14.5, fontWeight: '800', color: c.white },
+  helpBody: { fontSize: 12.5, color: '#8fa7b8', marginTop: 5, lineHeight: 18 },
+  helpBtn: { backgroundColor: c.cyan, borderRadius: 11, paddingVertical: 12, alignItems: 'center', marginTop: 13 },
+  helpBtnText: { fontSize: 13.5, fontWeight: '800', color: '#04303a' },
   note: { fontSize: 12.5, color: c.muted2, textAlign: 'center', marginTop: 18, lineHeight: 19 },
   signOut: {
     borderWidth: 1, borderColor: c.line, backgroundColor: c.white,
