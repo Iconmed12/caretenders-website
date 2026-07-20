@@ -87,6 +87,7 @@ body.ct .ct-assure{background:var(--ct-bg3);border-radius:12px;padding:14px;font
 body.ct .ct-assure svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:1.8;flex:none;margin-top:1px}
 body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px}
 </style>
+<link rel="stylesheet" href="/site-chrome.css">
 </head>
 <body class="ct">
 
@@ -297,7 +298,7 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
           <div class="bento-tile-desc">No waiting on anyone. Cana drafts, you give it your final read, you submit the same day. Expert review available on any tender, whenever you want it.</div>
           <div class="bento-pipeline">
             <div class="bento-stage">
-              <div class="bento-stage-icon">⚡</div>
+              <div class="bento-stage-icon"></div>
               <div class="bento-stage-label">Cana drafts</div>
               <div class="bento-stage-sub">Tailored to the tender</div>
             </div>
@@ -339,7 +340,7 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
             <li><span class="check">✓</span> Full submission ready in under 1 hour, with expert review whenever you want it</li>
           </ul>
           <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:2rem;">
-            <a href="https://caretenders-website.netlify.app" target="_blank" class="btn-primary">⚡ Try Cana now →</a>
+            <a href="https://caretenders-website.netlify.app" target="_blank" class="btn-primary">Try Cana now →</a>
             <a href="/case-studies.html" class="cana-link">See tenders won →</a>
           </div>
         </div>
@@ -362,7 +363,7 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
             </div>
           </div>
           <div class="how-footer">
-            <span style="font-size:1.1rem;">⚡</span>
+            <span style="font-size:1.1rem;"></span>
             <div>
               <div class="how-footer-title">Average turnaround: under 1 hour</div>
               <div class="how-footer-sub">Across all tender types and categories</div>
@@ -437,14 +438,6 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
           <span class="proof-num" data-count="38" data-suffix="+">0+</span>
           <span class="proof-label">Tenders submitted</span>
           <span class="proof-bar"><span class="proof-bar-fill" data-width="85"></span></span>
-        </div>
-      </div>
-      <div class="proof-quote-card">
-        <div class="proof-quote-mark">"</div>
-        <p class="proof-quote">We'd been losing tenders for two years. Not because our service wasn't good enough, but because we couldn't write the bids well enough. Cana changed that completely. We won our first contract within three weeks.</p>
-        <div class="proof-attr-row">
-          <div class="proof-attr">West Midlands · Domiciliary Care Framework · £1.2M contract value</div>
-          <div class="proof-won-pill">✓ Tender won</div>
         </div>
       </div>
       <a href="/case-studies.html" class="proof-cta">See the tenders won with Cana →</a>
@@ -584,11 +577,10 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
       <div style="position:relative;background:#fff;border:2px solid var(--teal);border-radius:14px;padding:1.4rem 1.5rem 1.25rem;margin-bottom:0;box-shadow:0 6px 24px rgba(0,201,224,0.12);">
         <div style="position:absolute;top:-11px;left:1.25rem;display:flex;gap:8px;">
           <span style="background:var(--teal);color:var(--navy);font-size:0.66rem;font-weight:800;letter-spacing:0.07em;padding:4px 12px;border-radius:999px;text-transform:uppercase;">Most popular</span>
-          <span style="background:var(--navy);color:#fff;font-size:0.66rem;font-weight:700;letter-spacing:0.07em;padding:4px 12px;border-radius:999px;text-transform:uppercase;">Written for you</span>
         </div>
         <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;margin:0.35rem 0 0.75rem;">
           <div>
-            <div style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:3px;">⚡ Write with Cana</div>
+            <div style="font-size:0.95rem;font-weight:700;color:var(--navy);margin-bottom:3px;">Write with Cana</div>
             <div style="font-size:0.78rem;color:var(--muted);line-height:1.55;">Cana writes your tender responses, tailored to this specific tender using your company information. You review and submit.</div>
           </div>
           <div style="background:rgba(0,201,224,0.1);border:1px solid rgba(0,201,224,0.25);border-radius:8px;padding:6px 12px;text-align:center;flex-shrink:0;">
@@ -605,7 +597,7 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
 
         <a id="modal-apply-btn" href="https://caretenders-website.netlify.app" target="_blank"
            style="display:flex;align-items:center;justify-content:space-between;background:var(--teal);color:var(--navy);border-radius:8px;padding:12px 16px;text-decoration:none;font-weight:700;font-size:0.88rem;">
-          <span>⚡ Write with Cana</span>
+          <span>Write with Cana</span>
           <span style="background:rgba(11,25,41,0.12);border-radius:5px;padding:2px 10px;font-size:0.8rem;">From £480</span>
         </a>
       </div>
@@ -615,35 +607,6 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
         <span style="font-size:0.78rem;color:#33475b;line-height:1.5;"><strong style="color:var(--navy);">Bidding regularly?</strong> Members bid unlimited tenders from £897 per 3-month term. Cana writes, you submit.</span>
         <span style="font-size:0.78rem;font-weight:700;color:var(--teal-dk);white-space:nowrap;">View membership →</span>
       </a>
-
-      <!-- LADDER CONNECTOR -->
-      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;margin:1rem 0;">
-        <div style="width:1.5px;height:14px;background:var(--border);"></div>
-        <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">Want the whole submission handled for you?</span>
-        <div style="width:1.5px;height:14px;background:var(--border);"></div>
-      </div>
-
-      <!-- RUNG 2: FULL BID SUPPORT (premium) -->
-      <div class="pricing-box">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-          <span style="background:rgba(255,255,255,0.12);color:#fff;font-size:0.64rem;font-weight:800;letter-spacing:0.08em;padding:3px 11px;border-radius:999px;text-transform:uppercase;">Premium</span>
-          <span style="background:rgba(0,201,224,0.15);color:var(--teal);font-size:0.64rem;font-weight:700;letter-spacing:0.08em;padding:3px 11px;border-radius:999px;text-transform:uppercase;">Done for you</span>
-        </div>
-        <div class="pricing-box-title">Full bid support: our consultants complete this tender for you</div>
-        <div class="pricing-items" id="modal-pricing-items"></div>
-        <hr class="pricing-divider">
-        <div class="pricing-total-row">
-          <span class="pricing-total-label">Total</span>
-          <span class="pricing-total-amount" id="modal-total-fee"></span>
-        </div>
-        <div class="pricing-note" id="modal-fee-note"></div>
-        <button id="modal-pay-btn" onclick="handlePayNow()"
-           style="display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.1rem;background:var(--teal);color:var(--navy);border-radius:10px;padding:13px 18px;font-weight:700;font-size:0.9rem;transition:background 0.2s;width:100%;border:none;cursor:pointer;">
-          <span id="modal-pay-label">💳 Pay for bid support</span>
-          <span id="modal-pay-amount" style="background:rgba(11,25,41,0.15);border-radius:6px;padding:3px 10px;font-size:0.85rem;white-space:nowrap;"></span>
-        </button>
-        <div style="text-align:center;font-size:0.72rem;color:rgba(255,255,255,0.3);margin-top:8px;">Secure payment via Stripe · Invoice provided on receipt</div>
-      </div>
 
       <!-- CTA -->
       <div class="modal-cta">
@@ -673,24 +636,30 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
 </div>
 
 <!-- FOOTER -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <p>Cana</p>
-      <span>Procurement Intelligence Consulting Solutions</span>
+<footer><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <span class="wm">Cana <b>Bids</b></span>
+      <p>Care tender discovery, preparation and bid management for ambitious UK care providers.</p>
     </div>
-    <div class="footer-contact">
-      <a href="tel:01268203010">01268 20 30 10</a><br>
-      <a href="mailto:hello@getcana.co.uk">hello@getcana.co.uk</a><br>
-      Unit A11 Harben House, Tickford Street<br>
-      Newport Pagnell, Milton Keynes MK16 9EY
+    <div>
+      <h5>Platform</h5>
+      <ul><li><a href="/tenders.html">Find care tenders</a></li><li><a href="/">Bid preparation</a></li><li><a href="/">Tender alerts</a></li><li><a href="/">Evidence library</a></li><li><a href="/plans.html">Pricing</a></li></ul>
+    </div>
+    <div>
+      <h5>Care services</h5>
+      <ul><li><a href="/tenders.html">Domiciliary care</a></li><li><a href="/tenders.html">Supported living</a></li><li><a href="/tenders.html">Residential care</a></li><li><a href="/tenders.html">Children's care</a></li><li><a href="/tenders.html">Mental health services</a></li><li><a href="/tenders.html">Complex care</a></li></ul>
+    </div>
+    <div>
+      <h5>Resources</h5>
+      <ul><li><a href="/case-studies.html">Case studies</a></li><li><a href="/plans.html">Membership</a></li><li><a href="mailto:hello@getcana.co.uk">Help centre</a></li></ul>
     </div>
   </div>
-  <div class="footer-bottom">
-    <span>© 2026 Cana. All rights reserved.</span>
-    <span></span>
+  <div class="foot-bottom">
+    <span>© 2026 Cana Bids. Care tender discovery, preparation and bid management.</span>
+    <span>hello@getcana.co.uk</span>
   </div>
-</footer>
+</div></footer>
 
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

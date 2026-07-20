@@ -729,7 +729,7 @@
     if (!window._isMember) return;
     var btn = document.getElementById('paywall-btn');
     if (btn) {
-      btn.textContent = '⚡ Generate now, included in your membership';
+      btn.textContent = 'Generate now, included in your membership';
       btn.onclick = memberStartFlow;
     }
     var amt = document.querySelector('.paywall-price-amount');

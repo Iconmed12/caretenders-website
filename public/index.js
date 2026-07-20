@@ -242,29 +242,34 @@
     window._currentStripeLink = t.stripe_link||'';
     const totalIncVat = subtotal ? subtotal : 0;
 
-    if(pricingItems.length){
-      pricingEl.innerHTML=pricingItems.map(p=>`
-        <div class="pricing-row">
-          <span class="pricing-label">${p.label||p.name||p.description||''}</span>
-          <span class="pricing-amount">${formatFee(Number(p.amount||p.price||p.value)||0)}</span>
-        </div>
-      `).join('');
-    } else if(subtotal){
-      pricingEl.innerHTML=`<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">${formatFee(subtotal)}</span></div>`;
-    } else {
-      pricingEl.innerHTML='<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">Contact us for pricing</span></div>';
+    // Full bid support was withdrawn, so these elements no longer exist on the
+    // page. Keep the writes guarded so the modal still opens cleanly.
+    if(pricingEl){
+      if(pricingItems.length){
+        pricingEl.innerHTML=pricingItems.map(p=>`
+          <div class="pricing-row">
+            <span class="pricing-label">${p.label||p.name||p.description||''}</span>
+            <span class="pricing-amount">${formatFee(Number(p.amount||p.price||p.value)||0)}</span>
+          </div>
+        `).join('');
+      } else if(subtotal){
+        pricingEl.innerHTML=`<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">${formatFee(subtotal)}</span></div>`;
+      } else {
+        pricingEl.innerHTML='<div class="pricing-row"><span class="pricing-label">Tender completion fee</span><span class="pricing-amount">Contact us for pricing</span></div>';
+      }
     }
 
-    // Total inc VAT  - never show POA
-    document.getElementById('modal-total-fee').textContent=totalIncVat?'£'+totalIncVat.toLocaleString('en-GB'):'Contact us for pricing';
-    document.getElementById('modal-fee-note').textContent=pricing.note||pricing.fee_note||t.fee_note||'Payable on engagement.';
+    var totalFeeEl=document.getElementById('modal-total-fee');
+    if(totalFeeEl) totalFeeEl.textContent=totalIncVat?'£'+totalIncVat.toLocaleString('en-GB'):'Contact us for pricing';
+    var feeNoteEl=document.getElementById('modal-fee-note');
+    if(feeNoteEl) feeNoteEl.textContent=pricing.note||pricing.fee_note||t.fee_note||'Payable on engagement.';
     // Store stripe link for Pay Now button
     window._currentStripeLink = t.stripe_link || '';
 
     // Cana button always shows the same regardless of submission link
     const applyBtn=document.getElementById('modal-apply-btn');
     applyBtn.href='/cana.html?tender=' + (t.id||'');
-    applyBtn.innerHTML='<div class="btn-cta-icon">⚡</div><div class="btn-cta-text"><span class="btn-cta-label">Write with Cana</span><span class="btn-cta-desc">Let our AI system draft your full tender response instantly</span></div><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    applyBtn.innerHTML='<div class="btn-cta-icon"></div><div class="btn-cta-text"><span class="btn-cta-label">Write with Cana</span><span class="btn-cta-desc">Let our AI system draft your full tender response instantly</span></div><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     applyBtn.className='btn-cta btn-cta--ai';
 
     // Source link  - shown on both public modal and admin
@@ -378,7 +383,7 @@
         .then(function(r){ return r.json(); })
         .then(function(m) {
           var memberPill = m && m.member
-            ? '<a href="/plans.html" style="display:inline-flex;align-items:center;gap:4px;background:var(--teal);color:var(--navy);font-size:0.7rem;font-weight:700;border-radius:999px;padding:3px 10px;text-decoration:none;margin-right:4px;">⚡ Member</a>'
+            ? '<a href="/plans.html" style="display:inline-flex;align-items:center;gap:4px;background:var(--teal);color:var(--navy);font-size:0.7rem;font-weight:700;border-radius:999px;padding:3px 10px;text-decoration:none;margin-right:4px;">Member</a>'
             : '';
           navAuth.innerHTML =
             memberPill +

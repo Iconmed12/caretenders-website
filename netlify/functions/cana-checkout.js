@@ -15,7 +15,7 @@ exports.handler = async (event) => {
     let chosenTier = tier || (wantsReview ? 'review' : 'none');
     if (['none','review','review_docs'].indexOf(chosenTier) === -1) chosenTier = 'none';
 
-    // Go-live add-on amounts (pence): review 30000, review_docs 100000.
+    // Go-live add-on amounts (pence): review 50000, review_docs 100000.
     // Base bid go-live 48000. TEST keeps everything at £1 per line item.
     const addonName = chosenTier === 'review_docs'
       ? 'Expert Review + document completion (SQ + required tender documents, excluding pricing)'
@@ -39,7 +39,7 @@ exports.handler = async (event) => {
     if (chosenTier !== 'none') {
       params.append('line_items[1][price_data][currency]', 'gbp');
       params.append('line_items[1][price_data][product_data][name]', addonName);
-      params.append('line_items[1][price_data][unit_amount]', '100'); // TEST £1; go-live review 30000 / review_docs 100000
+      params.append('line_items[1][price_data][unit_amount]', '100'); // TEST £1; go-live review 50000 / review_docs 100000
       params.append('line_items[1][quantity]', '1');
     }
 

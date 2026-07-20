@@ -45,7 +45,7 @@
   <div class="state active" id="state-form">
 
     <div class="tender-header" id="tender-header">
-      <div class="tender-header-eyebrow">⚡ Cana - Tender Writer</div>
+      <div class="tender-header-eyebrow">Cana - Tender Writer</div>
       <h1 id="tender-title">Loading tender...</h1>
       <div class="tender-header-meta">
         <span class="tender-meta-pill" id="tender-org"></span>
@@ -128,7 +128,7 @@
     </div>
 
     <button class="generate-btn" onclick="generateResponses()">
-      ⚡ Generate my tender responses
+      Generate my tender responses
     </button>
     <div style="text-align:center;font-size:0.78rem;color:var(--muted);margin-top:0.75rem;">Takes about 30 seconds · Preview is free · Pay to unlock the full bid</div>
 
@@ -137,7 +137,7 @@
   <!-- MEMBER DASHBOARD STATE -->
   <div class="state" id="state-member">
     <div class="tender-header" id="tender-header-member">
-      <div class="tender-header-eyebrow">⚡ Cana - Tender Writer</div>
+      <div class="tender-header-eyebrow">Cana - Tender Writer</div>
       <h1 id="tender-title-member">Loading tender...</h1>
       <div class="tender-header-meta">
         <span class="tender-meta-pill" id="tender-org-member"></span>
@@ -150,7 +150,7 @@
       <!-- Membership status card -->
       <div id="member-status-card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;background:linear-gradient(135deg,#0B1929,#11243A);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
         <div style="display:flex;align-items:center;gap:12px;">
-          <div style="background:rgba(0,201,224,0.15);border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;">⚡</div>
+          <div style="background:rgba(0,201,224,0.15);border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;"></div>
           <div>
             <div style="color:#fff;font-weight:700;font-size:0.95rem;" id="member-plan-label">Cana Membership</div>
             <div style="color:rgba(255,255,255,0.5);font-size:0.76rem;" id="member-renews-label">Unlimited bidding active</div>
@@ -179,17 +179,17 @@
         </label>
         <label style="display:flex;align-items:flex-start;gap:10px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
           <input type="radio" name="member-tier" value="review" onchange="setCanaTier('review')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#0B1929;">
-          <span style="flex:1;font-size:0.82rem;color:#0B1929;line-height:1.5;"><strong>Add Expert Review</strong> <span style="float:right;">+ £300</span><br>A specialist checks and sharpens your responses against the scoring criteria. Within 48 hours.</span>
+          <span style="flex:1;font-size:0.82rem;color:#0B1929;line-height:1.5;"><strong>Add Silver Add-on</strong> <span style="float:right;">+ £500</span><br>A specialist checks and sharpens your responses against the scoring criteria. Within 48 hours.</span>
         </label>
         <label style="display:flex;align-items:flex-start;gap:10px;background:#fffbeb;border:1.5px solid #fde68a;border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
           <input type="radio" name="member-tier" value="review_docs" onchange="setCanaTier('review_docs')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#0B1929;">
-          <span style="flex:1;font-size:0.82rem;color:#0B1929;line-height:1.5;"><strong>Expert Review + document completion</strong> <span style="float:right;">+ £1,000</span><br>We review your responses and complete your SQ and all other required tender documents (excluding pricing, which stays with you).</span>
+          <span style="flex:1;font-size:0.82rem;color:#0B1929;line-height:1.5;"><strong>Silver Add-on + document completion</strong> <span style="float:right;">+ £1,000</span><br>We review your responses and complete your SQ and all other required tender documents (excluding pricing, which stays with you).</span>
         </label>
       </div>
 
       <!-- Generate button -->
       <button class="generate-btn" onclick="memberGenerate()" id="member-generate-btn">
-        ⚡ Generate my tender responses
+        Generate my tender responses
       </button>
       <div style="text-align:center;font-size:0.78rem;color:var(--muted);margin-top:0.75rem;">Included in your membership, no payment needed</div>
     </div>
@@ -361,11 +361,11 @@
         </label>
         <label class="cana-tier-opt" style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
           <input type="radio" name="cana-tier" value="review" onchange="setCanaTier('review')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#00C9E0;">
-          <span style="flex:1;font-size:0.82rem;color:rgba(255,255,255,0.9);line-height:1.5;"><strong style="color:#fff;">Add Expert Review</strong> <span style="float:right;color:#fff;">+ £300</span><br>A specialist checks and sharpens your responses against the scoring criteria. Within 48 hours.</span>
+          <span style="flex:1;font-size:0.82rem;color:rgba(255,255,255,0.9);line-height:1.5;"><strong style="color:#fff;">Add Silver Add-on</strong> <span style="float:right;color:#fff;">+ £500</span><br>A specialist checks and sharpens your responses against the scoring criteria. Within 48 hours.</span>
         </label>
         <label class="cana-tier-opt" style="display:flex;align-items:flex-start;gap:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.18);border-radius:10px;padding:0.8rem 1rem;cursor:pointer;">
           <input type="radio" name="cana-tier" value="review_docs" onchange="setCanaTier('review_docs')" style="margin-top:3px;width:15px;height:15px;flex-shrink:0;accent-color:#00C9E0;">
-          <span style="flex:1;font-size:0.82rem;color:rgba(255,255,255,0.9);line-height:1.5;"><strong style="color:#fff;">Expert Review + document completion</strong> <span style="float:right;color:#fff;">+ £1,000</span><br>We review your responses and complete your SQ and all other required tender documents (excluding pricing, which stays with you).</span>
+          <span style="flex:1;font-size:0.82rem;color:rgba(255,255,255,0.9);line-height:1.5;"><strong style="color:#fff;">Silver Add-on + document completion</strong> <span style="float:right;color:#fff;">+ £1,000</span><br>We review your responses and complete your SQ and all other required tender documents (excluding pricing, which stays with you).</span>
         </label>
       </div>
       <button onclick="handlePayNow()" class="paywall-btn" id="paywall-btn">💳 Pay £480 and unlock full bid</button>

@@ -397,8 +397,8 @@ async function confirmSqAndGenerate() {
         var sqBtn = document.getElementById('paywall-btn');
         if (sqBtn) {
           sqBtn.textContent = window._wantsExpertReview
-            ? '⚡ Generate + add Expert Review (£300)'
-            : '⚡ Generate my responses (included in membership)';
+            ? 'Generate + add Silver Add-on (£500)'
+            : 'Generate my responses (included in membership)';
           sqBtn.onclick = function(e) { e.preventDefault(); window.memberStartGeneration(); };
           sqBtn.style.background = 'var(--teal)';
           sqBtn.style.color = 'var(--navy)';

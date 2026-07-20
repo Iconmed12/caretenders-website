@@ -1,6 +1,6 @@
 // Cana Membership checkout + per-tender Expert Review checkout.
 // TEST MODE: everything charges 1 GBP until Joel approves go-live.
-// Go-live amounts (pence): membership 29900 monthly, expert review 30000 one-off.
+// Go-live amounts (pence): membership 29900 monthly, expert review 50000 one-off.
 
 exports.handler = async (event) => {
   const cors = {
@@ -41,7 +41,7 @@ exports.handler = async (event) => {
       params.append('mode', 'payment');
       params.append('line_items[0][price_data][currency]', 'gbp');
       params.append('line_items[0][price_data][product_data][name]', 'Expert Review (TEST 1 GBP): ' + (tenderTitle || 'Tender').substring(0, 60));
-      params.append('line_items[0][price_data][unit_amount]', '100'); // TEST. Go-live: 30000
+      params.append('line_items[0][price_data][unit_amount]', '100'); // TEST. Go-live: 50000
       params.append('line_items[0][quantity]', '1');
       params.append('success_url', 'https://caretenders-website.netlify.app/cana.html?tender=' + (tenderId || '') + '&review=paid');
       params.append('cancel_url', 'https://caretenders-website.netlify.app/cana.html?tender=' + (tenderId || ''));
