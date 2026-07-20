@@ -72,7 +72,7 @@ export default function SignInScreen() {
         showsVerticalScrollIndicator={false}
       >
         <Image source={require('../../assets/logo-white.png')} style={s.logo} resizeMode="contain" />
-        <Text style={s.strap}>Care sector tenders, answered.</Text>
+        <Text style={s.strap}>Bid on the Go</Text>
 
         <View style={s.card}>
           <Text style={s.label}>Email</Text>
