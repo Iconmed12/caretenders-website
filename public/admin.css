@@ -11,6 +11,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);fon
 .login-label{font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:6px}
 .login-input{width:100%;border:1.5px solid var(--border);border-radius:var(--radius);padding:11px 14px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color 0.15s;margin-bottom:14px}
 .login-input:focus{border-color:var(--green)}
+/* Password field with a show/hide eye tucked inside it. The input keeps its
+   own bottom margin, so the wrapper carries none. */
+.pw-wrap{position:relative}
+.pw-wrap .login-input{padding-right:44px}
+.pw-eye{position:absolute;top:11px;right:10px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:none;border:0;padding:0;cursor:pointer;color:var(--text-muted)}
+.pw-eye:hover{color:var(--text)}
+.pw-eye svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .login-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:var(--radius);padding:13px;font-size:15px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif}
 .login-btn:hover{background:var(--green-dark)}
 .login-error{background:var(--red-light);color:var(--red);font-size:13px;padding:10px 14px;border-radius:var(--radius);margin-bottom:14px;display:none;align-items:center;gap:8px}

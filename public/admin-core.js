@@ -123,6 +123,18 @@ function applyRoleVisibility() {
   if (usersNav) usersNav.style.display = isManagerUp ? '' : 'none';
 }
 
+// Show or hide a password field, swapping the eye icon for an eye with a slash.
+function togglePw(inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (!input) return;
+  var show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.setAttribute('aria-label', show ? 'Hide' : 'Show');
+  btn.innerHTML = show
+    ? '<svg viewBox="0 0 24 24"><path d="M9.6 6.2A8.9 8.9 0 0112 6c6 0 9.5 6 9.5 6a15.6 15.6 0 01-3.4 4M6.4 8A15.6 15.6 0 002.5 12s3.5 6 9.5 6a8.9 8.9 0 003-.5"/><path d="M10 10a2.9 2.9 0 004 4"/><path d="M3.5 3.5l17 17"/></svg>'
+    : '<svg viewBox="0 0 24 24"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.9"/></svg>';
+}
+
 async function doLoginSupabase() {
   var email = (document.getElementById('loginEmail') || {}).value || '';
   var pass  = (document.getElementById('loginPass')  || {}).value || '';
