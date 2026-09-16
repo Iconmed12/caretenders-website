@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us | Cana Bids</title>
+<meta name="description" content="Get in touch with the Cana Bids team. We usually reply within one working day.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/site-chrome.css">
+<link rel="stylesheet" href="/legal.css">
+<style>
+  /* Contact-specific layout. Reuses the shared nav, hero and footer from
+     site-chrome.css and legal.css; only the form and the two columns are new. */
+  .contact-grid{ max-width:900px; margin:0 auto; padding:40px 20px 72px;
+    display:grid; grid-template-columns:1.3fr 1fr; gap:34px; align-items:start; }
+  @media(max-width:720px){ .contact-grid{ grid-template-columns:1fr; gap:26px; } }
+
+  .contact-card{ background:#fff; border:1px solid var(--lg-line); border-radius:16px;
+    padding:26px 24px; box-shadow:0 4px 24px rgba(11,25,41,.05); }
+  .contact-card h2{ font-family:'Inter',sans-serif; font-size:20px; font-weight:700;
+    color:var(--lg-navy); margin:0 0 4px; }
+  .contact-card .lead{ font-size:14.5px; color:var(--lg-muted); margin:0 0 20px; }
+
+  .field{ margin-bottom:15px; }
+  .field label{ display:block; font-size:13px; font-weight:600; color:var(--lg-navy); margin-bottom:6px; }
+  .field label .opt{ font-weight:400; color:var(--lg-muted); }
+  .field input, .field select, .field textarea{ width:100%; border:1.5px solid var(--lg-line);
+    border-radius:10px; padding:11px 13px; font-size:15px; font-family:'DM Sans',sans-serif;
+    color:var(--lg-ink); background:#fff; outline:none; transition:border-color .15s, box-shadow .15s; }
+  .field input:focus, .field select:focus, .field textarea:focus{ border-color:var(--lg-teal);
+    box-shadow:0 0 0 3px rgba(8,145,163,.10); }
+  .field textarea{ min-height:132px; resize:vertical; line-height:1.55; }
+  .field .err{ display:none; font-size:12.5px; color:#b4232a; margin-top:5px; }
+  .field.invalid .err{ display:block; }
+  .field.invalid input, .field.invalid select, .field.invalid textarea{ border-color:#b4232a; }
+
+  /* Spam trap: a field real people never see or fill. */
+  .hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+
+  .send-btn{ width:100%; background:var(--lg-navy); color:#fff; border:0; border-radius:11px;
+    padding:14px; font-size:15px; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer;
+    transition:background .15s, opacity .15s; }
+  .send-btn:hover{ background:#16324b; }
+  .send-btn:disabled{ opacity:.6; cursor:not-allowed; }
+
+  .form-alert{ display:none; border-radius:10px; padding:12px 14px; font-size:14px; margin-bottom:16px; line-height:1.5; }
+  .form-alert.err{ display:block; background:#fdeaea; border:1px solid #f3c2c2; color:#a11c22; }
+
+  .sent-state{ display:none; text-align:center; padding:20px 6px; }
+  .sent-state.show{ display:block; }
+  .sent-icon{ width:60px; height:60px; border-radius:50%; background:#e6f8ef; color:#0e9f6e;
+    display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 16px; }
+  .sent-state h2{ font-family:'Inter',sans-serif; font-size:20px; color:var(--lg-navy); margin:0 0 8px; }
+  .sent-state p{ font-size:14.5px; color:var(--lg-muted); margin:0; line-height:1.6; }
+
+  /* Right-hand "other ways to reach us" panel */
+  .reach h3{ font-size:12px; font-weight:700; letter-spacing:.09em; text-transform:uppercase;
+    color:var(--lg-muted); margin:0 0 14px; }
+  .reach-item{ display:flex; gap:12px; align-items:flex-start; margin-bottom:20px; }
+  .reach-item .ic{ width:38px; height:38px; border-radius:10px; background:#e7f6f9; color:var(--lg-teal-dk);
+    display:flex; align-items:center; justify-content:center; flex:none; }
+  .reach-item .ic svg{ width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.9;
+    stroke-linecap:round; stroke-linejoin:round; }
+  .reach-item .tx b{ display:block; font-size:14.5px; color:var(--lg-navy); font-weight:700; }
+  .reach-item .tx a{ font-size:14px; color:var(--lg-teal-dk); text-decoration:none; }
+  .reach-item .tx span{ display:block; font-size:13px; color:var(--lg-muted); margin-top:2px; line-height:1.5; }
+</style>
+</head>
+<body class="legal">
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span style="display:inline-flex;align-items:center;gap:9px;line-height:1"><svg viewBox="0 0 64 64" style="height:38px;width:38px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#0b1929" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="cb-wm" style="font-family:'Space Grotesk','Inter',sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:-0.02em;color:#0b1929">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></span>
+  </a>
+  <ul>
+    <li><a href="/">Home</a></li>
+    <li><a href="/tenders.html">Care Tenders</a></li>
+    <li><a href="/plans.html">Membership</a></li>
+    <li><a href="/case-studies.html">Case Studies</a></li>
+    <li><a href="/contact.html" class="nav-active">Contact</a></li>
+  </ul>
+</nav>
+
+<header class="legal-hero">
+  <div class="wrap">
+    <p class="eyebrow">Contact</p>
+    <h1>Get in touch</h1>
+    <p>Questions about membership, a tender, or how Cana works? Send us a message and a real person will get back to you, usually within one working day.</p>
+  </div>
+</header>
+
+<div class="contact-grid">
+
+  <!-- FORM -->
+  <div class="contact-card">
+    <div id="form-view">
+      <h2>Send us a message</h2>
+      <p class="lead">Fill this in and it comes straight to our inbox.</p>
+
+      <div class="form-alert err" id="form-error"></div>
+
+      <div class="field" id="f-name">
+        <label for="c-name">Your name</label>
+        <input type="text" id="c-name" autocomplete="name" placeholder="Sarah Johnson">
+        <div class="err">Please tell us your name</div>
+      </div>
+
+      <div class="field" id="f-email">
+        <label for="c-email">Email address</label>
+        <input type="email" id="c-email" autocomplete="email" placeholder="sarah@yourcompany.co.uk">
+        <div class="err">Please enter a valid email so we can reply</div>
+      </div>
+
+      <div class="field" id="f-company">
+        <label for="c-company">Company <span class="opt">(optional)</span></label>
+        <input type="text" id="c-company" autocomplete="organization" placeholder="Sunrise Care Services Ltd">
+      </div>
+
+      <div class="field" id="f-reason">
+        <label for="c-reason">What is it about?</label>
+        <select id="c-reason">
+          <option value="General enquiry">General enquiry</option>
+          <option value="Membership and pricing">Membership and pricing</option>
+          <option value="Help with a tender">Help with a tender</option>
+          <option value="Technical support">Technical support</option>
+          <option value="Partnership">Partnership</option>
+        </select>
+      </div>
+
+      <div class="field" id="f-message">
+        <label for="c-message">Message</label>
+        <textarea id="c-message" placeholder="How can we help?"></textarea>
+        <div class="err">Please add a short message</div>
+      </div>
+
+      <!-- Spam trap, hidden from real people -->
+      <div class="hp" aria-hidden="true">
+        <label for="c-website">Leave this field empty</label>
+        <input type="text" id="c-website" tabindex="-1" autocomplete="off">
+      </div>
+
+      <button class="send-btn" id="send-btn" onclick="sendContact()">Send message</button>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="sent-state" id="sent-view">
+      <div class="sent-icon">&#10003;</div>
+      <h2>Message sent</h2>
+      <p>Thanks for getting in touch. We have your message and will reply to <span id="sent-to" style="color:var(--lg-navy);font-weight:600;"></span> soon, usually within one working day.</p>
+    </div>
+  </div>
+
+  <!-- OTHER WAYS -->
+  <aside class="reach">
+    <h3>Other ways to reach us</h3>
+
+    <div class="reach-item">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 6h16a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V7a1 1 0 011-1z"/><path d="M3.5 7l8.5 6 8.5-6"/></svg></span>
+      <div class="tx">
+        <b>Email</b>
+        <a href="mailto:hello@getcana.co.uk">hello@getcana.co.uk</a>
+        <span>We read every message ourselves.</span>
+      </div>
+    </div>
+
+    <div class="reach-item">
+      <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+      <div class="tx">
+        <b>Response time</b>
+        <span>Usually within one working day, Monday to Friday.</span>
+      </div>
+    </div>
+
+    <div class="reach-item">
+      <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s-7-5.2-7-11a7 7 0 0114 0c0 5.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+      <div class="tx">
+        <b>Registered office</b>
+        <span>CanaTechnology Ltd, 25 The Hoe, Watford, WD19 5AY, United Kingdom</span>
+      </div>
+    </div>
+  </aside>
+
+</div>
+
+<footer><div class="wrap">
+  <div class="foot-grid">
+    <div class="foot-brand">
+      <span class="wm">Cana <b>Bids</b></span>
+      <p>Care tender discovery, preparation and bid management for ambitious UK care providers.</p>
+    </div>
+    <div>
+      <h5>Platform</h5>
+      <ul><li><a href="/tenders.html">Find care tenders</a></li><li><a href="/plans.html">Pricing</a></li><li><a href="/case-studies.html">Case studies</a></li></ul>
+    </div>
+    <div>
+      <h5>Company</h5>
+      <ul><li><a href="/contact.html">Contact us</a></li><li><a href="/login.html">Sign in</a></li><li><a href="/register.html">Get started</a></li></ul>
+    </div>
+    <div>
+      <h5>Legal</h5>
+      <ul><li><a href="/privacy.html">Privacy Policy</a></li><li><a href="/cookies.html">Cookie Policy</a></li></ul>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span>© 2026 Cana Bids. Care tender discovery, preparation and bid management.</span>
+    <span><a href="/privacy.html">Privacy Policy</a> &middot; <a href="/cookies.html">Cookie Policy</a> &middot; hello@getcana.co.uk</span>
+  </div>
+</div></footer>
+
+<script>
+  function setInvalid(id, bad) {
+    var el = document.getElementById(id);
+    if (el) el.classList.toggle('invalid', bad);
+  }
+
+  async function sendContact() {
+    var name    = document.getElementById('c-name').value.trim();
+    var email   = document.getElementById('c-email').value.trim();
+    var company = document.getElementById('c-company').value.trim();
+    var reason  = document.getElementById('c-reason').value;
+    var message = document.getElementById('c-message').value.trim();
+    var website = document.getElementById('c-website').value; // honeypot
+
+    var okName = !!name;
+    var okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    var okMsg = message.length >= 2;
+    setInvalid('f-name', !okName);
+    setInvalid('f-email', !okEmail);
+    setInvalid('f-message', !okMsg);
+    document.getElementById('form-error').style.display = 'none';
+    if (!okName || !okEmail || !okMsg) return;
+
+    var btn = document.getElementById('send-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      var res = await fetch('/.netlify/functions/send-contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, email: email, company: company, reason: reason, message: message, website: website })
+      });
+      if (!res.ok) throw new Error('bad status');
+      document.getElementById('sent-to').textContent = email;
+      document.getElementById('form-view').style.display = 'none';
+      document.getElementById('sent-view').classList.add('show');
+    } catch (e) {
+      var alert = document.getElementById('form-error');
+      alert.textContent = 'Sorry, that did not send. Please try again, or email us directly at hello@getcana.co.uk.';
+      alert.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Send message';
+    }
+  }
+</script>
+<script src="/mobile-nav.js" defer></script>
+</body>
+</html>
