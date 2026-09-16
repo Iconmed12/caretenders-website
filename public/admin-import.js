@@ -324,22 +324,57 @@ async function tiReject(id) {
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
+function tiPendingCount() {
+  return tiAllTenders.filter(function(t){ return t.status === 'pending_review'; }).length;
+}
+
 async function runManualImport() {
   var btn    = document.getElementById('ti-import-btn');
   var status = document.getElementById('ti-import-status');
   if (btn) { btn.disabled = true; btn.textContent = '⏳ Importing...'; }
   if (status) status.textContent = 'Fetching from Contracts Finder and Find a Tender...';
 
+  // import-tenders runs on a schedule too, and Netlify returns an empty body
+  // when a scheduled function is called directly. So do NOT trust the response
+  // body: measure how many tenders landed by reading the database before and
+  // after, and poll while the import is still running.
+  var before = tiPendingCount();
+
   try {
-    var res  = await fetch('/.netlify/functions/import-tenders', {
+    var res = await fetch('/.netlify/functions/import-tenders', {
       method: 'POST',
       headers: adminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ pages: 3 })
     });
-    var data = await res.json();
-    if (status) status.textContent = '✓ Imported ' + (data.imported||0) + ' new · ' + (data.skipped||0) + ' already existed';
-    showToast('Imported ' + (data.imported||0) + ' new tenders', 'success');
-    await loadImportedTenders();
+
+    // Read the body defensively. It may be empty (scheduled function) or JSON.
+    var reported = null;
+    try {
+      var text = await res.text();
+      if (text) { var parsed = JSON.parse(text); if (parsed && parsed.imported != null) reported = parsed.imported; }
+    } catch (_) { /* empty or non-JSON body is expected, ignore */ }
+
+    // A hard server error with nothing imported is a real failure.
+    if (!res.ok && res.status >= 500 && reported === null) {
+      throw new Error('the importer returned an error (status ' + res.status + ')');
+    }
+
+    // Poll the list until the pending count stops rising, so the number shown
+    // is the true result whether the import ran quickly or in the background.
+    if (status) status.textContent = 'Import running, this can take up to a minute...';
+    var last = before, stable = 0;
+    for (var i = 0; i < 12; i++) {
+      await new Promise(function(r){ setTimeout(r, 4000); });
+      await loadImportedTenders();
+      var now = tiPendingCount();
+      if (now === last) { stable++; if (stable >= 2) break; }
+      else { stable = 0; last = now; if (status) status.textContent = 'Importing... ' + now + ' pending so far'; }
+    }
+
+    var after = tiPendingCount();
+    var added = (reported !== null) ? reported : Math.max(0, after - before);
+    if (status) status.textContent = '✓ Import finished. ' + after + ' pending review' + (added ? ' (' + added + ' new this run)' : ' (nothing new)');
+    showToast(added ? ('Imported ' + added + ' new tenders') : 'Import finished, nothing new', 'success');
   } catch(e) {
     if (status) status.textContent = '✗ Import failed: ' + e.message;
     showToast('Import failed', 'error');
