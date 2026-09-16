@@ -1,0 +1,53 @@
+/* Shared styling for the legal pages (privacy, cookies, and any future terms).
+   Sits on top of site-chrome.css, which supplies the white nav and the footer. */
+:root{
+  --lg-navy:#0b1929; --lg-ink:#1c3040; --lg-teal:#0891a3; --lg-teal-dk:#0b7c8c;
+  --lg-muted:#5b6b78; --lg-line:#e4ecf0; --lg-bg:#f4f8fa; --lg-white:#fff;
+  --lg-amber-bg:#fdf6e7; --lg-amber-line:#f0dca6; --lg-amber-ink:#7a5a12;
+}
+body.legal{ margin:0; background:var(--lg-bg); color:var(--lg-ink);
+  font-family:'DM Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; line-height:1.65; }
+
+.legal-hero{ background:var(--lg-navy); color:#fff; padding:54px 20px 40px; }
+.legal-hero .wrap{ max-width:820px; margin:0 auto; }
+.legal-hero .eyebrow{ font-size:12px; font-weight:700; letter-spacing:.14em; text-transform:uppercase; color:var(--lg-teal); margin:0 0 12px; }
+.legal-hero h1{ font-family:'Inter',sans-serif; font-size:clamp(28px,5vw,40px); line-height:1.1; letter-spacing:-.02em; font-weight:800; margin:0 0 12px; }
+.legal-hero p{ margin:0; color:#9fb4c2; font-size:15px; max-width:60ch; }
+.legal-hero .updated{ margin-top:16px; font-size:13px; color:#7f97a8; }
+
+.legal-body{ max-width:820px; margin:0 auto; padding:40px 20px 72px; }
+
+/* Anything the founder must fill in before going live shows up highlighted, so
+   a placeholder can never slip out onto the live site unnoticed. */
+.fill{ background:var(--lg-amber-bg); border:1px solid var(--lg-amber-line);
+  color:var(--lg-amber-ink); border-radius:5px; padding:1px 7px; font-weight:600;
+  font-size:.95em; white-space:nowrap; }
+
+.legal-note{ background:#eaf3f7; border:1px solid #cfe3ea; border-radius:12px;
+  padding:16px 18px; margin:0 0 32px; font-size:14px; color:var(--lg-ink); }
+.legal-note strong{ color:var(--lg-navy); }
+
+.legal-body h2{ font-family:'Inter',sans-serif; font-size:20px; font-weight:700;
+  color:var(--lg-navy); letter-spacing:-.01em; margin:36px 0 12px; padding-top:8px; }
+.legal-body h2:first-of-type{ margin-top:8px; }
+.legal-body h3{ font-size:16px; font-weight:700; color:var(--lg-navy); margin:24px 0 8px; }
+.legal-body p{ margin:0 0 14px; font-size:15.5px; }
+.legal-body ul{ margin:0 0 16px; padding-left:22px; }
+.legal-body li{ margin-bottom:8px; font-size:15.5px; }
+.legal-body a{ color:var(--lg-teal-dk); }
+.legal-body strong{ color:var(--lg-navy); }
+
+/* Plain, readable table for the list of who we share data with. */
+.legal-table{ width:100%; border-collapse:collapse; margin:0 0 20px; font-size:14.5px; }
+.legal-table th, .legal-table td{ text-align:left; padding:11px 13px; border:1px solid var(--lg-line);
+  vertical-align:top; }
+.legal-table th{ background:var(--lg-white); font-weight:700; color:var(--lg-navy); }
+.legal-table td{ background:var(--lg-white); color:var(--lg-ink); }
+.table-scroll{ overflow-x:auto; -webkit-overflow-scrolling:touch; margin:0 0 20px; }
+.table-scroll .legal-table{ margin:0; min-width:520px; }
+
+.legal-toc{ background:var(--lg-white); border:1px solid var(--lg-line); border-radius:12px;
+  padding:18px 20px; margin:0 0 32px; }
+.legal-toc h2{ margin:0 0 10px; font-size:14px; text-transform:uppercase; letter-spacing:.06em; color:var(--lg-muted); padding:0; }
+.legal-toc ol{ margin:0; padding-left:20px; }
+.legal-toc li{ margin-bottom:5px; font-size:14.5px; }
