@@ -1,0 +1,89 @@
+<!--
+  Cana Bids welcome / confirm-signup email.
+
+  This is the template to paste into Supabase:
+    Authentication  ->  Email Templates  ->  Confirm signup
+
+  Keep the {{ .ConfirmationURL }} placeholder exactly as it is: Supabase swaps
+  it for the real activation link for each person. Email clients are fussy, so
+  this uses tables and inline styles on purpose. No external CSS, no SVG.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0;padding:0;background:#eef2f5;">
+  <tr>
+    <td align="center" style="padding:28px 16px;">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:600px;max-width:100%;background:#ffffff;border-radius:16px;overflow:hidden;border:1px solid #e0e8ee;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+
+        <!-- Header -->
+        <tr>
+          <td style="background:#0b1929;padding:26px 32px;">
+            <span style="font-size:22px;font-weight:700;letter-spacing:-0.02em;color:#ffffff;">Cana<span style="color:#00c9e0;">&nbsp;Bids</span></span>
+          </td>
+        </tr>
+
+        <!-- Body -->
+        <tr>
+          <td style="padding:36px 32px 8px;">
+            <h1 style="margin:0 0 14px;font-size:24px;line-height:1.25;color:#0b1929;font-weight:800;">Welcome to Cana Bids</h1>
+            <p style="margin:0 0 16px;font-size:16px;line-height:1.6;color:#33475b;">
+              Thanks for signing up. You are one click away from finding care tenders and having your bid responses written for you.
+            </p>
+            <p style="margin:0 0 26px;font-size:16px;line-height:1.6;color:#33475b;">
+              Confirm your email address to activate your account:
+            </p>
+
+            <!-- Button -->
+            <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 26px;">
+              <tr>
+                <td align="center" bgcolor="#00c9e0" style="border-radius:12px;">
+                  <a href="{{ .ConfirmationURL }}" target="_blank"
+                     style="display:inline-block;padding:15px 34px;font-size:16px;font-weight:700;color:#04303a;text-decoration:none;border-radius:12px;">
+                    Activate my account
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0 0 24px;font-size:13.5px;line-height:1.6;color:#6b8090;">
+              If the button does not work, copy and paste this link into your browser:<br>
+              <a href="{{ .ConfirmationURL }}" target="_blank" style="color:#0b7c8c;word-break:break-all;">{{ .ConfirmationURL }}</a>
+            </p>
+          </td>
+        </tr>
+
+        <!-- What is next -->
+        <tr>
+          <td style="padding:0 32px 8px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f4f8fa;border:1px solid #e4ecf0;border-radius:12px;">
+              <tr>
+                <td style="padding:18px 20px;">
+                  <p style="margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:#5b6b78;">Once you are in</p>
+                  <p style="margin:0 0 9px;font-size:14.5px;line-height:1.5;color:#33475b;">Find live care tenders that fit your services</p>
+                  <p style="margin:0 0 9px;font-size:14.5px;line-height:1.5;color:#33475b;">Have Cana write full, tailored responses for you</p>
+                  <p style="margin:0;font-size:14.5px;line-height:1.5;color:#33475b;">Get your bid pack emailed with a submission checklist</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- Reassurance -->
+        <tr>
+          <td style="padding:22px 32px 30px;">
+            <p style="margin:0;font-size:13.5px;line-height:1.6;color:#6b8090;">
+              You are receiving this because someone signed up for Cana Bids with this email address. If that was not you, you can safely ignore this message and no account will be activated.
+            </p>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="background:#0b1929;padding:22px 32px;">
+            <p style="margin:0 0 4px;font-size:13px;color:#93a8b6;">Need help? Email <a href="mailto:hello@getcana.co.uk" style="color:#00c9e0;text-decoration:none;">hello@getcana.co.uk</a></p>
+            <p style="margin:0;font-size:12px;color:#6f8593;line-height:1.5;">CanaTechnology Ltd, 25 The Hoe, Watford, WD19 5AY, United Kingdom</p>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
