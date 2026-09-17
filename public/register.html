@@ -80,6 +80,14 @@
   .auth-footer a { color:var(--teal); text-decoration:none; font-weight:500; }
   .auth-footer a:hover { text-decoration:underline; }
 
+  /* PASSWORD FIELD WITH SHOW/HIDE EYE */
+  .pw-wrap { position:relative; }
+  .pw-wrap .form-input { padding-right:44px; }
+  .pw-eye { position:absolute; top:0; right:0; height:100%; width:42px; display:flex; align-items:center; justify-content:center;
+    background:none; border:0; padding:0; cursor:pointer; color:var(--muted); }
+  .pw-eye:hover { color:var(--navy); }
+  .pw-eye svg { width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
+
   /* PASSWORD STRENGTH */
   .pw-strength { margin-top:5px; height:4px; border-radius:4px; background:var(--border); overflow:hidden; }
   .pw-strength-bar { height:100%; border-radius:4px; transition:width 0.3s, background 0.3s; width:0%; }
@@ -145,7 +153,12 @@
 
       <div class="form-group">
         <label class="form-label" for="password">Password</label>
-        <input class="form-input" type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password">
+        <div class="pw-wrap">
+          <input class="form-input" type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password">
+          <button type="button" class="pw-eye" aria-label="Show password" onclick="togglePw('password', this)">
+            <svg viewBox="0 0 24 24"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.9"/></svg>
+          </button>
+        </div>
         <div class="pw-strength"><div class="pw-strength-bar" id="pw-bar"></div></div>
         <span class="field-error" id="err-password">Password must be at least 8 characters</span>
       </div>
@@ -210,6 +223,18 @@
     bar.style.width = widths[strength] || '0%';
     bar.style.background = colors[strength] || 'transparent';
   });
+
+  // Show or hide a password field, swapping the eye for an eye with a slash.
+  function togglePw(inputId, btn) {
+    var input = document.getElementById(inputId);
+    if (!input) return;
+    var show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    btn.innerHTML = show
+      ? '<svg viewBox="0 0 24 24"><path d="M9.6 6.2A8.9 8.9 0 0112 6c6 0 9.5 6 9.5 6a15.6 15.6 0 01-3.4 4M6.4 8A15.6 15.6 0 002.5 12s3.5 6 9.5 6a8.9 8.9 0 003-.5"/><path d="M10 10a2.9 2.9 0 004 4"/><path d="M3.5 3.5l17 17"/></svg>'
+      : '<svg viewBox="0 0 24 24"><path d="M2.5 12S6 5.8 12 5.8 21.5 12 21.5 12 18 18.2 12 18.2 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.9"/></svg>';
+  }
 
   function clearErrors() {
     document.querySelectorAll('.field-error').forEach(function(el){ el.classList.remove('show'); });
