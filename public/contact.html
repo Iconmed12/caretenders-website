@@ -46,8 +46,11 @@
   .send-btn:hover{ background:#16324b; }
   .send-btn:disabled{ opacity:.6; cursor:not-allowed; }
 
+  /* Hidden until the script shows it with an inline style on a real error. The
+     err class only carries the colours, so it must not force display:block or
+     the empty box sits there permanently. */
   .form-alert{ display:none; border-radius:10px; padding:12px 14px; font-size:14px; margin-bottom:16px; line-height:1.5; }
-  .form-alert.err{ display:block; background:#fdeaea; border:1px solid #f3c2c2; color:#a11c22; }
+  .form-alert.err{ background:#fdeaea; border:1px solid #f3c2c2; color:#a11c22; }
 
   .sent-state{ display:none; text-align:center; padding:20px 6px; }
   .sent-state.show{ display:block; }
