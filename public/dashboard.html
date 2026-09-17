@@ -218,6 +218,12 @@
     <div class="section-title">Quick actions</div>
   </div>
   <div class="actions">
+    <a href="/plans.html" class="action-card" id="upgrade-card" style="background:var(--navy);border-color:var(--navy);">
+      <div class="action-icon" style="background:rgba(0,201,224,0.15);">⬆️</div>
+      <h3 style="color:#fff;">Upgrade account</h3>
+      <p style="color:rgba(255,255,255,0.6);">Go unlimited with membership, or add an expert review to a bid.</p>
+      <span class="action-arrow" id="upgrade-arrow">View options</span>
+    </a>
     <a href="/tenders.html" class="action-card">
       <div class="action-icon teal">✍️</div>
       <h3>Use Cana</h3>
@@ -385,6 +391,20 @@
 
     // Load bid history
     await loadBidHistory();
+
+    // For existing members, the upgrade card becomes a manage card.
+    try {
+      var memRes = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(user.email));
+      var memData = await memRes.json();
+      if (memData && memData.member) {
+        var uT = document.querySelector('#upgrade-card h3');
+        var uP = document.querySelector('#upgrade-card p');
+        var uA = document.getElementById('upgrade-arrow');
+        if (uT) uT.textContent = 'Manage membership';
+        if (uP) uP.textContent = 'You are a member. View or change your plan and add-ons.';
+        if (uA) uA.textContent = 'Manage';
+      }
+    } catch(e) { /* leave the default upgrade wording */ }
 
     // Hide loading, show page
     document.getElementById('loading-screen').style.display = 'none';

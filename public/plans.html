@@ -249,11 +249,17 @@ var selectedTerm = 12;
     );
     var sessRes = await sb.auth.getSession();
     var sess = sessRes.data && sessRes.data.session;
-    if (!sess || !sess.user || !sess.user.email) return;
+    if (!sess || !sess.user || !sess.user.email) return; // logged out: keep "Become a member"
+
+    // Logged in means they already have an account, so this is an upgrade, not
+    // a new membership. Members get the manage wording further down.
+    var planBtnEl = document.querySelector('.plan-btn.btn-solid');
+    if (planBtnEl) planBtnEl.textContent = 'Upgrade your account';
+
     var email = sess.user.email.toLowerCase();
     var memRes = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
     var memData = await memRes.json();
-    if (!memData.member) return;
+    if (!memData.member) return; // logged in, not a member: leave "Upgrade your account"
     var currentTerm = memData.term_months || 3;
 
     // Badge the current term button
