@@ -85,6 +85,32 @@
   .term-best { position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.55rem; font-weight:800; letter-spacing:0.05em; padding:2px 8px; border-radius:999px; text-transform:uppercase; white-space:nowrap; }
   @media(max-width:840px){ .trust-grid{grid-template-columns:1fr !important;} }
   .nav-logo-img { height:48px; width:auto; display:block; }
+
+  /* Two clear payment paths, side by side. */
+  .pay-grid { max-width:900px; margin:-4.5rem auto 0; padding:0 2rem; display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; align-items:stretch; }
+  @media(max-width:840px){ .pay-grid{ grid-template-columns:1fr; max-width:480px; } }
+  .pcard { background:#fff; border:1.5px solid var(--border); border-radius:18px; padding:1.9rem 1.7rem; position:relative; display:flex; flex-direction:column; }
+  .pcard.feature { border:2px solid var(--teal); box-shadow:0 18px 48px rgba(0,201,224,0.16); }
+  .pcard .plan-btn { margin-top:auto; }
+
+  /* Optional expert review, for everyone. */
+  .addon-wrap { max-width:900px; margin:1.25rem auto 0; padding:0 2rem; }
+  .addon-box { background:var(--navy); border-radius:16px; padding:1.4rem 1.6rem; display:flex; align-items:center; justify-content:space-between; gap:1.2rem; flex-wrap:wrap; }
+  .addon-txt h3 { color:#fff; font-size:1.05rem; font-weight:800; margin:0 0 4px; }
+  .addon-txt p { color:rgba(255,255,255,0.62); font-size:0.85rem; margin:0; max-width:54ch; line-height:1.6; }
+  .addon-tag { display:inline-block; background:rgba(0,201,224,0.16); color:#7fe6f2; font-size:0.66rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:4px 10px; border-radius:999px; margin-bottom:8px; }
+  .addon-cost { text-align:right; flex:none; }
+  .addon-cost .p { font-size:1.7rem; font-weight:800; color:var(--teal); line-height:1; }
+  .addon-cost .l { font-size:0.72rem; color:rgba(255,255,255,0.6); margin-top:3px; }
+
+  /* FAQ, answering the questions people keep asking. */
+  .faq2 { max-width:760px; margin:3rem auto 0; padding:0 2rem; }
+  .faq2 h2 { font-family:'Inter',sans-serif; font-size:1.4rem; font-weight:800; color:var(--navy); text-align:center; margin:0 0 1.4rem; }
+  .qa { background:#fff; border:1px solid var(--border); border-radius:12px; padding:1rem 1.15rem; margin-bottom:0.75rem; }
+  .qa .q { font-size:0.95rem; font-weight:700; color:var(--navy); margin:0 0 5px; }
+  .qa .a { font-size:0.86rem; color:#33475b; margin:0; line-height:1.6; }
+  .qa .a b { color:var(--navy); }
+  .fineprint { max-width:760px; margin:1.5rem auto 0; padding:0 2rem 3.5rem; text-align:center; font-size:0.75rem; color:var(--muted); }
 </style>
 <link rel="stylesheet" href="/site-chrome.css">
 <body>
@@ -100,17 +126,32 @@
 </nav>
 
 <div class="plans-hero">
-  <h1>Bid on the go. <em>As many tenders as you want.</em></h1>
-  <p>Cana writes your tender responses, emails you the full pack with a submission checklist, and you submit. Generate at 10am, submit by noon. No waiting on anyone.</p>
+  <h1>Two ways to bid. <em>Your choice.</em></h1>
+  <p>Pay for a single tender, or go unlimited with membership. No membership needed to get started.</p>
 </div>
 
-<div class="member-wrap">
+<div class="pay-grid">
+
+  <!-- PAY AS YOU GO -->
+  <div class="pcard">
+    <div class="plan-name">Pay as you go</div>
+    <div class="plan-for">Best if you bid now and then, or want to try Cana once</div>
+    <div class="plan-price">£480<small> per tender</small></div>
+    <div class="plan-billed">One payment, one full bid. No membership, no commitment.</div>
+    <ul class="feat">
+      <li><span class="tick">✓</span><span>Full, tailored responses for every question in the tender</span></li>
+      <li><span class="tick">✓</span><span>Full pack emailed with a submission checklist and portal link</span></li>
+      <li><span class="tick">✓</span><span><span class="hl">Profile setup included</span>, so answers use your real details</span></li>
+      <li><span class="tick">✓</span><span>Optional expert review available (see below)</span></li>
+    </ul>
+    <a class="plan-btn btn-navy" href="/tenders.html">Find a tender to write</a>
+  </div>
 
   <!-- MEMBERSHIP -->
-  <div class="card popular">
-    <div class="pop-badge">Cana Membership</div>
-    <div class="plan-name" style="margin-top:0.4rem;">Unlimited bidding</div>
-    <div class="plan-for">For providers who want to bid whenever an opportunity appears</div>
+  <div class="pcard feature">
+    <div class="pop-badge">Best value if you bid often</div>
+    <div class="plan-name" style="margin-top:0.4rem;">Membership</div>
+    <div class="plan-for">Unlimited bidding, for providers who bid regularly</div>
     <div class="term-toggle">
       <button class="term-opt" data-term="3" onclick="setTerm(3)">3 months<span class="t-rate">£299/mo</span></button>
       <button class="term-opt" data-term="6" onclick="setTerm(6)">6 months<span class="t-rate">£279/mo</span></button>
@@ -120,69 +161,56 @@
     <div class="plan-billed" id="member-billed">Covers 12 months of unlimited bidding. Works out at £249 a month, saving £600 against the 3-month rate.</div>
     <ul class="feat">
       <li><span class="tick">✓</span><span><span class="hl">Unlimited tenders.</span> Bid on every opportunity that fits, no counting, no credits</span></li>
-      <li><span class="tick">✓</span><span>Full, tailored responses written for every question in the tender</span></li>
-      <li><span class="tick">✓</span><span>Full tender pack emailed with a submission checklist and portal link</span></li>
-      <li><span class="tick">✓</span><span><span class="hl">Profile setup included as standard</span>, so responses use your real company details</span></li>
+      <li><span class="tick">✓</span><span>Everything in pay as you go, on every tender</span></li>
       <li><span class="tick">✓</span><span>Matched tender alerts for your sector</span></li>
     </ul>
     <button class="plan-btn btn-solid" onclick="startMembership()">Become a member</button>
   </div>
 
-  <!-- EXPERT REVIEW -->
-  <div class="card">
-    <div class="plan-name">Silver Add-on</div>
-    <div class="plan-for">Optional, whenever you want it</div>
-    <div class="plan-price">£500<small>/tender</small></div>
-    <div class="plan-billed">Pay per tender, members only</div>
-    <ul class="feat">
-      <li><span class="tick">✓</span><span>A consultant reads and sharpens your Cana responses before you submit</span></li>
-      <li><span class="tick">✓</span><span>Scoring criteria checked line by line</span></li>
-      <li><span class="tick">✓</span><span>Available on any tender, any time</span></li>
-    </ul>
-  </div>
-
 </div>
 
-<div style="max-width:980px;margin:0 auto;padding:0 2rem 2rem;">
-  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;" class="trust-grid">
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.2rem;">
-      <div style="font-size:0.84rem;font-weight:700;color:var(--navy);margin-bottom:4px;">Written from your documents</div>
-      <div style="font-size:0.76rem;color:var(--muted);line-height:1.6;">Every response is grounded in your company profile, policies and past work, so it reflects your real organisation.</div>
+<!-- OPTIONAL EXPERT REVIEW, FOR EVERYONE -->
+<div class="addon-wrap">
+  <div class="addon-box">
+    <div class="addon-txt">
+      <span class="addon-tag">Optional add-on</span>
+      <h3>Silver Add-on: expert review</h3>
+      <p>A consultant reads and sharpens your responses against the scoring criteria before you submit. Available on any bid, whether you pay as you go or are a member.</p>
     </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.2rem;">
-      <div style="font-size:0.84rem;font-weight:700;color:var(--navy);margin-bottom:4px;">Built against the scoring criteria</div>
-      <div style="font-size:0.76rem;color:var(--muted);line-height:1.6;">Cana reads the tender's own specification and marking scheme and writes each answer to score, not just to fill space.</div>
-    </div>
-    <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.1rem 1.2rem;">
-      <div style="font-size:0.84rem;font-weight:700;color:var(--navy);margin-bottom:4px;">You stay in control</div>
-      <div style="font-size:0.76rem;color:var(--muted);line-height:1.6;">Everything arrives for your review before anything is submitted, with expert eyes available on any tender for £500.</div>
+    <div class="addon-cost">
+      <div class="p">£500</div>
+      <div class="l">per tender</div>
     </div>
   </div>
 </div>
 
+<!-- FAQ -->
+<div class="faq2">
+  <h2>Common questions</h2>
 
-<div class="ladder-strip">
-  <div class="ladder-grid">
-    <div class="rung">
-      <div class="rung-step">Try it</div>
-      <div class="rung-name">One tender</div>
-      <div class="rung-price">£480 one-off</div>
-    </div>
-    <div class="rung active">
-      <div class="rung-step">Members</div>
-      <div class="rung-name">Unlimited bidding</div>
-      <div class="rung-price">From £249/month</div>
-    </div>
-    <div class="rung">
-      <div class="rung-step">Optional</div>
-      <div class="rung-name">Silver Add-on</div>
-      <div class="rung-price">£500/tender</div>
-    </div>
+  <div class="qa">
+    <p class="q">Do I need a membership to bid?</p>
+    <p class="a"><b>No.</b> A single tender is £480, paid as you go, with no membership and no commitment. Membership is only worth it if you expect to bid regularly.</p>
+  </div>
+  <div class="qa">
+    <p class="q">What is the difference between the £480 and the £500?</p>
+    <p class="a">The <b>£480</b> is Cana writing your full bid for one tender. The <b>£500</b> is an optional extra where a human expert reviews and sharpens that bid before you submit. They are separate, and you only pay for the review if you want it.</p>
+  </div>
+  <div class="qa">
+    <p class="q">Can I get the expert review without being a member?</p>
+    <p class="a"><b>Yes.</b> The £500 review can be added to any bid, whether you paid £480 for a single tender or you are a member.</p>
+  </div>
+  <div class="qa">
+    <p class="q">What does membership include?</p>
+    <p class="a">Unlimited bids for your term, with everything in pay as you go on every tender, plus matched alerts for your sector. From £249 a month on the 12-month plan.</p>
+  </div>
+  <div class="qa">
+    <p class="q">Can I cancel?</p>
+    <p class="a">Membership is one payment per term and renews automatically at the end of the term. You can cancel any time before it renews.</p>
   </div>
 </div>
 
-<div class="terms">One upfront payment per term, renewing automatically at the end of each term. Cancel any time before renewal. Fair use applies: membership covers tenders your business is genuinely bidding for.</div>
-<div class="compare-note">Want one tender first? <a href="/">Cana writes any single tender for £480</a>.</div>
+<div class="fineprint">Membership is one upfront payment per term, renewing automatically at the end of each term. Cancel any time before renewal. Fair use applies: membership covers tenders your business is genuinely bidding for.</div>
 
 <footer><div class="wrap">
   <div class="foot-grid">
