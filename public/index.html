@@ -742,10 +742,16 @@ footer ul a:hover{color:var(--cyan)}
   var _sb = supabase.createClient('https://igpjfpncfuawikoyzfcd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA');
   window._sbHome = _sb;
   window.handleHomeSignOut = function(){ _sb.auth.signOut().then(function(){ location.reload(); }); };
+  // Staff and owner accounts live on the getcana.co.uk domain (e.g.
+  // ahmed@staff.getcana.co.uk). They are not customers, so the public site must
+  // never show them a customer account or dashboard.
+  function isInternal(email){ return String(email || '').toLowerCase().indexOf('getcana.co.uk') !== -1; }
+
   _sb.auth.getSession().then(function(r){
     var s = r && r.data && r.data.session;
     var nav = document.getElementById('nav-right');
     if (!nav || !s || !s.user) return;
+    if (isInternal(s.user.email)) return; // internal account, leave the normal logged-out nav
     var meta = s.user.user_metadata || {};
     var fn = meta.first_name || '';
     var ln = meta.last_name || '';

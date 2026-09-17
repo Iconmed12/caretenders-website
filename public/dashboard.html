@@ -321,6 +321,13 @@
     }
 
     var user = session.user;
+
+    // Staff and owner accounts (getcana.co.uk domain) are not customers and do
+    // not get a customer dashboard. Send them to the main site instead.
+    if (String(user.email || '').toLowerCase().indexOf('getcana.co.uk') !== -1) {
+      window.location.href = '/';
+      return;
+    }
     var meta = user.user_metadata || {};
     var firstName = meta.first_name || 'there';
     var lastName  = meta.last_name || '';
