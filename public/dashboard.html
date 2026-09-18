@@ -157,7 +157,6 @@
     <li><a href="/tenders.html">Find Tenders</a></li>
   </ul>
   <div class="nav-right">
-    <span id="nav-tier"></span>
     <div class="nav-user">
       <div class="nav-avatar" id="nav-avatar">?</div>
       <span id="nav-name">Loading...</span>
@@ -405,16 +404,19 @@
         if (uP) uP.textContent = 'You are a member. View or change your plan and add-ons.';
         if (uA) uA.textContent = 'Manage';
 
-        // Tier badge at the top, so membership is visible without opening the profile.
+        // The account chip becomes a tier coin plus "Bronze/Silver/Gold member".
+        // Their name still shows in the welcome banner below, so it is not lost.
         var mm = parseInt(memData.term_months, 10) || 0;
-        var tier = mm >= 12 ? { n:'Gold', bg:'#f7ecc9', fg:'#8a6d12' }
-                 : mm >= 6  ? { n:'Silver', bg:'#e9edf1', fg:'#4b5a67' }
-                 :            { n:'Bronze', bg:'#f3e2d0', fg:'#8a5a2b' };
-        var pill = document.getElementById('nav-tier');
-        if (pill) {
-          pill.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:' + tier.fg + ';margin-right:7px;flex:none"></span>' + tier.n + ' member';
-          pill.style.cssText = 'display:inline-flex;align-items:center;white-space:nowrap;flex:none;font-size:12px;font-weight:600;line-height:1;padding:6px 12px;border-radius:999px;margin-right:6px;background:' + tier.bg + ';color:' + tier.fg + ';';
+        var tier = mm >= 12 ? { n:'Gold',   grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
+                 : mm >= 6  ? { n:'Silver', grad:'radial-gradient(circle at 34% 28%,#f3f5f8,#b7c0cb)', fg:'#3f4a56' }
+                 :            { n:'Bronze', grad:'radial-gradient(circle at 34% 28%,#eccba0,#b3763f)', fg:'#5c3a17' };
+        var coin = document.getElementById('nav-avatar');
+        if (coin) {
+          coin.textContent = tier.n.charAt(0);
+          coin.style.cssText = 'width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;background:' + tier.grad + ';color:' + tier.fg + ';box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.2)';
         }
+        var nm = document.getElementById('nav-name');
+        if (nm) nm.textContent = tier.n + ' member';
       }
     } catch(e) { /* leave the default upgrade wording */ }
 
