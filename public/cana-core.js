@@ -462,11 +462,13 @@
     var tierT = mmT >= 12 ? { n:'Gold',   grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
               : mmT >= 6  ? { n:'Silver', grad:'radial-gradient(circle at 34% 28%,#f3f5f8,#b7c0cb)', fg:'#3f4a56' }
               :             { n:'Bronze', grad:'radial-gradient(circle at 34% 28%,#eccba0,#b3763f)', fg:'#5c3a17' };
+    // Always show the tier for a member. When the term is missing this defaults
+    // to Bronze, matching how the nav labels the same membership.
     if (planLabel) {
-      planLabel.textContent = memRes.term_months ? (tierT.n + ' membership') : 'Cana Membership';
+      planLabel.textContent = tierT.n + ' membership';
     }
     var tierCoin = document.getElementById('member-tier-coin');
-    if (tierCoin && memRes.term_months) {
+    if (tierCoin) {
       tierCoin.textContent = tierT.n.charAt(0);
       tierCoin.style.background = tierT.grad;
       tierCoin.style.color = tierT.fg;
