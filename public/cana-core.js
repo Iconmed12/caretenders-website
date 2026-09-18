@@ -742,7 +742,14 @@
       }
     }
     if (window._isMember && typeof window.applyMemberPaywall === 'function') window.applyMemberPaywall();
-    return { member: member, verified: verified, has_account: (window._memberMeta && window._memberMeta.has_account) || false };
+    var meta = window._memberMeta || {};
+    return {
+      member: member,
+      verified: verified,
+      has_account: !!meta.has_account,
+      term_months: meta.term_months || null,       // needed for the tier (was missing -> always Bronze)
+      current_period_end: meta.current_period_end || null
+    };
   }
 
   window.applyMemberPaywall = function() {
