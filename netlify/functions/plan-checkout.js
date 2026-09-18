@@ -12,7 +12,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { product, email, tenderId, tenderTitle } = JSON.parse(event.body);
+    const { product, email, tenderId, tenderTitle, tier } = JSON.parse(event.body);
     const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
     const params = new URLSearchParams();
 
@@ -43,9 +43,12 @@ exports.handler = async (event) => {
       params.append('line_items[0][price_data][product_data][name]', 'Expert Review (TEST 1 GBP): ' + (tenderTitle || 'Tender').substring(0, 60));
       params.append('line_items[0][price_data][unit_amount]', '100'); // TEST. Go-live: 50000
       params.append('line_items[0][quantity]', '1');
-      params.append('success_url', 'https://caretenders-website.netlify.app/cana.html?tender=' + (tenderId || '') + '&review=paid');
+      // {CHECKOUT_SESSION_ID} is filled in by Stripe on success, so the return
+      // page carries the real session id and the server can verify the payment.
+      params.append('success_url', 'https://caretenders-website.netlify.app/cana.html?tender=' + (tenderId || '') + '&review=paid&rs={CHECKOUT_SESSION_ID}');
       params.append('cancel_url', 'https://caretenders-website.netlify.app/cana.html?tender=' + (tenderId || ''));
       params.append('metadata[product]', 'review');
+      params.append('metadata[tier]', (tier === 'review_docs' ? 'review_docs' : 'review'));
       if (tenderId) params.append('metadata[tender_id]', tenderId);
       if (tenderTitle) params.append('metadata[tender_title]', String(tenderTitle).substring(0, 120));
     } else {

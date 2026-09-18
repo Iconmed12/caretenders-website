@@ -12,7 +12,7 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { companyDetails, tenderId, includeSq, accessToken } = JSON.parse(event.body);
+    const { companyDetails, tenderId, includeSq, accessToken, wantsReview, reviewSessionId } = JSON.parse(event.body);
     const email = (companyDetails && companyDetails.email || '').trim().toLowerCase();
     if (!email || !tenderId) {
       return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing email or tender' }) };
@@ -56,6 +56,30 @@ exports.handler = async (event) => {
       return { statusCode: 403, headers: cors, body: JSON.stringify({ error: 'No active membership found for ' + email }) };
     }
 
+    // ── Paid add-on: verify the REAL Stripe payment before generating ──
+    // A member's base bid is free, but a paid add-on (expert review) must be
+    // paid for. We retrieve the exact Stripe checkout session by id and confirm
+    // it is paid, is a review product, and is for THIS tender. This closes the
+    // hole where someone could hit the return URL without paying.
+    var verifiedTier = 'none';
+    if (wantsReview) {
+      if (!reviewSessionId) {
+        return { statusCode: 402, headers: cors, body: JSON.stringify({ error: 'Add-on payment was not found. Please try again or email hello@getcana.co.uk' }) };
+      }
+      const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
+      const sessRes = await fetch('https://api.stripe.com/v1/checkout/sessions/' + encodeURIComponent(reviewSessionId), {
+        headers: { Authorization: 'Bearer ' + stripeKey }
+      });
+      const sess = await sessRes.json();
+      const okPaid = sess && sess.payment_status === 'paid';
+      const okProduct = sess && sess.metadata && sess.metadata.product === 'review';
+      const okTender = sess && sess.metadata && String(sess.metadata.tender_id || '') === String(tenderId);
+      if (!okPaid || !okProduct || !okTender) {
+        return { statusCode: 402, headers: cors, body: JSON.stringify({ error: 'Add-on payment could not be confirmed. If you were charged, email hello@getcana.co.uk with your reference.' }) };
+      }
+      verifiedTier = (sess.metadata.tier === 'review_docs') ? 'review_docs' : 'review';
+    }
+
     // ── Create job record (identical shape to cana-verify) ──
     var jobId = 'job_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
     var jobRes = await fetch(sbUrl + '/rest/v1/cana_jobs', {
@@ -81,6 +105,8 @@ exports.handler = async (event) => {
         email,
         tenderId,
         includeSq: !!includeSq,
+        wantsReview: verifiedTier !== 'none',
+        tier: verifiedTier,
         companyDetails: Object.assign({}, companyDetails || {}, { email: email })
       })
     };

@@ -11,12 +11,17 @@
   tenderId = params.get('tender');
   const sessionId = params.get('session');
   const paid = params.get('paid');
+  const reviewPaid = params.get('review');
 
   if (!tenderId) {
     document.getElementById('tender-title').textContent = 'No tender selected';
   } else if (paid === 'true' && sessionId) {
     // Coming back from Stripe - verify payment then show responses
     loadTender().then(() => verifyAndUnlock(sessionId));
+  } else if (reviewPaid === 'paid') {
+    // Member returning from an add-on payment. Nothing was generated before
+    // payment, so we generate now that Stripe has taken the money.
+    loadTender().then(() => resumeMemberAfterAddon());
   } else {
     // If a session token is present, the visitor is likely a signed-in member.
     // Show a loading state right away instead of the empty guest form, so their
@@ -566,6 +571,13 @@
     if (btn) { btn.disabled = true; }
     try {
       var companyDetails = window._companyDetails || memberCompanyDetails();
+
+      // Paid add-on chosen: take payment FIRST. Nothing is generated and no
+      // email goes out until Stripe confirms. Generation happens on return.
+      if (window._wantsExpertReview) {
+        if (await startMemberAddonPayment(companyDetails)) return;
+      }
+
       var res = await fetch('/.netlify/functions/member-start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -574,15 +586,14 @@
           includeSq: false, // SQ auto-fill paused for launch - see SQ_FEATURE_PAUSED note
           companyDetails: companyDetails,
           accessToken: window._authToken || '',
-          wantsReview: !!window._wantsExpertReview
+          wantsReview: false
         })
       });
       var data = await res.json();
       if (!res.ok || !data.member) throw new Error(data.error || 'Membership could not be verified');
-      showProcessingScreen(data.jobId, data.email);
 
-      // Await the trigger: background functions reply instantly (202) and then
-      // run server-side regardless of what this browser does next
+      // No add-on: the base bid is included in membership, generate now.
+      showProcessingScreen(data.jobId, data.email);
       try {
         await fetch('/.netlify/functions/generate-cana-background', {
           method: 'POST',
@@ -592,32 +603,12 @@
             tenderId: data.tenderId || tenderId,
             sessionId: 'member_' + data.jobId,
             includeSq: data.includeSq,
-            wantsReview: !!window._wantsExpertReview,
-            tier: window._canaTier || (window._wantsExpertReview ? 'review' : 'none'),
+            wantsReview: false,
+            tier: 'none',
             companyDetails: data.companyDetails || companyDetails
           })
         });
       } catch(e) { console.error('Background trigger:', e.message); }
-
-      // Expert Review ticked: generation is running and docs will email
-      // regardless. Take the payment now, while intent is certain.
-      if (window._wantsExpertReview) {
-        window._wantsExpertReview = false;
-        try {
-          var rRes = await fetch('/.netlify/functions/plan-checkout', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              product: 'review',
-              tenderId: tenderId,
-              tenderTitle: (window._tenderData && window._tenderData.title) || '',
-              email: (companyDetails && companyDetails.email) || ''
-            })
-          });
-          var rData = await rRes.json();
-          if (rData.url) { window.location.href = rData.url; return; }
-        } catch(e) { console.error('Review checkout failed:', e.message); }
-      }
 
       pollJobStatus(data.jobId);
     } catch (e) {
@@ -625,6 +616,101 @@
       if (btn) { btn.disabled = false; }
     }
   };
+
+  // Send a member to Stripe to pay for a chosen add-on BEFORE anything is
+  // generated. Returns true if we redirected (caller should stop). The tender,
+  // company details and add-on choice are saved so we can generate on return.
+  async function startMemberAddonPayment(companyDetails) {
+    try {
+      localStorage.setItem('cana_company_details', JSON.stringify(companyDetails || {}));
+      localStorage.setItem('cana_tier', window._canaTier || 'review');
+      localStorage.setItem('cana_wants_review', '1');
+    } catch (e) {}
+    showState('loading');
+    var h = document.querySelector('.loading-state h3'); if (h) h.textContent = 'Taking you to payment';
+    var p = document.querySelector('.loading-state p');  if (p) p.textContent  = 'Your add-on needs to be paid before Cana writes your bid.';
+    var s = document.querySelector('.loading-state .loading-spinner'); if (s) s.style.display = '';
+    try {
+      var rRes = await fetch('/.netlify/functions/plan-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product: 'review',
+          tier: window._canaTier || 'review',
+          tenderId: tenderId,
+          tenderTitle: (tenderData && tenderData.title) || (window._tenderData && window._tenderData.title) || '',
+          email: (companyDetails && companyDetails.email) || window._memberEmail || ''
+        })
+      });
+      var rData = await rRes.json();
+      if (rData.url) { window.location.href = rData.url; return true; }
+      throw new Error(rData.error || 'Could not start payment');
+    } catch (e) {
+      showState('form');
+      alert('Could not start payment: ' + e.message);
+      return false;
+    }
+  }
+
+  // Member is back from paying for an add-on. Verify membership via member-start
+  // (which needs their sign-in token), then generate and email the bid.
+  async function resumeMemberAfterAddon() {
+    setStep(5);
+    showState('loading');
+    var h = document.querySelector('.loading-state h3'); if (h) h.textContent = 'Payment received';
+    var p = document.querySelector('.loading-state p');  if (p) p.textContent  = 'Cana is now writing your bid.';
+    var s = document.querySelector('.loading-state .loading-spinner'); if (s) s.style.display = '';
+    try {
+      var co = {};
+      try { co = JSON.parse(localStorage.getItem('cana_company_details') || '{}'); } catch (e) {}
+      var reviewSessionId = params.get('rs') || '';
+      var token = window._authToken || '';
+      if (!token) {
+        try {
+          var raw = JSON.parse(localStorage.getItem('sb-igpjfpncfuawikoyzfcd-auth-token') || '{}');
+          token = raw.access_token || (raw.currentSession && raw.currentSession.access_token) || '';
+        } catch (e) {}
+      }
+      var res = await fetch('/.netlify/functions/member-start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tenderId: tenderId,
+          includeSq: false,
+          companyDetails: co,
+          accessToken: token,
+          wantsReview: true,
+          reviewSessionId: reviewSessionId
+        })
+      });
+      var data = await res.json();
+      if (!res.ok || !data.member) throw new Error(data.error || 'Membership could not be verified');
+
+      showProcessingScreen(data.jobId, data.email);
+      fetch('/.netlify/functions/generate-cana-background', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jobId: data.jobId,
+          tenderId: data.tenderId || tenderId,
+          sessionId: 'member_' + data.jobId,
+          includeSq: data.includeSq,
+          wantsReview: data.wantsReview !== false,
+          tier: data.tier || 'review',
+          companyDetails: data.companyDetails || co
+        })
+      }).catch(function (e) { console.error('Background trigger failed:', e.message); });
+
+      try {
+        localStorage.removeItem('cana_wants_review');
+        localStorage.removeItem('cana_tier');
+      } catch (e) {}
+      pollJobStatus(data.jobId);
+    } catch (e) {
+      showState('form');
+      alert('Could not finish after payment: ' + e.message + '. Please contact hello@getcana.co.uk');
+    }
+  }
 
   // ── ONE shared Supabase client for the whole page (kills the
   //    'Multiple GoTrueClient instances' warning and repeated setup cost) ──
@@ -776,6 +862,13 @@
         company_name: co.name || chData.company_name || '',
         chData: chData
       });
+
+      // Paid add-on chosen: take payment FIRST. Nothing is generated and no
+      // email goes out until Stripe confirms. Generation happens on return.
+      if (window._wantsExpertReview) {
+        if (await startMemberAddonPayment(mergedCo)) return;
+      }
+
       var res = await fetch('/.netlify/functions/member-start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -783,12 +876,14 @@
           tenderId: tenderId,
           includeSq: false, // SQ auto-fill paused for launch - see SQ_FEATURE_PAUSED note
           companyDetails: mergedCo,
-          accessToken: window._authToken || ''
+          accessToken: window._authToken || '',
+          wantsReview: false
         })
       });
       var data = await res.json();
       if (!res.ok || !data.member) throw new Error(data.error || 'Membership could not be verified');
 
+      // No add-on: the base bid is included in membership, generate now.
       showProcessingScreen(data.jobId, data.email);
       fetch('/.netlify/functions/generate-cana-background', {
         method: 'POST',
@@ -797,8 +892,8 @@
           jobId: data.jobId,
           tenderId: data.tenderId || tenderId,
           sessionId: 'member_' + data.jobId,
-          wantsReview: !!window._wantsExpertReview,
-          tier: window._canaTier || (window._wantsExpertReview ? 'review' : 'none'),
+          wantsReview: false,
+          tier: 'none',
           includeSq: data.includeSq,
           companyDetails: data.companyDetails || mergedCo
         })
