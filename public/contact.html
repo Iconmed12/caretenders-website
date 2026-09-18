@@ -16,7 +16,9 @@
      site-chrome.css and legal.css; only the form and the two columns are new. */
   .contact-grid{ max-width:900px; margin:0 auto; padding:40px 20px 72px;
     display:grid; grid-template-columns:1.3fr 1fr; gap:34px; align-items:start; }
-  @media(max-width:720px){ .contact-grid{ grid-template-columns:1fr; gap:26px; } }
+  /* Below 900px, stop the two columns getting cramped: switch to a single,
+     tidy, centred column capped at a comfortable width. */
+  @media(max-width:900px){ .contact-grid{ grid-template-columns:1fr; max-width:560px; gap:26px; } }
 
   .contact-card{ background:#fff; border:1px solid var(--lg-line); border-radius:16px;
     padding:26px 24px; box-shadow:0 4px 24px rgba(11,25,41,.05); }
