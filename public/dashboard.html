@@ -412,8 +412,8 @@
                  :            { n:'Bronze', bg:'#f3e2d0', fg:'#8a5a2b' };
         var pill = document.getElementById('nav-tier');
         if (pill) {
-          pill.textContent = tier.n + ' member';
-          pill.style.cssText = 'display:inline-flex;align-items:center;font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;margin-right:4px;background:' + tier.bg + ';color:' + tier.fg + ';';
+          pill.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:' + tier.fg + ';margin-right:7px;flex:none"></span>' + tier.n + ' member';
+          pill.style.cssText = 'display:inline-flex;align-items:center;white-space:nowrap;flex:none;font-size:12px;font-weight:600;line-height:1;padding:6px 12px;border-radius:999px;margin-right:6px;background:' + tier.bg + ';color:' + tier.fg + ';';
         }
       }
     } catch(e) { /* leave the default upgrade wording */ }
