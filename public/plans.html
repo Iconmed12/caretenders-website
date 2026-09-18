@@ -9,7 +9,6 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root { --navy:#0B1929; --navy-mid:#11243A; --teal:#00C9E0; --teal-dk:#00a8bc; --white:#fff; --offwhite:#F4F6F9; --border:#E3E8EF; --muted:#5a6b7a; --amber:#d6a516; }
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -237,6 +236,9 @@
   </div>
 </div></footer>
 
+<!-- Login library loaded here, at the end, so it does not block the page from
+     showing. The membership check below runs right after it. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 var selectedTerm = 12;
 // ── Active membership detection ──
