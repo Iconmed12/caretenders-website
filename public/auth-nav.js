@@ -28,17 +28,17 @@
   }
 
   function chipHTML(tier) {
-    var coin;
+    var out = '';
+    // Members get a coin + tier name. Non-members get nothing here: "My account"
+    // next to "My dashboard" was just noise, so it is removed.
     if (tier) {
       var t = tierStyle(tier);
-      coin = '<span style="width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:' + t.grad + ';color:' + t.fg + ';box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.2)">' + tier.charAt(0) + '</span>';
-    } else {
-      coin = '<span style="width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;background:#00c9e0;color:#04303a">&#8226;</span>';
+      var coin = '<span style="width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:' + t.grad + ';color:' + t.fg + ';box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.2)">' + tier.charAt(0) + '</span>';
+      out += '<a href="/dashboard.html" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:#0b1929;font-weight:600;font-size:14.5px;margin-right:14px">' + coin + '<span>' + tier + ' member</span></a>';
     }
-    var label = tier ? (tier + ' member') : 'My account';
-    return '<a href="/dashboard.html" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:#0b1929;font-weight:600;font-size:14.5px;margin-right:14px">' + coin + '<span>' + label + '</span></a>' +
-      '<a href="/dashboard.html" style="display:inline-block;background:#00c9e0;color:#04303a;font-weight:700;border-radius:10px;padding:9px 16px;text-decoration:none;font-size:14px;margin-right:12px">My dashboard</a>' +
+    out += '<a href="/dashboard.html" style="display:inline-block;background:#00c9e0;color:#04303a;font-weight:700;border-radius:10px;padding:9px 16px;text-decoration:none;font-size:14px;margin-right:12px">My dashboard</a>' +
       '<a href="#" data-signout style="color:#5b6b78;font-size:13px;text-decoration:none;cursor:pointer">Sign out</a>';
+    return out;
   }
 
   function showChip(tier) { target.innerHTML = chipHTML(tier); }
