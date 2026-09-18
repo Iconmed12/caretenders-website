@@ -167,6 +167,19 @@
   </div>
 
 </div>
+<script>
+  /* Set the button wording immediately from the cached login state, so a
+     signed-in member does not see "Become a member" flash before it corrects.
+     The membership check further down still verifies and refines this. */
+  (function(){
+    try {
+      var c = JSON.parse(localStorage.getItem('cana_nav') || 'null');
+      if (!c || !c.signedIn) return;
+      var b = document.querySelector('.plan-btn.btn-solid');
+      if (b) b.textContent = c.tier ? 'Upgrade or manage membership' : 'Upgrade your account';
+    } catch (e) {}
+  })();
+</script>
 
 <!-- OPTIONAL EXPERT REVIEW, FOR EVERYONE -->
 <div class="addon-wrap">
