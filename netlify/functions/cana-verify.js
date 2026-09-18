@@ -12,7 +12,7 @@ exports.handler = async (event) => {
     const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
     const sbKey     = process.env.SUPABASE_ANON_KEY;
     const sbUrl     = 'https://igpjfpncfuawikoyzfcd.supabase.co';
-    const siteUrl   = 'https://caretenders-website.netlify.app';
+    const siteUrl   = 'https://getcana.co.uk';
 
     // ── Verify payment with Stripe ──
     const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions?limit=20', {

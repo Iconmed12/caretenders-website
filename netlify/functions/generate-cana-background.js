@@ -7,7 +7,7 @@ exports.handler = async (event) => {
   const RESEND = process.env.RESEND_API_KEY;
   const FROM   = 'noreply@getcana.co.uk';
   const AI_KEY = process.env.ANTHROPIC_API_KEY;
-  const SITE   = 'https://caretenders-website.netlify.app';
+  const SITE   = 'https://getcana.co.uk';
 
   var jobId = null;
 

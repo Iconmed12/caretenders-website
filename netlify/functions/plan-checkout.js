@@ -12,9 +12,15 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { product, email, tenderId, tenderTitle, tier } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    const { product, email, tenderId, tenderTitle, tier } = body;
+    // Embedded = the Stripe form mounts on our own page (customer stays on
+    // getcana.co.uk). We then return a client_secret instead of a redirect URL.
+    const embedded = !!body.embedded;
+    const SITE = 'https://getcana.co.uk';
     const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
     const params = new URLSearchParams();
+    if (embedded) params.append('ui_mode', 'embedded');
 
     if (product === 'membership') {
       // Terms: 3 / 6 / 12 months, one payment per term, auto-renewing.
@@ -33,8 +39,12 @@ exports.handler = async (event) => {
       params.append('line_items[0][price_data][recurring][interval]', t.interval);
       params.append('line_items[0][price_data][recurring][interval_count]', String(t.count));
       params.append('line_items[0][quantity]', '1');
-      params.append('success_url', 'https://caretenders-website.netlify.app/plans.html?subscribed=membership');
-      params.append('cancel_url', 'https://caretenders-website.netlify.app/plans.html');
+      if (embedded) {
+        params.append('return_url', SITE + '/plans.html?subscribed=membership&sess={CHECKOUT_SESSION_ID}');
+      } else {
+        params.append('success_url', SITE + '/plans.html?subscribed=membership');
+        params.append('cancel_url', SITE + '/plans.html');
+      }
       params.append('metadata[product]', 'membership');
       params.append('metadata[term_months]', String(t.count === 1 ? 12 : t.count));
     } else if (product === 'review') {
@@ -45,8 +55,12 @@ exports.handler = async (event) => {
       params.append('line_items[0][quantity]', '1');
       // {CHECKOUT_SESSION_ID} is filled in by Stripe on success, so the return
       // page carries the real session id and the server can verify the payment.
-      params.append('success_url', 'https://caretenders-website.netlify.app/cana.html?tender=' + (tenderId || '') + '&review=paid&rs={CHECKOUT_SESSION_ID}');
-      params.append('cancel_url', 'https://caretenders-website.netlify.app/cana.html?tender=' + (tenderId || ''));
+      if (embedded) {
+        params.append('return_url', SITE + '/cana.html?tender=' + (tenderId || '') + '&review=paid&rs={CHECKOUT_SESSION_ID}');
+      } else {
+        params.append('success_url', SITE + '/cana.html?tender=' + (tenderId || '') + '&review=paid&rs={CHECKOUT_SESSION_ID}');
+        params.append('cancel_url', SITE + '/cana.html?tender=' + (tenderId || ''));
+      }
       params.append('metadata[product]', 'review');
       params.append('metadata[tier]', (tier === 'review_docs' ? 'review_docs' : 'review'));
       if (tenderId) params.append('metadata[tender_id]', tenderId);
@@ -66,7 +80,11 @@ exports.handler = async (event) => {
     if (!res.ok || data.error) {
       return { statusCode: 500, headers: cors, body: JSON.stringify({ error: data.error ? data.error.message : 'Stripe error' }) };
     }
-    return { statusCode: 200, headers: cors, body: JSON.stringify({ url: data.url }) };
+    return {
+      statusCode: 200,
+      headers: cors,
+      body: JSON.stringify(embedded ? { clientSecret: data.client_secret } : { url: data.url })
+    };
   } catch (err) {
     return { statusCode: 500, headers: cors, body: JSON.stringify({ error: err.message }) };
   }

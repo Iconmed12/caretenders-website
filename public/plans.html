@@ -9,6 +9,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
 <style>
   :root { --navy:#0B1929; --navy-mid:#11243A; --teal:#00C9E0; --teal-dk:#00a8bc; --white:#fff; --offwhite:#F4F6F9; --border:#E3E8EF; --muted:#5a6b7a; --amber:#d6a516; }
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -331,22 +332,58 @@ function setTerm(t) {
 }
 function startMembership() { startCheckout('membership'); }
 
+// Stripe publishable key (safe to expose in the browser). While this is empty
+// the page falls back to the old redirect checkout, so nothing breaks.
+var STRIPE_PK = '';
+var _stripe = null, _embeddedCheckout = null;
+
+function releasePlanBtns() {
+  document.querySelectorAll('.plan-btn').forEach(function(b){ b.disabled = false; b.style.opacity = '1'; });
+}
+function closePayOverlay() {
+  try { if (_embeddedCheckout) { _embeddedCheckout.destroy(); _embeddedCheckout = null; } } catch(e){}
+  var ov = document.getElementById('pay-overlay');
+  if (ov) ov.style.display = 'none';
+  releasePlanBtns();
+}
+
 async function startCheckout(product) {
   var btns = document.querySelectorAll('.plan-btn');
   btns.forEach(function(b){ b.disabled = true; b.style.opacity = '0.6'; });
+
+  // Fallback: no publishable key yet, or Stripe.js unavailable -> old redirect.
+  if (!STRIPE_PK || typeof Stripe === 'undefined') {
+    try {
+      var r = await fetch('/.netlify/functions/plan-checkout', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product: product, term: selectedTerm })
+      });
+      var d = await r.json();
+      if (d.url) { window.location.href = d.url; return; }
+      alert(d.error || 'Could not start checkout. Please try again.');
+    } catch (e) { alert('Could not start checkout. Please try again.'); }
+    releasePlanBtns();
+    return;
+  }
+
+  // Embedded checkout: the payment form opens on this page.
   try {
     var res = await fetch('/.netlify/functions/plan-checkout', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product: product, term: selectedTerm })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product: product, term: selectedTerm, embedded: true })
     });
     var data = await res.json();
-    if (data.url) { window.location.href = data.url; return; }
-    alert(data.error || 'Could not start checkout. Please try again.');
+    if (!data.clientSecret) { alert(data.error || 'Could not start checkout. Please try again.'); releasePlanBtns(); return; }
+    if (!_stripe) _stripe = Stripe(STRIPE_PK);
+    var mount = document.getElementById('checkout-mount');
+    if (mount) mount.innerHTML = '';
+    document.getElementById('pay-overlay').style.display = 'block';
+    _embeddedCheckout = await _stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
+    _embeddedCheckout.mount('#checkout-mount');
   } catch (e) {
     alert('Could not start checkout. Please try again.');
+    closePayOverlay();
   }
-  btns.forEach(function(b){ b.disabled = false; b.style.opacity = '1'; });
 }
 
 (function(){
@@ -356,6 +393,20 @@ async function startCheckout(product) {
   if (hero) hero.innerHTML = '<strong style="color:#27c93f;">Welcome aboard! Your membership is active.</strong> Check your email for your receipt; we will be in touch within one working day to set up your company profile.';
 })();
 </script>
+
+<!-- On-page Stripe checkout (customer stays on getcana.co.uk) -->
+<div id="pay-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(11,25,41,0.62);overflow-y:auto;">
+  <div style="max-width:560px;margin:36px auto;padding:0 16px;">
+    <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,0.35);">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border);">
+        <div style="font-family:'Inter',sans-serif;font-weight:700;color:var(--navy);">Complete your membership</div>
+        <button onclick="closePayOverlay()" aria-label="Close" style="border:none;background:none;font-size:1.5rem;line-height:1;color:var(--muted);cursor:pointer;padding:0 4px;">&times;</button>
+      </div>
+      <div id="checkout-mount" style="padding:8px;min-height:120px;"></div>
+    </div>
+    <p style="text-align:center;color:#cdd7e0;font-size:0.78rem;margin-top:12px;">Payments are securely processed by Stripe. Cana never sees your card details.</p>
+  </div>
+</div>
 
 <script src="/mobile-nav.js" defer></script>
 </body>

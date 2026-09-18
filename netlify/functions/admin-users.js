@@ -106,7 +106,7 @@ exports.handler = async (event) => {
       const email = String(body.email || '').trim().toLowerCase();
       if (!email) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing email' }) };
 
-      const site = (process.env.URL || 'https://caretenders-website.netlify.app').replace(/\/$/, '');
+      const site = (process.env.URL || 'https://getcana.co.uk').replace(/\/$/, '');
       const r = await fetch(SB_URL + '/auth/v1/recover', {
         method: 'POST',
         headers: { apikey: anon || srv, 'Content-Type': 'application/json' },
