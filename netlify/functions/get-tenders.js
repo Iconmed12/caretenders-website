@@ -33,8 +33,6 @@ exports.handler = async (event) => {
     if (scope !== 'all') query = query.in('status', ['live', 'open', 'closing', 'urgent']);
     const { data, error } = await query;
 
-    // Heavy fields not selected -- list rows are already light.
-
     if (error) {
       return {
         statusCode: 500,
@@ -43,10 +41,43 @@ exports.handler = async (event) => {
       };
     }
 
+    let rows = data || [];
+
+    // Admin view (scope=all): the Cana rail needs to know which documents each
+    // tender has, so the "Missing" chips are accurate. The list stays light; we
+    // pull the doc fields only for the few tenders the rail actually shows
+    // (live / needs_docs / open), compute booleans, and never return the heavy
+    // content itself.
+    if (scope === 'all') {
+      const panelIds = rows
+        .filter(function (r) { return ['live', 'needs_docs', 'open'].indexOf(r.status) !== -1; })
+        .map(function (r) { return r.id; });
+      if (panelIds.length) {
+        const { data: docRows } = await supabase
+          .from('tenders')
+          .select('id,cana_docs,cana_questions')
+          .in('id', panelIds);
+        const byId = {};
+        (docRows || []).forEach(function (dr) { byId[dr.id] = dr; });
+        rows.forEach(function (r) {
+          const dr = byId[r.id];
+          if (!dr) return;
+          const cd = dr.cana_docs || {};
+          const qCount = Array.isArray(dr.cana_questions) ? dr.cana_questions.length : 0;
+          r.docFlags = {
+            sq: !!cd.sq || (Array.isArray(cd.sq) && cd.sq.length > 0),
+            quality: (Array.isArray(cd.quality) && cd.quality.length > 0) || qCount > 0,
+            spec: Array.isArray(cd.spec) && cd.spec.length > 0,
+            scoring: Array.isArray(cd.scoring) && cd.scoring.length > 0
+          };
+        });
+      }
+    }
+
     return {
       statusCode: 200,
       headers: corsHeaders,
-      body: JSON.stringify(data || [])
+      body: JSON.stringify(rows)
     };
 
   } catch (err) {
