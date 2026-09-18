@@ -368,6 +368,7 @@ footer ul a:hover{color:var(--cyan)}
     <a class="btn btn-cyan" style="padding:11px 18px" href="/register.html">Get started</a>
   </div>
 </div></nav>
+<script src="/auth-nav.js"></script>
 
 <!-- HERO (rebuilt in HTML) -->
 <style>
@@ -738,55 +739,8 @@ footer ul a:hover{color:var(--cyan)}
 </div></footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-/* ── Show logged-in state in the nav (account + dashboard) ── */
-(function(){
-  if (typeof supabase === 'undefined') return;
-  var _sb = supabase.createClient('https://igpjfpncfuawikoyzfcd.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA');
-  window._sbHome = _sb;
-  window.handleHomeSignOut = function(){ _sb.auth.signOut().then(function(){ location.reload(); }); };
-  // Staff and owner accounts live on the getcana.co.uk domain (e.g.
-  // ahmed@staff.getcana.co.uk). They are not customers, so the public site must
-  // never show them a customer account or dashboard.
-  function isInternal(email){ return String(email || '').toLowerCase().indexOf('getcana.co.uk') !== -1; }
-
-  _sb.auth.getSession().then(function(r){
-    var s = r && r.data && r.data.session;
-    var nav = document.getElementById('nav-right');
-    if (!nav || !s || !s.user) return;
-    if (isInternal(s.user.email)) return; // internal account, leave the normal logged-out nav
-    var meta = s.user.user_metadata || {};
-    var fn = meta.first_name || '';
-    var ln = meta.last_name || '';
-    var name = (fn + ' ' + ln).trim() || s.user.email || 'My account';
-    var initials = ((fn || s.user.email || '?').charAt(0) + (ln.charAt(0) || '')).toUpperCase();
-    nav.innerHTML =
-      '<a class="nav-account" href="/dashboard.html"><span class="nav-dot" id="nav-coin">' + initials + '</span><span id="nav-acct-label">' + name + '</span></a>' +
-      '<a class="btn btn-cyan" href="/dashboard.html" style="padding:11px 18px">My dashboard</a>' +
-      '<a href="#" class="nav-signin" onclick="handleHomeSignOut();return false;">Sign out</a>';
-
-    // For members, the account chip becomes a tier coin plus "Bronze/Silver/Gold
-    // member" in place of the name. Term maps to tier: 3 Bronze, 6 Silver, 12+ Gold.
-    fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(s.user.email))
-      .then(function(r){ return r.json(); })
-      .then(function(mem){
-        if (!mem || !mem.member) return;
-        var m = parseInt(mem.term_months, 10) || 0;
-        var tier = m >= 12 ? { n:'Gold',   grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
-                 : m >= 6  ? { n:'Silver', grad:'radial-gradient(circle at 34% 28%,#f3f5f8,#b7c0cb)', fg:'#3f4a56' }
-                 :           { n:'Bronze', grad:'radial-gradient(circle at 34% 28%,#eccba0,#b3763f)', fg:'#5c3a17' };
-        var coin = document.getElementById('nav-coin');
-        if (coin) {
-          coin.textContent = tier.n.charAt(0);
-          coin.style.cssText = 'width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;flex:none;background:' + tier.grad + ';color:' + tier.fg + ';box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.2)';
-        }
-        var label = document.getElementById('nav-acct-label');
-        if (label) label.textContent = tier.n + ' member';
-      })
-      .catch(function(){});
-  }).catch(function(){});
-})();
-</script>
+<!-- Logged-in nav is handled by /auth-nav.js, loaded right after the nav so it
+     renders before paint. This just keeps the Supabase library available to it. -->
 
 <script>
 /* ── Live care opportunities: pull real tenders from the admin/back end ── */
