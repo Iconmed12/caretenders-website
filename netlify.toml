@@ -2,6 +2,21 @@
   publish = "public"
   functions = "netlify/functions"
 
+# Keep the raw netlify.app address from ever showing to visitors: send it to
+# the brand domain. Function calls (Stripe webhooks, scheduled jobs) are left
+# alone by the first rule so a redirect can never break a webhook POST.
+[[redirects]]
+  from = "https://caretenders-website.netlify.app/.netlify/*"
+  to = "https://caretenders-website.netlify.app/.netlify/:splat"
+  status = 200
+  force = false
+
+[[redirects]]
+  from = "https://caretenders-website.netlify.app/*"
+  to = "https://getcana.co.uk/:splat"
+  status = 301
+  force = true
+
 [functions."stream-response"]
   timeout = 26
 
