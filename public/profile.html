@@ -147,7 +147,7 @@
   <div id="membership-section" style="display:none;background:linear-gradient(135deg,#0B1929,#11243A);border-radius:14px;padding:1.25rem 1.5rem;margin-bottom:1.5rem;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
       <div style="display:flex;align-items:center;gap:12px;">
-        <div style="background:rgba(0,201,224,0.15);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1rem;"></div>
+        <div id="profile-tier-coin" style="background:rgba(0,201,224,0.15);border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;flex-shrink:0;"></div>
         <div>
           <div style="color:#fff;font-weight:700;font-size:0.92rem;" id="profile-plan-name">Cana Membership</div>
           <div style="color:rgba(255,255,255,0.5);font-size:0.75rem;" id="profile-plan-detail">Unlimited bidding active</div>
@@ -775,9 +775,19 @@
     if (!section) return;
     section.style.display = 'block';
     // Term maps to a tier: 3 = Bronze, 6 = Silver, 12 = Gold (any 12+ is Gold).
-    var canaTierName = function (m) { m = parseInt(m, 10) || 0; return m >= 12 ? 'Gold' : m >= 6 ? 'Silver' : 'Bronze'; };
+    var mmT = parseInt(memData.term_months, 10) || 0;
+    var canaTier = mmT >= 12 ? { n:'Gold',   grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
+                 : mmT >= 6  ? { n:'Silver', grad:'radial-gradient(circle at 34% 28%,#f3f5f8,#b7c0cb)', fg:'#3f4a56' }
+                 :             { n:'Bronze', grad:'radial-gradient(circle at 34% 28%,#eccba0,#b3763f)', fg:'#5c3a17' };
     if (planName && memData.term_months) {
-      planName.textContent = canaTierName(memData.term_months) + ' membership';
+      planName.textContent = canaTier.n + ' membership';
+    }
+    var coin = document.getElementById('profile-tier-coin');
+    if (coin && memData.term_months) {
+      coin.textContent = canaTier.n.charAt(0);
+      coin.style.background = canaTier.grad;
+      coin.style.color = canaTier.fg;
+      coin.style.boxShadow = 'inset 0 0 0 1.5px rgba(255,255,255,.55), 0 1px 2px rgba(0,0,0,.25)';
     }
     if (planDetail && memData.current_period_end) {
       var d = new Date(memData.current_period_end);
