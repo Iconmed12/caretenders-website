@@ -773,8 +773,10 @@
     var planDetail = document.getElementById('profile-plan-detail');
     if (!section) return;
     section.style.display = 'block';
+    // Term maps to a tier: 3 = Bronze, 6 = Silver, 12 = Gold (any 12+ is Gold).
+    var canaTierName = function (m) { m = parseInt(m, 10) || 0; return m >= 12 ? 'Gold' : m >= 6 ? 'Silver' : 'Bronze'; };
     if (planName && memData.term_months) {
-      planName.textContent = memData.term_months + '-Month Cana Membership';
+      planName.textContent = canaTierName(memData.term_months) + ' membership';
     }
     if (planDetail && memData.current_period_end) {
       var d = new Date(memData.current_period_end);

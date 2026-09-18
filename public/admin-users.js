@@ -32,7 +32,9 @@ function membershipCell(m) {
   if (!m || !m.member) {
     return '<span style="font-size:11px;font-weight:700;background:#eef3f6;color:#5a6b7a;padding:3px 9px;border-radius:999px">Free</span>';
   }
-  var term = m.term_months ? (m.term_months + ' month' + (m.term_months > 1 ? 's' : '')) : '';
+  var months = parseInt(m.term_months, 10) || 0;
+  var tierName = months >= 12 ? 'Gold' : months >= 6 ? 'Silver' : months >= 1 ? 'Bronze' : '';
+  var term = months ? (tierName + ' · ' + months + ' month' + (months > 1 ? 's' : '')) : '';
   var out = '<span style="font-size:11px;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:3px 9px;border-radius:999px">Member</span>';
   if (term) out += '<div style="font-size:11px;color:var(--text-light);margin-top:3px">' + term + '</div>';
   if (m.renews) {
