@@ -266,11 +266,22 @@
     // Store stripe link for Pay Now button
     window._currentStripeLink = t.stripe_link || '';
 
-    // Cana button always shows the same regardless of submission link
+    // Cana button + pricing. Members have unlimited bidding, so they must not be
+    // shown the per-tender £480 price or the "become a member" upsell. Decide
+    // from the cached login state so it is right on first paint.
+    var navCache = {};
+    try { navCache = JSON.parse(localStorage.getItem('cana_nav') || '{}') || {}; } catch (e) {}
+    var isMember = !!(navCache.signedIn && navCache.tier);
+
     const applyBtn=document.getElementById('modal-apply-btn');
     applyBtn.href='/cana.html?tender=' + (t.id||'');
-    applyBtn.innerHTML='<div class="btn-cta-icon"></div><div class="btn-cta-text"><span class="btn-cta-label">Write with Cana</span><span class="btn-cta-desc">Let Cana draft your full tender response instantly</span></div>';
-    applyBtn.className='btn-cta btn-cta--ai';
+    var priceLabel = isMember ? 'Included' : 'From £480';
+    applyBtn.innerHTML = '<span>Write with Cana</span><span style="background:rgba(11,25,41,0.12);border-radius:5px;padding:2px 10px;font-size:0.8rem;">' + priceLabel + '</span>';
+
+    var priceBadge = document.getElementById('modal-price-badge');
+    if (priceBadge) priceBadge.textContent = priceLabel;
+    var upsell = document.getElementById('modal-upsell');
+    if (upsell) upsell.style.display = isMember ? 'none' : '';
 
     // Source link  - shown on both public modal and admin
     var srcEl = document.getElementById('modal-source-link');

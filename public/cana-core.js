@@ -99,39 +99,35 @@
 
   function showProcessingScreen(jobId, email) {
     showState('loading');
+    // Move the step tracker to the final step instead of leaving it stranded.
+    setStep(5);
     var h3 = document.querySelector('.loading-state h3');
     var p  = document.querySelector('.loading-state p');
     var spinner = document.querySelector('.loading-state .loading-spinner');
     if (spinner) spinner.style.display = 'none';
-    if (h3) { h3.innerHTML = '✅ Payment received, Cana is on it'; }
+    // Members pay nothing (it is included), so do not tell them "Payment received".
+    var isMember = !!window._isMember;
+    if (h3) { h3.innerHTML = isMember ? '&#9989; You are all set, Cana is writing your bid' : '&#9989; Payment received, Cana is on it'; }
     if (p)  { p.innerHTML =
       'Your bid responses will be sent to <strong>' + (email||'your email') + '</strong> as Word documents.<br><br>' +
       '<span style="color:var(--muted);font-size:0.88em;">Expect to receive your documents within 1 hour. ' +
       'If you don\'t receive anything please email <strong>hello@getcana.co.uk</strong></span>'; }
 
-    // Prompt to register an account (for guest buyers)
+    // Prompt guest buyers to create an account. Never show it to someone who is
+    // already signed in or is a member.
     setTimeout(function() {
       var loadingState = document.querySelector('.loading-state');
       if (!loadingState) return;
-      var existing = document.getElementById('register-prompt');
-      if (existing) return;
-      // Only show if not already logged in
-      var sb = window._supabase;
-      var showPrompt = function() {
-        var promptDiv = document.createElement('div');
-        promptDiv.id = 'register-prompt';
-        promptDiv.style.cssText = 'margin-top:2rem;padding:1.5rem;background:linear-gradient(135deg,rgba(0,201,224,0.08),rgba(11,25,41,0.04));border:1.5px solid rgba(0,201,224,0.3);border-radius:14px;text-align:center;';
-        promptDiv.innerHTML =
-          '<div style="font-family:\'Playfair Display\',serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Save your details for next time</div>' +
-          '<p style="color:var(--muted);font-size:0.88rem;margin-bottom:1rem;line-height:1.6;">Create a free account to track this bid, store your company profile and CQC rating, and complete future bids in minutes instead of starting from scratch.</p>' +
-          '<a href="/register.html?email=' + encodeURIComponent(email||'') + '" style="display:inline-block;background:var(--navy);color:#fff;padding:11px 28px;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Create free account</a>';
-        loadingState.appendChild(promptDiv);
-      };
-      if (sb && sb.auth) {
-        sb.auth.getUser().then(function(res){ if (!res || !res.data || !res.data.user) showPrompt(); }).catch(showPrompt);
-      } else {
-        showPrompt();
-      }
+      if (document.getElementById('register-prompt')) return;
+      if (window._sessEmail || window._isMember) return; // signed in / member: skip
+      var promptDiv = document.createElement('div');
+      promptDiv.id = 'register-prompt';
+      promptDiv.style.cssText = 'margin-top:2rem;padding:1.5rem;background:linear-gradient(135deg,rgba(0,201,224,0.08),rgba(11,25,41,0.04));border:1.5px solid rgba(0,201,224,0.3);border-radius:14px;text-align:center;';
+      promptDiv.innerHTML =
+        '<div style="font-family:\'Playfair Display\',serif;font-size:1.15rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem;">Save your details for next time</div>' +
+        '<p style="color:var(--muted);font-size:0.88rem;margin-bottom:1rem;line-height:1.6;">Create a free account to track this bid, store your company profile and CQC rating, and complete future bids in minutes instead of starting from scratch.</p>' +
+        '<a href="/register.html?email=' + encodeURIComponent(email||'') + '" style="display:inline-block;background:var(--navy);color:#fff;padding:11px 28px;border-radius:8px;font-weight:700;text-decoration:none;font-size:0.9rem;">Create free account</a>';
+      loadingState.appendChild(promptDiv);
     }, 2500);
 
     window._jobId = jobId;

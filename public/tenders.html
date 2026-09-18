@@ -587,7 +587,7 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
             <div style="font-size:0.78rem;color:var(--muted);line-height:1.55;">Cana writes your tender responses, tailored to this specific tender using your company information. You review and submit.</div>
           </div>
           <div style="background:rgba(0,201,224,0.1);border:1px solid rgba(0,201,224,0.25);border-radius:8px;padding:6px 12px;text-align:center;flex-shrink:0;">
-            <div style="font-size:1rem;font-weight:700;color:var(--teal-dk);">From £480</div>
+            <div id="modal-price-badge" style="font-size:1rem;font-weight:700;color:var(--teal-dk);">From £480</div>
           </div>
         </div>
         <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:1rem;">
@@ -605,8 +605,8 @@ body.ct .loading-msg,body.ct .empty-state{color:var(--ct-muted);padding:20px 4px
         </a>
       </div>
 
-      <!-- MEMBERSHIP STRIP (rung between) -->
-      <a href="/plans.html" style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(0,201,224,0.06);border:1.5px dashed rgba(0,168,188,0.45);border-radius:10px;padding:10px 14px;margin-top:0.85rem;text-decoration:none;">
+      <!-- MEMBERSHIP STRIP (rung between). Hidden for members by openModal(). -->
+      <a href="/plans.html" id="modal-upsell" style="display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(0,201,224,0.06);border:1.5px dashed rgba(0,168,188,0.45);border-radius:10px;padding:10px 14px;margin-top:0.85rem;text-decoration:none;">
         <span style="font-size:0.78rem;color:#33475b;line-height:1.5;"><strong style="color:var(--navy);">Bidding regularly?</strong> Members bid unlimited tenders from £897 per 3-month term. Cana writes, you submit.</span>
         <span style="font-size:0.78rem;font-weight:700;color:var(--teal-dk);white-space:nowrap;">View membership</span>
       </a>
