@@ -18,6 +18,21 @@
     // Coming back from Stripe - verify payment then show responses
     loadTender().then(() => verifyAndUnlock(sessionId));
   } else {
+    // If a session token is present, the visitor is likely a signed-in member.
+    // Show a loading state right away instead of the empty guest form, so their
+    // saved details do not flash in after it. initMemberExperience() then shows
+    // the member dashboard, or falls back to the form for guests/non-members.
+    try {
+      if (localStorage.getItem('sb-igpjfpncfuawikoyzfcd-auth-token')) {
+        window._sessionHint = true;
+        showState('loading');
+        var _lh = document.querySelector('.loading-state h3'); if (_lh) _lh.textContent = 'Loading your details...';
+        var _lp = document.querySelector('.loading-state p');  if (_lp) _lp.textContent  = 'One moment while we load your saved profile.';
+        var _ls = document.querySelector('.loading-state .loading-spinner'); if (_ls) _ls.style.display = '';
+        // Safety net: never leave someone stuck on the loading state.
+        setTimeout(function () { var s = document.getElementById('state-loading'); if (s && s.classList.contains('active')) showState('form'); }, 8000);
+      }
+    } catch (e) {}
     loadTender();
   }
 
@@ -348,7 +363,7 @@
   async function initMemberExperience() {
     // Single auth call, then parallel membership + profile fetches
     var sess = await getAuthSession();
-    if (!sess || !sess.email) return;
+    if (!sess || !sess.email) { showState('form'); return; } // no real session: show the form
 
     // Signed in: pre-fill the email field so they don't retype it, and greet them
     var emailField = document.getElementById('f-email');
@@ -375,6 +390,9 @@
     if (profile) {
       prefillFormFromProfile(profile, sess.email);
     }
+    // Not a member dashboard, so land on the form (revealing it if we had shown
+    // the loading state for a signed-in visitor).
+    showState('form');
   }
 
   // Fill the Cana company form from a saved company_profiles row
@@ -698,27 +716,21 @@
     if (!email) return { member: false, verified: false };
     var member = false;
     var cacheKey = 'cana_member_' + email.toLowerCase();
+    // Always fetch fresh so the tier and term are current: a cached value went
+    // stale right after an upgrade (e.g. Silver still showing as Bronze). The
+    // cache is only a fallback if the network call fails.
     try {
-      // 10-minute cache: repeat tender visits skip the network round trip
-      var cached = sessionStorage.getItem(cacheKey);
-      var c = null;
-      if (cached) {
-        c = JSON.parse(cached);
-        if (Date.now() - c.ts < 10 * 60 * 1000) { member = !!c.member; window._memberMeta = c; }
-        else { cached = null; c = null; }
-      }
-      var hasAccount = false;
-      if (cached) {
-        hasAccount = !!c.has_account;
-      } else {
-        var res = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
-        var data = await res.json();
-        member = !!data.member;
-        hasAccount = !!data.has_account;
-        window._memberMeta = { member: member, has_account: hasAccount, term_months: data.term_months, current_period_end: data.current_period_end, ts: Date.now() };
-        try { sessionStorage.setItem(cacheKey, JSON.stringify(window._memberMeta)); } catch(e2) {}
-      }
-    } catch (e) { member = false; }
+      var res = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
+      var data = await res.json();
+      member = !!data.member;
+      window._memberMeta = { member: member, has_account: !!data.has_account, term_months: data.term_months, current_period_end: data.current_period_end, ts: Date.now() };
+      try { sessionStorage.setItem(cacheKey, JSON.stringify(window._memberMeta)); } catch(e2) {}
+    } catch (e) {
+      try {
+        var c = JSON.parse(sessionStorage.getItem(cacheKey) || 'null');
+        if (c) { member = !!c.member; window._memberMeta = c; }
+      } catch (e3) {}
+    }
 
     var verified = false;
     if (member) {
