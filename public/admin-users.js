@@ -21,15 +21,34 @@ function fmtDate(d) {
   return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+function daysLeft(dateStr) {
+  if (!dateStr) return null;
+  var d = new Date(dateStr);
+  if (isNaN(d.getTime())) return null;
+  return Math.ceil((d.getTime() - Date.now()) / 86400000);
+}
+
 function membershipCell(m) {
   if (!m || !m.member) {
     return '<span style="font-size:11px;font-weight:700;background:#eef3f6;color:#5a6b7a;padding:3px 9px;border-radius:999px">Free</span>';
   }
-  var term = m.term_months ? (m.term_months + ' month') : '';
-  var renews = m.renews ? ('renews ' + fmtDate(m.renews)) : '';
-  var sub = [term, renews].filter(Boolean).join(' · ');
-  return '<span style="font-size:11px;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:3px 9px;border-radius:999px">Member</span>' +
-         (sub ? '<div style="font-size:11px;color:var(--text-light);margin-top:3px">' + sub + '</div>' : '');
+  var term = m.term_months ? (m.term_months + ' month' + (m.term_months > 1 ? 's' : '')) : '';
+  var out = '<span style="font-size:11px;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:3px 9px;border-radius:999px">Member</span>';
+  if (term) out += '<div style="font-size:11px;color:var(--text-light);margin-top:3px">' + term + '</div>';
+  if (m.renews) {
+    var dl = daysLeft(m.renews);
+    var colour = 'var(--text-light)';
+    var txt;
+    if (dl === null) { txt = 'renews ' + fmtDate(m.renews); }
+    else if (dl < 0) { colour = '#c53030'; txt = 'Expired ' + fmtDate(m.renews); }
+    else if (dl <= 10) { colour = '#c53030'; txt = 'Expires in ' + dl + ' day' + (dl === 1 ? '' : 's'); }
+    else if (dl <= 30) { colour = '#b7791f'; txt = fmtDate(m.renews) + ' · ' + dl + ' days left'; }
+    else { txt = fmtDate(m.renews) + ' · ' + dl + ' days left'; }
+    out += '<div style="font-size:11px;font-weight:600;color:' + colour + ';margin-top:2px">' + txt + '</div>';
+  } else {
+    out += '<div style="font-size:11px;color:var(--text-light);margin-top:2px">No expiry set</div>';
+  }
+  return out;
 }
 
 function renderUsersTable(list) {
@@ -50,10 +69,14 @@ function renderUsersTable(list) {
       '<td>' + membershipCell(u.membership) + '</td>' +
       '<td style="font-size:13px">' + fmtDate(u.created_at) + '</td>' +
       '<td style="font-size:13px">' + fmtDate(u.last_sign_in_at) + '</td>' +
-      '<td style="white-space:nowrap">' +
-        '<button style="' + UBTN + '" data-email="' + String(u.email || '').replace(/"/g, '&quot;') + '" onclick="resetUserPassword(this.dataset.email, this)">Send password reset</button>' +
+      '<td>' +
         (u.is_staff ? '' :
-          '<button style="' + UBTN + 'margin-left:6px;color:#c53030;border-color:#f0c2c2" ' +
+          '<button style="' + UBTN + 'margin:0 6px 6px 0;color:#0f6e56;border-color:#9fe1cb;font-weight:600" ' +
+            'data-email="' + String(u.email || '').replace(/"/g, '&quot;') + '" ' +
+            'onclick="openMembershipModal(this.dataset.email)">Manage membership</button>') +
+        '<button style="' + UBTN + 'margin:0 6px 6px 0" data-email="' + String(u.email || '').replace(/"/g, '&quot;') + '" onclick="resetUserPassword(this.dataset.email, this)">Send password reset</button>' +
+        (u.is_staff ? '' :
+          '<button style="' + UBTN + 'margin:0 0 6px 0;color:#c53030;border-color:#f0c2c2" ' +
             'data-id="' + String(u.id || '') + '" ' +
             'data-email="' + String(u.email || '').replace(/"/g, '&quot;') + '" ' +
             'data-member="' + (u.membership && u.membership.member ? '1' : '') + '" ' +
@@ -120,6 +143,185 @@ async function deleteUser(id, email, isMember, btn) {
     loadUsers();
   } catch (e) {
     if (btn) { btn.disabled = false; btn.textContent = original; }
+    if (typeof showToast === 'function') showToast(e.message, 'error'); else alert(e.message);
+  }
+}
+
+// ── Manage membership modal ──────────────────────────────────────────────
+function ensureMemStyles() {
+  if (document.getElementById('mm-styles')) return;
+  var css = document.createElement('style');
+  css.id = 'mm-styles';
+  css.textContent =
+    '.mm-overlay{position:fixed;inset:0;background:rgba(11,25,41,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px}' +
+    '.mm-card{background:#fff;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.25);width:520px;max-width:100%;max-height:92vh;overflow:auto;font-family:inherit}' +
+    '.mm-head{background:#0a2a1e;color:#fff;padding:18px 22px}' +
+    '.mm-head h3{margin:0;font-size:17px;font-weight:700}' +
+    '.mm-head p{margin:4px 0 0;font-size:12.5px;color:#9fc9b8}' +
+    '.mm-body{padding:20px 22px}' +
+    '.mm-cur{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:20px;font-size:13.5px}' +
+    '.mm-fl{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);display:block;margin:0 0 8px}' +
+    '.mm-seg{display:flex;gap:8px;margin-bottom:18px}' +
+    '.mm-seg button{flex:1;border:1.5px solid var(--border);background:#fff;border-radius:8px;padding:10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--text-muted);cursor:pointer}' +
+    '.mm-seg button.on{border-color:var(--green);background:var(--green-light);color:var(--green-dark)}' +
+    '.mm-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}' +
+    '.mm-row input,.mm-row select,.mm-note input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;color:var(--text);background:#fff}' +
+    '.mm-note{margin-bottom:18px}' +
+    '.mm-computed{background:var(--green-light);border:1px solid #9fe1cb;border-radius:8px;padding:12px 14px;margin-bottom:18px}' +
+    '.mm-comp-k{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--green-dark)}' +
+    '.mm-comp-v{font-size:15px;font-weight:800;color:var(--green-dark);margin-top:3px}' +
+    '.mm-actions{display:flex;gap:10px}' +
+    '.mm-actions button{flex:1;border-radius:8px;padding:12px;font-family:inherit;font-size:13.5px;font-weight:700;cursor:pointer;border:1.5px solid}' +
+    '.mm-save{background:var(--green);border-color:var(--green);color:#fff}' +
+    '.mm-down{background:#fff;border-color:#f0c2c2;color:#c53030}' +
+    '.mm-note-p{font-size:12px;color:var(--text-light);margin-top:14px;line-height:1.6}' +
+    '.mm-x{float:right;background:none;border:0;color:#9fc9b8;font-size:20px;cursor:pointer;line-height:1}';
+  document.head.appendChild(css);
+}
+
+function closeMembershipModal() {
+  var o = document.getElementById('mm-overlay');
+  if (o) o.remove();
+}
+
+function mmRecompute() {
+  var modal = document.getElementById('mm-overlay');
+  if (!modal) return;
+  var termSel = modal.querySelector('#mm-term');
+  var customWrap = modal.querySelector('#mm-custom-wrap');
+  var months = termSel.value === 'custom'
+    ? parseInt((modal.querySelector('#mm-custom') || {}).value, 10)
+    : parseInt(termSel.value, 10);
+  customWrap.style.display = termSel.value === 'custom' ? 'block' : 'none';
+
+  var startVal = modal.querySelector('#mm-start').value;
+  var start = startVal ? new Date(startVal) : new Date();
+  var box = modal.querySelector('#mm-computed');
+  if (!months || months < 1 || months > 60 || isNaN(start.getTime())) {
+    box.innerHTML = '<div class="mm-comp-k">Membership will run until</div><div class="mm-comp-v">Enter a valid term (1 to 60 months)</div>';
+    return;
+  }
+  var end = new Date(start.getTime());
+  end.setMonth(end.getMonth() + months);
+  var days = Math.ceil((end.getTime() - Date.now()) / 86400000);
+  box.innerHTML = '<div class="mm-comp-k">Membership will run until</div><div class="mm-comp-v">' +
+    end.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) +
+    ' · ' + days + ' days</div>';
+}
+
+function openMembershipModal(email) {
+  var u = ALL_USERS.filter(function (x) { return String(x.email || '').toLowerCase() === String(email || '').toLowerCase(); })[0];
+  if (!u) return;
+  ensureMemStyles();
+  closeMembershipModal();
+
+  var m = u.membership || {};
+  var isMember = !!m.member;
+  var today = new Date().toISOString().slice(0, 10);
+  var curText = isMember
+    ? ('Member' + (m.term_months ? ', ' + m.term_months + ' month' + (m.term_months > 1 ? 's' : '') : '') +
+        (m.renews ? ', expires ' + fmtDate(m.renews) : ''))
+    : 'Free account';
+
+  var o = document.createElement('div');
+  o.className = 'mm-overlay';
+  o.id = 'mm-overlay';
+  o.setAttribute('data-email', u.email || '');
+  o.innerHTML =
+    '<div class="mm-card">' +
+      '<div class="mm-head"><button class="mm-x" onclick="closeMembershipModal()">&times;</button>' +
+        '<h3>Manage membership</h3><p>' + (u.name || u.email) + ' · ' + (u.email || '') + '</p></div>' +
+      '<div class="mm-body">' +
+        '<div class="mm-cur"><strong>Current:</strong> ' + curText + '</div>' +
+        '<span class="mm-fl">Set to</span>' +
+        '<div class="mm-seg">' +
+          '<button type="button" id="mm-plan-member" class="on" onclick="mmSetPlan(true)">Member</button>' +
+          '<button type="button" id="mm-plan-free" onclick="mmSetPlan(false)">Free</button>' +
+        '</div>' +
+        '<div id="mm-member-fields">' +
+          '<div class="mm-row">' +
+            '<div><span class="mm-fl">Term</span>' +
+              '<select id="mm-term" onchange="mmRecompute()">' +
+                '<option value="3">3 months</option>' +
+                '<option value="6">6 months</option>' +
+                '<option value="12" selected>12 months</option>' +
+                '<option value="custom">Custom</option>' +
+              '</select>' +
+              '<div id="mm-custom-wrap" style="display:none;margin-top:8px"><input type="number" id="mm-custom" min="1" max="60" placeholder="Months" oninput="mmRecompute()"></div>' +
+            '</div>' +
+            '<div><span class="mm-fl">Start date</span><input type="date" id="mm-start" value="' + today + '" onchange="mmRecompute()"></div>' +
+          '</div>' +
+          '<div id="mm-computed" class="mm-computed"></div>' +
+          '<div class="mm-note"><span class="mm-fl">Note (optional, saved to the audit log)</span>' +
+            '<input type="text" id="mm-note" placeholder="e.g. Paid 249 by bank transfer, ref 4471"></div>' +
+        '</div>' +
+        '<div class="mm-actions">' +
+          '<button class="mm-save" id="mm-save" onclick="mmSave()">Save membership</button>' +
+          (isMember ? '<button class="mm-down" id="mm-down" onclick="mmDowngrade()">Downgrade to Free</button>' : '') +
+        '</div>' +
+        '<p class="mm-note-p">This sets the membership in Cana only. It does not take payment and does not touch Stripe, so use it when you have already received the money another way. Every change is written to the admin audit log.</p>' +
+      '</div>' +
+    '</div>';
+  o.addEventListener('click', function (e) { if (e.target === o) closeMembershipModal(); });
+  document.body.appendChild(o);
+  mmRecompute();
+}
+
+// Toggle the Member/Free choice inside the modal.
+function mmSetPlan(member) {
+  var modal = document.getElementById('mm-overlay');
+  if (!modal) return;
+  modal.querySelector('#mm-plan-member').classList.toggle('on', member);
+  modal.querySelector('#mm-plan-free').classList.toggle('on', !member);
+  modal.querySelector('#mm-member-fields').style.display = member ? 'block' : 'none';
+  var save = modal.querySelector('#mm-save');
+  save.textContent = member ? 'Save membership' : 'Set to Free';
+}
+
+async function mmSave() {
+  var modal = document.getElementById('mm-overlay');
+  if (!modal) return;
+  var email = modal.getAttribute('data-email');
+  var toFree = modal.querySelector('#mm-plan-free').classList.contains('on');
+  var note = (modal.querySelector('#mm-note') || {}).value || '';
+
+  if (toFree) { mmDowngrade(); return; }
+
+  var termSel = modal.querySelector('#mm-term').value;
+  var months = termSel === 'custom'
+    ? parseInt((modal.querySelector('#mm-custom') || {}).value, 10)
+    : parseInt(termSel, 10);
+  if (!months || months < 1 || months > 60) { alert('Enter a term between 1 and 60 months.'); return; }
+  var start = modal.querySelector('#mm-start').value || new Date().toISOString().slice(0, 10);
+
+  var btn = modal.querySelector('#mm-save');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    await usersApi({ action: 'set-membership', email: email, plan: 'member', term_months: months, start_date: start, note: note });
+    if (typeof showToast === 'function') showToast('Membership set for ' + email, 'success');
+    closeMembershipModal();
+    loadUsers();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Save membership';
+    if (typeof showToast === 'function') showToast(e.message, 'error'); else alert(e.message);
+  }
+}
+
+async function mmDowngrade() {
+  var modal = document.getElementById('mm-overlay');
+  if (!modal) return;
+  var email = modal.getAttribute('data-email');
+  var note = (modal.querySelector('#mm-note') || {}).value || '';
+  if (!confirm('Downgrade ' + email + ' to a Free account?\n\nTheir unlimited bidding stops. This does not refund anything.')) return;
+  var btn = modal.querySelector('#mm-save');
+  if (btn) { btn.disabled = true; btn.textContent = 'Working...'; }
+  try {
+    await usersApi({ action: 'set-membership', email: email, plan: 'free', note: note });
+    if (typeof showToast === 'function') showToast(email + ' set to Free', 'success');
+    closeMembershipModal();
+    loadUsers();
+  } catch (e) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Save membership'; }
     if (typeof showToast === 'function') showToast(e.message, 'error'); else alert(e.message);
   }
 }

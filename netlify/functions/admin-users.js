@@ -55,12 +55,23 @@ exports.handler = async (event) => {
         if (key && !subByEmail[key]) subByEmail[key] = s;   // first = latest period
       });
 
+      // Active means the status is live AND, if there is an end date, it has not
+      // passed (plus a 3 day grace). This matches check-membership, so the admin
+      // count and what the customer actually gets can never disagree.
       const ACTIVE = ['active', 'trialing', 'past_due'];
+      const GRACE_MS = 3 * 24 * 3600 * 1000;
+      function activeNow(sub) {
+        if (!sub) return false;
+        if (ACTIVE.indexOf(String(sub.status || '').toLowerCase()) === -1) return false;
+        if (!sub.current_period_end) return String(sub.status || '').toLowerCase() === 'active';
+        return (new Date(sub.current_period_end).getTime() + GRACE_MS) > Date.now();
+      }
+
       const rows = users.map(function (u) {
         const email = String(u.email || '').toLowerCase();
         const meta = u.user_metadata || {};
         const sub = subByEmail[email] || null;
-        const isMember = !!(sub && ACTIVE.indexOf(String(sub.status || '').toLowerCase()) !== -1);
+        const isMember = activeNow(sub);
         return {
           id: u.id,
           email: u.email || '',
@@ -143,6 +154,83 @@ exports.handler = async (event) => {
       // record. Deleting the login does not cancel Stripe billing.
       try { await logAudit(event, 'admin-users', 'user_deleted', { email: email, id: id }); } catch (e) {}
       return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, deleted: email || id }) };
+    }
+
+    if (action === 'set-membership') {
+      const email = String(body.email || '').trim().toLowerCase();
+      if (!email) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing email' }) };
+      // Internal accounts (staff/owner on getcana.co.uk) are not customers.
+      if (email.indexOf('getcana.co.uk') !== -1) {
+        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Internal accounts do not have a membership' }) };
+      }
+
+      const patchHeaders = Object.assign({ Prefer: 'return=minimal' }, svcHeaders);
+      const note = String(body.note || '').slice(0, 300);
+      const plan = body.plan === 'free' ? 'free' : 'member';
+
+      // Downgrade: mark every subscription row for this email cancelled. Rows are
+      // kept as the record; check-membership ignores cancelled ones.
+      if (plan === 'free') {
+        const r = await fetch(SB_URL + '/rest/v1/subscriptions?email=eq.' + encodeURIComponent(email), {
+          method: 'PATCH', headers: patchHeaders,
+          body: JSON.stringify({ status: 'cancelled', updated_at: new Date().toISOString() })
+        });
+        if (!r.ok && r.status !== 404) {
+          const t = await r.text();
+          return { statusCode: 502, headers: cors, body: JSON.stringify({ error: 'Could not downgrade', detail: t.slice(0, 160) }) };
+        }
+        try { await logAudit(event, 'admin-users', 'membership_downgraded', { email: email, note: note }); } catch (e) {}
+        return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, membership: { member: false } }) };
+      }
+
+      // Upgrade / set: work out the end date from the term and start date.
+      const term = parseInt(body.term_months, 10);
+      if (!term || term < 1 || term > 60) {
+        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Term must be a whole number of months between 1 and 60' }) };
+      }
+      let start = body.start_date ? new Date(body.start_date) : new Date();
+      if (isNaN(start.getTime())) start = new Date();
+      const end = new Date(start.getTime());
+      end.setMonth(end.getMonth() + term);
+      const endISO = end.toISOString();
+
+      const payload = {
+        email: email,
+        product: 'membership',
+        term_months: term,
+        status: 'active',
+        current_period_end: endISO,
+        updated_at: new Date().toISOString()
+      };
+
+      // Reuse the latest existing row for this email if there is one, otherwise
+      // create a manual row (id prefixed so it is clearly not from Stripe).
+      const findRes = await fetch(
+        SB_URL + '/rest/v1/subscriptions?email=eq.' + encodeURIComponent(email) + '&select=id&order=current_period_end.desc.nullslast&limit=1',
+        { headers: svcHeaders }
+      );
+      const found = findRes.ok ? await findRes.json() : [];
+      const existingId = found && found[0] && found[0].id;
+
+      let w;
+      if (existingId) {
+        w = await fetch(SB_URL + '/rest/v1/subscriptions?id=eq.' + encodeURIComponent(existingId), {
+          method: 'PATCH', headers: patchHeaders, body: JSON.stringify(payload)
+        });
+      } else {
+        payload.id = 'manual_' + Date.now();
+        payload.created_at = new Date().toISOString();
+        w = await fetch(SB_URL + '/rest/v1/subscriptions', {
+          method: 'POST', headers: patchHeaders, body: JSON.stringify(payload)
+        });
+      }
+      if (!w.ok) {
+        const t = await w.text();
+        return { statusCode: 502, headers: cors, body: JSON.stringify({ error: 'Could not save membership', detail: t.slice(0, 160) }) };
+      }
+
+      try { await logAudit(event, 'admin-users', 'membership_set', { email: email, term_months: term, current_period_end: endISO, note: note }); } catch (e) {}
+      return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, membership: { member: true, term_months: term, renews: endISO } }) };
     }
 
     return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Unknown action' }) };
