@@ -76,9 +76,11 @@ exports.handler = async (event) => {
 
     if (email) params.append('customer_email', email);
 
+    // Pin a stable API version: the account default can be a newer version that
+    // renames checkout fields (e.g. ui_mode embedded), which would break this.
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + stripeKey, 'Content-Type': 'application/x-www-form-urlencoded' },
+      headers: { 'Authorization': 'Bearer ' + stripeKey, 'Content-Type': 'application/x-www-form-urlencoded', 'Stripe-Version': '2024-06-20' },
       body: params.toString()
     });
     const data = await res.json();

@@ -52,6 +52,7 @@ exports.handler = async (event) => {
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
       method: 'POST',
       headers: {
+        'Stripe-Version': '2024-06-20',
         'Authorization': 'Bearer ' + stripeKey,
         'Content-Type': 'application/x-www-form-urlencoded'
       },

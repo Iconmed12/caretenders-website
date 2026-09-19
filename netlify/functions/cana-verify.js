@@ -16,7 +16,7 @@ exports.handler = async (event) => {
 
     // ── Verify payment with Stripe ──
     const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions?limit=20', {
-      headers: { Authorization: 'Bearer ' + stripeKey }
+      headers: { Authorization: 'Bearer ' + stripeKey, 'Stripe-Version': '2024-06-20' }
     });
     const stripeData = await stripeRes.json();
 

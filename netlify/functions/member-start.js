@@ -68,7 +68,7 @@ exports.handler = async (event) => {
       }
       const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
       const sessRes = await fetch('https://api.stripe.com/v1/checkout/sessions/' + encodeURIComponent(reviewSessionId), {
-        headers: { Authorization: 'Bearer ' + stripeKey }
+        headers: { Authorization: 'Bearer ' + stripeKey, 'Stripe-Version': '2024-06-20' }
       });
       const sess = await sessRes.json();
       const okPaid = sess && sess.payment_status === 'paid';

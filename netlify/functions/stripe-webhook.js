@@ -47,7 +47,7 @@ exports.handler = async (event) => {
 
   async function fetchSubscription(subId) {
     const r = await fetch('https://api.stripe.com/v1/subscriptions/' + subId, {
-      headers: { Authorization: 'Bearer ' + stripeKey }
+      headers: { Authorization: 'Bearer ' + stripeKey, 'Stripe-Version': '2024-06-20' }
     });
     return r.ok ? r.json() : null;
   }
