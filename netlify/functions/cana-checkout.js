@@ -15,8 +15,14 @@ exports.handler = async (event) => {
     let chosenTier = tier || (wantsReview ? 'review' : 'none');
     if (['none','review','review_docs'].indexOf(chosenTier) === -1) chosenTier = 'none';
 
-    // Go-live add-on amounts (pence): review 50000, review_docs 100000.
-    // Base bid go-live 48000. TEST keeps everything at £1 per line item.
+    // Prices in pence: base bid 48000 (£480), Expert Review add-on 35000 (£350),
+    // Review + document completion add-on 100000 (£1000).
+    // PRE-LAUNCH SAFETY: with a LIVE key everything is forced to £1 so no real
+    // money can move before launch. TEST keys charge the real prices so the full
+    // journey can be tested with Stripe test cards.
+    // GO-LIVE STEP: change GUARD to false so live keys charge the real amounts.
+    const GUARD = /sk_live/.test(stripeKey || '');
+    const px = function (real) { return GUARD ? '100' : String(real); };
     const addonName = chosenTier === 'review_docs'
       ? 'Expert Review + document completion (SQ + required tender documents, excluding pricing)'
       : 'Expert Review: consultant check within 48 hours';
@@ -24,8 +30,8 @@ exports.handler = async (event) => {
     const params = new URLSearchParams({
       'mode': 'payment',
       'line_items[0][price_data][currency]': 'gbp',
-      'line_items[0][price_data][product_data][name]': 'Cana - TEST £1: ' + (tenderTitle || 'Tender').substring(0, 60),
-      'line_items[0][price_data][unit_amount]': '100',
+      'line_items[0][price_data][product_data][name]': 'Cana bid response: ' + (tenderTitle || 'Tender').substring(0, 60),
+      'line_items[0][price_data][unit_amount]': px(48000),
       'line_items[0][quantity]': '1',
       'success_url': 'https://getcana.co.uk/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true',
       'cancel_url': 'https://getcana.co.uk/cana.html?tender=' + tenderId,
@@ -39,7 +45,7 @@ exports.handler = async (event) => {
     if (chosenTier !== 'none') {
       params.append('line_items[1][price_data][currency]', 'gbp');
       params.append('line_items[1][price_data][product_data][name]', addonName);
-      params.append('line_items[1][price_data][unit_amount]', '100'); // TEST £1; go-live review 50000 / review_docs 100000
+      params.append('line_items[1][price_data][unit_amount]', px(chosenTier === 'review_docs' ? 100000 : 35000));
       params.append('line_items[1][quantity]', '1');
     }
 

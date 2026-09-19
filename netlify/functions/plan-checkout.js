@@ -19,23 +19,28 @@ exports.handler = async (event) => {
     const embedded = !!body.embedded;
     const SITE = 'https://getcana.co.uk';
     const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
+    // PRE-LAUNCH SAFETY: a LIVE key forces every amount to £1 so no real money
+    // can move before launch. TEST keys charge the real prices for testing.
+    // GO-LIVE STEP: change GUARD to false so live keys charge the real amounts.
+    const GUARD = /sk_live/.test(stripeKey || '');
+    const px = function (real) { return GUARD ? '100' : String(real); };
     const params = new URLSearchParams();
     if (embedded) params.append('ui_mode', 'embedded');
 
     if (product === 'membership') {
       // Terms: 3 / 6 / 12 months, one payment per term, auto-renewing.
-      // TEST 1 GBP everywhere. Go-live amounts (pence): 3mo 89700 (299/mo),
-      // 6mo 167400 (279/mo), 12mo 298800 (249/mo).
+      // Prices in pence: 3mo 89700 (299/mo), 6mo 167400 (279/mo),
+      // 12mo 298800 (249/mo).
       const TERMS = {
-        3:  { name: 'Cana Membership 3 months (TEST 1 GBP) 299 GBP/mo',  amount: 100, interval: 'month', count: 3 },
-        6:  { name: 'Cana Membership 6 months (TEST 1 GBP) 279 GBP/mo',  amount: 100, interval: 'month', count: 6 },
-        12: { name: 'Cana Membership 12 months (TEST 1 GBP) 249 GBP/mo', amount: 100, interval: 'year',  count: 1 }
+        3:  { name: 'Cana Membership 3 months (299 GBP/mo)',  amount: 89700,  interval: 'month', count: 3 },
+        6:  { name: 'Cana Membership 6 months (279 GBP/mo)',  amount: 167400, interval: 'month', count: 6 },
+        12: { name: 'Cana Membership 12 months (249 GBP/mo)', amount: 298800, interval: 'year',  count: 1 }
       };
       const t = TERMS[parseInt(JSON.parse(event.body).term)] || TERMS[3];
       params.append('mode', 'subscription');
       params.append('line_items[0][price_data][currency]', 'gbp');
       params.append('line_items[0][price_data][product_data][name]', t.name);
-      params.append('line_items[0][price_data][unit_amount]', String(t.amount));
+      params.append('line_items[0][price_data][unit_amount]', px(t.amount));
       params.append('line_items[0][price_data][recurring][interval]', t.interval);
       params.append('line_items[0][price_data][recurring][interval_count]', String(t.count));
       params.append('line_items[0][quantity]', '1');
@@ -50,8 +55,8 @@ exports.handler = async (event) => {
     } else if (product === 'review') {
       params.append('mode', 'payment');
       params.append('line_items[0][price_data][currency]', 'gbp');
-      params.append('line_items[0][price_data][product_data][name]', 'Expert Review (TEST 1 GBP): ' + (tenderTitle || 'Tender').substring(0, 60));
-      params.append('line_items[0][price_data][unit_amount]', '100'); // TEST. Go-live: 50000
+      params.append('line_items[0][price_data][product_data][name]', (tier === 'review_docs' ? 'Expert Review + document completion: ' : 'Expert Review: ') + (tenderTitle || 'Tender').substring(0, 60));
+      params.append('line_items[0][price_data][unit_amount]', px(tier === 'review_docs' ? 100000 : 35000)); // £1000 / £350
       params.append('line_items[0][quantity]', '1');
       // {CHECKOUT_SESSION_ID} is filled in by Stripe on success, so the return
       // page carries the real session id and the server can verify the payment.

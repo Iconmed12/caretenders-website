@@ -329,7 +329,7 @@ async function confirmSqAndGenerate() {
     window._canaTier = tier;
     // Keep legacy flag in sync (review or review_docs both involve a review)
     window._wantsExpertReview = (tier === 'review' || tier === 'review_docs');
-    var totals = { none: 480, review: 780, review_docs: 1480 };
+    var totals = { none: 480, review: 830, review_docs: 1480 };
     var total = totals[tier] || 480;
     var btn = document.getElementById('paywall-btn');
     var amt = document.getElementById('paywall-price-amount');
@@ -389,7 +389,7 @@ async function confirmSqAndGenerate() {
         throw new Error(data.error || 'Could not create payment session');
       }
     } catch(e) {
-      var totals = { none: 480, review: 780, review_docs: 1480 };
+      var totals = { none: 480, review: 830, review_docs: 1480 };
       btn.textContent = 'Pay £' + (totals[tier]||480).toLocaleString() + ' and unlock full bid';
       if (typeof window.applyMemberPaywall === 'function') window.applyMemberPaywall();
       // If member came via member dashboard, rewire paywall button to bypass
@@ -397,7 +397,7 @@ async function confirmSqAndGenerate() {
         var sqBtn = document.getElementById('paywall-btn');
         if (sqBtn) {
           sqBtn.textContent = window._wantsExpertReview
-            ? 'Generate + add Silver Add-on (£500)'
+            ? ('Generate + add-on (£' + (window._canaTier === 'review_docs' ? '1,000' : '350') + ')')
             : 'Generate my responses (included in membership)';
           sqBtn.onclick = function(e) { e.preventDefault(); window.memberStartGeneration(); };
           sqBtn.style.background = 'var(--teal)';
