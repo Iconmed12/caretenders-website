@@ -386,6 +386,39 @@ async function runManualImport() {
   }
 }
 
+// Manually add one tender from a pasted Find a Tender link.
+async function addTenderByLink() {
+  var input = document.getElementById('ti-add-url');
+  var btn = document.getElementById('ti-add-btn');
+  var status = document.getElementById('ti-add-status');
+  var url = (input && input.value || '').trim();
+  if (!url) { if (status) { status.style.color = '#dc2626'; status.textContent = 'Paste a link first.'; } return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'Adding...'; }
+  if (status) { status.style.color = 'var(--text-muted)'; status.textContent = 'Fetching the notice...'; }
+  try {
+    var res = await fetch('/.netlify/functions/add-tender', {
+      method: 'POST',
+      headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ url: url })
+    });
+    var data = await res.json();
+    if (data.added) {
+      if (status) { status.style.color = '#166534'; status.textContent = '✓ Added: ' + data.title + ' (' + data.category + '). It is now pending review below.'; }
+      if (input) input.value = '';
+      if (typeof loadImportedTenders === 'function') await loadImportedTenders();
+      if (typeof showToast === 'function') showToast('Tender added', 'success');
+    } else if (data.duplicate) {
+      if (status) { status.style.color = 'var(--text-muted)'; status.textContent = 'Already in Cana: ' + data.title + ' (' + data.status + ').'; }
+    } else {
+      if (status) { status.style.color = '#dc2626'; status.textContent = '✗ ' + (data.error || 'Could not add that tender.'); }
+    }
+  } catch (e) {
+    if (status) { status.style.color = '#dc2626'; status.textContent = '✗ Could not add: ' + e.message; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Add tender'; }
+  }
+}
+
 
 // Update sidebar badge on admin load (not just when page opened)
 document.addEventListener('DOMContentLoaded', function() {
