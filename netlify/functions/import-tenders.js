@@ -18,18 +18,18 @@ exports.handler = async (event) => {
     }, opts || {}));
   }
 
-  // Business-support / employment programmes are NOT care, checked first, against the TITLE only
+  // Business-support / employment programmes are NOT care, checked against the
+  // TITLE only. Only used in the keyword fallback (a real care CPV overrides it).
   var BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
 
-  // Categories to import, maps CF keywords to Cana categories.
-  // Matching is whole-word (\b boundaries) so e.g. 'care' no longer matches 'careers'.
-  const CATEGORY_MAP = [
-    { keywords: ['care','social care','domiciliary','residential','nursing','supported living','mental health','learning disabilit','older people','cqc','personal care','home care','homecare','extra care','respite','reablement','care home','foster'], category: 'care' },
-    { keywords: ['construction','building','refurbishment','maintenance','repair','facilities','cleaning','grounds','caretaking','security','fm','facilities management'], category: 'commercial' },
-    { keywords: ['it','digital','software','technology','ict','cyber','data','infrastructure','cloud'], category: 'commercial' },
-    { keywords: ['consultancy','advisory','professional services','training','recruitment'], category: 'commercial' },
-    { keywords: ['transport','fleet','logistics','waste','recycling'], category: 'commercial' },
-  ];
+  // Care / community keyword fallback, used ONLY when the official CPV code is
+  // missing or unclear. Broadened well beyond the old short list so we stop
+  // dropping real care tenders that are simply worded differently.
+  var CARE_KEYWORDS = ['care','social care','domiciliary','home care','homecare','residential','nursing','care home','supported living','supported accommodation','sheltered housing','extra care','respite','reablement','day service','day services','day care','shared lives','direct payments','personal care','mental health','learning disabilit','autism','autistic','dementia','end of life','palliative','hospice','older people','vulnerable','disabilit','disabled','send','special educational needs','safeguarding','advocacy','wellbeing','welfare','carer','carers','family support','children','young people','youth','looked after children','foster','fostering','adoption','substance misuse','drug and alcohol','domestic abuse','homeless','community support','cqc'];
+
+  // Care-related transport terms (SEN / patient / community transport). Keeps
+  // passenger transport for vulnerable people while excluding freight/logistics.
+  var CARE_TRANSPORT_RE = /\b(passenger assistant|special educational needs|send|sen|home[ -]to[ -]school|school transport|patient transport|non[ -]?emergency( patient)? transport|dial[ -]a[ -]ride|community transport|wheelchair|escort)\b/i;
 
   function kwMatch(text, kw) {
     var esc = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -38,23 +38,55 @@ exports.handler = async (event) => {
     return new RegExp('\\b' + esc + trail, 'i').test(text);
   }
 
-  function detectCategory(title, desc) {
-    // Employment / business-support programmes routinely mention "careers", "young people"
-    // etc. in descriptions, so they are excluded by title before care matching runs.
-    if (BUSINESS_TITLE_RE.test(title || '')) return 'commercial';
-    var text = ((title||'') + ' ' + (desc||''));
-    for (var map of CATEGORY_MAP) {
-      if (map.keywords.some(function(kw){ return kwMatch(text, kw); })) {
-        return map.category;
-      }
-    }
-    return 'commercial'; // default
+  // Collect every CPV (official category) code on a tender: main classification,
+  // line items and any additional classifications.
+  function collectCpv(tender) {
+    var ids = [];
+    function add(cls) { if (cls && cls.id && (!cls.scheme || /cpv/i.test(cls.scheme))) ids.push(String(cls.id)); }
+    add(tender.classification);
+    (tender.additionalClassifications || []).forEach(add);
+    (tender.items || []).forEach(function (it) { add(it.classification); (it.additionalClassifications || []).forEach(add); });
+    return ids;
   }
 
-  function detectCqc(title, desc) {
-    var text = ((title||'') + ' ' + (desc||'')).toLowerCase();
-    var cqcKeywords = ['care','domiciliary','residential','nursing','supported living','mental health','learning disabilit','personal care','cqc','social care'];
-    return cqcKeywords.some(function(kw){ return text.includes(kw); });
+  // The official codes decide "care" first (most reliable):
+  //   85 = health & social work services (social care + NHS/clinical)
+  //   60 = transport, but only care-related passenger transport (needs a keyword)
+  // Community / wellbeing work (advocacy, carers, family support) is coded too
+  // broadly under 98 (which also covers maritime, mining, car parks, laundry),
+  // so it is caught by the care keyword fallback instead, not by CPV 98.
+  function cpvSaysCare(cpvIds, text) {
+    for (var i = 0; i < cpvIds.length; i++) {
+      var c = cpvIds[i];
+      if (!c) continue;
+      if (c.indexOf('85') === 0) return true;
+      if (c.indexOf('60') === 0 && CARE_TRANSPORT_RE.test(text)) return true;
+    }
+    return false;
+  }
+
+  function detectCategory(title, desc, cpvIds) {
+    var text = ((title || '') + ' ' + (desc || ''));
+    // 1) Trust the official CPV code first.
+    if (cpvIds && cpvIds.length && cpvSaysCare(cpvIds, text)) return 'care';
+    // 2) Employment / business-support programmes are not care.
+    if (BUSINESS_TITLE_RE.test(title || '')) return 'commercial';
+    // 3) Keyword fallback for tenders with a missing or unhelpful CPV.
+    if (CARE_KEYWORDS.some(function (kw) { return kwMatch(text, kw); })) return 'care';
+    return 'commercial';
+  }
+
+  function detectCqc(title, desc, cpvIds) {
+    // Social-care CPVs: 853x social work, 8514x nursing, 8511x hospital/home health.
+    if (cpvIds) {
+      for (var i = 0; i < cpvIds.length; i++) {
+        var c = cpvIds[i] || '';
+        if (c.indexOf('853') === 0 || c.indexOf('8514') === 0 || c.indexOf('8511') === 0) return true;
+      }
+    }
+    var text = ((title || '') + ' ' + (desc || '')).toLowerCase();
+    var cqcKeywords = ['care', 'domiciliary', 'residential', 'nursing', 'supported living', 'mental health', 'learning disabilit', 'personal care', 'cqc', 'social care'];
+    return cqcKeywords.some(function (kw) { return text.includes(kw); });
   }
 
   function cleanText(str) {
@@ -71,8 +103,10 @@ exports.handler = async (event) => {
     var imported = 0, skipped = 0, errors = 0;
     var results = [];
 
-    // Fetch from Contracts Finder API, page through results
-    var pages = event.body ? JSON.parse(event.body).pages || 3 : 3;
+    // Fetch from Contracts Finder API, page through results. Deeper default so
+    // the wider look-back window is actually paged through; "Import Now" can pass
+    // a bigger number for a one-off deep backfill.
+    var pages = event.body ? JSON.parse(event.body).pages || 5 : 5;
     
     for (var page = 0; page < pages; page++) {
       var apiUrl = 'https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search' +
@@ -135,8 +169,9 @@ exports.handler = async (event) => {
           // 4. Last resort: the API record link
           if (!sourceUrl) sourceUrl = (release.links && release.links.self) || '';
           var sourceId = release.ocid || release.id || '';
-          var category = detectCategory(title, desc);
-          var isCqc = detectCqc(title, desc);
+          var cpvIds = collectCpv(tender);
+          var category = detectCategory(title, desc, cpvIds);
+          var isCqc = detectCqc(title, desc, cpvIds);
 
           // Care-only launch: do not import non-care (commercial) tenders
           if (category !== 'care') { skipped++; continue; }
@@ -264,8 +299,9 @@ exports.handler = async (event) => {
             if (Array.isArray(fCrossData) && fCrossData.length > 0) { skipped++; continue; }
           }
 
-          var category = detectCategory(title, desc);
-          var isCqc = detectCqc(title, desc);
+          var cpvIds = collectCpv(ft);
+          var category = detectCategory(title, desc, cpvIds);
+          var isCqc = detectCqc(title, desc, cpvIds);
 
           // Care-only launch: do not import non-care (commercial) tenders
           if (category !== 'care') { skipped++; continue; }
@@ -304,14 +340,17 @@ exports.handler = async (event) => {
   }
 };
 
+// Contracts Finder look-back window. Wider than one day so an open tender
+// published a week or two ago is still caught; the dedup guards stop repeats.
 function getYesterdayDate() {
   var d = new Date();
-  d.setDate(d.getDate() - 1);
+  d.setDate(d.getDate() - 14);
   return d.toISOString().split('T')[0] + 'T00:00:00';
 }
 
+// Find a Tender look-back window (dedup guards prevent re-imports).
 function getYesterdayDateISO() {
   var d = new Date();
-  d.setDate(d.getDate() - 7);
+  d.setDate(d.getDate() - 21);
   return d.toISOString().split('.')[0] + 'Z';
 }
