@@ -16,15 +16,15 @@ exports.handler = async (event) => {
     return;
   }
 
-  // Deep sweep: page much further and look back ~120 days, so currently-open
-  // frameworks and DPS published weeks ago are caught (the daily cron stays
-  // light). Overridable from the request body.
-  var pages = 15, days = 120;
-  try { var b = JSON.parse(event.body || '{}'); if (b.pages) pages = b.pages; if (b.days) days = b.days; } catch (e) {}
+  // Deep sweep: page far (40) and look back ~60 days across ALL stages, so
+  // currently-open frameworks and re-issued/amended ones are caught. The daily
+  // cron stays light. Overridable from the request body.
+  var pages = 40, days = 60, deep = true;
+  try { var b = JSON.parse(event.body || '{}'); if (b.pages) pages = b.pages; if (b.days) days = b.days; if (b.deep === false) deep = false; } catch (e) {}
 
   try {
-    const r = await runImport(pages, days);
-    console.log('[import-now] finished for', who.email, '(pages ' + pages + ', days ' + days + '):', r && r.body ? String(r.body).substring(0, 200) : 'no body');
+    const r = await runImport(pages, days, deep);
+    console.log('[import-now] finished for', who.email, '(pages ' + pages + ', days ' + days + ', deep ' + deep + '):', r && r.body ? String(r.body).substring(0, 200) : 'no body');
   } catch (e) {
     console.log('[import-now] error:', e.message);
   }

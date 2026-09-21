@@ -109,10 +109,14 @@ exports.handler = async (event) => {
     var _b = {}; try { _b = event.body ? JSON.parse(event.body) : {}; } catch (e) {}
     var pages = _b.pages || 5;
     var days = _b.days || 21;
+    // deep = the manual "Import Now" sweep: pull ALL stages on Find a Tender so
+    // re-issued/amended frameworks are caught. The light daily cron stays on the
+    // 'tender' stage only (new opportunities), which keeps it fast.
+    var deep = !!_b.deep;
     
     for (var page = 0; page < pages; page++) {
       var apiUrl = 'https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search' +
-        '?publishedFrom=' + getDateDaysAgo(days) +
+        '?publishedFrom=' + getDateDaysAgo(Math.min(days, 30)) + // CF caps the range; 30 days is safe
         '&stages=tender' +
         '&size=100&page=' + page +
         '&order=publishedDate&orderDirection=DESC';
@@ -179,6 +183,8 @@ exports.handler = async (event) => {
           if (category !== 'care') { skipped++; continue; }
 
           if (!title || !deadline) { skipped++; continue; }
+          // Skip already-closed tenders (deadline in the past)
+          if (new Date(deadline) < new Date()) { skipped++; continue; }
 
           // Check not already imported, two guards:
           // 1. Same source_id (same portal, exact record match)
@@ -237,11 +243,14 @@ exports.handler = async (event) => {
     }
 
     // ── Find a Tender (UK-wide, all values, above + below threshold since Feb 2025) ──
-    // Uses the OCDS release package endpoint. Valid params per FAT API spec:
-    // stages, limit, cursor, updatedFrom, updatedTo. Pagination is cursor-based via links.next.
+    // The OCDS API rejects a stages list and even 'tenderUpdate', and 'tender'
+    // alone misses re-issued/amended frameworks. So we pull EVERYTHING in the
+    // window and keep only care tenders whose deadline is still in the future
+    // (the open-deadline check below drops closed/awarded notices). Dedup guards
+    // stop the same notice being imported twice across its releases.
     var fatNextUrl = 'https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages' +
-      '?updatedFrom=' + getIsoDaysAgo(days) +
-      '&stages=tender' +
+      '?updatedFrom=' + getIsoDaysAgo(Math.min(days, 60)) +
+      (deep ? '' : '&stages=tender') +
       '&limit=100';
 
     for (var fatLoop = 0; fatLoop < pages && fatNextUrl; fatLoop++) {
@@ -288,6 +297,8 @@ exports.handler = async (event) => {
           if (!sourceUrl && noticeId) sourceUrl = 'https://www.find-tender.service.gov.uk/Notice/' + noticeId;
 
           if (!title || !deadline) continue;
+          // Skip already-closed tenders (deadline in the past)
+          if (new Date(deadline) < new Date()) { skipped++; continue; }
 
           // Guard 1: source_id match
           var fExist = await sbFetch('/rest/v1/tenders?source_id=eq.' + encodeURIComponent(sourceId) + '&select=id&limit=1');
@@ -358,6 +369,6 @@ function getIsoDaysAgo(days) {
 
 // Reusable entry point so the manual (background) importer can run exactly the
 // same logic as the scheduled one. Returns the handler's { statusCode, body }.
-exports.runImport = function (pages, days) {
-  return exports.handler({ httpMethod: 'POST', body: JSON.stringify({ pages: pages, days: days }) });
+exports.runImport = function (pages, days, deep) {
+  return exports.handler({ httpMethod: 'POST', body: JSON.stringify({ pages: pages, days: days, deep: deep }) });
 };
