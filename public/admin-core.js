@@ -16,7 +16,12 @@ const SB_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 function adminSb() {
   if (window._adminSbClient) return window._adminSbClient;
   if (!window.supabase) return null;
-  window._adminSbClient = window.supabase.createClient(SB_URL, SB_ANON);
+  // Use a SEPARATE storage key so an admin login is completely independent of
+  // the customer site login. Signing into the admin no longer signs you in as a
+  // customer (and vice versa), which keeps staff sessions from getting confused.
+  window._adminSbClient = window.supabase.createClient(SB_URL, SB_ANON, {
+    auth: { storageKey: 'cana-admin-auth', persistSession: true, autoRefreshToken: true }
+  });
   // Keep the admin token fresh: supabase-js auto-refreshes the session in the
   // background; mirror the latest access token so admin calls never send a
   // stale one (tokens expire after about an hour).
