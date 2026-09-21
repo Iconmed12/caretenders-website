@@ -26,12 +26,16 @@ var TI_SUBCATS = [
 ];
 
 function tiSubcat(t) {
+  // Respect the real category first: a commercial tender must never show as Care
+  // just because its description mentions "residential" etc.
+  if (t.category === 'care') return 'care';
   var text = ((t.title||'') + ' ' + (t.description||t.org||'')).toLowerCase();
   for (var i = 0; i < TI_SUBCATS.length; i++) {
     var s = TI_SUBCATS[i];
+    if (s.key === 'care') continue; // never label a non-care tender as Care
     if (s.kws.length && s.kws.some(function(kw){ return text.indexOf(kw) !== -1; })) return s.key;
   }
-  return 'other';
+  return 'professional';
 }
 
 function tiRenderBreakdown() {
