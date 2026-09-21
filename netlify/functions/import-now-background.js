@@ -16,12 +16,15 @@ exports.handler = async (event) => {
     return;
   }
 
-  var pages = 6;
-  try { pages = JSON.parse(event.body || '{}').pages || 6; } catch (e) {}
+  // Deep sweep: page much further and look back ~120 days, so currently-open
+  // frameworks and DPS published weeks ago are caught (the daily cron stays
+  // light). Overridable from the request body.
+  var pages = 15, days = 120;
+  try { var b = JSON.parse(event.body || '{}'); if (b.pages) pages = b.pages; if (b.days) days = b.days; } catch (e) {}
 
   try {
-    const r = await runImport(pages);
-    console.log('[import-now] finished for', who.email, ':', r && r.body ? String(r.body).substring(0, 200) : 'no body');
+    const r = await runImport(pages, days);
+    console.log('[import-now] finished for', who.email, '(pages ' + pages + ', days ' + days + '):', r && r.body ? String(r.body).substring(0, 200) : 'no body');
   } catch (e) {
     console.log('[import-now] error:', e.message);
   }

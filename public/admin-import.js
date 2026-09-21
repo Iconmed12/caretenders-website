@@ -347,7 +347,7 @@ async function runManualImport() {
     var res = await fetch('/.netlify/functions/import-now-background', {
       method: 'POST',
       headers: adminHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ pages: 6 })
+      body: JSON.stringify({}) // background uses a deep sweep (many pages, ~120 days)
     });
 
     // Read the body defensively. It may be empty (scheduled function) or JSON.
@@ -364,9 +364,9 @@ async function runManualImport() {
 
     // Poll the list until the pending count stops rising, so the number shown
     // is the true result whether the import ran quickly or in the background.
-    if (status) status.textContent = 'Import running, this can take up to a minute...';
+    if (status) status.textContent = 'Import running, a deep sweep can take a minute or two...';
     var last = before, stable = 0;
-    for (var i = 0; i < 12; i++) {
+    for (var i = 0; i < 24; i++) {
       await new Promise(function(r){ setTimeout(r, 4000); });
       await loadImportedTenders();
       var now = tiPendingCount();

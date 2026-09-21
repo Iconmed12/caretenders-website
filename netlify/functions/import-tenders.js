@@ -103,14 +103,16 @@ exports.handler = async (event) => {
     var imported = 0, skipped = 0, errors = 0;
     var results = [];
 
-    // Fetch from Contracts Finder API, page through results. Deeper default so
-    // the wider look-back window is actually paged through; "Import Now" can pass
-    // a bigger number for a one-off deep backfill.
-    var pages = event.body ? JSON.parse(event.body).pages || 5 : 5;
+    // pages = how many result pages to walk per feed; days = how far back to look.
+    // The daily cron uses light defaults; the manual "Import Now" passes a deep
+    // sweep (many pages, ~120 days) to catch open frameworks published weeks ago.
+    var _b = {}; try { _b = event.body ? JSON.parse(event.body) : {}; } catch (e) {}
+    var pages = _b.pages || 5;
+    var days = _b.days || 21;
     
     for (var page = 0; page < pages; page++) {
       var apiUrl = 'https://www.contractsfinder.service.gov.uk/Published/Notices/OCDS/Search' +
-        '?publishedFrom=' + getYesterdayDate() +
+        '?publishedFrom=' + getDateDaysAgo(days) +
         '&stages=tender' +
         '&size=100&page=' + page +
         '&order=publishedDate&orderDirection=DESC';
@@ -238,7 +240,7 @@ exports.handler = async (event) => {
     // Uses the OCDS release package endpoint. Valid params per FAT API spec:
     // stages, limit, cursor, updatedFrom, updatedTo. Pagination is cursor-based via links.next.
     var fatNextUrl = 'https://www.find-tender.service.gov.uk/api/1.0/ocdsReleasePackages' +
-      '?updatedFrom=' + getYesterdayDateISO() +
+      '?updatedFrom=' + getIsoDaysAgo(days) +
       '&stages=tender' +
       '&limit=100';
 
@@ -340,23 +342,22 @@ exports.handler = async (event) => {
   }
 };
 
-// Contracts Finder look-back window. Wider than one day so an open tender
-// published a week or two ago is still caught; the dedup guards stop repeats.
-function getYesterdayDate() {
+// Contracts Finder look-back window (days). Dedup guards stop repeats.
+function getDateDaysAgo(days) {
   var d = new Date();
-  d.setDate(d.getDate() - 14);
+  d.setDate(d.getDate() - (days || 21));
   return d.toISOString().split('T')[0] + 'T00:00:00';
 }
 
-// Find a Tender look-back window (dedup guards prevent re-imports).
-function getYesterdayDateISO() {
+// Find a Tender look-back window (days, ISO). Dedup guards prevent re-imports.
+function getIsoDaysAgo(days) {
   var d = new Date();
-  d.setDate(d.getDate() - 21);
+  d.setDate(d.getDate() - (days || 21));
   return d.toISOString().split('.')[0] + 'Z';
 }
 
 // Reusable entry point so the manual (background) importer can run exactly the
 // same logic as the scheduled one. Returns the handler's { statusCode, body }.
-exports.runImport = function (pages) {
-  return exports.handler({ httpMethod: 'POST', body: JSON.stringify({ pages: pages }) });
+exports.runImport = function (pages, days) {
+  return exports.handler({ httpMethod: 'POST', body: JSON.stringify({ pages: pages, days: days }) });
 };
