@@ -341,10 +341,13 @@ async function runManualImport() {
   var before = tiPendingCount();
 
   try {
-    var res = await fetch('/.netlify/functions/import-tenders', {
+    // Background function (HTTP-invokable, runs up to 15 min). It returns 202
+    // with no body and runs asynchronously, so we measure the result by polling
+    // the database below rather than reading the response.
+    var res = await fetch('/.netlify/functions/import-now-background', {
       method: 'POST',
       headers: adminHeaders({ 'Content-Type': 'application/json' }),
-      body: JSON.stringify({ pages: 3 })
+      body: JSON.stringify({ pages: 6 })
     });
 
     // Read the body defensively. It may be empty (scheduled function) or JSON.

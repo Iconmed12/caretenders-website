@@ -354,3 +354,9 @@ function getYesterdayDateISO() {
   d.setDate(d.getDate() - 21);
   return d.toISOString().split('.')[0] + 'Z';
 }
+
+// Reusable entry point so the manual (background) importer can run exactly the
+// same logic as the scheduled one. Returns the handler's { statusCode, body }.
+exports.runImport = function (pages) {
+  return exports.handler({ httpMethod: 'POST', body: JSON.stringify({ pages: pages }) });
+};
