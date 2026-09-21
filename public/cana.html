@@ -11,6 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/cana.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.stripe.com/v3/"></script>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#0B1929">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -375,6 +376,24 @@
 
 </div>
 
+<!-- On-page Stripe checkout (customer stays on getcana.co.uk) -->
+<div id="pay-overlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(11,25,41,0.62);overflow-y:auto;">
+  <div style="max-width:560px;margin:36px auto;padding:0 16px;">
+    <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,0.35);">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid #e5e7eb;">
+        <div id="pay-overlay-title" style="font-family:'Inter',sans-serif;font-weight:700;color:#0B1929;">Complete your payment</div>
+        <button onclick="closeEmbeddedCheckout()" aria-label="Close" style="border:none;background:none;font-size:1.5rem;line-height:1;color:#5a6b7a;cursor:pointer;padding:0 4px;">&times;</button>
+      </div>
+      <div id="checkout-mount" style="padding:8px;min-height:120px;"></div>
+    </div>
+    <p style="text-align:center;color:#cdd7e0;font-size:0.78rem;margin-top:12px;">Payments are securely processed by Stripe. Cana never sees your card details.</p>
+  </div>
+</div>
+<script>
+  // Stripe publishable key (safe to expose in the browser). Empty = fall back to
+  // the old redirect checkout, so nothing breaks if it is ever cleared.
+  window.STRIPE_PK = 'pk_test_51UGikuCZh5lVD5d5wP5xnoGoFnX1lEtDqdjbKN2L32YCVSBnVFDv0O9AhusEmEZujxtfWtT7IoNlfFdTv0YZFRq200MpAS3Uc4';
+</script>
 <script src="/cana-core.js"></script>
 <script src="/cana-sq.js"></script>
 <script>

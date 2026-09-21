@@ -379,10 +379,20 @@ async function confirmSqAndGenerate() {
           tenderId: tenderId,
           tenderTitle: tenderData ? tenderData.title : '',
           tier: tier,
-          wantsReview: tier !== 'none'
+          wantsReview: tier !== 'none',
+          embedded: (typeof Stripe !== 'undefined' && !!window.STRIPE_PK)
         })
       });
       const data = await res.json();
+      if (data.clientSecret && window.openEmbeddedCheckout) {
+        // On-page checkout: stays on getcana.co.uk. On payment the return URL
+        // brings us back with ?paid=true to verify and generate.
+        await window.openEmbeddedCheckout(data.clientSecret, 'Complete your payment');
+        // Restore the button so closing the overlay lets them try again
+        btn.disabled = false; btn.style.opacity = '1';
+        if (typeof setCanaTier === 'function') setCanaTier(tier);
+        return;
+      }
       if (data.url) {
         window.location.href = data.url;
       } else {

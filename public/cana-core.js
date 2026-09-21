@@ -617,19 +617,40 @@
     }
   };
 
-  // Send a member to Stripe to pay for a chosen add-on BEFORE anything is
-  // generated. Returns true if we redirected (caller should stop). The tender,
-  // company details and add-on choice are saved so we can generate on return.
+  // Opens Stripe's on-page checkout in an overlay (customer stays on
+  // getcana.co.uk). Returns true if it opened. Needs window.STRIPE_PK + Stripe.js.
+  var _stripeClient = null, _embeddedCo = null;
+  window.openEmbeddedCheckout = async function (clientSecret, title) {
+    if (!window.STRIPE_PK || typeof Stripe === 'undefined') return false;
+    var t = document.getElementById('pay-overlay-title'); if (t && title) t.textContent = title;
+    var mount = document.getElementById('checkout-mount'); if (mount) mount.innerHTML = '';
+    var ov = document.getElementById('pay-overlay'); if (ov) ov.style.display = 'block';
+    try {
+      if (!_stripeClient) _stripeClient = Stripe(window.STRIPE_PK);
+      _embeddedCo = await _stripeClient.initEmbeddedCheckout({ clientSecret: clientSecret });
+      _embeddedCo.mount('#checkout-mount');
+      return true;
+    } catch (e) {
+      window.closeEmbeddedCheckout();
+      alert('Could not open payment: ' + e.message);
+      return false;
+    }
+  };
+  window.closeEmbeddedCheckout = function () {
+    try { if (_embeddedCo) { _embeddedCo.destroy(); _embeddedCo = null; } } catch (e) {}
+    var ov = document.getElementById('pay-overlay'); if (ov) ov.style.display = 'none';
+  };
+
+  // A member paying for a chosen add-on BEFORE anything is generated. Opens the
+  // on-page checkout; on payment the return URL brings us back to generate.
+  // Returns true if handled (caller should stop). Details/tier are saved so we
+  // can generate on return.
   async function startMemberAddonPayment(companyDetails) {
     try {
       localStorage.setItem('cana_company_details', JSON.stringify(companyDetails || {}));
       localStorage.setItem('cana_tier', window._canaTier || 'review');
       localStorage.setItem('cana_wants_review', '1');
     } catch (e) {}
-    showState('loading');
-    var h = document.querySelector('.loading-state h3'); if (h) h.textContent = 'Taking you to payment';
-    var p = document.querySelector('.loading-state p');  if (p) p.textContent  = 'Your add-on needs to be paid before Cana writes your bid.';
-    var s = document.querySelector('.loading-state .loading-spinner'); if (s) s.style.display = '';
     try {
       var rRes = await fetch('/.netlify/functions/plan-checkout', {
         method: 'POST',
@@ -639,10 +660,15 @@
           tier: window._canaTier || 'review',
           tenderId: tenderId,
           tenderTitle: (tenderData && tenderData.title) || (window._tenderData && window._tenderData.title) || '',
-          email: (companyDetails && companyDetails.email) || window._memberEmail || ''
+          email: (companyDetails && companyDetails.email) || window._memberEmail || '',
+          embedded: (typeof Stripe !== 'undefined' && !!window.STRIPE_PK)
         })
       });
       var rData = await rRes.json();
+      if (rData.clientSecret && window.openEmbeddedCheckout) {
+        var ttl = (window._canaTier === 'review_docs') ? 'Add review + documents' : 'Add expert review';
+        if (await window.openEmbeddedCheckout(rData.clientSecret, ttl)) return true;
+      }
       if (rData.url) { window.location.href = rData.url; return true; }
       throw new Error(rData.error || 'Could not start payment');
     } catch (e) {

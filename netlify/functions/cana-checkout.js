@@ -8,7 +8,11 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
   try {
-    const { sessionId, tenderId, tenderTitle, wantsReview, tier } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    const { sessionId, tenderId, tenderTitle, wantsReview, tier } = body;
+    // Embedded = the payment form mounts on our own page (customer stays on
+    // getcana.co.uk). We then return a client_secret instead of a redirect URL.
+    const embedded = !!body.embedded;
     const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
 
     // Normalise tier (back-compat: old callers send only wantsReview)
@@ -33,13 +37,18 @@ exports.handler = async (event) => {
       'line_items[0][price_data][product_data][name]': 'Cana bid response: ' + (tenderTitle || 'Tender').substring(0, 60),
       'line_items[0][price_data][unit_amount]': px(48000),
       'line_items[0][quantity]': '1',
-      'success_url': 'https://getcana.co.uk/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true',
-      'cancel_url': 'https://getcana.co.uk/cana.html?tender=' + tenderId,
       'metadata[session_id]': sessionId,
       'metadata[tender_id]': tenderId,
       'metadata[tier]': chosenTier,
       'metadata[includes_review]': (chosenTier !== 'none') ? '1' : '0'
     });
+    if (embedded) {
+      params.append('ui_mode', 'embedded');
+      params.append('return_url', 'https://getcana.co.uk/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true');
+    } else {
+      params.append('success_url', 'https://getcana.co.uk/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true');
+      params.append('cancel_url', 'https://getcana.co.uk/cana.html?tender=' + tenderId);
+    }
 
     // Add-on line item for review or review+docs tiers (SAME payment)
     if (chosenTier !== 'none') {
@@ -64,7 +73,11 @@ exports.handler = async (event) => {
       return { statusCode: 500, headers: cors, body: JSON.stringify({ error: data.error ? data.error.message : 'Stripe error' }) };
     }
 
-    return { statusCode: 200, headers: cors, body: JSON.stringify({ url: data.url }) };
+    return {
+      statusCode: 200,
+      headers: cors,
+      body: JSON.stringify(embedded ? { clientSecret: data.client_secret } : { url: data.url })
+    };
 
   } catch(err) {
     return { statusCode: 500, headers: cors, body: JSON.stringify({ error: err.message }) };
