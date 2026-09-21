@@ -9,7 +9,7 @@ const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
 // ── Classification (kept in sync with import-tenders.js) ──
 var CARE_TRANSPORT_RE = /\b(passenger assistant|special educational needs|send|sen|home[ -]to[ -]school|school transport|patient transport|non[ -]?emergency( patient)? transport|dial[ -]a[ -]ride|community transport|wheelchair|escort)\b/i;
-var CARE_KEYWORDS = ['care','social care','domiciliary','home care','homecare','residential','nursing','care home','supported living','supported accommodation','sheltered housing','extra care','respite','reablement','day service','day services','day care','shared lives','direct payments','personal care','mental health','learning disabilit','autism','autistic','dementia','end of life','palliative','hospice','older people','vulnerable','disabilit','disabled','send','special educational needs','safeguarding','advocacy','wellbeing','welfare','carer','carers','family support','children','young people','youth','looked after children','foster','fostering','adoption','substance misuse','drug and alcohol','domestic abuse','homeless','community support','cqc'];
+var CARE_STRICT = ['social care','domiciliary care','home care','homecare','care home','residential care','nursing home','nursing care','supported living','supported accommodation','extra care','respite care','reablement','shared lives','day care service','learning disabilit','dementia','palliative care','end of life care','safeguarding','cqc','care at home'];
 var BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
 function kwMatch(text, kw) {
   var esc = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -34,9 +34,10 @@ function cpvSaysCare(ids, text) {
 }
 function detectCategory(title, desc, ids) {
   var text = ((title || '') + ' ' + (desc || ''));
-  if (ids && ids.length && cpvSaysCare(ids, text)) return 'care';
+  // Trust the official CPV code when present; only keyword-guess when there is none.
+  if (ids && ids.length) return cpvSaysCare(ids, text) ? 'care' : 'commercial';
   if (BUSINESS_TITLE_RE.test(title || '')) return 'commercial';
-  if (CARE_KEYWORDS.some(function (kw) { return kwMatch(text, kw); })) return 'care';
+  if (CARE_STRICT.some(function (kw) { return kwMatch(text, kw); })) return 'care';
   return 'commercial';
 }
 function detectCqc(title, desc, ids) {

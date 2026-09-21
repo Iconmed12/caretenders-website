@@ -22,10 +22,11 @@ exports.handler = async (event) => {
   // TITLE only. Only used in the keyword fallback (a real care CPV overrides it).
   var BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
 
-  // Care / community keyword fallback, used ONLY when the official CPV code is
-  // missing or unclear. Broadened well beyond the old short list so we stop
-  // dropping real care tenders that are simply worded differently.
-  var CARE_KEYWORDS = ['care','social care','domiciliary','home care','homecare','residential','nursing','care home','supported living','supported accommodation','sheltered housing','extra care','respite','reablement','day service','day services','day care','shared lives','direct payments','personal care','mental health','learning disabilit','autism','autistic','dementia','end of life','palliative','hospice','older people','vulnerable','disabilit','disabled','send','special educational needs','safeguarding','advocacy','wellbeing','welfare','carer','carers','family support','children','young people','youth','looked after children','foster','fostering','adoption','substance misuse','drug and alcohol','domestic abuse','homeless','community support','cqc'];
+  // TIGHT care terms, used ONLY when a notice has no official CPV code at all.
+  // Deliberately narrow and unambiguous: broad words like "children", "young
+  // people", "training", "welfare" were pulling in colleges and generic
+  // programmes, so they are NOT here.
+  var CARE_STRICT = ['social care','domiciliary care','home care','homecare','care home','residential care','nursing home','nursing care','supported living','supported accommodation','extra care','respite care','reablement','shared lives','day care service','learning disabilit','dementia','palliative care','end of life care','safeguarding','cqc','care at home'];
 
   // Care-related transport terms (SEN / patient / community transport). Keeps
   // passenger transport for vulnerable people while excluding freight/logistics.
@@ -67,12 +68,15 @@ exports.handler = async (event) => {
 
   function detectCategory(title, desc, cpvIds) {
     var text = ((title || '') + ' ' + (desc || ''));
-    // 1) Trust the official CPV code first.
-    if (cpvIds && cpvIds.length && cpvSaysCare(cpvIds, text)) return 'care';
-    // 2) Employment / business-support programmes are not care.
+    // If the notice has an official CPV code, TRUST it and do not keyword-guess.
+    // (Guessing from descriptions pulled in colleges, training, generic
+    // programmes that merely mention "young people" etc.)
+    if (cpvIds && cpvIds.length) {
+      return cpvSaysCare(cpvIds, text) ? 'care' : 'commercial';
+    }
+    // No CPV at all: fall back to the tight, unambiguous care terms only.
     if (BUSINESS_TITLE_RE.test(title || '')) return 'commercial';
-    // 3) Keyword fallback for tenders with a missing or unhelpful CPV.
-    if (CARE_KEYWORDS.some(function (kw) { return kwMatch(text, kw); })) return 'care';
+    if (CARE_STRICT.some(function (kw) { return kwMatch(text, kw); })) return 'care';
     return 'commercial';
   }
 
