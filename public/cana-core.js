@@ -521,6 +521,7 @@
     window._memberProfile = profile;
     window._memberEmail = email;
 
+    renderMemberLots();
     showState('member');
   }
 
@@ -547,7 +548,69 @@
     };
   }
 
+  // ── Multi-lot support (customer side) ──
+  function escLot(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function tenderLots(){ return (tenderData && Array.isArray(tenderData.lots)) ? tenderData.lots.filter(function(l){return l&&l.name;}) : []; }
+  function renderMemberLots() {
+    var wrap = document.getElementById('member-lots'); if (!wrap) return;
+    var lots = tenderLots();
+    if (!lots.length) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+    wrap.style.display = 'block';
+    wrap.innerHTML =
+      '<div style="font-size:0.85rem;font-weight:600;color:#0B1929;margin-bottom:8px;">This tender has ' + lots.length + ' lots. Choose which to bid for, Cana writes a tailored response for each.</div>' +
+      lots.map(function(l){
+        return '<label style="display:flex;align-items:center;gap:10px;border:1.5px solid #e6e9ef;border-radius:10px;padding:10px 12px;margin-bottom:6px;cursor:pointer;">' +
+          '<input type="checkbox" class="member-lot-cb" data-name="' + escLot(l.name) + '" data-ref="' + escLot(l.ref) + '" style="width:16px;height:16px;flex-shrink:0;accent-color:#0B1929;">' +
+          '<span style="font-size:0.85rem;color:#0B1929;">' + escLot(l.name) + (l.ref ? ' <span style="color:#8b93a1;">· ' + escLot(l.ref) + '</span>' : '') + '</span></label>';
+      }).join('');
+    var btn = document.getElementById('member-generate-btn');
+    if (btn) btn.textContent = 'Generate my lot responses';
+  }
+  function getSelectedLots() {
+    return Array.from(document.querySelectorAll('.member-lot-cb:checked')).map(function(cb){
+      return { name: cb.getAttribute('data-name'), ref: cb.getAttribute('data-ref') };
+    });
+  }
+  window.renderMemberLots = renderMemberLots;
+
+  // A member generating for a multi-lot tender: one tailored response per lot,
+  // each emailed as it is ready. Base bids are included, so no payment.
+  async function memberGenerateLots() {
+    var selected = getSelectedLots();
+    if (!selected.length) { alert('Please pick at least one lot to bid for.'); return; }
+    var companyDetails = memberCompanyDetails();
+    window._companyDetails = companyDetails; window._isMember = true;
+    setStep(5); showState('loading');
+    var h = document.querySelector('.loading-state h3'); if (h) h.textContent = 'Cana is writing your ' + selected.length + ' lot response' + (selected.length > 1 ? 's' : '');
+    var p = document.querySelector('.loading-state p');  if (p) p.textContent  = 'Each lot is written separately, they will email through as they finish.';
+    var sp = document.querySelector('.loading-state .loading-spinner'); if (sp) sp.style.display = '';
+    var ok = 0;
+    for (var i = 0; i < selected.length; i++) {
+      var lot = selected[i];
+      try {
+        var res = await fetch('/.netlify/functions/member-start', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenderId: tenderId, includeSq: false, companyDetails: companyDetails, accessToken: window._authToken || '', wantsReview: false })
+        });
+        var data = await res.json();
+        if (!res.ok || !data.member) throw new Error(data.error || 'Membership could not be verified');
+        fetch('/.netlify/functions/generate-cana-background', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jobId: data.jobId, tenderId: data.tenderId || tenderId, sessionId: 'member_' + data.jobId, includeSq: false, wantsReview: false, tier: 'none', lotName: lot.name, lotRef: lot.ref, companyDetails: data.companyDetails || companyDetails })
+        }).catch(function(e){ console.error('Lot generation trigger failed:', e.message); });
+        ok++;
+      } catch (e) { console.error('Lot start failed (' + lot.name + '):', e.message); }
+    }
+    if (h) h.textContent = ok ? 'You are all set' : 'Something went wrong';
+    if (p) p.textContent = ok
+      ? ('Cana is writing ' + ok + ' lot response' + (ok > 1 ? 's' : '') + '. Each will be emailed to ' + (companyDetails.email || 'you') + ' as it is ready.')
+      : 'We could not start the lot responses. Please try again or contact hello@getcana.co.uk';
+    if (sp) sp.style.display = 'none';
+  }
+
   window.memberGenerate = function() {
+    // Multi-lot tender: use the lot picker flow instead of the single SQ flow.
+    if (tenderLots().length) { return memberGenerateLots(); }
     // Store company details + CH data from the saved profile so the SQ
     // preview renders exactly as it does in the normal flow
     window._companyDetails = memberCompanyDetails();

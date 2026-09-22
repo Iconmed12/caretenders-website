@@ -75,7 +75,7 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body || '{}');
     jobId = body.jobId;
-    const { tenderId, companyDetails, sessionId, includeSq, wantsReview, tier } = body;
+    const { tenderId, companyDetails, sessionId, includeSq, wantsReview, tier, lotName, lotRef } = body;
 
     if (!jobId) return;
 
@@ -249,6 +249,7 @@ exports.handler = async (event) => {
     var sharedContext =
       'You are an elite UK public sector bid writer with a 90%+ win rate on local authority contracts. ' +
       'You are writing one quality question response for a live tender.\n\n' +
+      (lotName ? '═══ LOT ═══\nThis submission is for a specific lot of this framework: "' + lotName + '"' + (lotRef ? ' (reference ' + lotRef + ')' : '') + '. Tailor every answer to this specific lot and its area: name the area where relevant, reflect its local geography and context, and make the response clearly specific to this lot rather than generic. Do not mention or compare other lots.\n\n' : '') +
       '═══ THE SCORING RUBRIC (the evaluator will score 0-10 with this) ═══\n' + scoringFull + '\n\n' +
       '═══ HOW TO SCORE 10/10 ═══\n' +
       '1. Address EVERY bullet and sub-requirement in the question criteria below, evaluators tick them off; one missed bullet caps the score at 6.\n' +
@@ -577,7 +578,7 @@ exports.handler = async (event) => {
         border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: '00C9E0' } }, spacing: { after: 300 }
       }));
       children.push(new Paragraph({
-        children: [new TextRun({ text: tender.title || 'Tender Response', bold: true, size: 32, font: 'Arial' })],
+        children: [new TextRun({ text: (tender.title || 'Tender Response') + (lotName ? ' - ' + lotName : ''), bold: true, size: 32, font: 'Arial' })],
         alignment: AlignmentType.CENTER, spacing: { after: 200 }
       }));
       children.push(new Paragraph({
@@ -712,7 +713,7 @@ exports.handler = async (event) => {
         var r1 = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: { Authorization: 'Bearer ' + RESEND, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: clientEmail, subject: '📄 Your Cana documents: ' + (tender.title||'').substring(0,50), html: emailHtml, attachments })
+          body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: clientEmail, subject: '📄 Your Cana documents: ' + (tender.title||'').substring(0,50) + (lotName ? ' - ' + lotName : ''), html: emailHtml, attachments })
         });
         console.log('Client email:', r1.status, clientEmail);
       } catch(e) { console.log('Client email failed:', e.message); }
@@ -735,7 +736,7 @@ exports.handler = async (event) => {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + RESEND, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: 'hello@getcana.co.uk', subject: subjectPrefix + clientName + ' | ' + (tender.title||'').substring(0,40), html: banner + '<p><strong>Client:</strong> ' + clientName + ' | <strong>Email:</strong> ' + clientEmail + '</p>' + emailHtml, attachments })
+        body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: 'hello@getcana.co.uk', subject: subjectPrefix + clientName + ' | ' + (tender.title||'').substring(0,40) + (lotName ? ' - ' + lotName : ''), html: banner + '<p><strong>Client:</strong> ' + clientName + (lotName ? ' | <strong>Lot:</strong> ' + lotName : '') + ' | <strong>Email:</strong> ' + clientEmail + '</p>' + emailHtml, attachments })
       });
     } catch(e) { console.log('Ops email failed:', e.message); }
 
