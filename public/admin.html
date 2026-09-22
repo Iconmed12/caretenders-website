@@ -111,10 +111,6 @@
     </div>
 
     <div class="page" id="page-care">
-      <div style="background:#e8f7ee;border:1px solid #9FE1CB;border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:13px;color:#085041;display:flex;align-items:center;gap:8px;">
-        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
-        <span>If a care tender has <strong>no CQC rating requirement</strong> in its eligibility, it will automatically also appear under <strong>Non-CQC listings</strong> for new providers.</span>
-      </div>
       <div class="table-card">
         <div class="table-header"><h2>Care tenders <span style="color:var(--text-light);font-weight:400;font-size:13px" id="careCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="careSearch" placeholder="Search..." oninput="renderCareTable()"></div></div>
         <table><thead><tr><th>Tender</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Non-CQC?</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="careTable"></tbody></table>
@@ -129,10 +125,6 @@
     </div>
 
     <div class="page" id="page-noncqc">
-      <div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:10px 16px;margin-bottom:1rem;font-size:13px;color:#4c1d95;display:flex;align-items:center;gap:8px;">
-        <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i>
-        <span>This list is <strong>auto-populated</strong> from care tenders where no CQC rating is required. You can also add them manually.</span>
-      </div>
       <div class="table-card">
         <div class="table-header"><h2>Non-CQC listings <span style="color:var(--text-light);font-weight:400;font-size:13px" id="nonCqcCountLabel"></span></h2><div class="table-search"><i class="ti ti-search" style="font-size:15px;color:var(--text-light)"></i><input type="text" id="nonCqcSearch" placeholder="Search..." oninput="renderNonCqcTable()"></div></div>
         <table><thead><tr><th>Listing</th><th>Organisation</th><th>Value</th><th>Our fee</th><th>Auto-detected</th><th>Status</th><th>Deadline</th><th>Actions</th></tr></thead><tbody id="nonCqcTable"></tbody></table>
@@ -141,10 +133,6 @@
 
     <!-- CANA PAGE -->
     <div class="page" id="page-cana">
-      <div style="background:rgba(0,201,224,0.06);border:1px solid rgba(0,201,224,0.2);border-radius:8px;padding:10px 16px;margin-bottom:1.25rem;font-size:13px;color:#0099AA;display:flex;align-items:center;gap:8px;">
-        <i class="ti ti-sparkles" style="font-size:16px;flex-shrink:0;"></i>
-        <span>Upload documents for each tender so Cana knows exactly how to write the responses. You can upload multiple files per section.</span>
-      </div>
       <style>
         .cana-shell{display:grid;grid-template-columns:310px 1fr;gap:1.25rem;align-items:start}
         @media(max-width:900px){.cana-shell{grid-template-columns:1fr}}
@@ -267,7 +255,6 @@
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
             <div>
               <div style="font-weight:600;font-size:0.95rem;">Tender Questions</div>
-              <div style="font-size:0.78rem;color:var(--text-light);margin-top:2px;">Type or paste each question below. Cana will write a full response to every one.</div>
             </div>
             <button onclick="addCanaQuestion()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:8px 16px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;">
               <i class="ti ti-plus" style="font-size:13px;"></i> Add question
@@ -537,7 +524,6 @@
   <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:1.5rem;flex-wrap:wrap;">
     <div>
       <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:4px;">Tender Import</h2>
-      <p style="color:var(--text-muted);font-size:0.875rem;">Auto-imported from Contracts Finder. Review and approve before going live.</p>
     </div>
     <div style="display:flex;gap:10px;align-items:center;">
       <button onclick="runManualImport()" id="ti-import-btn" style="background:var(--green-dark);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.84rem;">&#x2B07; Import Now</button>
@@ -546,8 +532,7 @@
   </div>
   <!-- Manually add a tender the auto-import missed, by pasting its Find a Tender link -->
   <div style="background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:14px;margin-bottom:1.25rem;">
-    <div style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:6px;">Add a tender by link</div>
-    <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:10px;">Found one the import missed? Paste its <strong>Find a Tender</strong> link (find-tender.service.gov.uk/Notice/...) and Cana will pull it in as pending.</div>
+    <div style="font-size:0.82rem;font-weight:700;color:var(--text);margin-bottom:10px;">Add a tender by link</div>
     <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
       <input id="ti-add-url" type="url" placeholder="https://www.find-tender.service.gov.uk/Notice/089351-2026" style="flex:1;min-width:260px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.84rem;">
       <button onclick="addTenderByLink()" id="ti-add-btn" style="background:var(--green-dark);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer;font-family:inherit;font-size:0.84rem;">Add tender</button>
