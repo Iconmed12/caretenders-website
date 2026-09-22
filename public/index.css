@@ -191,7 +191,7 @@
   /* CTA section */
   .modal-cta-heading { font-size:1.05rem; font-weight:600; color:var(--navy); margin-bottom:0.3rem; }
   .modal-cta-sub { font-size:0.85rem; color:var(--muted); line-height:1.6; margin-bottom:1.1rem; }
-  .modal-cta { display:flex; flex-direction:column; gap:0.65rem; }
+  .modal-cta { display:flex; flex-direction:column; gap:0.8rem; margin-top:1.5rem; }
 
   .btn-cta {
     display:flex; align-items:center; gap:14px;
