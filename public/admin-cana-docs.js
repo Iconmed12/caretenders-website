@@ -147,20 +147,23 @@ async function loadCanaDocs(){
   renderTenderStatusBar(t);
 
   // List rows are light. Fetch the full record (extracted text, SQ internals,
-  // completion pack) for this one tender so editing and saving work on real data.
-  try {
-    var fullRes = await fetch(API + '/get-tender-full?id=' + encodeURIComponent(id));
-    if (fullRes.ok) {
-      var full = await fullRes.json();
-      if (t && full && full.id === id) {
-        t.cana_docs = full.cana_docs;
-        t.cana_questions = full.cana_questions;
-        t.sq_data = full.sq_data;
-        t.completion_docs = full.completion_docs;
-        t.submission_portal = full.submission_portal;
+  // completion pack) once per tender, then cache it so switching back is instant.
+  if (t && !t._fullLoaded) {
+    try {
+      var fullRes = await fetch(API + '/get-tender-full?id=' + encodeURIComponent(id));
+      if (fullRes.ok) {
+        var full = await fullRes.json();
+        if (full && full.id === id) {
+          t.cana_docs = full.cana_docs;
+          t.cana_questions = full.cana_questions;
+          t.sq_data = full.sq_data;
+          t.completion_docs = full.completion_docs;
+          t.submission_portal = full.submission_portal;
+          t._fullLoaded = true;
+        }
       }
-    }
-  } catch(e) { showToast('Could not load full tender data: ' + e.message, 'error'); }
+    } catch(e) { showToast('Could not load full tender data: ' + e.message, 'error'); }
+  }
 
   var docs=(t&&t.cana_docs)||{};
   if (typeof loadDeliveryPack === 'function') loadDeliveryPack(t);
@@ -169,10 +172,11 @@ async function loadCanaDocs(){
     renderCanaFiles(type);
   });
   var hasSq = !!(t && t.sq_data && (t.sq_data.fileName || t.sq_data.htmlPreview || (t.sq_data.sections && t.sq_data.sections.length > 0)));
+  var hasQuestions = !!(t && Array.isArray(t.cana_questions) && t.cana_questions.length > 0);
   var hasSpec = canaDocData.spec.length > 0;
   var hasScoring = canaDocData.scoring.length > 0;
-  var hasAny = hasSq || hasSpec || hasScoring;
-  var hasAll = hasSpec && hasScoring;
+  var hasAny = hasSq || hasQuestions || hasSpec || hasScoring;
+  var hasAll = hasQuestions && hasSpec && hasScoring;
 
   var badge = document.getElementById('canaDocStatus');
   if (!hasAny) {
@@ -185,7 +189,7 @@ async function loadCanaDocs(){
     badge.textContent = '✓ All documents uploaded';
   } else {
     var missing = [];
-    if (!hasQuality) missing.push('Questions');
+    if (!hasQuestions) missing.push('Questions');
     if (!hasSpec) missing.push('Spec');
     if (!hasScoring) missing.push('Scoring');
     badge.style.display = 'block';
