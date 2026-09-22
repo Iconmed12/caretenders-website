@@ -516,11 +516,8 @@ function openDrawer(tOrId,sectionType,aiData){
     document.getElementById('fStatus').value=t.status||'open';
     document.getElementById('fDesc').value=t.description||'';
     document.getElementById('fLink').value=t.link||t.submission_link||'';
-    document.getElementById('fStripeLink').value=t.stripe_link||'';
-    document.getElementById('fPricingNote').value=(t.pricing||{}).note||'';
     if(!isNc) document.getElementById('fCategory').value=t.category||(isCommercial?'Construction':'Domiciliary care');
     if(isNc) document.getElementById('fWhyCqc').value=t.why_cqc||'';
-    buildPriceRows((t.pricing||{}).items||[]);
     buildEligRows(Array.isArray(t.eligibility)?t.eligibility:[]);
   } else if(aiData){
     document.getElementById('editId').value='';
@@ -534,28 +531,21 @@ function openDrawer(tOrId,sectionType,aiData){
       if(arr[1]){el.classList.add('ai-filled');var h=document.getElementById(arr[2]);if(h)h.style.display='flex';}
     });
     document.getElementById('fStatus').value='open';
-    document.getElementById('fPricingNote').value='One-off fee. No hidden charges. Payable on engagement.';
     if(!isNc){
       var aiCat=aiData.category||autoDetectCategory((aiData.title||'')+' '+(aiData.description||''))||(isCommercial?'Construction':'Domiciliary care');
       document.getElementById('fCategory').value=aiCat;
     }
-    var priceItems=aiData.our_price
-      ?[{label:'Bid writing and strategy (from document)',price:aiData.our_price.replace(/[^0-9.]/g,'')}]
-      :[{label:'Bid writing and strategy',price:''},{label:'Compliance review',price:''},{label:'Submission support',price:''}];
-    buildPriceRows(priceItems);
     buildEligRows(aiData.eligibility&&aiData.eligibility.length?aiData.eligibility:['']);
   } else {
     document.getElementById('editId').value='';
     document.getElementById('drawerTitleText').childNodes[0].textContent='Add '+(isNc?'listing ':isCommercial?'commercial tender ':'care tender ');
     document.getElementById('saveLabel').textContent=isNc?'Publish listing':'Publish tender';
-    ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink','fStripeLink'].forEach(function(f){
+    ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink'].forEach(function(f){
       var el=document.getElementById(f);if(el){el.value='';el.classList.remove('ai-filled');}
     });
     document.getElementById('fDeadline').value='';
     document.getElementById('fStatus').value='open';
-    document.getElementById('fPricingNote').value='One-off fee. No hidden charges. Payable on engagement.';
     if(!isNc) document.getElementById('fCategory').value=isCommercial?'Construction':'Domiciliary care';
-    buildPriceRows([{label:'Bid writing and strategy',price:''},{label:'Compliance review',price:''},{label:'Submission support',price:''}]);
     buildEligRows(['']);
   }
   document.getElementById('drawerOverlay').classList.add('open');
@@ -607,8 +597,6 @@ async function saveTender(draft){
   draft=draft||false;
   var isNonCqc=document.getElementById('editIsNonCqc').value==='1';
   var id=document.getElementById('editId').value;
-  var pItems=getPriceItems();
-  var total=pItems.reduce(function(s,i){return s+(parseFloat(i.price)||0);},0);
   var deadline=document.getElementById('fDeadline').value;
   var cat=document.getElementById('fCategory').value||null;
   var commercialCats=['Construction','Facilities','Cleaning','Consultancy','IT & Digital','Logistics','Other'];
@@ -623,9 +611,7 @@ async function saveTender(draft){
     deadline:deadline||null,
     days_left:deadline?Math.max(0,Math.round((new Date(deadline)-new Date())/(1000*60*60*24))):0,
     link:document.getElementById('fLink').value,
-    stripe_link:document.getElementById('fStripeLink').value||null,
     description:document.getElementById('fDesc').value,
-    pricing:{items:pItems.map(function(i){return{label:i.label,price:parseFloat(i.price)||0};}),total:total,note:document.getElementById('fPricingNote').value},
     eligibility:getEligItems(),
     is_non_cqc:commercialCats.includes(cat)?false:(isNonCqc||isNonCqcEligible({category:cat,eligibility:getEligItems()})),
     why_cqc:isNonCqc?document.getElementById('fWhyCqc').value:null,
