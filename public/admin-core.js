@@ -547,12 +547,49 @@ function openDrawer(tOrId,sectionType,aiData){
     document.getElementById('fStatus').value='open';
     if(!isNc) document.getElementById('fCategory').value=isCommercial?'Construction':'Domiciliary care';
     buildEligRows(['']);
+    // Restore an unsaved draft for this section so nothing is lost on a close.
+    var _draft=getLocalDraft(); if(_draft) restoreLocalDraft(_draft);
   }
   document.getElementById('drawerOverlay').classList.add('open');
 }
 
 function closeDrawer(){document.getElementById('drawerOverlay').classList.remove('open');}
-function maybeCloseDrawer(e){if(e.target===document.getElementById('drawerOverlay'))closeDrawer();}
+// Click-outside no longer closes the drawer (it lost people's work). Kept as a
+// no-op so any old reference is harmless.
+function maybeCloseDrawer(e){}
+// Cancel = deliberately discard the draft; the X just closes and keeps it.
+function cancelDrawer(){clearLocalDraft();closeDrawer();}
+
+// ── Auto draft save (local, per section) so work is never lost on close ──
+var DRAFT_KEY='cana_tender_draft';
+function _dv(id){var e=document.getElementById(id);return e?e.value:'';}
+function saveLocalDraft(){
+  if(document.getElementById('editId').value) return; // only for new tenders
+  try{
+    var d={section:currentSection,isNc:_dv('editIsNonCqc'),
+      fTitle:_dv('fTitle'),fOrg:_dv('fOrg'),fRegion:_dv('fRegion'),fValue:_dv('fValue'),
+      fDuration:_dv('fDuration'),fDeadline:_dv('fDeadline'),fStatus:_dv('fStatus'),
+      fCategory:_dv('fCategory'),fLink:_dv('fLink'),fDesc:_dv('fDesc'),fWhyCqc:_dv('fWhyCqc'),
+      eligibility:(typeof getEligItems==='function'?getEligItems():[])};
+    if(d.fTitle||d.fOrg||d.fDesc||d.fValue) localStorage.setItem(DRAFT_KEY,JSON.stringify(d));
+  }catch(e){}
+}
+function getLocalDraft(){
+  try{var d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');
+    return (d&&d.section===currentSection&&(d.fTitle||d.fOrg||d.fDesc||d.fValue))?d:null;}catch(e){return null;}
+}
+function restoreLocalDraft(d){
+  ['fTitle','fOrg','fRegion','fValue','fDuration','fDeadline','fStatus','fCategory','fLink','fDesc','fWhyCqc'].forEach(function(id){
+    var e=document.getElementById(id); if(e&&d[id]!=null&&d[id]!=='') e.value=d[id];
+  });
+  if(Array.isArray(d.eligibility)&&d.eligibility.length) buildEligRows(d.eligibility);
+}
+function clearLocalDraft(){try{localStorage.removeItem(DRAFT_KEY);}catch(e){}}
+document.addEventListener('DOMContentLoaded',function(){
+  var body=document.querySelector('.drawer-body');
+  if(!body) return;
+  var t; body.addEventListener('input',function(){clearTimeout(t);t=setTimeout(saveLocalDraft,400);});
+});
 
 var prc=0;
 function buildPriceRows(items){prc=0;document.getElementById('pricingBuilder').innerHTML='';items.forEach(function(i){_addPR(i.label,i.price);});updatePriceTotal();}
@@ -629,6 +666,7 @@ async function saveTender(draft){
     if(data.error) throw new Error(data.error);
     var idx=allTenders.findIndex(function(x){return x.id===tender.id;});
     if(idx>-1) allTenders[idx]=tender; else allTenders.unshift(tender);
+    clearLocalDraft();
     closeDrawer();renderAll();
     showToast(draft?'Draft saved':(id?'Tender updated':'Tender added, upload its documents in the dashboard before it goes live'),'success');
   } catch(err){
