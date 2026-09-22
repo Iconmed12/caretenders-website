@@ -169,11 +169,10 @@ async function loadCanaDocs(){
     renderCanaFiles(type);
   });
   var hasSq = !!(t && t.sq_data && (t.sq_data.fileName || t.sq_data.htmlPreview || (t.sq_data.sections && t.sq_data.sections.length > 0)));
-  var hasQuality = canaDocData.quality.length > 0;
   var hasSpec = canaDocData.spec.length > 0;
   var hasScoring = canaDocData.scoring.length > 0;
-  var hasAny = hasSq || hasQuality || hasSpec || hasScoring;
-  var hasAll = hasQuality && hasSpec && hasScoring;
+  var hasAny = hasSq || hasSpec || hasScoring;
+  var hasAll = hasSpec && hasScoring;
 
   var badge = document.getElementById('canaDocStatus');
   if (!hasAny) {
@@ -226,15 +225,15 @@ async function loadCanaDocs(){
 }
 
 function updateCanaDocProgress(){
-  var sections=['quality','spec','scoring'];
+  var sections=['spec','scoring'];
   var filled=0;
   sections.forEach(function(s){
     if(window.canaDocData&&canaDocData[s]&&canaDocData[s].length) filled++;
   });
   var label=document.getElementById('canaDocProgressLabel');
   var fill=document.getElementById('canaDocProgressFill');
-  if(label) label.textContent=filled+' of 3';
-  if(fill) fill.style.width=Math.round((filled/3)*100)+'%';
+  if(label) label.textContent=filled+' of 2';
+  if(fill) fill.style.width=Math.round((filled/2)*100)+'%';
 }
 
 function renderCanaFiles(type){
