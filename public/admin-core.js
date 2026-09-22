@@ -680,7 +680,7 @@ async function saveTender(draft){
     // New manual tenders do NOT go live on publish; they sit in the dashboard as
     // "needs documents" until the docs are uploaded and it is set live. Editing
     // an existing tender still respects the chosen status.
-    status:draft?'draft':(id?document.getElementById('fStatus').value:'needs_docs'),
+    status:draft?'draft':(id?(document.getElementById('fStatus').value||'needs_docs'):'needs_docs'),
     title:document.getElementById('fTitle').value,
     org:document.getElementById('fOrg').value,
     region:document.getElementById('fRegion').value,
