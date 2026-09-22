@@ -522,7 +522,7 @@ function openDrawer(tOrId,sectionType,aiData){
   } else if(aiData){
     document.getElementById('editId').value='';
     document.getElementById('drawerTitleText').childNodes[0].textContent='Review AI-extracted tender ';
-    document.getElementById('saveLabel').textContent='Publish tender';
+    document.getElementById('saveLabel').textContent='Add tender';
     [['fTitle',aiData.title,'hintTitle'],['fOrg',aiData.org,'hintOrg'],['fRegion',aiData.region,'hintRegion'],
      ['fValue',aiData.value,'hintValue'],['fDuration',aiData.duration,'hintDuration'],
      ['fDeadline',aiData.deadline,'hintDeadline'],['fDesc',aiData.description,'hintDesc'],['fLink',aiData.link,'hintLink']
@@ -539,7 +539,7 @@ function openDrawer(tOrId,sectionType,aiData){
   } else {
     document.getElementById('editId').value='';
     document.getElementById('drawerTitleText').childNodes[0].textContent='Add '+(isNc?'listing ':isCommercial?'commercial tender ':'care tender ');
-    document.getElementById('saveLabel').textContent=isNc?'Publish listing':'Publish tender';
+    document.getElementById('saveLabel').textContent=isNc?'Add listing':'Add tender';
     ['fTitle','fOrg','fRegion','fValue','fDuration','fDesc','fWhyCqc','fLink'].forEach(function(f){
       var el=document.getElementById(f);if(el){el.value='';el.classList.remove('ai-filled');}
     });
@@ -602,7 +602,10 @@ async function saveTender(draft){
   var commercialCats=['Construction','Facilities','Cleaning','Consultancy','IT & Digital','Logistics','Other'];
   var tender={
     id:id||(isNonCqc?'NC':'T')+'-2026-'+String(nextId++).padStart(3,'0'),
-    status:draft?'draft':document.getElementById('fStatus').value,
+    // New manual tenders do NOT go live on publish; they sit in the dashboard as
+    // "needs documents" until the docs are uploaded and it is set live. Editing
+    // an existing tender still respects the chosen status.
+    status:draft?'draft':(id?document.getElementById('fStatus').value:'needs_docs'),
     title:document.getElementById('fTitle').value,
     org:document.getElementById('fOrg').value,
     region:document.getElementById('fRegion').value,
@@ -627,7 +630,7 @@ async function saveTender(draft){
     var idx=allTenders.findIndex(function(x){return x.id===tender.id;});
     if(idx>-1) allTenders[idx]=tender; else allTenders.unshift(tender);
     closeDrawer();renderAll();
-    showToast(draft?'Draft saved':'Tender published to live site','success');
+    showToast(draft?'Draft saved':(id?'Tender updated':'Tender added, upload its documents in the dashboard before it goes live'),'success');
   } catch(err){
     showToast('Save failed: '+err.message,'error');
   } finally {
