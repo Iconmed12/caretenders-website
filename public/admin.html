@@ -648,6 +648,18 @@
         <div class="form-row single"><div class="form-group"><label class="form-label">Description <span class="req">*</span></label><textarea class="form-textarea" id="fDesc" placeholder="Describe the tender scope..." oninput="tryAutoCategory()"></textarea><div class="ai-filled-note" id="hintDesc"><i class="ti ti-sparkles" style="font-size:11px"></i> Auto-filled by AI</div></div></div>
       </div>
       <div class="form-section">
+        <div class="fsect-title">Lots</div>
+        <label style="display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text);cursor:pointer;margin-bottom:2px;">
+          <input type="checkbox" id="fHasLots" onclick="toggleLots()" style="width:16px;height:16px;cursor:pointer;">
+          This tender is split into multiple lots
+        </label>
+        <div style="font-size:11px;color:var(--text-light);margin:2px 0 10px 25px;">Customers pick which lots to bid for, and Cana writes a tailored response per lot.</div>
+        <div id="lotsWrap" style="display:none;">
+          <div id="lotsList" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <button class="add-elig" onclick="addLotRow()" style="margin-top:8px;"><i class="ti ti-plus" style="font-size:14px"></i> Add lot</button>
+        </div>
+      </div>
+      <div class="form-section">
         <div class="fsect-title">Eligibility requirements</div>
         <div class="elig-list" id="eligList"></div>
         <button class="add-elig" onclick="addEligRow()"><i class="ti ti-plus" style="font-size:14px"></i> Add requirement</button>

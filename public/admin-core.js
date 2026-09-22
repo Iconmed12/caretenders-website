@@ -519,6 +519,7 @@ function openDrawer(tOrId,sectionType,aiData){
     if(!isNc) document.getElementById('fCategory').value=t.category||(isCommercial?'Construction':'Domiciliary care');
     if(isNc) document.getElementById('fWhyCqc').value=t.why_cqc||'';
     buildEligRows(Array.isArray(t.eligibility)?t.eligibility:[]);
+    setLots(t.lots);
   } else if(aiData){
     document.getElementById('editId').value='';
     document.getElementById('drawerTitleText').childNodes[0].textContent='Review AI-extracted tender ';
@@ -536,6 +537,7 @@ function openDrawer(tOrId,sectionType,aiData){
       document.getElementById('fCategory').value=aiCat;
     }
     buildEligRows(aiData.eligibility&&aiData.eligibility.length?aiData.eligibility:['']);
+    setLots([]);
   } else {
     document.getElementById('editId').value='';
     document.getElementById('drawerTitleText').childNodes[0].textContent='Add '+(isNc?'listing ':isCommercial?'commercial tender ':'care tender ');
@@ -547,6 +549,7 @@ function openDrawer(tOrId,sectionType,aiData){
     document.getElementById('fStatus').value='open';
     if(!isNc) document.getElementById('fCategory').value=isCommercial?'Construction':'Domiciliary care';
     buildEligRows(['']);
+    setLots([]);
     // Restore an unsaved draft for this section so nothing is lost on a close.
     var _draft=getLocalDraft(); if(_draft) restoreLocalDraft(_draft);
   }
@@ -590,6 +593,41 @@ document.addEventListener('DOMContentLoaded',function(){
   if(!body) return;
   var t; body.addEventListener('input',function(){clearTimeout(t);t=setTimeout(saveLocalDraft,400);});
 });
+
+// ── Lots (multi-lot tenders) ──
+function toggleLots(){
+  var on=document.getElementById('fHasLots').checked;
+  document.getElementById('lotsWrap').style.display=on?'block':'none';
+  if(on && !document.getElementById('lotsList').children.length) addLotRow();
+}
+function addLotRow(name,ref){
+  var list=document.getElementById('lotsList'); if(!list) return;
+  var row=document.createElement('div');
+  row.className='lot-row';
+  row.style.cssText='display:grid;grid-template-columns:1fr 150px 32px;gap:8px;align-items:center;';
+  var n=document.createElement('input'); n.type='text'; n.placeholder='Lot name e.g. Central 1 - Welwyn Hatfield'; n.value=name||''; n.className='form-input';
+  var r=document.createElement('input'); r.type='text'; r.placeholder='Reference'; r.value=ref||''; r.className='form-input';
+  var x=document.createElement('button'); x.type='button'; x.innerHTML='<i class="ti ti-x"></i>'; x.style.cssText='background:none;border:none;color:#dc2626;cursor:pointer;font-size:16px;'; x.onclick=function(){row.remove();};
+  row.appendChild(n); row.appendChild(r); row.appendChild(x);
+  list.appendChild(row);
+}
+function buildLotRows(items){
+  var list=document.getElementById('lotsList'); if(!list) return; list.innerHTML='';
+  (items||[]).forEach(function(l){ addLotRow(l.name||l.title||'', l.ref||l.reference||''); });
+}
+function getLots(){
+  var list=document.getElementById('lotsList'); if(!list) return [];
+  return Array.from(list.querySelectorAll('.lot-row')).map(function(row){
+    var ins=row.querySelectorAll('input'); return {name:ins[0].value.trim(), ref:ins[1].value.trim()};
+  }).filter(function(l){return l.name;});
+}
+function setLots(items){
+  var cb=document.getElementById('fHasLots'); if(!cb) return;
+  var has=Array.isArray(items)&&items.length>0;
+  cb.checked=has;
+  document.getElementById('lotsWrap').style.display=has?'block':'none';
+  buildLotRows(has?items:[]);
+}
 
 var prc=0;
 function buildPriceRows(items){prc=0;document.getElementById('pricingBuilder').innerHTML='';items.forEach(function(i){_addPR(i.label,i.price);});updatePriceTotal();}
@@ -657,6 +695,9 @@ async function saveTender(draft){
     why_cqc:isNonCqc?document.getElementById('fWhyCqc').value:null,
     category:cat,
   };
+  // Only include lots when multi-lot is enabled, so normal tenders never send
+  // the field (and never need the column). Requires the `lots` jsonb column.
+  var _hasLots=document.getElementById('fHasLots'); if(_hasLots&&_hasLots.checked){ tender.lots=getLots(); }
   document.getElementById('savingSpinner').style.display='block';
   document.getElementById('saveIcon').style.display='none';
   document.getElementById('publishBtn').disabled=true;
