@@ -321,24 +321,26 @@ exports.handler = async (event) => {
       // Programmatic length enforcement: models can't count words; we can
       function countWords(s) { return s.trim().split(/\s+/).filter(Boolean).length; }
 
-      // EXPAND: models routinely under-write long answers. If the response is
-      // well under the target, push it back up to the full allowed length with
-      // genuine depth (never fabrication).
+      // EXPAND: models routinely under-write long answers. Keep pushing until the
+      // response is within 10% of the limit (>=90%), with genuine depth (never
+      // fabrication). Up to 4 attempts, and stop early if it stops growing.
       var expandAttempts = 0;
-      while (countWords(final) < target * 0.85 && expandAttempts < 2) {
+      while (countWords(final) < target * 0.9 && expandAttempts < 4) {
         expandAttempts++;
         var cur = countWords(final);
-        console.log('Q' + (i+1) + ' under length (' + cur + '/' + target + '), expand attempt ' + expandAttempts);
+        var need = Math.max(0, Math.round(target * 0.97) - cur);
+        var pct = Math.round((cur / target) * 100);
+        console.log('Q' + (i+1) + ' under length (' + cur + '/' + target + ', ' + pct + '%), expand attempt ' + expandAttempts);
         try {
           var expanded = await callSonnet(
-            'This tender answer is only ' + cur + ' words but must be a thorough response of approximately ' + target + ' words to score full marks and use the allowed length. Expand it to about ' + Math.round(target * 0.95) + ' words.\n\n' +
+            'This tender answer is ' + cur + ' words, only ' + pct + '% of the ' + target + '-word limit. It MUST reach at least 90% of the limit (about ' + Math.round(target * 0.9) + ' words) or it loses marks against competitors who fill the space. Add roughly ' + need + ' more words to bring it to about ' + Math.round(target * 0.97) + ' words (never exceed ' + target + ').\n\n' +
             '═══ THE QUESTION AND ITS CRITERIA ═══\n' + qText + '\n\n' +
             '═══ COMPANY EVIDENCE (the ONLY permitted source of specific facts) ═══\n' + coCtx + '\n\n' +
             '═══ CURRENT ANSWER ═══\n' + final + '\n\n' +
-            'Expand by adding genuine depth against every criteria bullet: concrete processes, worked examples, named roles, and specifics drawn ONLY from the company evidence above. Where a needed specific is missing from the evidence, add an [INSERT: ...] flag rather than inventing it, and keep all existing [INSERT] flags. Do NOT pad with generic filler or repetition; every added sentence must add substance an evaluator would score. Plain prose, no markdown symbols, first person plural. Output ONLY the expanded response.',
+            'Add NEW substantive content (not rephrasing what is already there): go deeper on each criteria bullet, add concrete worked examples and step-by-step processes, name roles and responsibilities, describe monitoring/QA and how outcomes are measured, and address any sub-requirement not yet fully covered. Draw specifics ONLY from the company evidence above; where a needed specific is missing, add an [INSERT: ...] flag rather than inventing it, and keep all existing [INSERT] flags. No filler or repetition, every added sentence must be something an evaluator would score. Plain prose, no markdown symbols, first person plural. Output ONLY the full expanded response.',
             8000, sharedSystem);
           if (expanded) expanded = expanded.replace(/\s*—\s*/g, ', ').replace(/–/g, '-');
-          if (expanded && countWords(expanded) > cur) final = expanded; else break;
+          if (expanded && countWords(expanded) > cur + 15) final = expanded; else break;
         } catch(e) { console.log('Expand failed:', e.message); break; }
       }
 
