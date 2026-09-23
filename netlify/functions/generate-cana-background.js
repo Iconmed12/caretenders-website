@@ -256,10 +256,11 @@ exports.handler = async (event) => {
       '2. Evidence EVERY claim with specifics from the company evidence provided (real numbers, named roles, concrete processes). Generic assurances score 4.\n' +
       '3. End with a short "added value" element: 2-4 concrete commitments that go beyond the stated requirements (this is the explicit difference between 8 and 10 in the rubric).\n' +
       '4. Reference the specification sections the question points to, showing the requirements are understood and will be met in full.\n\n' +
-      '═══ ABSOLUTE RULE No. 1: ZERO FABRICATION ═══\n' +
-      'You must NEVER invent: names of people, statistics, percentages, staff counts, years of experience, tenure figures, retention rates, case studies, client examples, audit results, or track-record claims. Every specific fact MUST appear in the COMPANY EVIDENCE below. Where evidence is missing, write [INSERT: short description of what the client should provide]. A response containing placeholder flags scores higher than one containing invented facts, fabricated claims get bidders disqualified and blacklisted. This rule overrides all style and persuasiveness goals.\n\n' +
-      '═══ NAMED ROLES REQUIREMENT ═══\n' +
-      'Evaluators award marks for named accountability. For any content about staffing, safeguarding, management, training, mobilisation or quality assurance, the response MUST identify key individuals by name, role and qualification, e.g.' + roleExamples + '. Where the company evidence does not contain a name or qualification, write [INSERT: full name and qualification of your <role>] at that exact point. NEVER write around the gap with generic phrasing like "our experienced manager" or "our qualified safeguarding lead", unnamed roles lose marks; flagged gaps tell the client exactly what to add.\n\n' +
+      '═══ RULE No. 1: THIS IS A STRONG DRAFT THE CLIENT WILL REVIEW AND EDIT ═══\n' +
+      'Write it fully, confidently and persuasively. Prefer the COMPANY EVIDENCE below, but where it is thin you MAY write realistic, believable illustrative detail so the answer is complete and compelling: example scenarios, worked examples of how the service is delivered, operational processes, methods, timelines and typical situations. Write these as concrete and specific so they read like genuine practice; the client will review and adjust every section to their reality before submitting.\n' +
+      'HOWEVER, do NOT state as established fact the few things a commissioner verifies against a register or reference, because a false one is disqualifying: do not invent real individuals\' names, CQC registration status or ratings, specific third-party accreditations/certifications (ISO 9001/14001/45001, CHAS, Constructionline, SafeContractor, Cyber Essentials, SSIP), or specific headline track-record statistics presented as the organisation\'s actual record (retention %, exact years trading, client/hours counts, audit results). For those: use them only if they appear in the COMPANY EVIDENCE, otherwise write a clearly-marked [CONFIRM: ...] flag or phrase them illustratively (e.g. "typically" / "for example") rather than as a specific verified fact. Everything else: write it in full.\n\n' +
+      '═══ NAMED ROLES ═══\n' +
+      'Evaluators award marks for clear accountability, so describe roles, responsibilities and qualifications concretely (e.g. "our registered manager, qualified to Level 5 Diploma in Leadership for Health and Social Care, is accountable for..."). Do NOT invent a specific real person\'s name: use the role, or add a [CONFIRM: name of your <role>] flag where naming a real individual would strengthen it. Qualifications and role structures may be written illustratively for the client to confirm.\n\n' +
       complianceRule +
       '═══ COMPANY EVIDENCE (the ONLY permitted source of specific facts) ═══\n' + coCtx + '\n\n' +
       (kbContext ? '═══ KNOWLEDGE BASE ═══\n' + kbContext : '') +
@@ -302,9 +303,9 @@ exports.handler = async (event) => {
         '═══ DRAFT RESPONSE ═══\n' + draft + '\n\n' +
         '═══ YOUR TASK ═══\n' +
         'Step 1 (do this silently): score the draft 0-10 against the rubric. Identify every criteria bullet that is missing, thin, unevidenced, or generic. Check the added-value element exists and is concrete.\n' +
-        'Step 2 (FABRICATION AUDIT, do this silently): list every specific claim in the draft: named individuals, numbers, percentages, years, counts, case examples, audit results, CQC ratings. For each one, verify it appears in the COMPANY EVIDENCE above. Any claim NOT in the evidence must be replaced with [INSERT: what the client should provide] or rephrased without the invented specific. Be ruthless: invented facts disqualify bidders.\n' +
-        'Step 2b (NAMED ROLES CHECK, do this silently): wherever the draft discusses staffing, safeguarding, management, training or mobilisation, verify it either names real individuals from the evidence (with role and qualification) or carries an [INSERT: full name and qualification of your <role>] flag. Generic unnamed references like "our experienced team" or "a dedicated manager" are gaps, replace them with named individuals or [INSERT] flags.\n' +
-        'Step 3: rewrite the response fixing every identified gap and every fabricated claim, AND expand it to use the full allowed length. Target approximately ' + Math.round(target*0.95) + ' to ' + target + ' words (never exceed ' + target + '); a response well under the limit scores poorly, so add depth, specific evidence and worked examples from the company evidence to fill the space substantively (no padding, no fabrication). Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
+        'Step 2 (VERIFIABLE-FACT CHECK, do this silently): illustrative scenarios, example approaches and described processes are allowed (the client edits them) and must be KEPT. Only police the few externally-verifiable facts: real individuals\' names, CQC registration status/ratings, third-party accreditations/certifications (ISO, CHAS, Cyber Essentials, SSIP, etc.), and specific headline track-record statistics stated as the organisation\'s actual record. If one of THOSE appears but is not in the COMPANY EVIDENCE, replace it with a [CONFIRM: ...] flag or make it illustrative ("typically", "for example"), never a specific verified claim. Do not strip out realistic examples or worked scenarios.\n' +
+        'Step 2b (ROLES CHECK, do this silently): staffing/safeguarding/management content should describe roles, responsibilities and qualifications concretely; it does not need real names. Replace any invented specific personal name with the role or a [CONFIRM: name of your <role>] flag. Generic descriptions of roles and qualifications are fine and should be kept.\n' +
+        'Step 3: rewrite the response fixing the gaps from Step 1 and any verifiable-fact issues from Step 2, AND expand it to use the full allowed length. Target approximately ' + Math.round(target*0.95) + ' to ' + target + ' words (never exceed ' + target + '); a response well under the limit scores poorly, so add depth, realistic worked examples and specific-sounding detail to fill the space substantively (illustrative detail is fine; do not fabricate verifiable facts). Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
         'Output ONLY the final rewritten response: no scores, no commentary.';
 
       var final;
@@ -337,7 +338,7 @@ exports.handler = async (event) => {
             '═══ THE QUESTION AND ITS CRITERIA ═══\n' + qText + '\n\n' +
             '═══ COMPANY EVIDENCE (the ONLY permitted source of specific facts) ═══\n' + coCtx + '\n\n' +
             '═══ CURRENT ANSWER ═══\n' + final + '\n\n' +
-            'Add NEW substantive content (not rephrasing what is already there): go deeper on each criteria bullet, add concrete worked examples and step-by-step processes, name roles and responsibilities, describe monitoring/QA and how outcomes are measured, and address any sub-requirement not yet fully covered. Draw specifics ONLY from the company evidence above; where a needed specific is missing, add an [INSERT: ...] flag rather than inventing it, and keep all existing [INSERT] flags. No filler or repetition, every added sentence must be something an evaluator would score. Plain prose, no markdown symbols, first person plural. Output ONLY the full expanded response.',
+            'Add NEW substantive content (not rephrasing what is already there): go deeper on each criteria bullet with realistic worked examples, step-by-step processes, described roles and responsibilities, and how monitoring, QA and outcomes are measured, and cover any sub-requirement not yet fully addressed. You MAY write believable illustrative detail and example scenarios (the client reviews and edits these). Do NOT assert externally-verifiable facts that are not in the company evidence, real individuals\' names, CQC status/ratings, third-party accreditations, or headline track-record statistics, for those use [CONFIRM: ...] or illustrative phrasing ("typically", "for example") and keep all existing flags. No filler or repetition, every added sentence must be something an evaluator would score. Plain prose, no markdown symbols, first person plural. Output ONLY the full expanded response.',
             8000, sharedSystem);
           if (expanded) expanded = expanded.replace(/\s*—\s*/g, ', ').replace(/–/g, '-');
           if (expanded && countWords(expanded) > cur + 15) final = expanded; else break;
@@ -610,7 +611,7 @@ exports.handler = async (event) => {
         alignment: AlignmentType.CENTER, spacing: { after: 200 }
       }));
       children.push(new Paragraph({
-        children: [new TextRun({ text: 'Anything shown in red, like [INSERT: ...], must be completed by you before you submit.', size: 20, font: 'Arial', bold: true, color: 'C00000' })],
+        children: [new TextRun({ text: 'This is a draft: review and edit every section to fit your organisation. Anything shown in red, like [INSERT: ...] or [CONFIRM: ...], must be completed or verified by you before you submit.', size: 20, font: 'Arial', bold: true, color: 'C00000' })],
         spacing: { after: 160 }
       }));
       children.push(new Paragraph({
@@ -640,10 +641,10 @@ exports.handler = async (event) => {
         }
         (r.answer || '').split('\n').forEach(function(line) {
           if (!line.trim()) return;
-          // Split the line around [INSERT: ...] flags and render those bold red
-          var parts = line.split(/(\[INSERT:[^\]]*\])/g);
+          // Split the line around [INSERT: ...] / [CONFIRM: ...] flags and render those bold red
+          var parts = line.split(/(\[(?:INSERT|CONFIRM):[^\]]*\])/g);
           var runs = parts.filter(function(seg){ return seg.length; }).map(function(seg) {
-            if (/^\[INSERT:/.test(seg)) {
+            if (/^\[(?:INSERT|CONFIRM):/.test(seg)) {
               return new TextRun({ text: seg, size: 22, font: 'Arial', bold: true, color: 'C00000' });
             }
             return new TextRun({ text: seg, size: 22, font: 'Arial' });
