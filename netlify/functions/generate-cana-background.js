@@ -255,6 +255,57 @@ exports.handler = async (event) => {
       return d.content && d.content[0] ? d.content[0].text.trim() : '';
     }
 
+    // ── LIVE LOCAL RESEARCH (web search) ──
+    // One web-enabled call per job, run BEFORE any writing. It looks up the
+    // REAL, current local health-and-care partners for this tender's exact area
+    // (acute NHS trust, discharge teams, community health, ICB, PCNs, council
+    // adult social care, hospices, local voluntary orgs) so answers can name
+    // genuine organisations instead of guessing. The briefing is folded into the
+    // cached shared context, so the area is researched ONCE and reused across
+    // every question. Fully guarded: if web search is unavailable or the call
+    // fails, localResearch stays empty and generation continues on the model's
+    // own knowledge (with [CONFIRM] flags), exactly as before.
+    var localResearch = '';
+    async function researchLocalArea() {
+      var place = [tender.org || tender.buyer || '', tender.region || '', lotName || ''].filter(Boolean).join(', ');
+      if (!place) { console.log('Local research skipped: no place info on tender'); return ''; }
+      var sector = isCare ? 'adult social care and community health' : (tender.category === 'commercial' ? 'public sector services' : 'health and social care');
+      var researchPrompt =
+        'You are researching the local landscape for a UK public sector tender so a bid can name real, current local partners.\n\n' +
+        'The tender is commissioned by: ' + (tender.org || tender.buyer || 'a UK commissioner') + (tender.region ? ' (' + tender.region + ')' : '') + (lotName ? ', for the "' + lotName + '" area' : '') + '.\n' +
+        'Tender title: ' + (tender.title || '') + '\n\n' +
+        'Use web search to find the CURRENT, REAL organisations a ' + sector + ' provider working in this exact area would partner with. Then write a concise factual briefing (no more than 450 words, plain prose, no markdown symbols) covering, ONLY where you can verify a real named organisation for THIS area from the search results:\n' +
+        '- the local acute NHS trust(s) and their main hospital(s), and the hospital discharge / transfer-of-care teams\n' +
+        '- the community health provider (community nursing, therapy teams)\n' +
+        '- the relevant NHS Integrated Care Board (ICB) and any place-based partnership\n' +
+        '- GP primary care networks (PCNs) serving the area\n' +
+        '- the council\'s adult social care, safeguarding and commissioning teams\n' +
+        '- local hospice(s)\n' +
+        '- notable local voluntary and community sector organisations (for example the local Age UK, carers\' organisations, Healthwatch)\n\n' +
+        'For each, give the exact current organisation name and one short phrase on what a provider works with them on. Only include organisations you can actually verify by name for this area from the search results. If you cannot find a real name for a category, briefly say so rather than inventing one. Never fabricate an organisation name. Output only the briefing.';
+      try {
+        var res = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-api-key': AI_KEY, 'anthropic-version': '2023-06-01' },
+          body: JSON.stringify({
+            model: SONNET,
+            max_tokens: 2000,
+            messages: [{ role: 'user', content: researchPrompt }],
+            tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 6 }]
+          })
+        });
+        if (!res.ok) { var et = await res.text(); console.log('Local research web search failed:', res.status, et.substring(0,200)); return ''; }
+        var d = await res.json();
+        if (d.error) { console.log('Local research error:', JSON.stringify(d.error).substring(0,200)); return ''; }
+        var txt = (d.content || []).filter(function(c){ return c.type === 'text' && c.text; }).map(function(c){ return c.text; }).join('\n').trim();
+        console.log('Local research for "' + place + '": ' + (txt ? txt.length + ' chars' : 'empty'));
+        return txt;
+      } catch(e) { console.log('Local research exception:', e.message); return ''; }
+    }
+
+    await setStatus(jobId, 'researching_local_area');
+    localResearch = await researchLocalArea();
+
     // Shared reference block, built once per job and cached by the AI so it is
     // not re-billed at full price on every question. Byte-identical across all
     // questions because it is assembled here once and reused. This is the exact
@@ -264,7 +315,10 @@ exports.handler = async (event) => {
       'You are writing one quality question response for a live tender.\n\n' +
       (lotName ? '═══ LOT ═══\nThis submission is for a specific lot of this framework: "' + lotName + '"' + (lotRef ? ' (reference ' + lotRef + ')' : '') + '. Tailor every answer to this specific lot and its area: name the area where relevant, reflect its local geography and context, and make the response clearly specific to this lot rather than generic. Do not mention or compare other lots.\n\n' : '') +
       '═══ LOCAL AREA (ground the response in this locality) ═══\n' +
-      'This tender is for ' + (tender.org || tender.buyer || 'the commissioner') + (tender.region ? ' (' + tender.region + ')' : '') + (lotName ? ', specifically the ' + lotName + ' area' : '') + '. Show you know the area: where relevant, name the local partners this service actually works with, the local acute NHS trust and hospital discharge teams, community nursing, GP primary care networks (PCNs), the council\'s adult social care and safeguarding teams, local hospices, and relevant voluntary and community organisations serving this area. Where you can confidently name the real local organisation for this locality, name it; where you are not sure of the exact current name, describe the partner by type and add a [CONFIRM: local <type> for this area] flag rather than inventing a specific name. Local grounding scores well, it proves you understand the commissioner\'s area rather than offering a generic answer.\n\n' +
+      'This tender is for ' + (tender.org || tender.buyer || 'the commissioner') + (tender.region ? ' (' + tender.region + ')' : '') + (lotName ? ', specifically the ' + lotName + ' area' : '') + '. Show you know the area: where relevant, name the local partners this service actually works with, the local acute NHS trust and hospital discharge teams, community nursing, GP primary care networks (PCNs), the council\'s adult social care and safeguarding teams, local hospices, and relevant voluntary and community organisations serving this area. Local grounding scores well, it proves you understand the commissioner\'s area rather than offering a generic answer.\n' +
+      (localResearch
+        ? 'The following local partners have been researched from current web sources for THIS area. These are REAL, verified organisation names, so you may name them directly and confidently in the response as the genuine local partners this service works with (no [CONFIRM] flag needed for names that appear here). Weave them in naturally where the question invites partnership working, discharge, community health, safeguarding or social value, always tied to a concrete example of what you do with them:\n' + localResearch + '\n\nFor any local partner NOT covered by the research above, describe the partner by type and add a [CONFIRM: local <type> for this area] flag rather than inventing a specific name.\n\n'
+        : 'Where you can confidently name the real local organisation for this locality, name it; where you are not sure of the exact current name, describe the partner by type and add a [CONFIRM: local <type> for this area] flag rather than inventing a specific name.\n\n') +
       '═══ THE SCORING RUBRIC (the evaluator will score 0-10 with this) ═══\n' + scoringFull + '\n\n' +
       '═══ HOW TO SCORE 10/10 ═══\n' +
       '1. Address EVERY bullet and sub-requirement in the question criteria below, evaluators tick them off; one missed bullet caps the score at 6.\n' +
