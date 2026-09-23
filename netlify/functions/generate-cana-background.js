@@ -271,7 +271,11 @@ exports.handler = async (event) => {
     async function generateOne(i) {
       var q = questions[i];
       var qText = q.question || q.text || String(q);
-      var target = qLimits[i+1] || wordTarget(qText);
+      // Use the word limit the admin entered on the question first (that is the
+      // authoritative one), then any limit parsed from the quality document,
+      // then a limit written in the question text, then a sensible default.
+      var target = parseInt((q && (q.wordLimit || q.word_limit)) || '', 10) || qLimits[i+1] || wordTarget(qText);
+      if (!target || target < 300) target = 700;
       console.log('Q' + (i+1) + ': target ' + target + ' words');
 
       // STAGE A: Draft to the rubric. The shared reference material (rubric,
@@ -280,7 +284,7 @@ exports.handler = async (event) => {
       var draftPrompt =
         '═══ THE QUESTION TO ANSWER ═══\n' + qText + '\n\n' +
         '═══ OUTPUT REQUIREMENTS ═══\n' +
-        '- HARD LIMIT: ' + target + ' words, the council REDACTS everything beyond the page limit unread, so exceeding it destroys the response. Write to ' + Math.round(target*0.78) + ' words. Do not exceed ' + Math.round(target*0.85) + ' words under any circumstances.\n' +
+        '- LENGTH IS SCORED: this answer must be a substantial, thorough response of approximately ' + target + ' words. Aim for ' + Math.round(target*0.95) + ' to ' + target + ' words: a short answer leaves marks on the table and looks weak next to competitors who fill the space. Do not exceed ' + target + ' words (the council redacts anything beyond the limit). Use the full length to address every criteria bullet in depth with specific evidence and examples.\n' +
         '- Plain flowing prose paragraphs with occasional short headed sections (plain text headings, no markdown symbols).\n' +
         '- ABSOLUTELY NO markdown: no asterisks, no hashes, no bullet symbols. Use sentence-form lists.\n' +
         '- First person plural (we/our). Confident, specific, human. Vary sentence length. No AI tells like "Moreover" chains, "delve", "tapestry", "Furthermore" repetition.\n' +
@@ -300,7 +304,7 @@ exports.handler = async (event) => {
         'Step 1 (do this silently): score the draft 0-10 against the rubric. Identify every criteria bullet that is missing, thin, unevidenced, or generic. Check the added-value element exists and is concrete.\n' +
         'Step 2 (FABRICATION AUDIT, do this silently): list every specific claim in the draft: named individuals, numbers, percentages, years, counts, case examples, audit results, CQC ratings. For each one, verify it appears in the COMPANY EVIDENCE above. Any claim NOT in the evidence must be replaced with [INSERT: what the client should provide] or rephrased without the invented specific. Be ruthless: invented facts disqualify bidders.\n' +
         'Step 2b (NAMED ROLES CHECK, do this silently): wherever the draft discusses staffing, safeguarding, management, training or mobilisation, verify it either names real individuals from the evidence (with role and qualification) or carries an [INSERT: full name and qualification of your <role>] flag. Generic unnamed references like "our experienced team" or "a dedicated manager" are gaps, replace them with named individuals or [INSERT] flags.\n' +
-        'Step 3: rewrite the response fixing every identified gap and every fabricated claim. Length is a hard constraint: write to ' + Math.round(target*0.82) + ' words, never exceed ' + Math.round(target*0.9) + ', the council redacts everything beyond the page limit unread. Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
+        'Step 3: rewrite the response fixing every identified gap and every fabricated claim, AND expand it to use the full allowed length. Target approximately ' + Math.round(target*0.95) + ' to ' + target + ' words (never exceed ' + target + '); a response well under the limit scores poorly, so add depth, specific evidence and worked examples from the company evidence to fill the space substantively (no padding, no fabrication). Plain prose, no markdown symbols, first person plural, professional human voice.\n' +
         'Output ONLY the final rewritten response: no scores, no commentary.';
 
       var final;
@@ -315,7 +319,29 @@ exports.handler = async (event) => {
       }
 
       // Programmatic length enforcement: models can't count words; we can
-      function countWords(s) { return s.trim().split(/\s+/).length; }
+      function countWords(s) { return s.trim().split(/\s+/).filter(Boolean).length; }
+
+      // EXPAND: models routinely under-write long answers. If the response is
+      // well under the target, push it back up to the full allowed length with
+      // genuine depth (never fabrication).
+      var expandAttempts = 0;
+      while (countWords(final) < target * 0.85 && expandAttempts < 2) {
+        expandAttempts++;
+        var cur = countWords(final);
+        console.log('Q' + (i+1) + ' under length (' + cur + '/' + target + '), expand attempt ' + expandAttempts);
+        try {
+          var expanded = await callSonnet(
+            'This tender answer is only ' + cur + ' words but must be a thorough response of approximately ' + target + ' words to score full marks and use the allowed length. Expand it to about ' + Math.round(target * 0.95) + ' words.\n\n' +
+            '═══ THE QUESTION AND ITS CRITERIA ═══\n' + qText + '\n\n' +
+            '═══ COMPANY EVIDENCE (the ONLY permitted source of specific facts) ═══\n' + coCtx + '\n\n' +
+            '═══ CURRENT ANSWER ═══\n' + final + '\n\n' +
+            'Expand by adding genuine depth against every criteria bullet: concrete processes, worked examples, named roles, and specifics drawn ONLY from the company evidence above. Where a needed specific is missing from the evidence, add an [INSERT: ...] flag rather than inventing it, and keep all existing [INSERT] flags. Do NOT pad with generic filler or repetition; every added sentence must add substance an evaluator would score. Plain prose, no markdown symbols, first person plural. Output ONLY the expanded response.',
+            8000, sharedSystem);
+          if (expanded) expanded = expanded.replace(/\s*—\s*/g, ', ').replace(/–/g, '-');
+          if (expanded && countWords(expanded) > cur) final = expanded; else break;
+        } catch(e) { console.log('Expand failed:', e.message); break; }
+      }
+
       var attempts = 0;
       while (countWords(final) > target * 1.02 && attempts < 2) {
         attempts++;
