@@ -344,7 +344,12 @@ exports.handler = async (event) => {
       // Use the word limit the admin entered on the question first (that is the
       // authoritative one), then any limit parsed from the quality document,
       // then a limit written in the question text, then a sensible default.
-      var target = parseInt((q && (q.wordLimit || q.word_limit)) || '', 10) || qLimits[i+1] || wordTarget(qText);
+      // Extract the FIRST number from the entered value so it works no matter how
+      // it is written: "4000 words", "(2500 words)", "2,500", "2500" all parse.
+      var rawLimit  = (q && (q.wordLimit || q.word_limit)) || '';
+      var limMatch  = String(rawLimit).match(/\d[\d,]*/);
+      var enteredLimit = limMatch ? parseInt(limMatch[0].replace(/,/g, ''), 10) : 0;
+      var target = enteredLimit || qLimits[i+1] || wordTarget(qText);
       if (!target || target < 300) target = 700;
       console.log('Q' + (i+1) + ': target ' + target + ' words');
 
