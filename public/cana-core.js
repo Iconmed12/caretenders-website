@@ -130,8 +130,8 @@
     if (h3) { h3.innerHTML = isMember ? '&#9989; You are all set, Cana is writing your bid' : '&#9989; Payment received, Cana is on it'; }
     if (p)  { p.innerHTML =
       'Your bid responses will be sent to <strong>' + (email||'your email') + '</strong> as Word documents.<br><br>' +
-      '<span style="color:var(--muted);font-size:0.88em;">Expect to receive your documents within 1 hour. ' +
-      'If you don\'t receive anything please email <strong>hello@getcana.co.uk</strong></span>'; }
+      '<span style="color:var(--muted);font-size:0.88em;">Cana is researching your local area and writing your responses in full. Please allow up to a couple of hours for your documents to arrive by email; there is no need to keep this page open. ' +
+      'If nothing has arrived after that, please email <strong>hello@getcana.co.uk</strong></span>'; }
 
     // Prompt guest buyers to create an account. Never show it to someone who is
     // already signed in or is a member.
@@ -244,7 +244,7 @@
 
     if (errorMsg) {
       if (h3) h3.textContent = 'Something went wrong';
-      if (p)  p.innerHTML = 'Our team has been notified. Please email <strong>hello@getcana.co.uk</strong> with your payment reference and we will send your documents manually within 1 hour.';
+      if (p)  p.innerHTML = 'Our team has been notified. Please email <strong>hello@getcana.co.uk</strong> with your payment reference and we will send your documents manually, usually within a couple of hours.';
     } else {
       if (h3) h3.innerHTML = '✅ Your documents are on their way';
       if (p)  p.innerHTML =
