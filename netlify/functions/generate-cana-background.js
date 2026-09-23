@@ -123,15 +123,28 @@ exports.handler = async (event) => {
     }
 
     var kbContext = '';
-    function kbStr(val) {
+    // Pull clean text out of a field that may be a plain string or an array of
+    // uploaded docs ({name, text}). perItemCap limits each doc; the caller caps
+    // the combined length.
+    function kbItems(val, perItemCap) {
       if (!val) return '';
-      if (Array.isArray(val)) return val.map(function(v){ return typeof v === 'object' ? JSON.stringify(v) : String(v); }).join(' | ');
+      if (Array.isArray(val)) return val.map(function(v){
+        if (v && typeof v === 'object') {
+          var t = v.text || v.content || v.extractedText || v.body || '';
+          return (v.name ? (v.name + ':\n') : '') + String(t).substring(0, perItemCap || 12000);
+        }
+        return String(v).substring(0, perItemCap || 12000);
+      }).filter(Boolean).join('\n\n----\n\n');
       return String(val);
     }
-    if (kb.writing_style)            kbContext += 'HOUSE WRITING STYLE:\n'        + kbStr(kb.writing_style).substring(0,3000) + '\n\n';
-    if (kb.winning_examples)         kbContext += 'EXAMPLES FROM WINNING BIDS:\n' + kbStr(kb.winning_examples).substring(0,3000) + '\n\n';
-    if (kb.commissioner_preferences) kbContext += 'WHAT COMMISSIONERS WANT:\n'    + kbStr(kb.commissioner_preferences).substring(0,3000) + '\n\n';
-    if (kb.avoid)                    kbContext += 'NEVER DO THIS:\n'              + kbStr(kb.avoid).substring(0,600) + '\n\n';
+    if (kb.writing_style)            kbContext += 'HOUSE WRITING STYLE:\n'   + kbItems(kb.writing_style).substring(0,3500) + '\n\n';
+    if (kb.commissioner_preferences) kbContext += 'WHAT COMMISSIONERS WANT:\n' + kbItems(kb.commissioner_preferences).substring(0,3500) + '\n\n';
+    if (kb.feedback_examples && kb.feedback_examples.length)
+      kbContext += 'COMMISSIONER FEEDBACK FROM PAST TENDERS (real evaluator scoring and comments, learn exactly what wins marks and what loses them, mirror the strengths and fix the weaknesses):\n' + kbItems(kb.feedback_examples, 15000).substring(0,60000) + '\n\n';
+    if (kb.winning_examples && kb.winning_examples.length)
+      kbContext += 'EXAMPLES FROM WINNING BIDS (match this depth, structure, specificity and tone):\n' + kbItems(kb.winning_examples, 12000).substring(0,40000) + '\n\n';
+    var avoidTxt = kb.avoid_patterns_text || kb.avoid;
+    if (avoidTxt) kbContext += 'NEVER DO THIS:\n' + kbItems(avoidTxt).substring(0,2500) + '\n\n';
 
     // Key people: named, qualified staff the client provided at onboarding
     var keyPeopleStr = '';
