@@ -128,9 +128,9 @@ exports.handler = async (event) => {
       if (Array.isArray(val)) return val.map(function(v){ return typeof v === 'object' ? JSON.stringify(v) : String(v); }).join(' | ');
       return String(val);
     }
-    if (kb.writing_style)            kbContext += 'HOUSE WRITING STYLE:\n'        + kbStr(kb.writing_style).substring(0,800) + '\n\n';
-    if (kb.winning_examples)         kbContext += 'EXAMPLES FROM WINNING BIDS:\n' + kbStr(kb.winning_examples).substring(0,2500) + '\n\n';
-    if (kb.commissioner_preferences) kbContext += 'WHAT COMMISSIONERS WANT:\n'    + kbStr(kb.commissioner_preferences).substring(0,800) + '\n\n';
+    if (kb.writing_style)            kbContext += 'HOUSE WRITING STYLE:\n'        + kbStr(kb.writing_style).substring(0,3000) + '\n\n';
+    if (kb.winning_examples)         kbContext += 'EXAMPLES FROM WINNING BIDS:\n' + kbStr(kb.winning_examples).substring(0,3000) + '\n\n';
+    if (kb.commissioner_preferences) kbContext += 'WHAT COMMISSIONERS WANT:\n'    + kbStr(kb.commissioner_preferences).substring(0,3000) + '\n\n';
     if (kb.avoid)                    kbContext += 'NEVER DO THIS:\n'              + kbStr(kb.avoid).substring(0,600) + '\n\n';
 
     // Key people: named, qualified staff the client provided at onboarding
