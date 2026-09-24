@@ -4,6 +4,8 @@
 // Reply-to is set to the sender, so a reply from the inbox goes straight back to
 // them. A hidden honeypot field catches bots: if it is filled, we quietly accept
 // and drop the message rather than emailing spam.
+const { checkRate, tooMany } = require('./_rate-limit');
+
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',
@@ -12,6 +14,7 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
+  if (!(await checkRate(event, 'contact', 5, 60))) return tooMany(cors);
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: cors, body: JSON.stringify({ error: 'Method not allowed' }) };
 
   try {

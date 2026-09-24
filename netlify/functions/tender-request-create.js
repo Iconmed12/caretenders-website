@@ -3,6 +3,8 @@
 // customer's email is taken from their verified Supabase session, never from
 // the request body, so a request can never be filed under someone else.
 
+const { checkRate, tooMany } = require('./_rate-limit');
+
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
 // Verify the caller's Supabase access token and return their identity, or null.
@@ -32,6 +34,7 @@ exports.handler = async (event) => {
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
   if (event.httpMethod !== 'POST') return { statusCode: 405, headers: cors, body: JSON.stringify({ error: 'Method not allowed' }) };
+  if (!(await checkRate(event, 'tender-request', 6, 60))) return tooMany(cors);
 
   try {
     var user = await verifyUser(event);

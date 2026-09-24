@@ -2,6 +2,8 @@
 // Mirrors cana-verify's job creation exactly; membership is re-verified
 // server-side so the bypass cannot be forged from the browser.
 
+const { checkRate, tooMany } = require('./_rate-limit');
+
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',
@@ -10,6 +12,7 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
+  if (!(await checkRate(event, 'member-start', 8, 60))) return tooMany(cors);
 
   try {
     const { companyDetails, tenderId, includeSq, accessToken, wantsReview, reviewSessionId } = JSON.parse(event.body);

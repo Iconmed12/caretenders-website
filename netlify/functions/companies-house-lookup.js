@@ -1,6 +1,8 @@
 // Supports both:
 // - { companyNumber }: fetch full company profile + officers + PSC
 // - { query }: search by company name, return list of matches
+const { checkRate, tooMany } = require('./_rate-limit');
+
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',
@@ -9,6 +11,7 @@ exports.handler = async (event) => {
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
+  if (!(await checkRate(event, 'ch', 30, 60))) return tooMany(cors);
 
   try {
     const body = JSON.parse(event.body || '{}');
