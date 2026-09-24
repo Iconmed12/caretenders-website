@@ -74,7 +74,9 @@
     var total = allDocs.length;
     var expiring = 0, expired = 0, valid = 0;
     allDocs.forEach(function(d){
-      var s = getExpiryStatus(d.expiry_date);
+      // Pass docType and review_date too, so review-type docs (policies, case
+      // studies, references) are counted and can trigger the alert banner.
+      var s = getExpiryStatus(d.expiry_date, d.doc_type, d.review_date);
       if (s.cls === 'expired') expired++;
       else if (s.cls === 'soon') expiring++;
       else if (s.cls === 'valid') valid++;
@@ -393,11 +395,26 @@
     var doc = allDocs.find(function(d){ return d.id === id; });
     if (!doc) return;
     if (!confirm('Delete "' + (doc.doc_label||doc.file_name) + '"? This cannot be undone.')) return;
-    await sb.storage.from('Vault').remove([doc.file_path]);
-    await sb.from('vault_documents').delete().eq('id', id);
-    allDocs = allDocs.filter(function(d){ return d.id !== id; });
-    renderDocs();
-    showToast('Document deleted', '');
+    // Deletes must go through the server function (the anon key cannot delete
+    // rows). Doing it client-side silently failed, so the document came back on
+    // reload. Verify the token, then call the service-key function.
+    try {
+      var sess = await sb.auth.getSession();
+      var token = sess && sess.data && sess.data.session ? sess.data.session.access_token : null;
+      if (!token) { showToast('Please sign in again to delete', 'error'); return; }
+      var res = await fetch('/.netlify/functions/delete-vault-doc', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+        body: JSON.stringify({ id: id })
+      });
+      var data = await res.json();
+      if (!res.ok || !data.ok) { showToast((data && data.error) || 'Could not delete document', 'error'); return; }
+      allDocs = allDocs.filter(function(d){ return d.id !== id; });
+      renderDocs();
+      showToast('Document deleted', 'success');
+    } catch (e) {
+      showToast('Could not delete document', 'error');
+    }
   }
 
   // ── EDIT ──

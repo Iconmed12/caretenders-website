@@ -118,7 +118,7 @@ exports.handler = async (event) => {
         return { statusCode: 502, headers: cors, body: JSON.stringify({ error: 'Could not send reset email', detail: t.slice(0, 160) }) };
       }
 
-      try { await logAudit(event, 'admin-users', 'password_reset_sent', { email: email }); } catch (e) {}
+      try { await logAudit(event, 'admin-users:password_reset_sent', { email: email }); } catch (e) {}
       return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, sent: email }) };
     }
 
@@ -152,7 +152,7 @@ exports.handler = async (event) => {
 
       // Subscription rows are deliberately left in place: they are the billing
       // record. Deleting the login does not cancel Stripe billing.
-      try { await logAudit(event, 'admin-users', 'user_deleted', { email: email, id: id }); } catch (e) {}
+      try { await logAudit(event, 'admin-users:user_deleted', { email: email, id: id }); } catch (e) {}
       return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, deleted: email || id }) };
     }
 
@@ -179,7 +179,7 @@ exports.handler = async (event) => {
           const t = await r.text();
           return { statusCode: 502, headers: cors, body: JSON.stringify({ error: 'Could not downgrade', detail: t.slice(0, 160) }) };
         }
-        try { await logAudit(event, 'admin-users', 'membership_downgraded', { email: email, note: note }); } catch (e) {}
+        try { await logAudit(event, 'admin-users:membership_downgraded', { email: email, note: note }); } catch (e) {}
         return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, membership: { member: false } }) };
       }
 
@@ -229,7 +229,7 @@ exports.handler = async (event) => {
         return { statusCode: 502, headers: cors, body: JSON.stringify({ error: 'Could not save membership', detail: t.slice(0, 160) }) };
       }
 
-      try { await logAudit(event, 'admin-users', 'membership_set', { email: email, term_months: term, current_period_end: endISO, note: note }); } catch (e) {}
+      try { await logAudit(event, 'admin-users:membership_set', { email: email, term_months: term, current_period_end: endISO, note: note }); } catch (e) {}
       return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, membership: { member: true, term_months: term, renews: endISO } }) };
     }
 
