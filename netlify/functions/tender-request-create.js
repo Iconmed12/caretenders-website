@@ -44,6 +44,9 @@ exports.handler = async (event) => {
     if (!link) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Please paste the tender link.' }) };
     if (!/^https?:\/\/.+/i.test(link)) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'That does not look like a link. It should start with http.' }) };
     if (link.length > 1000) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'That link is too long.' }) };
+    // Reject characters that do not belong in a URL and could be used to inject
+    // markup/script when the link is later displayed (defence in depth).
+    if (/[\s<>"'`\\]/.test(link)) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'That link contains invalid characters. Please paste the plain web address.' }) };
 
     var SB_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
     var row = {
@@ -62,6 +65,8 @@ exports.handler = async (event) => {
     if (!ins.ok) { var et = await ins.text(); return { statusCode: 500, headers: cors, body: JSON.stringify({ error: 'Could not save your request: ' + et.substring(0, 150) }) }; }
 
     // Let the team know a request came in (best effort, never blocks the save).
+    // Every customer-supplied value is HTML-escaped before going into the email.
+    function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
     try {
       var RESEND = process.env.RESEND_API_KEY;
       if (RESEND) {
@@ -73,9 +78,9 @@ exports.handler = async (event) => {
             to: 'hello@getcana.co.uk',
             subject: 'Tender request from ' + (companyName || user.email),
             html: '<p><strong>New tender request</strong></p>' +
-              '<p>From: ' + user.email + (companyName ? ' (' + companyName + ')' : '') + '</p>' +
-              '<p>Link: <a href="' + link + '">' + link + '</a></p>' +
-              (note ? '<p>Note: ' + note.replace(/</g, '&lt;') + '</p>' : '') +
+              '<p>From: ' + esc(user.email) + (companyName ? ' (' + esc(companyName) + ')' : '') + '</p>' +
+              '<p>Link: <a href="' + esc(link) + '">' + esc(link) + '</a></p>' +
+              (note ? '<p>Note: ' + esc(note) + '</p>' : '') +
               '<p>See the Requests inbox in the admin panel to action it.</p>'
           })
         });

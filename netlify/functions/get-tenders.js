@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const { requireAdmin } = require('./_admin-auth');
 
 exports.handler = async (event) => {
   const corsHeaders = {
@@ -7,6 +8,15 @@ exports.handler = async (event) => {
   };
 
   try {
+    // scope=all returns the full pipeline including unapproved (pending_review)
+    // tenders and internal document flags, so it is admin-only. The public
+    // default scope returns only live/approved statuses and needs no auth.
+    var requestedScope = (event.queryStringParameters && event.queryStringParameters.scope) || 'public';
+    if (requestedScope === 'all') {
+      var denied = await requireAdmin(event, 'get-tenders', corsHeaders);
+      if (denied) return denied;
+    }
+
     const supabaseUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
     const supabaseKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
 

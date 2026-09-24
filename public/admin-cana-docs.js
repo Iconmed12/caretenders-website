@@ -343,7 +343,7 @@ async function saveCanaDocs() {
 
 async function loadTenders(){
   try{
-    const res=await fetch(API+'/get-tenders?scope=all');
+    const res=await fetch(API+'/get-tenders?scope=all',{ headers: (typeof adminHeaders==='function'?adminHeaders():{}) });
     allTenders=await res.json()||[];
     // Sync nextId to avoid overwriting existing tenders
     allTenders.forEach(function(t){
