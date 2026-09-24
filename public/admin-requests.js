@@ -38,8 +38,7 @@ async function loadTenderRequests() {
     var data = await res.json();
     if (!res.ok) throw new Error((data && data.error) || 'Failed to load');
     _trAll = (data && data.requests) || [];
-    var badge = document.getElementById('sbRequests');
-    if (badge) badge.textContent = _trAll.filter(function (r) { return r.status === 'new' || r.status === 'sourcing'; }).length;
+    trPaintBadge(_trAll.filter(function (r) { return r.status === 'new' || r.status === 'sourcing'; }).length);
     trRender();
   } catch (e) {
     if (list) list.innerHTML = '<div style="color:#dc2626;font-size:0.85rem;padding:1rem;">Could not load requests: ' + trEsc(e.message) + '</div>';
@@ -108,3 +107,35 @@ function trCannot(id) {
   if (reason === null) return;
   trUpdate(id, 'cannot_source', reason.trim());
 }
+
+// Paint the sidebar badge, red and bold when requests are waiting so a new one
+// is obvious from any admin screen.
+function trPaintBadge(n) {
+  var b = document.getElementById('sbRequests');
+  if (!b) return;
+  b.textContent = n;
+  if (n > 0) { b.style.background = '#dc2626'; b.style.color = '#fff'; b.style.fontWeight = '700'; }
+  else { b.style.background = ''; b.style.color = ''; b.style.fontWeight = ''; }
+}
+
+// Live updates: poll in the background so new requests appear (and the badge
+// turns red) without the admin having to refresh the page. When the Requests
+// page is open, the list itself refreshes too.
+async function trPoll() {
+  if (!window._adminToken) return;
+  try {
+    var res = await fetch('/.netlify/functions/tender-requests-admin', { headers: adminHeaders() });
+    if (!res.ok) return;
+    var data = await res.json();
+    _trAll = (data && data.requests) || [];
+    trPaintBadge(_trAll.filter(function (r) { return r.status === 'new' || r.status === 'sourcing'; }).length);
+    var pg = document.getElementById('page-requests');
+    if (pg && pg.classList.contains('active')) trRender();
+  } catch (e) { /* silent, will retry next tick */ }
+}
+
+// Kick off soon after load (auth token may not be ready immediately), then keep
+// it fresh every 15 seconds.
+setTimeout(trPoll, 2500);
+setTimeout(trPoll, 6000);
+setInterval(trPoll, 15000);
