@@ -240,11 +240,14 @@ function showPage(page, btn) {
   if (page === 'requests' && typeof loadTenderRequests === 'function') {
     setTimeout(loadTenderRequests, 100);
   }
+  if (page === 'orders' && typeof loadOrders === 'function') {
+    setTimeout(loadOrders, 100);
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   btn.classList.add('active');
-  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana', knowledge:'Knowledge Base', 'tenders-import':'Tender Import', requests:'Requests', staff:'Staff', users:'Users', settings:'Settings' };
+  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana', knowledge:'Knowledge Base', 'tenders-import':'Tender Import', requests:'Requests', orders:'Orders', staff:'Staff', users:'Users', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[page] || page;
   ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(function(id) {
     var el = document.getElementById(id); if(el) el.style.display = 'none';

@@ -803,12 +803,18 @@ exports.handler = async (event) => {
       packChecklistHtml = '';
     }
 
+    // Order reference (derived from the job id, so it matches the customer's Bid
+    // History and the admin Orders screen) and a London-time generation stamp.
+    var orderRef = 'CANA-' + String(jobId || '').replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase();
+    var generatedAt = new Date().toLocaleString('en-GB', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Europe/London' });
+
     var emailHtml = '<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;">' +
       '<div style="background:#0B1929;padding:24px;border-radius:8px 8px 0 0;"><h1 style="color:#00C9E0;margin:0;">Cana</h1></div>' +
       '<div style="background:#fff;padding:28px;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 8px 8px;">' +
       '<h2 style="color:#0B1929;margin:0 0 12px;">Your documents are attached</h2>' +
       '<p style="color:#374151;margin:0 0 8px;"><strong>Tender:</strong> ' + (tender.title||'') + '</p>' +
-      '<p style="color:#374151;margin:0 0 20px;"><strong>Organisation:</strong> ' + clientName + '</p>' +
+      '<p style="color:#374151;margin:0 0 8px;"><strong>Organisation:</strong> ' + clientName + '</p>' +
+      '<p style="color:#374151;margin:0 0 20px;"><strong>Reference:</strong> ' + orderRef + ' &nbsp;|&nbsp; <strong>Generated:</strong> ' + generatedAt + '</p>' +
       '<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:14px;margin-bottom:20px;">' +
       '<div style="font-weight:700;color:#166534;margin-bottom:8px;">📎 ' + attachments.length + ' Word document' + (attachments.length>1?'s':'') + ' attached</div>' +
       (docBase64 ? '<div style="font-size:13px;color:#166534;padding:2px 0;">✓ Cana_Tender_Responses.docx</div>' : '') +
@@ -851,7 +857,7 @@ exports.handler = async (event) => {
       await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: { Authorization: 'Bearer ' + RESEND, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: 'hello@getcana.co.uk', subject: subjectPrefix + clientName + ' | ' + (tender.title||'').substring(0,40) + (lotName ? ' - ' + lotName : ''), html: banner + '<p><strong>Client:</strong> ' + clientName + (lotName ? ' | <strong>Lot:</strong> ' + lotName : '') + ' | <strong>Email:</strong> ' + clientEmail + '</p>' + emailHtml, attachments })
+        body: JSON.stringify({ from: 'Cana <' + FROM + '>', to: 'hello@getcana.co.uk', subject: subjectPrefix + orderRef + ' | ' + clientName + ' | ' + (tender.title||'').substring(0,40) + (lotName ? ' - ' + lotName : ''), html: banner + '<p><strong>Reference:</strong> ' + orderRef + ' | <strong>Generated:</strong> ' + generatedAt + '</p><p><strong>Client:</strong> ' + clientName + (lotName ? ' | <strong>Lot:</strong> ' + lotName : '') + ' | <strong>Email:</strong> ' + clientEmail + '</p>' + emailHtml, attachments })
       });
     } catch(e) { console.log('Ops email failed:', e.message); }
 
