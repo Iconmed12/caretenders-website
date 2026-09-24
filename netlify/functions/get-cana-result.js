@@ -15,19 +15,22 @@ exports.handler = async (event) => {
     const sbKey = (process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY);
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
-    const res = await fetch(sbUrl + '/rest/v1/cana_jobs?id=eq.' + jobId + '&select=*&limit=1', {
+    // Return ONLY the status (the poller uses nothing else). Previously this
+    // returned the whole job row (client email, Stripe session id, etc.) to
+    // anyone holding the job id; now no sensitive fields are exposed.
+    const res = await fetch(sbUrl + '/rest/v1/cana_jobs?id=eq.' + encodeURIComponent(jobId) + '&select=status&limit=1', {
       headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey }
     });
 
     const rows = await res.json();
-    const job = rows[0];
+    const job = Array.isArray(rows) ? rows[0] : null;
 
     if (!job) {
       // Job not yet created by background function, still starting
       return { statusCode: 200, headers: cors, body: JSON.stringify({ status: 'pending' }) };
     }
 
-    return { statusCode: 200, headers: cors, body: JSON.stringify(job) };
+    return { statusCode: 200, headers: cors, body: JSON.stringify({ status: job.status }) };
 
   } catch(err) {
     return { statusCode: 500, headers: cors, body: JSON.stringify({ error: err.message || 'Failed' }) };

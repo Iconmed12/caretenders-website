@@ -1,16 +1,46 @@
+const { checkRate, tooMany } = require('./_rate-limit');
+
+async function verifyUser(event) {
+  try {
+    var hdrs = (event && event.headers) || {};
+    var auth = hdrs.authorization || hdrs.Authorization || '';
+    var token = auth.indexOf('Bearer ') === 0 ? auth.slice(7).trim() : '';
+    if (!token) return null;
+    var anon = process.env.SUPABASE_ANON_KEY;
+    var res = await fetch('https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/user', { headers: { apikey: anon, Authorization: 'Bearer ' + token } });
+    if (!res.ok) return null;
+    var u = await res.json();
+    return (u && u.id) ? { id: u.id } : null;
+  } catch (e) { return null; }
+}
+
 exports.handler = async (event) => {
   const cors = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'POST, OPTIONS'
   };
 
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
+  // Must be a signed-in user, and rate-limited: this endpoint calls the AI, so
+  // leaving it open would let anyone run up AI costs by spamming uploads.
+  var user = await verifyUser(event);
+  if (!user) return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'Please sign in.' }) };
+  if (!(await checkRate(event, 'vault-extract', 15, 60))) return tooMany(cors);
+
   try {
     const { base64, fileType, docType, isReviewType } = JSON.parse(event.body);
     if (!base64 || !fileType) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing file data' }) };
+    // Only PDFs and images are processed; reject anything else.
+    if (fileType !== 'application/pdf' && !/^image\//.test(fileType)) {
+      return { statusCode: 415, headers: cors, body: JSON.stringify({ error: 'Unsupported file type.' }) };
+    }
+    // Size guard: 10MB file is ~13.4MB of base64; cap a bit above that.
+    if (typeof base64 !== 'string' || base64.length > 15 * 1024 * 1024) {
+      return { statusCode: 413, headers: cors, body: JSON.stringify({ error: 'File is too large.' }) };
+    }
 
     var contentBlock;
     if (fileType === 'application/pdf') {

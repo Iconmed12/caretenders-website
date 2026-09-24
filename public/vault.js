@@ -297,9 +297,11 @@
         setProgress(55, 'Scanning document for expiry date...');
         try {
           var base64 = await fileToBase64(selectedFile);
+          var _sess = await sb.auth.getSession();
+          var _tok = _sess && _sess.data && _sess.data.session ? _sess.data.session.access_token : '';
           var res = await fetch('/.netlify/functions/process-vault-doc', {
             method:'POST',
-            headers:{'Content-Type':'application/json'},
+            headers:{'Content-Type':'application/json', Authorization: 'Bearer ' + _tok},
             body: JSON.stringify({ base64: base64, fileType: selectedFile.type, docType: docType, isReviewType: isReviewType })
           });
           if (res.ok) {

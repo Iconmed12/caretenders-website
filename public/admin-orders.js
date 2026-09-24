@@ -20,7 +20,47 @@ function ordStatusChip(status) {
   return '<span style="background:' + c.bg + ';color:' + c.fg + ';font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;">' + ordEsc(c.t) + '</span>';
 }
 
+async function loadGenControl() {
+  var box = document.getElementById('gen-control');
+  if (!box) return;
+  try {
+    var res = await fetch('/.netlify/functions/generation-control', { headers: adminHeaders() });
+    var d = await res.json();
+    if (!res.ok) throw new Error(d && d.error || 'failed');
+    var spent = ((d.spent_today_pennies || 0) / 100).toFixed(2);
+    var budget = ((d.daily_budget_pennies || 0) / 100).toFixed(2);
+    var paused = d.paused === true;
+    box.innerHTML =
+      '<div>' +
+        '<div style="font-size:0.9rem;font-weight:700;color:' + (paused ? '#b91c1c' : '#166534') + ';">' +
+          (paused ? '⏸ Generation is PAUSED' : '▶ Generation is running') + '</div>' +
+        '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">Estimated AI spend today: £' + spent + ' of £' + budget + ' daily budget</div>' +
+      '</div>' +
+      '<button onclick="toggleGeneration(' + (paused ? 'false' : 'true') + ')" style="border:none;color:#fff;font-weight:700;font-size:0.84rem;padding:9px 18px;border-radius:8px;cursor:pointer;background:' + (paused ? '#166534' : '#dc2626') + ';">' +
+        (paused ? 'Resume generation' : 'Pause all generation') + '</button>';
+  } catch (e) {
+    box.innerHTML = '<div style="font-size:0.82rem;color:#dc2626;">Could not load generation status: ' + ordEsc(e.message) + '</div>';
+  }
+}
+
+async function toggleGeneration(pause) {
+  if (pause && !confirm('Pause ALL bid generation? Customers will not receive documents until you resume. Use this only if costs are spiking or you suspect abuse.')) return;
+  try {
+    var res = await fetch('/.netlify/functions/generation-control', {
+      method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ paused: !!pause })
+    });
+    var d = await res.json();
+    if (!res.ok) throw new Error(d && d.error || 'failed');
+    if (typeof showToast === 'function') showToast(pause ? 'Generation paused' : 'Generation resumed', 'success');
+    loadGenControl();
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Error: ' + e.message, 'error'); else alert('Error: ' + e.message);
+  }
+}
+
 async function loadOrders() {
+  loadGenControl();
   var list = document.getElementById('ord-list');
   if (list) list.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:1rem;">Loading...</div>';
   try {
