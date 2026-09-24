@@ -1,6 +1,9 @@
+const { checkRate, tooMany } = require('./_rate-limit');
+
 exports.handler = async (event) => {
   const cors = { 'Content-Type':'application/json','Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'*' };
   if (event.httpMethod === 'OPTIONS') return { statusCode:200, headers:cors, body:'' };
+  if (!(await checkRate(event, 'cqc', 30, 60))) return tooMany(cors);
 
   const KEY  = process.env.CQC_API_KEY;
   // Old public API, no auth required, stable, works for direct lookups
