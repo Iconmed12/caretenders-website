@@ -3,7 +3,7 @@
 // customer's email is taken from their verified Supabase session, never from
 // the request body, so a request can never be filed under someone else.
 
-const { checkRate, tooMany } = require('./_rate-limit');
+const { checkRate, checkKey, tooMany } = require('./_rate-limit');
 
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
@@ -39,6 +39,12 @@ exports.handler = async (event) => {
   try {
     var user = await verifyUser(event);
     if (!user) return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'Please sign in to request a tender.' }) };
+
+    // Daily cap: at most 10 tender requests per account per day.
+    var dayStr = new Date().toISOString().split('T')[0];
+    if (!(await checkKey('treq:' + user.id + ':' + dayStr, 10, 86400))) {
+      return { statusCode: 429, headers: cors, body: JSON.stringify({ error: 'You have reached today\'s limit of 10 tender requests. Please try again tomorrow, or email hello@getcana.co.uk.' }) };
+    }
 
     var body = JSON.parse(event.body || '{}');
     var link = (body.link || '').trim();

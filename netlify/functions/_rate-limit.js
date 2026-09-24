@@ -35,6 +35,26 @@ async function checkRate(event, bucket, limit, windowSec) {
   }
 }
 
+// Like checkRate, but you supply the exact key (e.g. an account-based key such
+// as 'gen-day:email:2026-09-24'), for per-account daily caps rather than per-IP.
+// Returns true if allowed, false if over the limit. Also fails open.
+async function checkKey(key, limit, windowSec) {
+  try {
+    var SB_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
+    if (!SB_KEY) return true;
+    var res = await fetch(SB_URL + '/rest/v1/rpc/rl_hit', {
+      method: 'POST',
+      headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_key: key, p_limit: limit, p_window: windowSec })
+    });
+    if (!res.ok) return true;
+    var allowed = await res.json();
+    return allowed !== false;
+  } catch (e) {
+    return true;
+  }
+}
+
 function tooMany(corsHeaders) {
   return {
     statusCode: 429,
@@ -43,4 +63,4 @@ function tooMany(corsHeaders) {
   };
 }
 
-module.exports = { checkRate, tooMany, clientIp };
+module.exports = { checkRate, checkKey, tooMany, clientIp };

@@ -2,7 +2,7 @@
 // Mirrors cana-verify's job creation exactly; membership is re-verified
 // server-side so the bypass cannot be forged from the browser.
 
-const { checkRate, tooMany } = require('./_rate-limit');
+const { checkRate, checkKey, tooMany } = require('./_rate-limit');
 
 exports.handler = async (event) => {
   const cors = {
@@ -81,6 +81,19 @@ exports.handler = async (event) => {
         return { statusCode: 402, headers: cors, body: JSON.stringify({ error: 'Add-on payment could not be confirmed. If you were charged, email hello@getcana.co.uk with your reference.' }) };
       }
       verifiedTier = (sess.metadata.tier === 'review_docs') ? 'review_docs' : 'review';
+    }
+
+    // ── Daily anti-extraction cap: at most 10 DISTINCT tenders per member per
+    // day. Multi-lot is safe: extra lots of the same tender do not count again,
+    // because the first generation for a tender "claims" it for the day and only
+    // that first one is counted against the daily variety cap. ──
+    var dayStr = new Date().toISOString().split('T')[0];
+    var firstForTender = await checkKey('gentender:' + authedEmail + ':' + dayStr + ':' + tenderId, 1, 86400);
+    if (firstForTender) {
+      var underDailyCap = await checkKey('genvariety:' + authedEmail + ':' + dayStr, 10, 86400);
+      if (!underDailyCap) {
+        return { statusCode: 429, headers: cors, body: JSON.stringify({ error: 'You have reached today\'s limit of 10 tenders. Please email hello@getcana.co.uk if you need more today.' }) };
+      }
     }
 
     // ── Create job record (identical shape to cana-verify) ──
