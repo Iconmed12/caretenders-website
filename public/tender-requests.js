@@ -37,10 +37,10 @@
       var rows = (data && data.requests) || [];
       if (!rows.length) { mineEl.innerHTML = ''; return; }
       var html = '<div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;">Your requests</div>' +
-        '<div style="border:1px solid var(--border);border-radius:10px;overflow:hidden;">';
+        '<div style="border:1px solid #aab4c2;border-radius:10px;overflow:hidden;">';
       rows.forEach(function (r, i) {
         var when = r.created_at ? new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
-        html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;' + (i ? 'border-top:1px solid var(--border);' : '') + '">' +
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;' + (i ? 'border-top:1px solid #aab4c2;' : '') + '">' +
           '<div style="min-width:0;"><div style="font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(r.link) + '</div>' +
           '<div style="font-size:0.75rem;color:var(--muted);">Requested ' + when + '</div></div>' +
           chip(r.status) + '</div>';
