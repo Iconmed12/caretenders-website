@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Your team | Cana Bids</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root{--navy:#0b1929;--navy2:#13253a;--teal:#00c9e0;--teal-dk:#0891a3;--ink:#1a2433;--muted:#63707f;--line:#e7ebf1;--soft:#f4f8fa;--good:#16a37b;--amber:#b7791f;}
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'Plus Jakarta Sans',system-ui,Arial,sans-serif;background:var(--soft);color:var(--ink);line-height:1.5}
+ a{color:inherit;text-decoration:none}
+ .shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+ .side{background:var(--navy);color:#fff;padding:20px 16px;display:flex;flex-direction:column;gap:6px}
+ .logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:19px;letter-spacing:-.02em;padding:4px 8px 16px}
+ .logo b{color:var(--teal)}
+ .nav a{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;color:rgba(255,255,255,.68);font-size:14px;font-weight:600}
+ .nav a.on{background:rgba(255,255,255,.08);color:#fff}
+ .nav a:hover{color:#fff}
+ .org{margin-top:auto;background:var(--navy2);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:12px}
+ .org .n{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px}
+ .org .s{font-size:12px;color:rgba(255,255,255,.55);margin-top:3px}
+ .main{padding:26px 30px}
+ .top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+ .top h1{font-size:24px;font-weight:800;color:var(--navy);letter-spacing:-.02em}
+ .top p{font-size:13.5px;color:var(--muted);margin-top:4px}
+ .btn{background:var(--teal);color:var(--navy);border:none;font-weight:700;font-size:13.5px;padding:11px 18px;border-radius:10px;cursor:pointer;display:inline-flex;gap:7px;align-items:center;font-family:inherit}
+ .btn:hover{filter:brightness(.96)} .btn:disabled{opacity:.6;cursor:default}
+ .btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+ .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+ .tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 16px}
+ .tile .l{font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+ .tile .v{font-size:24px;font-weight:800;color:var(--navy);margin-top:5px}
+ @media(max-width:720px){.tiles{grid-template-columns:1fr 1fr}}
+ .card{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+ .card-h{padding:14px 18px;border-bottom:1px solid var(--line);font-weight:700;font-size:14px;color:var(--navy)}
+ table{width:100%;border-collapse:collapse}
+ th{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:12px 18px;font-weight:700;background:#fbfcfe}
+ td{padding:14px 18px;border-top:1px solid var(--line);font-size:13.5px;vertical-align:middle}
+ .who{display:flex;align-items:center;gap:11px}
+ .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;color:#fff;flex:none;background:var(--teal-dk)}
+ .nm{font-weight:700;color:var(--ink)} .em{font-size:12px;color:var(--muted)}
+ .dept{display:inline-block;font-size:12px;font-weight:600;padding:4px 11px;border-radius:999px;background:#e6f5f7;color:var(--teal-dk)}
+ .role{font-size:11.5px;font-weight:700;color:var(--navy);background:#eef2f6;border-radius:999px;padding:3px 9px}
+ .st{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600}
+ .dot{width:7px;height:7px;border-radius:50%;display:inline-block}
+ .rm{color:#b4232a;font-size:12.5px;cursor:pointer;background:none;border:none;font-family:inherit;font-weight:600}
+ .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:22px;max-width:520px}
+ .panel h2{font-size:18px;color:var(--navy);margin-bottom:6px}
+ .panel p{font-size:13.5px;color:var(--muted);margin-bottom:16px}
+ .field{margin-bottom:12px}
+ .field label{display:block;font-size:12.5px;font-weight:600;color:var(--navy);margin-bottom:5px}
+ .field input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 12px;font-size:14px;font-family:inherit}
+ .field input:focus{outline:none;border-color:var(--teal)}
+ .msg{font-size:13px;margin-top:10px}
+ .inv-row{display:grid;grid-template-columns:1.4fr 1fr auto;gap:10px;align-items:end}
+ @media(max-width:640px){.inv-row{grid-template-columns:1fr}}
+ .loading{padding:40px;color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="shell">
+  <aside class="side">
+    <div class="logo">Cana<b>Bids</b></div>
+    <nav class="nav">
+      <a href="/dashboard.html"><span>▦</span> Dashboard</a>
+      <a href="/tenders.html"><span>◎</span> Opportunities</a>
+      <a href="/dashboard.html"><span>▤</span> My Bids</a>
+      <a href="/vault.html"><span>🗂</span> Documents</a>
+      <a href="/team.html" class="on"><span>👥</span> Team</a>
+      <a href="/profile.html"><span>⚙</span> Settings</a>
+    </nav>
+    <div class="org" id="org-box" style="display:none">
+      <div class="n"><span>🏢</span> <span id="org-name">—</span></div>
+      <div class="s" id="org-seats"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div id="view-loading" class="loading">Loading your team…</div>
+
+    <!-- NO ENTERPRISE: create one -->
+    <div id="view-create" style="display:none">
+      <div class="top"><div><h1>Create your company circle</h1><p>Set up your enterprise account and invite up to 5 people from your organisation.</p></div></div>
+      <div class="panel">
+        <h2>Company details</h2>
+        <p>This groups your team under one account. Each person keeps their own profile and bids.</p>
+        <div class="field"><label>Company name</label><input id="create-name" placeholder="Icon Group"></div>
+        <button class="btn" id="create-btn">Create company circle</button>
+        <div class="msg" id="create-msg"></div>
+      </div>
+    </div>
+
+    <!-- MEMBER (not owner) -->
+    <div id="view-member" style="display:none">
+      <div class="top"><div><h1>Your team</h1><p id="member-sub"></p></div></div>
+      <div class="panel"><h2 id="member-ent">—</h2><p id="member-note">You are a member of this company circle. You can browse opportunities and generate bids for your team, delivered to your own email. Your owner manages the team.</p><a class="btn" href="/dashboard.html">Go to your dashboard</a></div>
+    </div>
+
+    <!-- OWNER overview -->
+    <div id="view-owner" style="display:none">
+      <div class="top">
+        <div><h1>Your team</h1><p>Everyone in your Cana Bids circle. Each person bids for their own opportunities; results go to their own inbox.</p></div>
+      </div>
+      <div class="tiles">
+        <div class="tile"><div class="l">Seats</div><div class="v" id="t-seats">–</div></div>
+        <div class="tile"><div class="l">Bids generated</div><div class="v" id="t-bids">–</div></div>
+        <div class="tile"><div class="l">Active seats</div><div class="v" id="t-active">–</div></div>
+        <div class="tile"><div class="l">Departments</div><div class="v" id="t-depts">–</div></div>
+      </div>
+
+      <div class="panel" style="max-width:none;margin-bottom:18px">
+        <h2>Invite a teammate</h2>
+        <p>Send an invite link. They create their own login and join your circle.</p>
+        <div class="inv-row">
+          <div class="field" style="margin:0"><label>Email address</label><input id="inv-email" type="email" placeholder="michael@icongroup.co.uk"></div>
+          <div class="field" style="margin:0"><label>Department</label><input id="inv-dept" placeholder="Logistics"></div>
+          <button class="btn" id="inv-btn">Send invite</button>
+        </div>
+        <div class="msg" id="inv-msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h">Members</div>
+        <table><thead><tr><th>Member</th><th>Department</th><th>Bids</th><th>Status</th><th></th></tr></thead>
+        <tbody id="members-body"></tbody></table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://igpjfpncfuawikoyzfcd.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+let TOKEN=null;
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function show(id){['view-loading','view-create','view-member','view-owner'].forEach(v=>{document.getElementById(v).style.display=v===id?'block':'none';});}
+async function api(method,body){
+  var opts={method:method,headers:{'Authorization':'Bearer '+TOKEN}};
+  if(body){opts.headers['Content-Type']='application/json';opts.body=JSON.stringify(body);}
+  var r=await fetch('/.netlify/functions/enterprise',opts);
+  return {ok:r.ok,status:r.status,data:await r.json().catch(()=>({}))};
+}
+function initials(name,email){var s=(name||email||'?').trim();return (s[0]||'?').toUpperCase()+((s.split(/\s+/)[1]||'')[0]||'').toUpperCase();}
+
+async function load(){
+  var r=await api('GET');
+  if(!r.ok){ show('view-create'); return; }
+  var d=r.data;
+  if(!d.role){ show('view-create'); return; }
+  if(d.role==='member'){
+    document.getElementById('member-ent').textContent=d.enterprise?d.enterprise.name:'Your company';
+    document.getElementById('member-sub').textContent=(d.department?d.department+' · ':'')+'member';
+    document.getElementById('org-box').style.display='block';
+    document.getElementById('org-name').textContent=d.enterprise?d.enterprise.name:'';
+    document.getElementById('org-seats').textContent=(d.department?d.department+' · ':'')+'member';
+    show('view-member'); return;
+  }
+  // owner
+  var ent=d.enterprise||{}; var members=d.members||[];
+  document.getElementById('org-box').style.display='block';
+  document.getElementById('org-name').textContent=ent.name||'';
+  document.getElementById('org-seats').textContent='Enterprise · '+(d.seats_used||0)+' of '+(ent.seat_limit||5)+' seats';
+  document.getElementById('t-seats').textContent=(d.seats_used||0)+' / '+(ent.seat_limit||5);
+  document.getElementById('t-bids').textContent=members.reduce((a,m)=>a+(m.bids||0),0);
+  document.getElementById('t-active').textContent=members.filter(m=>m.status==='active').length;
+  document.getElementById('t-depts').textContent=new Set(members.map(m=>(m.department||'').trim()).filter(Boolean)).size;
+  var full=(d.seats_used||0)>=(ent.seat_limit||5);
+  document.getElementById('inv-btn').disabled=full;
+  document.getElementById('inv-msg').textContent=full?'All seats are in use. Remove a member to free a seat.':'';
+  document.getElementById('members-body').innerHTML=members.map(function(m){
+    var st=m.status==='active'?'<span class="st"><span class="dot" style="background:var(--good)"></span>Active</span>':'<span class="st"><span class="dot" style="background:var(--amber)"></span>Invite sent</span>';
+    var role=m.role==='owner'?'<span class="role">Owner</span>':'';
+    var act=m.role==='owner'?'':'<button class="rm" onclick="removeMember(\''+m.id+'\')">Remove</button>';
+    return '<tr><td><div class="who"><span class="av">'+esc(initials('',m.email))+'</span><div><div class="nm">'+esc(m.email)+'</div><div class="em">'+(m.role==='owner'?'You':'')+'</div></div></div></td>'+
+      '<td>'+(m.department?'<span class="dept">'+esc(m.department)+'</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
+      '<td>'+(m.bids||0)+'</td><td>'+(role||st)+'</td><td style="text-align:right">'+act+'</td></tr>';
+  }).join('');
+  show('view-owner');
+}
+
+async function removeMember(id){
+  if(!confirm('Remove this member and free their seat?')) return;
+  var r=await api('POST',{action:'remove',memberId:id});
+  if(!r.ok){ alert(r.data.error||'Could not remove.'); return; }
+  load();
+}
+window.removeMember=removeMember;
+
+document.addEventListener('DOMContentLoaded',async function(){
+  var s=await sb.auth.getSession();
+  if(!s.data.session){ window.location.href='/login.html?redirect=/team.html'; return; }
+  TOKEN=s.data.session.access_token;
+  document.getElementById('create-btn').addEventListener('click',async function(){
+    var name=document.getElementById('create-name').value.trim();
+    var msg=document.getElementById('create-msg');
+    if(!name){msg.style.color='#b4232a';msg.textContent='Please enter a company name.';return;}
+    this.disabled=true;this.textContent='Creating…';
+    var r=await api('POST',{action:'create',name:name});
+    if(!r.ok){msg.style.color='#b4232a';msg.textContent=r.data.error||'Could not create.';this.disabled=false;this.textContent='Create company circle';return;}
+    load();
+  });
+  document.getElementById('inv-btn').addEventListener('click',async function(){
+    var email=document.getElementById('inv-email').value.trim();
+    var dept=document.getElementById('inv-dept').value.trim();
+    var msg=document.getElementById('inv-msg');
+    if(!email){msg.style.color='#b4232a';msg.textContent='Enter an email address.';return;}
+    this.disabled=true;this.textContent='Sending…';
+    var r=await api('POST',{action:'invite',email:email,department:dept});
+    if(!r.ok){msg.style.color='#b4232a';msg.textContent=r.data.error||'Could not send invite.';this.disabled=false;this.textContent='Send invite';return;}
+    document.getElementById('inv-email').value='';document.getElementById('inv-dept').value='';
+    msg.style.color='var(--good)';msg.textContent='Invite sent.';
+    this.disabled=false;this.textContent='Send invite';
+    load();
+  });
+  load();
+});
+</script>
+</body>
+</html>

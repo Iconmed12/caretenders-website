@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Join your team | Cana Bids</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+ :root{--navy:#0b1929;--teal:#00c9e0;--teal-dk:#0891a3;--ink:#1a2433;--muted:#63707f;--line:#e7ebf1;--good:#16a37b;}
+ *{box-sizing:border-box;margin:0;padding:0}
+ body{font-family:'Plus Jakarta Sans',system-ui,Arial,sans-serif;background:#eef2f6;color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+ .card{background:#fff;border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:34px 32px;box-shadow:0 30px 60px -30px rgba(11,25,41,.3);text-align:center}
+ .logo{font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--navy);margin-bottom:20px}
+ .logo b{color:var(--teal-dk)}
+ .badge{width:56px;height:56px;border-radius:15px;background:rgba(0,201,224,.13);color:var(--teal-dk);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
+ h1{font-size:20px;color:var(--navy);margin-bottom:8px}
+ p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:8px}
+ .ent{font-weight:700;color:var(--ink)}
+ .btn{display:inline-block;width:100%;background:var(--teal);color:var(--navy);border:none;font-weight:700;font-size:15px;padding:13px 18px;border-radius:10px;cursor:pointer;font-family:inherit;margin-top:16px;text-decoration:none}
+ .btn:hover{filter:brightness(.96)} .btn:disabled{opacity:.6;cursor:default}
+ .btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink);margin-top:10px}
+ .err{color:#b4232a;font-size:14px;margin-top:8px}
+ .spin{color:var(--muted);font-size:14px}
+</style>
+</head>
+<body>
+<div class="card" id="card">
+  <div class="logo">Cana<b>Bids</b></div>
+  <div class="spin" id="loading">Checking your invitation…</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL='https://igpjfpncfuawikoyzfcd.supabase.co';
+const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function getToken(){var m=location.search.match(/[?&]token=([^&]+)/);return m?decodeURIComponent(m[1]):'';}
+function render(html){document.getElementById('card').innerHTML='<div class="logo">Cana<b>Bids</b></div>'+html;}
+
+async function run(){
+  var tok=getToken();
+  if(!tok){ render('<div class="badge">✕</div><h1>Invalid link</h1><p>This invitation link is missing its code. Please use the link from your email.</p>'); return; }
+
+  var s=await sb.auth.getSession();
+  if(!s.data.session){
+    var here='/join.html?token='+encodeURIComponent(tok);
+    render('<div class="badge">👥</div><h1>You have been invited</h1>'+
+      '<p>You have been invited to join a team on Cana Bids. Sign in or create your account to accept.</p>'+
+      '<a class="btn" href="/register.html?redirect='+encodeURIComponent(here)+'">Create my account</a>'+
+      '<a class="btn ghost" href="/login.html?redirect='+encodeURIComponent(here)+'">I already have an account</a>');
+    return;
+  }
+
+  // Signed in: accept the invite.
+  render('<div class="spin">Joining your team…</div>');
+  var r=await fetch('/.netlify/functions/enterprise-accept',{method:'POST',headers:{'Authorization':'Bearer '+s.data.session.access_token,'Content-Type':'application/json'},body:JSON.stringify({token:tok})});
+  var d=await r.json().catch(()=>({}));
+  if(!r.ok){
+    render('<div class="badge">✕</div><h1>Cannot accept invitation</h1><p>'+esc(d.error||'Something went wrong. Please ask for a new invite.')+'</p><a class="btn ghost" href="/dashboard.html">Go to dashboard</a>');
+    return;
+  }
+  render('<div class="badge" style="background:rgba(22,163,123,.13);color:var(--good)">✓</div>'+
+    '<h1>You are in!</h1>'+
+    '<p>You have joined <span class="ent">'+esc(d.enterprise||'your team')+'</span>'+(d.department?' as <span class="ent">'+esc(d.department)+'</span>':'')+'.</p>'+
+    '<p>You can now browse opportunities and generate bids for your team. Results go straight to your own email.</p>'+
+    '<a class="btn" href="/dashboard.html">Go to my dashboard</a>');
+}
+run();
+</script>
+</body>
+</html>

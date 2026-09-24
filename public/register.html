@@ -312,6 +312,11 @@
         });
       }
 
+      // If a session already exists (email confirmation is off) and a redirect
+      // was requested (e.g. an enterprise invite), honour it straight away.
+      var redirectTo = new URLSearchParams(window.location.search).get('redirect');
+      if (redirectTo && data.session) { window.location.href = redirectTo; return; }
+
       // Show success
       document.getElementById('sent-to').textContent = email;
       document.getElementById('form-state').style.display = 'none';
