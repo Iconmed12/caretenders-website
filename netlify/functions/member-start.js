@@ -3,6 +3,7 @@
 // server-side so the bypass cannot be forged from the browser.
 
 const { checkRate, checkKey, tooMany } = require('./_rate-limit');
+const { memberInfo } = require('./_membership');
 
 exports.handler = async (event) => {
   const cors = {
@@ -43,20 +44,10 @@ exports.handler = async (event) => {
     }
 
     // ── Server-side membership check (never trust the browser) ──
-    const memRes = await fetch(
-      sbUrl + '/rest/v1/subscriptions?email=eq.' + encodeURIComponent(email) +
-      '&status=in.(active,trialing,past_due)&select=status,current_period_end' +
-      '&order=current_period_end.desc&limit=1',
-      { headers: { apikey: svcKey, Authorization: 'Bearer ' + svcKey } }
-    );
-    const memRows = await memRes.json();
-    const sub = Array.isArray(memRows) && memRows[0];
-    let active = false;
-    if (sub) {
-      if (!sub.current_period_end) active = sub.status === 'active';
-      else active = (new Date(sub.current_period_end).getTime() + 3 * 24 * 3600 * 1000) > Date.now();
-    }
-    if (!active) {
+    // memberInfo checks the person's own subscription first (unchanged), then
+    // falls back to the enterprise owner's subscription for an active seat.
+    const mem = await memberInfo(email);
+    if (!mem.member) {
       return { statusCode: 403, headers: cors, body: JSON.stringify({ error: 'No active membership found for ' + email }) };
     }
 

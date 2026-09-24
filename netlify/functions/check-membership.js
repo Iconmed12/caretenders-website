@@ -2,6 +2,7 @@
 // unlimited bidding. 3-day grace beyond period end covers renewal lag.
 
 const { checkRate, tooMany } = require('./_rate-limit');
+const { memberInfo } = require('./_membership');
 
 exports.handler = async (event) => {
   const cors = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
@@ -15,31 +16,22 @@ exports.handler = async (event) => {
     const sbKey = process.env.SUPABASE_ANON_KEY;
     var srv = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    // Run BOTH lookups at once instead of waiting for one then the other
-    var subPromise = fetch(
-      'https://igpjfpncfuawikoyzfcd.supabase.co/rest/v1/subscriptions' +
-      '?email=eq.' + encodeURIComponent(email) +
-      '&status=in.(active,trialing,past_due)' +
-      '&select=id,status,term_months,current_period_end,created_at' +
-      '&order=current_period_end.desc&limit=1',
-      { headers: { apikey: (srv || sbKey), Authorization: 'Bearer ' + (srv || sbKey) } }
-    ).then(function(r){ return r.json(); }).catch(function(){ return []; });
+    // Run membership resolution and the account lookup at once. memberInfo does
+    // the direct-subscription check first (unchanged for individual members) and
+    // falls back to the enterprise owner's subscription for active seats.
+    var memPromise = memberInfo(email);
 
     var acctPromise = srv ? fetch(
       'https://igpjfpncfuawikoyzfcd.supabase.co/auth/v1/admin/users?filter=' + encodeURIComponent(email),
       { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
     ).then(function(r){ return r.ok ? r.json() : null; }).catch(function(){ return null; }) : Promise.resolve(null);
 
-    var results = await Promise.all([subPromise, acctPromise]);
-    var rows = results[0];
+    var results = await Promise.all([memPromise, acctPromise]);
+    var mem = results[0] || { member: false, via: null, sub: null };
     var acctData = results[1];
 
-    const sub = Array.isArray(rows) && rows[0];
-    let member = false;
-    if (sub) {
-      if (!sub.current_period_end) member = sub.status === 'active';
-      else member = (new Date(sub.current_period_end).getTime() + 3 * 24 * 3600 * 1000) > Date.now();
-    }
+    const sub = mem.sub;
+    let member = !!mem.member;
 
     let hasAccount = false;
     if (acctData) {
@@ -51,6 +43,7 @@ exports.handler = async (event) => {
       statusCode: 200, headers: cors,
       body: JSON.stringify({
         member: member,
+        via: mem.via,
         has_account: hasAccount,
         status: sub ? sub.status : null,
         term_months: sub ? sub.term_months : null,
