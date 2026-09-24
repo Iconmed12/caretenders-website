@@ -20,26 +20,56 @@ function ordStatusChip(status) {
   return '<span style="background:' + c.bg + ';color:' + c.fg + ';font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;">' + ordEsc(c.t) + '</span>';
 }
 
+function ordIsManager() { return window._adminRole === 'owner' || window._adminRole === 'manager'; }
+
 async function loadGenControl() {
   var box = document.getElementById('gen-control');
   if (!box) return;
+  // Pausing generation and changing the AI budget is manager/owner only. Staff
+  // do not see this control at all (and the server enforces it too).
+  if (!ordIsManager()) { box.style.display = 'none'; return; }
+  box.style.display = 'flex';
   try {
     var res = await fetch('/.netlify/functions/generation-control', { headers: adminHeaders() });
     var d = await res.json();
     if (!res.ok) throw new Error(d && d.error || 'failed');
     var spent = ((d.spent_today_pennies || 0) / 100).toFixed(2);
-    var budget = ((d.daily_budget_pennies || 0) / 100).toFixed(2);
+    var budgetPounds = Math.round((d.daily_budget_pennies || 0) / 100);
     var paused = d.paused === true;
     box.innerHTML =
       '<div>' +
         '<div style="font-size:0.9rem;font-weight:700;color:' + (paused ? '#b91c1c' : '#166534') + ';">' +
           (paused ? '⏸ Generation is PAUSED' : '▶ Generation is running') + '</div>' +
-        '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">Estimated AI spend today: £' + spent + ' of £' + budget + ' daily budget</div>' +
+        '<div style="font-size:0.8rem;color:var(--text-muted);margin-top:2px;">Estimated AI spend today: £' + spent + ' of £' + budgetPounds + ' daily budget</div>' +
       '</div>' +
-      '<button onclick="toggleGeneration(' + (paused ? 'false' : 'true') + ')" style="border:none;color:#fff;font-weight:700;font-size:0.84rem;padding:9px 18px;border-radius:8px;cursor:pointer;background:' + (paused ? '#166534' : '#dc2626') + ';">' +
-        (paused ? 'Resume generation' : 'Pause all generation') + '</button>';
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">' +
+        '<label style="font-size:0.8rem;color:var(--text-muted);">Daily budget £</label>' +
+        '<input id="gen-budget" type="number" min="0" step="10" value="' + budgetPounds + '" style="width:90px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.84rem;">' +
+        '<button onclick="saveBudget()" style="border:1px solid var(--border);background:#fff;color:var(--text);font-weight:600;font-size:0.84rem;padding:8px 14px;border-radius:8px;cursor:pointer;">Save</button>' +
+        '<button onclick="toggleGeneration(' + (paused ? 'false' : 'true') + ')" style="border:none;color:#fff;font-weight:700;font-size:0.84rem;padding:9px 18px;border-radius:8px;cursor:pointer;background:' + (paused ? '#166534' : '#dc2626') + ';">' +
+          (paused ? 'Resume generation' : 'Pause all generation') + '</button>' +
+      '</div>';
   } catch (e) {
     box.innerHTML = '<div style="font-size:0.82rem;color:#dc2626;">Could not load generation status: ' + ordEsc(e.message) + '</div>';
+  }
+}
+
+async function saveBudget() {
+  var inp = document.getElementById('gen-budget');
+  if (!inp) return;
+  var pounds = parseInt(inp.value, 10);
+  if (isNaN(pounds) || pounds < 0) { if (typeof showToast === 'function') showToast('Enter a valid budget', 'error'); return; }
+  try {
+    var res = await fetch('/.netlify/functions/generation-control', {
+      method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ dailyBudgetPennies: pounds * 100 })
+    });
+    var d = await res.json();
+    if (!res.ok) throw new Error(d && d.error || 'failed');
+    if (typeof showToast === 'function') showToast('Daily budget set to £' + pounds, 'success');
+    loadGenControl();
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Error: ' + e.message, 'error'); else alert('Error: ' + e.message);
   }
 }
 

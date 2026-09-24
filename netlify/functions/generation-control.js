@@ -1,7 +1,7 @@
 // Admin-only: read/adjust the generation kill switch and daily AI budget, and
 // read today's estimated AI spend. GET returns status; POST updates it.
 
-const { requireAdmin, logAudit } = require('./_admin-auth');
+const { requireManager, logAudit } = require('./_admin-auth');
 
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
@@ -14,7 +14,9 @@ exports.handler = async (event) => {
   };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
 
-  const denied = await requireAdmin(event, 'generation-control', cors);
+  // Manager/owner only: pausing generation and changing the AI budget is a
+  // high-impact control, so ordinary staff are refused.
+  const denied = await requireManager(event, 'generation-control', cors);
   if (denied) return denied;
 
   const SB_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
