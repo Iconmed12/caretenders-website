@@ -21,7 +21,8 @@ exports.handler = async (event) => {
       return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing email or tender' }) };
     }
 
-    const sbKey = process.env.SUPABASE_ANON_KEY;
+    const sbKey = process.env.SUPABASE_ANON_KEY;                                   // for the /auth/v1/user identity check
+    const svcKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY; // for DB (works once RLS is on)
     const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
     // ── Identity check: the login token must belong to this email ──
@@ -46,7 +47,7 @@ exports.handler = async (event) => {
       sbUrl + '/rest/v1/subscriptions?email=eq.' + encodeURIComponent(email) +
       '&status=in.(active,trialing,past_due)&select=status,current_period_end' +
       '&order=current_period_end.desc&limit=1',
-      { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } }
+      { headers: { apikey: svcKey, Authorization: 'Bearer ' + svcKey } }
     );
     const memRows = await memRes.json();
     const sub = Array.isArray(memRows) && memRows[0];
@@ -100,7 +101,7 @@ exports.handler = async (event) => {
     var jobId = 'job_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
     var jobRes = await fetch(sbUrl + '/rest/v1/cana_jobs', {
       method: 'POST',
-      headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=representation' },
+      headers: { apikey: svcKey, Authorization: 'Bearer ' + svcKey, 'Content-Type': 'application/json', Prefer: 'return=representation' },
       body: JSON.stringify({
         id: jobId,
         status: 'pending',

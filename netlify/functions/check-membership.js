@@ -19,7 +19,7 @@ exports.handler = async (event) => {
       '&status=in.(active,trialing,past_due)' +
       '&select=id,status,term_months,current_period_end,created_at' +
       '&order=current_period_end.desc&limit=1',
-      { headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey } }
+      { headers: { apikey: (srv || sbKey), Authorization: 'Bearer ' + (srv || sbKey) } }
     ).then(function(r){ return r.json(); }).catch(function(){ return []; });
 
     var acctPromise = srv ? fetch(

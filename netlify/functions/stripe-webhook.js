@@ -18,7 +18,8 @@ function verifySignature(payload, sigHeader, secret) {
 }
 
 exports.handler = async (event) => {
-  const sbKey = process.env.SUPABASE_ANON_KEY;
+  // Service key so this keeps working once RLS is enabled on subscriptions.
+  const sbKey = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
   const sbUrl = 'https://igpjfpncfuawikoyzfcd.supabase.co';
   const stripeKey = process.env.STRIPE_SECRET_KEY || process.env.Stripe_Key;
   const whSecret = process.env.STRIPE_WEBHOOK_SECRET;
