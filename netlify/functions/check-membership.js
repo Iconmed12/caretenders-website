@@ -1,9 +1,12 @@
 // Is this email an active Cana member? Used by the client flow to honour
 // unlimited bidding. 3-day grace beyond period end covers renewal lag.
 
+const { checkRate, tooMany } = require('./_rate-limit');
+
 exports.handler = async (event) => {
   const cors = { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' };
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: cors, body: '' };
+  if (!(await checkRate(event, 'check-membership', 20, 60))) return tooMany(cors);
 
   try {
     const email = (event.queryStringParameters && event.queryStringParameters.email || '').trim().toLowerCase();

@@ -461,11 +461,11 @@
 
   async function loadBidHistory() {
     try {
-      var { data: { user } } = await sb.auth.getUser();
-      if (!user) return;
+      var { data: { session } } = await sb.auth.getSession();
+      if (!session) return;
       var res = await fetch('/.netlify/functions/get-bid-history', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: user.email })
+        method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token },
+        body: JSON.stringify({})
       });
       var history = await res.json();
       var list  = document.getElementById('bid-history-list');
