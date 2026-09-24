@@ -70,6 +70,7 @@
     <div class="sidebar-nav">
       <button class="nav-item" onclick="showPage('cana',this)"><i class="ti ti-sparkles"></i> Cana <span class="nav-badge" id="sbCana">0</span></button>
 <button class="nav-item" onclick="showPage('tenders-import',this)"><i class="ti ti-cloud-download"></i> Tender Import <span class="nav-badge" id="sbImport">0</span></button>
+<button class="nav-item" onclick="showPage('requests',this)"><i class="ti ti-inbox"></i> Requests <span class="nav-badge" id="sbRequests">0</span></button>
 <button class="nav-item" id="navKnowledge" onclick="showPage('knowledge',this)"><i class="ti ti-brain"></i> Knowledge Base</button>
       <button class="nav-item" id="navUsers" style="display:none" onclick="showPage('users',this)"><i class="ti ti-user-circle"></i> Users <span class="nav-badge" id="sbUsers">0</span></button>
       <button class="nav-item" id="navStaff" style="display:none" onclick="showPage('staff',this)"><i class="ti ti-users"></i> Staff</button>
@@ -546,6 +547,23 @@
   <div id="ti-list" style="display:flex;flex-direction:column;gap:10px;"></div>
   <div id="ti-empty" style="display:none;text-align:center;padding:3rem;color:var(--text-muted);font-size:0.9rem;">No tenders yet. Click <strong>Import Now</strong> to fetch tenders.</div>
 </div>
+
+<div class="page" id="page-requests">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:1.25rem;flex-wrap:wrap;">
+    <div>
+      <h2 style="font-size:1.3rem;font-weight:700;margin-bottom:4px;">Tender requests</h2>
+      <p style="font-size:0.84rem;color:var(--text-muted);">Links customers have asked us to find. Add the tender manually, then mark it ready to email the customer.</p>
+    </div>
+    <button onclick="loadTenderRequests()" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.82rem;"><i class="ti ti-refresh" style="font-size:14px;vertical-align:-2px;"></i> Refresh</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+    <button onclick="trSetFilter('open')" class="ti-tab active" id="tr-tab-open">To do</button>
+    <button onclick="trSetFilter('all')" class="ti-tab" id="tr-tab-all">All</button>
+    <button onclick="trSetFilter('done')" class="ti-tab" id="tr-tab-done">Done</button>
+  </div>
+  <div id="tr-list" style="display:flex;flex-direction:column;gap:10px;"></div>
+  <div id="tr-empty" style="display:none;text-align:center;padding:3rem;color:var(--text-muted);font-size:0.9rem;">No requests here yet.</div>
+</div>
 </div>
 </div>
 </div>
@@ -696,6 +714,7 @@
 <script src="/admin-cana-questions.js"></script>
 <script src="/admin-delivery.js"></script>
 <script src="/admin-import.js"></script>
+<script src="/admin-requests.js"></script>
 <script src="/admin-staff.js"></script>
 <script src="/admin-users.js"></script>
 </body>

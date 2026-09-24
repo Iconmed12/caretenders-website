@@ -252,6 +252,29 @@
     </a>
   </div>
 
+  <!-- REQUEST A TENDER -->
+  <div class="section-header">
+    <div class="section-title">Cannot find a tender you want?</div>
+  </div>
+  <div style="background:var(--white);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:1.5rem;">
+    <div style="background:var(--navy);padding:14px 18px;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:1.1rem;">🔗</span>
+      <span style="color:#fff;font-weight:600;">Send us the link and we will add it for you</span>
+    </div>
+    <div style="padding:18px;">
+      <p style="margin:0 0 14px;font-size:0.86rem;color:var(--muted);line-height:1.6;">Seen a tender elsewhere that is not on Cana? Paste the link below. We will find it, add it to your dashboard, and email you when it is ready to generate.</p>
+      <div id="tr-form">
+        <input id="tr-link" type="url" placeholder="https://www.find-tender.service.gov.uk/Notice/..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;margin-bottom:10px;box-sizing:border-box;" />
+        <textarea id="tr-note" placeholder="Anything we should know? (optional)" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;min-height:60px;margin-bottom:10px;box-sizing:border-box;font-family:inherit;"></textarea>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <button id="tr-send" type="button" style="background:#00C9E0;border:none;color:var(--navy);font-weight:700;padding:10px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;">Send it to us</button>
+          <span id="tr-msg" style="font-size:0.83rem;"></span>
+        </div>
+      </div>
+      <div id="tr-mine" style="margin-top:18px;"></div>
+    </div>
+  </div>
+
   <!-- BOTTOM TWO COL -->
   <div class="two-col">
 
@@ -483,5 +506,6 @@
     }
   </script>
 <script src="/mobile-nav.js" defer></script>
+<script src="/tender-requests.js" defer></script>
 </body>
 </html>
