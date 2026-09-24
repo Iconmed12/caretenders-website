@@ -17,16 +17,23 @@
 
   function chip(status) {
     var map = {
-      new:           { t: 'Received',    bg: '#eef2ff', fg: '#3730a3' },
-      sourcing:      { t: 'Sourcing',    bg: '#fef9c3', fg: '#854d0e' },
-      ready:         { t: 'Ready',       bg: '#dcfce7', fg: '#166534' },
-      cannot_source: { t: 'Not added',   bg: '#fee2e2', fg: '#991b1b' }
+      new:           { t: 'Received', bg: '#eef2ff', fg: '#4338ca', dot: '#6366f1' },
+      sourcing:      { t: 'Sourcing', bg: '#fff7e6', fg: '#b45309', dot: '#f59e0b' },
+      ready:         { t: 'Ready',    bg: '#ecfdf5', fg: '#047857', dot: '#10b981' },
+      cannot_source: { t: 'Not added',bg: '#fef2f2', fg: '#b91c1c', dot: '#ef4444' }
     };
     var c = map[status] || map.new;
-    return '<span style="background:' + c.bg + ';color:' + c.fg + ';font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;">' + c.t + '</span>';
+    return '<span style="display:inline-flex;align-items:center;gap:6px;background:' + c.bg + ';color:' + c.fg + ';font-size:0.73rem;font-weight:600;padding:4px 11px;border-radius:999px;white-space:nowrap;">' +
+      '<span style="width:6px;height:6px;border-radius:50%;background:' + c.dot + ';"></span>' + c.t + '</span>';
   }
 
   function esc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  // Show a tidy version of the link (host + path, no messy query string).
+  function pretty(link) {
+    try { var u = new URL(link); return esc((u.hostname + u.pathname).replace(/^www\./, '').replace(/\/$/, '')); }
+    catch (e) { return esc(String(link).split('?')[0]); }
+  }
 
   async function loadMine() {
     var tk = await token();
@@ -36,16 +43,14 @@
       var data = await res.json();
       var rows = (data && data.requests) || [];
       if (!rows.length) { mineEl.innerHTML = ''; return; }
-      var html = '<div style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;">Your requests</div>' +
-        '<div style="border:1px solid #aab4c2;border-radius:10px;overflow:hidden;">';
-      rows.forEach(function (r, i) {
+      var html = '<div style="font-size:0.72rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#9aa3b2;margin:0 0 4px;padding-top:18px;border-top:1px solid #eef1f5;">Your requests</div>';
+      rows.forEach(function (r) {
         var when = r.created_at ? new Date(r.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
-        html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;' + (i ? 'border-top:1px solid #aab4c2;' : '') + '">' +
-          '<div style="min-width:0;"><div style="font-size:0.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + esc(r.link) + '</div>' +
-          '<div style="font-size:0.75rem;color:var(--muted);">Requested ' + when + '</div></div>' +
+        html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid #f2f4f7;">' +
+          '<div style="min-width:0;"><div style="font-size:0.86rem;color:var(--navy);font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + pretty(r.link) + '</div>' +
+          '<div style="font-size:0.75rem;color:var(--muted);margin-top:2px;">Requested ' + when + '</div></div>' +
           chip(r.status) + '</div>';
       });
-      html += '</div>';
       mineEl.innerHTML = html;
     } catch (e) { /* silent */ }
   }

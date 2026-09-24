@@ -253,26 +253,34 @@
   </div>
 
   <!-- REQUEST A TENDER -->
-  <div class="section-header">
-    <div class="section-title">Cannot find a tender you want?</div>
-  </div>
-  <div style="background:var(--white);border:1px solid #aab4c2;border-radius:11px;overflow:hidden;margin-bottom:1.5rem;">
-    <div style="background:var(--navy);padding:14px 18px;display:flex;align-items:center;gap:10px;">
-      <span style="font-size:1.1rem;">🔗</span>
-      <span style="color:#fff;font-weight:600;">Send us the link and we will add it for you</span>
-    </div>
-    <div style="padding:18px;">
-      <p style="margin:0 0 14px;font-size:0.86rem;color:var(--muted);line-height:1.6;">Seen a tender elsewhere that is not on Cana? Paste the link below. We will find it, add it to your dashboard, and email you when it is ready to generate.</p>
-      <div id="tr-form">
-        <input id="tr-link" type="url" placeholder="Paste the tender link" style="width:100%;padding:10px 12px;border:1px solid #aab4c2;border-radius:8px;font-size:0.9rem;margin-bottom:10px;box-sizing:border-box;" />
-        <textarea id="tr-note" placeholder="Anything we should know? (optional)" style="width:100%;padding:10px 12px;border:1px solid #aab4c2;border-radius:8px;font-size:0.9rem;min-height:60px;margin-bottom:10px;box-sizing:border-box;font-family:inherit;"></textarea>
-        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-          <button id="tr-send" type="button" style="background:#00C9E0;border:none;color:var(--navy);font-weight:700;padding:10px 20px;border-radius:8px;font-size:0.9rem;cursor:pointer;">Send it to us</button>
-          <span id="tr-msg" style="font-size:0.83rem;"></span>
-        </div>
+  <style>
+    #tr-card .tr-input{width:100%;padding:12px 14px;border:1.5px solid #dbe0e8;border-radius:10px;font-size:0.9rem;box-sizing:border-box;font-family:inherit;color:var(--navy);background:#fbfcfe;transition:border-color .15s,box-shadow .15s,background .15s;}
+    #tr-card .tr-input::placeholder{color:#9aa3b2;}
+    #tr-card .tr-input:hover{border-color:#c3cad6;}
+    #tr-card .tr-input:focus{outline:none;border-color:#00C9E0;box-shadow:0 0 0 3px rgba(0,201,224,0.16);background:#fff;}
+    #tr-send{background:#00C9E0;border:none;color:var(--navy);font-weight:700;padding:11px 22px;border-radius:10px;font-size:0.9rem;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:filter .15s;}
+    #tr-send:hover{filter:brightness(0.94);}
+    #tr-send:disabled{opacity:.6;cursor:default;}
+  </style>
+  <div id="tr-card" style="background:var(--white);border:1px solid #e4e8ef;border-radius:16px;padding:22px 24px;margin-bottom:1.5rem;box-shadow:0 1px 3px rgba(16,24,40,0.05),0 1px 2px rgba(16,24,40,0.03);">
+    <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:18px;">
+      <div style="flex-shrink:0;width:44px;height:44px;border-radius:12px;background:rgba(0,201,224,0.12);display:flex;align-items:center;justify-content:center;">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0891a3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17H7A5 5 0 0 1 7 7h2"/><path d="M15 7h2a5 5 0 1 1 0 10h-2"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
       </div>
-      <div id="tr-mine" style="margin-top:18px;"></div>
+      <div>
+        <div style="font-family:'Playfair Display',serif;font-size:1.18rem;font-weight:700;color:var(--navy);margin-bottom:3px;">Cannot find a tender? Send us the link</div>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.55;">Seen a tender elsewhere that is not on Cana? Paste the link and we will add it to your dashboard, then email you when it is ready to generate.</div>
+      </div>
     </div>
+    <div id="tr-form">
+      <input id="tr-link" type="url" class="tr-input" placeholder="Paste the tender link" style="margin-bottom:12px;" />
+      <textarea id="tr-note" class="tr-input" placeholder="Anything we should know? (optional)" style="min-height:64px;resize:vertical;margin-bottom:14px;"></textarea>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <button id="tr-send" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Send it to us</button>
+        <span id="tr-msg" style="font-size:0.84rem;"></span>
+      </div>
+    </div>
+    <div id="tr-mine" style="margin-top:20px;"></div>
   </div>
 
   <!-- BOTTOM TWO COL -->
