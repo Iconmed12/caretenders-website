@@ -17,6 +17,18 @@
   status = 301
   force = true
 
+# Security headers applied to every response. No Content-Security-Policy yet:
+# the site uses inline scripts and onclick handlers, so a strict CSP would break
+# it until those are refactored. These headers are all safe with the current site.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+
 [functions."stream-response"]
   timeout = 26
 
