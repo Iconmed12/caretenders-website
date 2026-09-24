@@ -557,6 +557,9 @@
     </div>
     <button onclick="loadOrders()" style="background:none;border:1px solid var(--border);color:var(--text-muted);padding:8px 14px;border-radius:8px;font-weight:600;cursor:pointer;font-family:inherit;font-size:0.82rem;"><i class="ti ti-refresh" style="font-size:14px;vertical-align:-2px;"></i> Refresh</button>
   </div>
+  <div id="gen-control" style="background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:14px 16px;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+    <div style="font-size:0.85rem;color:var(--text-muted);">Loading generation status...</div>
+  </div>
   <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem;">
     <div style="background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:14px;"><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Today</div><div style="font-size:1.6rem;font-weight:700;color:var(--text);" id="ord-today">0</div></div>
     <div style="background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:14px;"><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Last 7 days</div><div style="font-size:1.6rem;font-weight:700;color:var(--text);" id="ord-week">0</div></div>

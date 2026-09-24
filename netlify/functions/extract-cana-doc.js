@@ -13,16 +13,18 @@ exports.handler = async (event) => {
   if (_denied) return _denied;
 
   try {
-    const { fileBase64, fileName, fileType } = JSON.parse(event.body);
+    const { fileBase64, fileType } = JSON.parse(event.body);
+    const fileName = (JSON.parse(event.body).fileName || ''); // may be omitted; guard below
     if (!fileBase64) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'No file provided' }) };
 
     const buffer = Buffer.from(fileBase64, 'base64');
     var extractedText = '';
 
-    const isPDF = fileType === 'application/pdf' || fileName.toLowerCase().endsWith('.pdf');
+    var lowerName = String(fileName || '').toLowerCase();
+    const isPDF = fileType === 'application/pdf' || lowerName.endsWith('.pdf');
     const isWord = fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-                   fileName.toLowerCase().endsWith('.docx') ||
-                   fileName.toLowerCase().endsWith('.doc');
+                   lowerName.endsWith('.docx') ||
+                   lowerName.endsWith('.doc');
 
     if (isPDF) {
       // Extract text from PDF using pdf-parse
