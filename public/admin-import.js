@@ -111,7 +111,7 @@ function tiPopulateCatDropdown() {
 
 async function loadImportedTenders() {
   try {
-    var res = await sbFetch('/rest/v1/tenders?source=in.(contracts_finder,find_a_tender)&select=*&order=created_at.desc&limit=200');
+    var res = await fetch('/.netlify/functions/get-import-tenders', { headers: adminHeaders() });
     var data = await res.json();
     tiAllTenders = Array.isArray(data) ? data : [];
     tiUpdateStats();
@@ -428,10 +428,10 @@ async function addTenderByLink() {
 document.addEventListener('DOMContentLoaded', function() {
   setTimeout(async function() {
     try {
-      var res = await sbFetch('/rest/v1/tenders?source=in.(contracts_finder,find_a_tender)&status=eq.pending_review&select=id');
+      var res = await fetch('/.netlify/functions/get-import-tenders', { headers: adminHeaders() });
       var data = await res.json();
       var badge = document.getElementById('sbImport');
-      if (badge && Array.isArray(data)) badge.textContent = data.length;
+      if (badge && Array.isArray(data)) badge.textContent = data.filter(function(t){ return t.status === 'pending_review'; }).length;
     } catch(e) {}
   }, 800);
 });
