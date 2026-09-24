@@ -213,6 +213,12 @@ tr:hover td{background:#f8fafc}
 .ti-tab { background:#f3f4f6; border:1px solid var(--border); color:#374151; padding:7px 16px; border-radius:8px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit; }
 .ti-tab:hover { background:#e9ebee; }
 .ti-tab.active { background:#166534; color:#fff; border-color:#166534; }
+.tr-btn { background:#f3f4f6; border:1px solid var(--border); color:#374151; padding:8px 14px; border-radius:8px; font-size:0.82rem; font-weight:600; cursor:pointer; font-family:inherit; }
+.tr-btn:hover { background:#e9ebee; }
+.tr-btn-primary { background:#00C9E0; border-color:#00C9E0; color:#0B1929; }
+.tr-btn-primary:hover { filter:brightness(0.96); }
+.tr-btn-danger { background:#fef2f2; border-color:#fca5a5; color:#dc2626; }
+.tr-btn-danger:hover { background:#fee2e2; }
 
 .ti-stats-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:1.5rem; }
 .ti-stat { background:#fff; border:1.5px solid var(--border); border-radius:12px; padding:16px; }
