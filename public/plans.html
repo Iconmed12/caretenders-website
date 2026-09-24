@@ -3,15 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Membership | Cana Bids</title>
+<title>Pricing | Cana Bids</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://js.stripe.com/v3/"></script>
 <style>
-  :root { --navy:#0B1929; --navy-mid:#11243A; --teal:#00C9E0; --teal-dk:#00a8bc; --white:#fff; --offwhite:#F4F6F9; --border:#E3E8EF; --muted:#5a6b7a; --amber:#d6a516; }
+  :root { --navy:#0B1929; --navy-mid:#11243A; --teal:#00C9E0; --teal-dk:#0891a3; --white:#fff; --offwhite:#F4F6F9; --border:#E3E8EF; --muted:#5a6b7a; --amber:#d6a516; --good:#16a37b; }
   * { margin:0; padding:0; box-sizing:border-box; }
   body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); }
   a { text-decoration:none; }
@@ -23,94 +21,64 @@
   nav ul a { color:rgba(255,255,255,0.7); font-size:0.85rem; font-weight:500; transition:color 0.2s; }
   nav ul a:hover, nav ul a.active { color:#fff; }
 
-  .plans-hero { background:var(--white); text-align:center; padding:3.5rem 2rem 7rem; border-bottom:1px solid var(--border); }
-  .plans-hero h1 { font-family:'Inter',sans-serif; font-weight:800; letter-spacing:-0.025em; font-size:clamp(1.9rem,4vw,2.7rem); color:var(--navy); margin-bottom:0.7rem; }
+  .plans-hero { background:var(--white); text-align:center; padding:3rem 2rem 6rem; border-bottom:1px solid var(--border); }
+  .plans-hero h1 { font-family:'Inter',sans-serif; font-weight:800; letter-spacing:-0.025em; font-size:clamp(1.9rem,4vw,2.6rem); color:var(--navy); margin-bottom:0.7rem; }
   .plans-hero h1 em { font-style:normal; color:var(--teal-dk); }
-  .plans-hero p { color:var(--muted); font-size:0.95rem; max-width:520px; margin:0 auto; line-height:1.7; }
+  .plans-hero p { color:var(--muted); font-size:0.95rem; max-width:560px; margin:0 auto; line-height:1.7; }
 
-  .founding { max-width:760px; margin:1.5rem auto 0; display:inline-flex; align-items:center; gap:10px; background:rgba(0,201,224,0.1); border:1px solid rgba(0,201,224,0.3); border-radius:999px; padding:8px 20px; }
-  .founding-dot { width:7px; height:7px; border-radius:50%; background:var(--teal); animation:pulse 2s ease-in-out infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-  .founding span { color:rgba(255,255,255,0.85); font-size:0.82rem; font-weight:600; }
-  .founding strong { color:var(--teal); }
+  .cards-wrap { max-width:1240px; margin:-4rem auto 0; padding:0 2rem 2rem; display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; align-items:start; }
+  @media(max-width:1080px){ .cards-wrap{grid-template-columns:1fr 1fr;} }
+  @media(max-width:620px){ .cards-wrap{grid-template-columns:1fr; max-width:460px;} }
 
-  .cards-wrap { max-width:1060px; margin:-4.5rem auto 0; padding:0 2rem 3rem; display:grid; grid-template-columns:repeat(3,1fr); gap:1.25rem; align-items:start; }
-  @media(max-width:880px){ .cards-wrap{grid-template-columns:1fr; max-width:480px;} .card.popular{transform:none;} }
-
-  .card { background:#fff; border:1.5px solid var(--border); border-radius:18px; padding:1.9rem 1.7rem; position:relative; }
-  .card.popular { border:2px solid var(--teal); transform:translateY(-14px); box-shadow:0 18px 48px rgba(0,201,224,0.16); }
-  .pop-badge { position:absolute; top:-12px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.66rem; font-weight:800; letter-spacing:0.08em; text-transform:uppercase; padding:5px 16px; border-radius:999px; white-space:nowrap; }
-
-  .plan-name { font-size:1.05rem; font-weight:700; margin-bottom:2px; }
-  .plan-for { font-size:0.76rem; color:var(--muted); margin-bottom:1.1rem; }
-  .plan-price { font-family:'Inter',sans-serif; letter-spacing:-0.02em; font-size:2.2rem; font-weight:700; line-height:1; }
-  .plan-price small { font-family:'DM Sans',sans-serif; font-size:0.85rem; font-weight:500; color:var(--muted); }
-  .plan-billed { font-size:0.72rem; color:var(--muted); margin:6px 0 1.3rem; }
-
-  .feat { list-style:none; display:flex; flex-direction:column; gap:0.55rem; margin-bottom:1.5rem; }
-  .feat li { display:flex; gap:9px; font-size:0.82rem; color:#33475b; line-height:1.5; }
+  .card { background:#fff; border:1.5px solid var(--border); border-radius:16px; padding:1.6rem 1.4rem; position:relative; display:flex; flex-direction:column; }
+  .card.pop { border:2px solid var(--teal); box-shadow:0 18px 48px rgba(0,201,224,0.16); }
+  .badge { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.62rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; padding:5px 14px; border-radius:999px; white-space:nowrap; }
+  .pname { font-family:'Inter',sans-serif; font-size:1.15rem; font-weight:800; }
+  .pfor { font-size:0.76rem; color:var(--muted); margin:2px 0 1rem; min-height:2.4em; }
+  .price { font-family:'Inter',sans-serif; letter-spacing:-0.02em; font-size:2rem; font-weight:800; line-height:1; color:var(--navy); }
+  .price.soon { font-size:1.15rem; color:var(--teal-dk); }
+  .price small { font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:500; color:var(--muted); }
+  .billed { font-size:0.72rem; color:var(--muted); margin:8px 0 1.1rem; min-height:2.2em; }
+  .seats { display:inline-block; background:rgba(0,201,224,0.1); color:var(--teal-dk); font-size:0.72rem; font-weight:700; padding:4px 10px; border-radius:999px; margin-bottom:1rem; }
+  .feat { list-style:none; display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.4rem; }
+  .feat li { display:flex; gap:8px; font-size:0.8rem; color:#33475b; line-height:1.45; }
   .feat .tick { color:var(--teal-dk); font-weight:700; flex-shrink:0; }
   .feat .hl { font-weight:700; color:var(--navy); }
+  .btn { display:block; width:100%; text-align:center; border:none; border-radius:10px; padding:12px; font-size:0.88rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; margin-top:auto; text-decoration:none; transition:transform 0.15s; }
+  .btn:hover { transform:translateY(-1px); }
+  .btn.solid { background:var(--teal); color:var(--navy); }
+  .btn.navy { background:var(--navy); color:#fff; }
+  .btn.outline { background:#fff; border:1.5px solid var(--navy); color:var(--navy); }
 
-  .setup-row { display:flex; align-items:center; gap:8px; background:var(--offwhite); border:1px solid var(--border); border-radius:8px; padding:9px 12px; margin-bottom:1.1rem; font-size:0.78rem; color:#33475b; cursor:pointer; }
-  .setup-row input { accent-color:var(--teal-dk); }
+  .payg { max-width:1240px; margin:1rem auto 0; padding:0 2rem; }
+  .payg-box { background:#fff; border:1px dashed var(--border); border-radius:14px; padding:1.1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+  .payg-box .t { font-size:0.9rem; color:#33475b; } .payg-box .t b { color:var(--navy); }
 
-  .plan-btn { display:block; width:100%; text-align:center; border:none; border-radius:10px; padding:13px; font-size:0.9rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:transform 0.15s, background 0.2s; }
-  .plan-btn:hover { transform:translateY(-1px); }
-  .btn-outline { background:#fff; border:1.5px solid var(--navy); color:var(--navy); }
-  .btn-solid { background:var(--teal); color:var(--navy); }
-  .btn-navy { background:var(--navy); color:#fff; }
-
-  .terms { text-align:center; font-size:0.75rem; color:var(--muted); padding:0 2rem 1rem; }
-  .compare-note { text-align:center; font-size:0.82rem; color:var(--muted); padding:0 2rem 3.5rem; }
-  .compare-note a { color:var(--teal-dk); font-weight:600; }
-
-  footer { background:var(--navy); text-align:center; padding:1.5rem; font-size:0.75rem; color:rgba(255,255,255,0.4); }
-
-  .member-wrap { max-width:980px; margin:-4.5rem auto 0; padding:0 2rem 2.5rem; display:grid; grid-template-columns:1.6fr 1fr; gap:1.25rem; align-items:start; }
-  @media(max-width:840px){ .member-wrap{grid-template-columns:1fr; max-width:520px;} }
-  .ladder-strip { max-width:980px; margin:0 auto; padding:0 2rem 3rem; }
-  .ladder-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:0.75rem; }
-  @media(max-width:840px){ .ladder-grid{grid-template-columns:1fr 1fr;} }
-  .rung { background:#fff; border:1px solid var(--border); border-radius:12px; padding:1rem; text-align:center; }
-  .rung.active { border:1.5px solid var(--teal); }
-  .rung-step { font-size:0.62rem; font-weight:800; letter-spacing:0.08em; color:var(--muted); text-transform:uppercase; }
-  .rung-name { font-size:0.84rem; font-weight:700; color:var(--navy); margin:4px 0 2px; }
-  .rung-price { font-size:0.76rem; color:var(--teal-dk); font-weight:700; }
-
-  .term-toggle { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; background:var(--offwhite); border:1px solid var(--border); border-radius:10px; padding:5px; margin-bottom:1.1rem; }
-  .term-opt { position:relative; border:none; background:transparent; border-radius:7px; padding:8px 4px; font-family:'DM Sans',sans-serif; font-size:0.74rem; font-weight:600; color:var(--muted); cursor:pointer; transition:all 0.15s; }
-  .term-opt.sel { background:var(--navy); color:#fff; }
-  .term-opt .t-rate { display:block; font-size:0.68rem; font-weight:500; opacity:0.75; margin-top:1px; }
-  .term-best { position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.55rem; font-weight:800; letter-spacing:0.05em; padding:2px 8px; border-radius:999px; text-transform:uppercase; white-space:nowrap; }
-  @media(max-width:840px){ .trust-grid{grid-template-columns:1fr !important;} }
-  .nav-logo-img { height:48px; width:auto; display:block; }
-
-  /* Two clear payment paths, side by side. */
-  .pay-grid { max-width:900px; margin:-4.5rem auto 0; padding:0 2rem; display:grid; grid-template-columns:1fr 1fr; gap:1.25rem; align-items:stretch; }
-  @media(max-width:840px){ .pay-grid{ grid-template-columns:1fr; max-width:480px; } }
-  .pcard { background:#fff; border:1.5px solid var(--border); border-radius:18px; padding:1.9rem 1.7rem; position:relative; display:flex; flex-direction:column; }
-  .pcard.feature { border:2px solid var(--teal); box-shadow:0 18px 48px rgba(0,201,224,0.16); }
-  .pcard .plan-btn { margin-top:auto; }
-
-  /* Optional expert review, for everyone. */
-  .addon-wrap { max-width:900px; margin:1.25rem auto 0; padding:0 2rem; }
-  .addon-box { background:var(--navy); border-radius:16px; padding:1.4rem 1.6rem; display:flex; align-items:center; justify-content:space-between; gap:1.2rem; flex-wrap:wrap; }
-  .addon-txt h3 { color:#fff; font-size:1.05rem; font-weight:800; margin:0 0 4px; }
-  .addon-txt p { color:rgba(255,255,255,0.62); font-size:0.85rem; margin:0; max-width:54ch; line-height:1.6; }
-  .addon-tag { display:inline-block; background:rgba(0,201,224,0.16); color:#7fe6f2; font-size:0.66rem; font-weight:700; letter-spacing:0.04em; text-transform:uppercase; padding:4px 10px; border-radius:999px; margin-bottom:8px; }
-  .addon-cost { text-align:right; flex:none; }
-  .addon-cost .p { font-size:1.7rem; font-weight:800; color:var(--teal); line-height:1; }
+  .addon-wrap { max-width:1240px; margin:1.2rem auto 0; padding:0 2rem; }
+  .addon-box { background:var(--navy); border-radius:16px; padding:1.3rem 1.6rem; display:flex; align-items:center; justify-content:space-between; gap:1.2rem; flex-wrap:wrap; }
+  .addon-box h3 { color:#fff; font-size:1rem; font-weight:800; margin-bottom:6px; }
+  .addon-box p { color:rgba(255,255,255,0.62); font-size:0.83rem; max-width:60ch; line-height:1.5; }
+  .addon-tag { display:inline-block; background:rgba(0,201,224,0.16); color:#7fe6f2; font-size:0.62rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:3px 9px; border-radius:999px; margin-bottom:7px; }
+  .addon-cost .p { font-size:1.6rem; font-weight:800; color:var(--teal); line-height:1; }
   .addon-cost .l { font-size:0.72rem; color:rgba(255,255,255,0.6); margin-top:3px; }
 
-  /* FAQ, answering the questions people keep asking. */
-  .faq2 { max-width:760px; margin:3rem auto 0; padding:0 2rem; }
+  .addlist { max-width:1240px; margin:1.2rem auto 3rem; padding:0 2rem; display:grid; grid-template-columns:repeat(4,1fr); gap:0.8rem; }
+  @media(max-width:880px){ .addlist{grid-template-columns:1fr 1fr;} }
+  .addcard { background:#fff; border:1px solid var(--border); border-radius:12px; padding:1rem; }
+  .addcard .n { font-weight:700; font-size:0.85rem; margin-bottom:3px; }
+  .addcard .d { font-size:0.75rem; color:var(--muted); line-height:1.4; }
+  .addcard .pr { font-size:0.8rem; color:var(--teal-dk); font-weight:700; margin-top:6px; }
+
+  .faq2 { max-width:760px; margin:2.5rem auto 0; padding:0 2rem; }
   .faq2 h2 { font-family:'Inter',sans-serif; font-size:1.4rem; font-weight:800; color:var(--navy); text-align:center; margin:0 0 1.4rem; }
   .qa { background:#fff; border:1px solid var(--border); border-radius:12px; padding:1rem 1.15rem; margin-bottom:0.75rem; }
   .qa .q { font-size:0.95rem; font-weight:700; color:var(--navy); margin:0 0 5px; }
   .qa .a { font-size:0.86rem; color:#33475b; margin:0; line-height:1.6; }
   .qa .a b { color:var(--navy); }
   .fineprint { max-width:760px; margin:1.5rem auto 0; padding:0 2rem 3.5rem; text-align:center; font-size:0.75rem; color:var(--muted); }
+
+  footer { background:var(--navy); text-align:center; padding:1.5rem; font-size:0.75rem; color:rgba(255,255,255,0.4); }
+  .nav-logo-img { height:48px; width:auto; display:block; }
 </style>
 <link rel="stylesheet" href="/site-chrome.css">
 <body>
@@ -126,118 +94,151 @@
 </nav>
 
 <div class="plans-hero">
-  <h1>Two ways to bid. <em>Your choice.</em></h1>
-  <p>Pay for a single tender, or go unlimited with membership. No membership needed to get started.</p>
+  <h1>One platform. <em>Grows with your team.</em></h1>
+  <p>Unlimited tender generation on every plan, delivered to your inbox. Start solo, add your team as you grow. No credits, no per-tender fees.</p>
 </div>
 
-<div class="pay-grid">
+<div class="cards-wrap">
 
-  <!-- PAY AS YOU GO -->
-  <div class="pcard">
-    <div class="plan-name">Pay as you go</div>
-    <div class="plan-for">Best if you bid now and then, or want to try Cana once</div>
-    <div class="plan-price">£480<small> per tender</small></div>
-    <div class="plan-billed">One payment, one full bid. No membership, no commitment.</div>
+  <!-- ACCESS -->
+  <div class="card">
+    <div class="pname">Access</div>
+    <div class="pfor">For solo providers getting started</div>
+    <div class="price soon">Pricing coming soon</div>
+    <div class="billed">Entry membership, one user.</div>
+    <span class="seats">1 user</span>
     <ul class="feat">
-      <li><span class="tick">✓</span><span>Full, tailored responses for every question in the tender</span></li>
-      <li><span class="tick">✓</span><span>Full pack emailed with a submission checklist and portal link</span></li>
-      <li><span class="tick">✓</span><span><span class="hl">Profile setup included</span>, so answers use your real details</span></li>
-      <li><span class="tick">✓</span><span>Optional expert review available (see below)</span></li>
+      <li><span class="tick">✓</span><span class="hl">Unlimited tender generation</span></li>
+      <li><span class="tick">✓</span><span>Delivered to your inbox</span></li>
+      <li><span class="tick">✓</span><span>Cana tenders plus preloaded ITT, spec and questions</span></li>
+      <li><span class="tick">✓</span><span>Company profile and your own evidence</span></li>
+      <li><span class="tick">✓</span><span>Add-ons available (see below)</span></li>
     </ul>
-    <a class="plan-btn btn-navy" href="/tenders.html">Find a tender to write</a>
+    <a class="btn navy" href="/contact.html">Register interest</a>
   </div>
 
-  <!-- MEMBERSHIP -->
-  <div class="pcard feature">
-    <div class="pop-badge">Best value if you bid often</div>
-    <div class="plan-name" style="margin-top:0.4rem;">Membership</div>
-    <div class="plan-for">Unlimited bidding, for providers who bid regularly</div>
-    <div class="term-toggle">
-      <button class="term-opt" data-term="3" onclick="setTerm(3)">3 months<span class="t-rate">£299/mo</span></button>
-      <button class="term-opt" data-term="6" onclick="setTerm(6)">6 months<span class="t-rate">£279/mo</span></button>
-      <button class="term-opt sel" data-term="12" onclick="setTerm(12)"><span class="term-best">Best value</span>12 months<span class="t-rate">£249/mo</span></button>
-    </div>
-    <div class="plan-price" id="member-price">£2,988<small> one payment</small></div>
-    <div class="plan-billed" id="member-billed">Covers 12 months of unlimited bidding. Works out at £249 a month, saving £600 against the 3-month rate.</div>
+  <!-- PRO -->
+  <div class="card pop">
+    <div class="badge">Most popular</div>
+    <div class="pname" style="margin-top:0.3rem;">Pro</div>
+    <div class="pfor">For small teams bidding regularly</div>
+    <div class="price soon">Pricing coming soon</div>
+    <div class="billed">One organisation, up to 5 people.</div>
+    <span class="seats">Up to 5 users</span>
     <ul class="feat">
-      <li><span class="tick">✓</span><span><span class="hl">Unlimited tenders.</span> Bid on every opportunity that fits, no counting, no credits</span></li>
-      <li><span class="tick">✓</span><span>Everything in pay as you go, on every tender</span></li>
-      <li><span class="tick">✓</span><span>Matched tender alerts for your sector</span></li>
+      <li><span class="tick">✓</span><span class="hl">Everything in Access</span></li>
+      <li><span class="tick">✓</span><span>Up to 5 team seats under one company</span></li>
+      <li><span class="tick">✓</span><span>Departments per person (HR, Care, Logistics and more)</span></li>
+      <li><span class="tick">✓</span><span>Owner team overview</span></li>
+      <li><span class="tick">✓</span><span>Preferential add-on pricing</span></li>
+      <li><span class="tick">✓</span><span>Priority support</span></li>
     </ul>
-    <button class="plan-btn btn-solid" onclick="startMembership()">Become a member</button>
+    <a class="btn solid" href="/contact.html">Register interest</a>
+  </div>
+
+  <!-- BUSINESS -->
+  <div class="card">
+    <div class="pname">Business</div>
+    <div class="pfor">For organisations with several teams</div>
+    <div class="price soon">Pricing coming soon</div>
+    <div class="billed">Multiple departments, shared library.</div>
+    <span class="seats">Up to 20 users</span>
+    <ul class="feat">
+      <li><span class="tick">✓</span><span class="hl">Everything in Pro</span></li>
+      <li><span class="tick">✓</span><span>Up to 20 seats, multiple departments</span></li>
+      <li><span class="tick">✓</span><span class="hl">Central shared evidence library</span></li>
+      <li><span class="tick">✓</span><span>Org-wide bid history and reporting</span></li>
+      <li><span class="tick">✓</span><span>Discounted add-ons</span></li>
+    </ul>
+    <a class="btn navy" href="/contact.html">Register interest</a>
+  </div>
+
+  <!-- ENTERPRISE -->
+  <div class="card">
+    <div class="pname">Enterprise</div>
+    <div class="pfor">For large, multi-team organisations</div>
+    <div class="price soon">Custom pricing</div>
+    <div class="billed">Tailored to your organisation.</div>
+    <span class="seats">Custom seats</span>
+    <ul class="feat">
+      <li><span class="tick">✓</span><span class="hl">Everything in Business</span></li>
+      <li><span class="tick">✓</span><span>Custom seats and departments</span></li>
+      <li><span class="tick">✓</span><span>Central procurement dashboard and reporting</span></li>
+      <li><span class="tick">✓</span><span>Dedicated onboarding</span></li>
+      <li><span class="tick">✓</span><span>Negotiated add-on pricing</span></li>
+    </ul>
+    <a class="btn outline" href="/contact.html">Contact us</a>
   </div>
 
 </div>
-<script>
-  /* Set the button wording immediately from the cached login state, so a
-     signed-in member does not see "Become a member" flash before it corrects.
-     The membership check further down still verifies and refines this. */
-  (function(){
-    try {
-      var c = JSON.parse(localStorage.getItem('cana_nav') || 'null');
-      if (!c || !c.signedIn) return;
-      var b = document.querySelector('.plan-btn.btn-solid');
-      if (b) b.textContent = c.tier ? 'Upgrade or manage membership' : 'Upgrade your account';
-    } catch (e) {}
-  })();
-</script>
 
-<!-- OPTIONAL EXPERT REVIEW, FOR EVERYONE -->
+<!-- PAY AS YOU GO -->
+<div class="payg">
+  <div class="payg-box">
+    <div class="t"><b>Just bidding once?</b> Pay as you go: <b>£480</b> for a single full tender response, no membership needed.</div>
+    <a class="btn outline" style="width:auto;padding:10px 20px;" href="/tenders.html">Write one tender</a>
+  </div>
+</div>
+
+<!-- OPTIONAL EXPERT REVIEW -->
 <div class="addon-wrap">
   <div class="addon-box">
     <div class="addon-txt">
       <span class="addon-tag">Optional add-on</span>
-      <h3>Silver Add-on: expert review</h3>
-      <p>A consultant reads and sharpens your responses against the scoring criteria before you submit. Available on any bid, whether you pay as you go or are a member.</p>
+      <h3>Expert human review</h3>
+      <p>A consultant reads and sharpens your responses against the scoring criteria before you submit. Available on any bid, on any plan.</p>
     </div>
-    <div class="addon-cost">
+    <div class="addon-cost" style="text-align:right;flex:none;">
       <div class="p">£350</div>
       <div class="l">per tender</div>
     </div>
   </div>
 </div>
 
+<!-- ADD-ONS -->
+<div class="addlist">
+  <div class="addcard"><div class="n">Expert review</div><div class="d">Human sharpening before you submit.</div><div class="pr">£350 / tender</div></div>
+  <div class="addcard"><div class="n">PSQ / SQ completion</div><div class="d">Our team completes the selection questionnaire for you.</div><div class="pr">Pricing coming soon</div></div>
+  <div class="addcard"><div class="n">ITT / form completion</div><div class="d">We fill in the tender forms on your behalf.</div><div class="pr">Pricing coming soon</div></div>
+  <div class="addcard"><div class="n">Tender administration</div><div class="d">Full submission handling and portal management.</div><div class="pr">Pricing coming soon</div></div>
+</div>
+
 <!-- FAQ -->
 <div class="faq2">
   <h2>Common questions</h2>
-
   <div class="qa">
     <p class="q">Do I need a membership to bid?</p>
-    <p class="a"><b>No.</b> A single tender is £480, paid as you go, with no membership and no commitment. Membership is only worth it if you expect to bid regularly.</p>
+    <p class="a"><b>No.</b> A single tender is £480, paid as you go, with no membership and no commitment. A plan is worth it once you bid regularly.</p>
   </div>
   <div class="qa">
-    <p class="q">What is the difference between the £480 and the £350?</p>
-    <p class="a">The <b>£480</b> is Cana writing your full bid for one tender. The <b>£350</b> is an optional extra where a human expert reviews and sharpens that bid before you submit. They are separate, and you only pay for the review if you want it.</p>
+    <p class="q">What is the difference between the plans?</p>
+    <p class="a">Every plan gives <b>unlimited generation</b> delivered to your inbox. The higher plans add more team seats, departments, a shared evidence library, reporting and better support. Enterprise is tailored to your organisation.</p>
   </div>
   <div class="qa">
-    <p class="q">Can I get the expert review without being a member?</p>
-    <p class="a"><b>Yes.</b> The £350 review can be added to any bid, whether you paid £480 for a single tender or you are a member.</p>
+    <p class="q">How does the team work?</p>
+    <p class="a">Each person gets their own login, their own company profile and evidence, and their bids go to <b>their own email</b>. The account owner gets an overview of the whole team. There is no shared editing inside the app: it is a central procurement hub, not a shared document tool.</p>
   </div>
   <div class="qa">
-    <p class="q">What does membership include?</p>
-    <p class="a">Unlimited bids for your term, with everything in pay as you go on every tender, plus matched alerts for your sector. From £249 a month on the 12-month plan.</p>
-  </div>
-  <div class="qa">
-    <p class="q">Can I cancel?</p>
-    <p class="a">Membership is one payment per term and renews automatically at the end of the term. You can cancel any time before it renews.</p>
+    <p class="q">Can I get the expert review on any plan?</p>
+    <p class="a"><b>Yes.</b> The £350 review can be added to any bid, whether you pay as you go or are on a plan.</p>
   </div>
 </div>
 
-<div class="fineprint">Membership is one upfront payment per term, renewing automatically at the end of each term. Cancel any time before renewal. Fair use applies: membership covers tenders your business is genuinely bidding for.</div>
+<div class="fineprint">Plan pricing is being finalised. Register your interest and we will be in touch with pricing and to set up your account.</div>
 
 <footer><div class="wrap">
   <div class="foot-grid">
     <div class="foot-brand">
       <span class="wm">Cana <b>Bids</b></span>
-      <p>Care tender discovery, preparation and bid management for ambitious UK care providers.</p>
+      <p>Tender discovery, preparation and bid management for ambitious UK organisations.</p>
     </div>
     <div>
       <h5>Platform</h5>
       <ul><li><a href="/tenders.html">Opportunities</a></li><li><a href="/">Bid preparation</a></li><li><a href="/">Tender alerts</a></li><li><a href="/">Evidence library</a></li><li><a href="/plans.html">Pricing</a></li></ul>
     </div>
     <div>
-      <h5>Care services</h5>
-      <ul><li><a href="/tenders.html">Domiciliary care</a></li><li><a href="/tenders.html">Supported living</a></li><li><a href="/tenders.html">Residential care</a></li><li><a href="/tenders.html">Children's care</a></li><li><a href="/tenders.html">Mental health services</a></li><li><a href="/tenders.html">Complex care</a></li></ul>
+      <h5>Sectors</h5>
+      <ul><li><a href="/tenders.html">Care and support</a></li><li><a href="/tenders.html">Facilities</a></li><li><a href="/tenders.html">Recruitment</a></li><li><a href="/tenders.html">Logistics</a></li><li><a href="/tenders.html">Professional services</a></li><li><a href="/tenders.html">Construction</a></li></ul>
     </div>
     <div>
       <h5>Resources</h5>
@@ -245,168 +246,19 @@
     </div>
   </div>
   <div class="foot-bottom">
-    <span>© 2026 Cana Bids. Care tender discovery, preparation and bid management.</span>
+    <span>© 2026 Cana Bids. Tender discovery, preparation and bid management.</span>
     <span><a href="/privacy.html">Privacy Policy</a> &middot; <a href="/cookies.html">Cookie Policy</a> &middot; hello@getcana.co.uk</span>
   </div>
 </div></footer>
 
-<!-- Login library loaded here, at the end, so it does not block the page from
-     showing. The membership check below runs right after it. -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-var selectedTerm = 12;
-// ── Active membership detection ──
-(async function() {
-  try {
-    if (!window.supabase) { console.warn('Supabase not loaded'); return; }
-    var sb = window.supabase.createClient(
-      'https://igpjfpncfuawikoyzfcd.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA'
-    );
-    var sessRes = await sb.auth.getSession();
-    var sess = sessRes.data && sessRes.data.session;
-    if (!sess || !sess.user || !sess.user.email) return; // logged out: keep "Become a member"
-
-    // Logged in means they already have an account, so this is an upgrade, not
-    // a new membership. Members get the manage wording further down.
-    var planBtnEl = document.querySelector('.plan-btn.btn-solid');
-    if (planBtnEl) planBtnEl.textContent = 'Upgrade your account';
-
-    var email = sess.user.email.toLowerCase();
-    var memRes = await fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email));
-    var memData = await memRes.json();
-    if (!memData.member) return; // logged in, not a member: leave "Upgrade your account"
-    var currentTerm = memData.term_months || 3;
-
-    // Badge the current term button
-    document.querySelectorAll('.term-opt').forEach(function(btn) {
-      var t = parseInt(btn.getAttribute('data-term'));
-      var existing = btn.querySelector('.current-plan-badge');
-      if (existing) existing.remove();
-      if (t === currentTerm) {
-        var badge = document.createElement('span');
-        badge.className = 'current-plan-badge';
-        badge.textContent = 'Your plan';
-        badge.style.cssText = 'display:block;font-size:0.6rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;';
-        btn.appendChild(badge);
-      }
-    });
-
-    // Change button copy and show renewal date
-    var planBtn = document.querySelector('.plan-btn.btn-solid');
-    if (planBtn) {
-      planBtn.textContent = 'Upgrade or manage membership';
-    }
-    var billedEl = document.getElementById('member-billed');
-    if (billedEl) {
-      var renewDate = null;
-      if (memData.current_period_end) {
-        renewDate = new Date(memData.current_period_end);
-      } else if (memData.created_at && memData.term_months) {
-        // Fallback: derive renewal from signup date + term length
-        renewDate = new Date(memData.created_at);
-        renewDate.setMonth(renewDate.getMonth() + memData.term_months);
-      }
-      var existing = document.getElementById('member-renewal-line');
-      if (!existing && renewDate && !isNaN(renewDate.getTime())) {
-        var line = document.createElement('div');
-        line.id = 'member-renewal-line';
-        line.style.cssText = 'margin-top:6px;font-size:0.76rem;color:var(--teal-dk);font-weight:600;';
-        line.textContent = 'Your membership renews ' + renewDate.toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
-        billedEl.insertAdjacentElement('afterend', line);
-      }
-    }
-  } catch(e) { console.warn('Membership detection:', e.message); }
-})();
-
-var TERM_INFO = {
-  3:  { total: '£897',   billed: 'Covers 3 months of unlimited bidding. Works out at £299 a month.' },
-  6:  { total: '£1,674', billed: 'Covers 6 months of unlimited bidding. Works out at £279 a month.' },
-  12: { total: '£2,988', billed: 'Covers 12 months of unlimited bidding. Works out at £249 a month, saving £600 against the 3-month rate.' }
-};
-function setTerm(t) {
-  selectedTerm = t;
-  document.querySelectorAll('.term-opt').forEach(function(b){ b.classList.toggle('sel', parseInt(b.getAttribute('data-term')) === t); });
-  document.getElementById('member-price').innerHTML = TERM_INFO[t].total + '<small> one payment</small>';
-  document.getElementById('member-billed').textContent = TERM_INFO[t].billed;
-}
-function startMembership() { startCheckout('membership'); }
-
-// Stripe publishable key (safe to expose in the browser). While this is empty
-// the page falls back to the old redirect checkout, so nothing breaks.
-var STRIPE_PK = 'pk_test_51UGikuCZh5lVD5d5wP5xnoGoFnX1lEtDqdjbKN2L32YCVSBnVFDv0O9AhusEmEZujxtfWtT7IoNlfFdTv0YZFRq200MpAS3Uc4';
-var _stripe = null, _embeddedCheckout = null;
-
-function releasePlanBtns() {
-  document.querySelectorAll('.plan-btn').forEach(function(b){ b.disabled = false; b.style.opacity = '1'; });
-}
-function closePayOverlay() {
-  try { if (_embeddedCheckout) { _embeddedCheckout.destroy(); _embeddedCheckout = null; } } catch(e){}
-  var ov = document.getElementById('pay-overlay');
-  if (ov) ov.style.display = 'none';
-  releasePlanBtns();
-}
-
-async function startCheckout(product) {
-  var btns = document.querySelectorAll('.plan-btn');
-  btns.forEach(function(b){ b.disabled = true; b.style.opacity = '0.6'; });
-
-  // Fallback: no publishable key yet, or Stripe.js unavailable -> old redirect.
-  if (!STRIPE_PK || typeof Stripe === 'undefined') {
-    try {
-      var r = await fetch('/.netlify/functions/plan-checkout', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ product: product, term: selectedTerm })
-      });
-      var d = await r.json();
-      if (d.url) { window.location.href = d.url; return; }
-      alert(d.error || 'Could not start checkout. Please try again.');
-    } catch (e) { alert('Could not start checkout. Please try again.'); }
-    releasePlanBtns();
-    return;
-  }
-
-  // Embedded checkout: the payment form opens on this page.
-  try {
-    var res = await fetch('/.netlify/functions/plan-checkout', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ product: product, term: selectedTerm, embedded: true })
-    });
-    var data = await res.json();
-    if (!data.clientSecret) { alert(data.error || 'Could not start checkout. Please try again.'); releasePlanBtns(); return; }
-    if (!_stripe) _stripe = Stripe(STRIPE_PK);
-    var mount = document.getElementById('checkout-mount');
-    if (mount) mount.innerHTML = '';
-    document.getElementById('pay-overlay').style.display = 'block';
-    _embeddedCheckout = await _stripe.initEmbeddedCheckout({ clientSecret: data.clientSecret });
-    _embeddedCheckout.mount('#checkout-mount');
-  } catch (e) {
-    alert('Could not start checkout. Please try again.');
-    closePayOverlay();
-  }
-}
-
-(function(){
-  var sub = new URLSearchParams(location.search).get('subscribed');
-  if (!sub) return;
-  var hero = document.querySelector('.plans-hero p');
-  if (hero) hero.innerHTML = '<strong style="color:#27c93f;">Welcome aboard! Your membership is active.</strong> Check your email for your receipt; we will be in touch within one working day to set up your company profile.';
-})();
+  (function(){
+    var sub = new URLSearchParams(location.search).get('subscribed');
+    if (!sub) return;
+    var hero = document.querySelector('.plans-hero p');
+    if (hero) hero.innerHTML = '<strong style="color:#27c93f;">Welcome aboard! Your plan is active.</strong> Check your email for your receipt; we will be in touch within one working day to set up your account.';
+  })();
 </script>
-
-<!-- On-page Stripe checkout (customer stays on getcana.co.uk) -->
-<div id="pay-overlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(11,25,41,0.62);overflow-y:auto;">
-  <div style="max-width:560px;margin:36px auto;padding:0 16px;">
-    <div style="background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 24px 70px rgba(0,0,0,0.35);">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border);">
-        <div style="font-family:'Inter',sans-serif;font-weight:700;color:var(--navy);">Complete your membership</div>
-        <button onclick="closePayOverlay()" aria-label="Close" style="border:none;background:none;font-size:1.5rem;line-height:1;color:var(--muted);cursor:pointer;padding:0 4px;">&times;</button>
-      </div>
-      <div id="checkout-mount" style="padding:8px;min-height:120px;"></div>
-    </div>
-    <p style="text-align:center;color:#cdd7e0;font-size:0.78rem;margin-top:12px;">Payments are securely processed by Stripe. Cana never sees your card details.</p>
-  </div>
-</div>
 
 <script src="/mobile-nav.js" defer></script>
 </body>
