@@ -6,7 +6,12 @@
 var _trAll = [];
 var _trFilter = 'open';
 
-function trEsc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function trEsc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+// Only treat a value as a clickable link if it is a real http(s) URL. Anything
+// else (e.g. a javascript: URL, or junk) is shown as plain escaped text, never
+// as an href, so a customer-supplied value can never run script in the admin.
+function trSafeUrl(u) { return /^https?:\/\//i.test(String(u || '')) ? String(u) : ''; }
 
 function trChip(status) {
   var map = {
@@ -68,11 +73,15 @@ function trRender() {
     } else {
       actions = '<button onclick="trUpdate(\'' + r.id + '\',\'sourcing\')" class="tr-btn">Reopen</button>';
     }
+    var safeUrl = trSafeUrl(r.link);
+    var linkHtml = safeUrl
+      ? '<a href="' + trEsc(safeUrl) + '" target="_blank" rel="noopener noreferrer nofollow" style="font-size:0.82rem;color:#0ea5b7;word-break:break-all;"><i class="ti ti-external-link" style="font-size:13px;vertical-align:-1px;"></i> ' + trEsc(safeUrl) + '</a>'
+      : '<span style="font-size:0.82rem;color:#b91c1c;word-break:break-all;">Invalid link (do not click): ' + trEsc(r.link) + '</span>';
     return '<div style="background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:14px 16px;">' +
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;">' +
       '<div style="min-width:0;"><div style="font-size:0.75rem;color:var(--text-muted);">' + who + ' &middot; ' + trFmt(r.created_at) + '</div></div>' +
       trChip(r.status) + '</div>' +
-      '<a href="' + trEsc(r.link) + '" target="_blank" rel="noopener" style="font-size:0.82rem;color:#0ea5b7;word-break:break-all;"><i class="ti ti-external-link" style="font-size:13px;vertical-align:-1px;"></i> ' + trEsc(r.link) + '</a>' +
+      linkHtml +
       (r.note ? '<div style="font-size:0.82rem;color:var(--text);background:#f8fafc;border-radius:8px;padding:8px 10px;margin:10px 0;line-height:1.5;">' + trEsc(r.note) + '</div>' : '<div style="height:10px;"></div>') +
       '<div style="display:flex;gap:8px;flex-wrap:wrap;">' + actions + '</div>' +
       '</div>';

@@ -8,7 +8,10 @@ const { requireAdmin, logAudit } = require('./_admin-auth');
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
 // ── Classification (kept in sync with import-tenders.js) ──
-var CARE_TRANSPORT_RE = /\b(passenger assistant|special educational needs|send|sen|home[ -]to[ -]school|school transport|patient transport|non[ -]?emergency( patient)? transport|dial[ -]a[ -]ride|community transport|wheelchair|escort)\b/i;
+// "send"/"sen" removed: they matched the ordinary verb "send" and mis-tagged
+// commercial transport as care. SEND is still covered by "special educational
+// needs" and the school-transport terms.
+var CARE_TRANSPORT_RE = /\b(passenger assistant|special educational needs|home[ -]to[ -]school|school transport|patient transport|non[ -]?emergency( patient)? transport|dial[ -]a[ -]ride|community transport|wheelchair|escort)\b/i;
 var CARE_STRICT = ['social care','domiciliary care','home care','homecare','care home','residential care','nursing home','nursing care','supported living','supported accommodation','extra care','respite care','reablement','shared lives','day care service','learning disabilit','dementia','palliative care','end of life care','safeguarding','cqc','care at home'];
 var BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
 function kwMatch(text, kw) {
@@ -114,7 +117,7 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers: cors, body: JSON.stringify({ duplicate: true, title: existData[0].title, status: existData[0].status }) };
     }
 
-    const tenderId = 'T-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random() * 900) + 100);
+    const tenderId = 'T-' + new Date().getFullYear() + '-' + Date.now() + String(Math.floor(Math.random() * 900) + 100);
     const obj = {
       id: tenderId, title: title, org: buyerName, buyer: buyerName,
       deadline: deadline, published_date: published, value: value, description: desc,

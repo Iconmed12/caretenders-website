@@ -42,11 +42,15 @@ exports.handler = async (event) => {
       'metadata[tier]': chosenTier,
       'metadata[includes_review]': (chosenTier !== 'none') ? '1' : '0'
     });
+    // {CHECKOUT_SESSION_ID} is substituted by Stripe with the REAL session id
+    // (cs_...). cana-verify uses it to look the session up directly and confirm
+    // it was actually paid for THIS tender, and to stop the same payment being
+    // reused for more than one bid.
     if (embedded) {
       params.append('ui_mode', 'embedded');
-      params.append('return_url', 'https://getcana.co.uk/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true');
+      params.append('return_url', 'https://getcana.co.uk/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true&cs={CHECKOUT_SESSION_ID}');
     } else {
-      params.append('success_url', 'https://getcana.co.uk/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true');
+      params.append('success_url', 'https://getcana.co.uk/cana.html?tender=' + tenderId + '&session=' + sessionId + '&paid=true&cs={CHECKOUT_SESSION_ID}');
       params.append('cancel_url', 'https://getcana.co.uk/cana.html?tender=' + tenderId);
     }
 

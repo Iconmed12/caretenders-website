@@ -68,7 +68,7 @@ exports.handler = async (event) => {
       }
     } catch (e) { console.log('Pack purge step failed (non-fatal):', e.message); }
 
-    console.log(`Expired ${tenders.length} tenders on ${today}:`, tenders.map(t => t.title.substring(0, 50)));
+    console.log(`Expired ${tenders.length} tenders on ${today}:`, tenders.map(t => (t.title || '').substring(0, 50)));
     return {
       statusCode: 200,
       headers: cors,

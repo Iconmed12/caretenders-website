@@ -30,7 +30,11 @@ exports.handler = async (event) => {
 
   // Care-related transport terms (SEN / patient / community transport). Keeps
   // passenger transport for vulnerable people while excluding freight/logistics.
-  var CARE_TRANSPORT_RE = /\b(passenger assistant|special educational needs|send|sen|home[ -]to[ -]school|school transport|patient transport|non[ -]?emergency( patient)? transport|dial[ -]a[ -]ride|community transport|wheelchair|escort)\b/i;
+  // Note: the SEND/SEN acronym is covered by "special educational needs" and the
+  // school-transport terms. The bare words "send"/"sen" were removed because they
+  // matched the ordinary verb "send" (e.g. "send your bid"), wrongly tagging
+  // commercial transport tenders as care.
+  var CARE_TRANSPORT_RE = /\b(passenger assistant|special educational needs|home[ -]to[ -]school|school transport|patient transport|non[ -]?emergency( patient)? transport|dial[ -]a[ -]ride|community transport|wheelchair|escort)\b/i;
 
   function kwMatch(text, kw) {
     var esc = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -188,7 +192,7 @@ exports.handler = async (event) => {
 
           if (!title || !deadline) { skipped++; continue; }
           // Skip already-closed tenders (deadline in the past)
-          if (new Date(deadline) < new Date()) { skipped++; continue; }
+          if (deadline && deadline < new Date().toISOString().split('T')[0]) { skipped++; continue; }
 
           // Check not already imported, two guards:
           // 1. Same source_id (same portal, exact record match)
@@ -211,7 +215,7 @@ exports.handler = async (event) => {
           // Generate tender ID
           var now = Date.now();
           var randStr = Math.random().toString(36).substring(2, 6);
-          var tenderId = 'T-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*900)+100);
+          var tenderId = 'T-' + new Date().getFullYear() + '-' + Date.now() + String(Math.floor(Math.random()*900)+100);
 
           var tenderObj = {
             id: tenderId,
@@ -302,7 +306,7 @@ exports.handler = async (event) => {
 
           if (!title || !deadline) continue;
           // Skip already-closed tenders (deadline in the past)
-          if (new Date(deadline) < new Date()) { skipped++; continue; }
+          if (deadline && deadline < new Date().toISOString().split('T')[0]) { skipped++; continue; }
 
           // Guard 1: source_id match
           var fExist = await sbFetch('/rest/v1/tenders?source_id=eq.' + encodeURIComponent(sourceId) + '&select=id&limit=1');
@@ -323,7 +327,7 @@ exports.handler = async (event) => {
           // Care-only launch: do not import non-care (commercial) tenders
           if (category !== 'care') { skipped++; continue; }
 
-          var tenderId = 'T-' + new Date().getFullYear() + '-' + String(Math.floor(Math.random()*900)+100);
+          var tenderId = 'T-' + new Date().getFullYear() + '-' + Date.now() + String(Math.floor(Math.random()*900)+100);
 
           var fatObj = {
             id: tenderId, title, org: buyerName, buyer: buyerName,

@@ -64,13 +64,23 @@ exports.handler = async (event) => {
           { headers: { 'Accept': 'application/json', 'User-Agent': 'Cana-Procurement/1.0' } });
         if (res.ok) {
           var data = await res.json();
-          (data.providers || []).forEach(function(p) {
-            if ((p.name || '').toLowerCase().includes(q)) {
-              matches.push({ locationId: p.providerId, name: p.name, postcode: p.postalCode || '' });
-            }
-          });
+          var hits = (data.providers || []).filter(function(p) {
+            return (p.name || '').toLowerCase().includes(q);
+          }).slice(0, 10);
+          // The search returns PROVIDER ids, but the detail lookup needs a
+          // LOCATION id. Resolve each provider to its first location so that
+          // selecting a result actually works.
+          for (var i = 0; i < hits.length; i++) {
+            var p = hits[i];
+            var locId = '';
+            try {
+              var pd = await cqcFetch('/providers/' + encodeURIComponent(p.providerId));
+              locId = (pd.locationIds && pd.locationIds[0]) || '';
+            } catch (e) { /* provider detail unavailable, skip location id */ }
+            matches.push({ locationId: locId, providerId: p.providerId, name: p.name, postcode: p.postalCode || '' });
+          }
         }
-        return { statusCode:200, headers:cors, body: JSON.stringify({ locations: matches.slice(0,10) }) };
+        return { statusCode:200, headers:cors, body: JSON.stringify({ locations: matches.filter(function(m){ return m.locationId; }) }) };
       } catch(e) {
         return { statusCode:200, headers:cors, body: JSON.stringify({ locations: [] }) };
       }

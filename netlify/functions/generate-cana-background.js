@@ -447,6 +447,10 @@ exports.handler = async (event) => {
       }
 
       var finalText = stripMarkdown(final);
+      // House rule: NO em dashes anywhere. Scrub here at the single final step so
+      // it covers every path (revise, draft fallback, trim, expand). Em dash -> comma,
+      // en dash -> hyphen.
+      finalText = finalText.replace(/\s*—\s*/g, ', ').replace(/–/g, '-');
       var wc = finalText.split(/\s+/).filter(Boolean).length;
       return { question: qText, answer: finalText, wordCount: wc, wordLimit: target };
     }
@@ -497,7 +501,13 @@ exports.handler = async (event) => {
       '| fileName:', tender.sq_data && tender.sq_data.fileName,
       '| resolved path:', sqStoragePath);
 
-    if (includeSq && tender.sq_data && sqStoragePath) {
+    // SQ_FEATURE_PAUSED: the automated SQ (PSQ) fill is intentionally disabled.
+    // PSQ documents are completed manually by the Cana team, not by the engine.
+    // The old inline fill logic below is left in place but never runs (guarded by
+    // false); it also referenced helpers that were never defined, so it could
+    // only ever fail silently. Keeping it off avoids that and matches the manual
+    // process. Do not re-enable without rebuilding the fill helpers.
+    if (false && includeSq && tender.sq_data && sqStoragePath) {
       try {
         // URL-encode path segments (handles spaces, parentheses in filenames)
         var encodedSqPath = sqStoragePath.split('/').map(function(seg){ return encodeURIComponent(seg); }).join('/');

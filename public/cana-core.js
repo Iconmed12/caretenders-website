@@ -69,6 +69,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           sessionId: sid,
+          cs: params.get('cs'), // real Stripe session id, used for secure server-side verification
           tenderId: tenderId,
           includeSq: false, // SQ auto-fill paused for launch - see SQ_FEATURE_PAUSED note
           companyDetails: mergedCo

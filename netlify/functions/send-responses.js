@@ -85,6 +85,8 @@ exports.handler = async (event) => {
 
     var doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 1440, right: 1440, bottom: 1440, left: 1440 } } }, children: children }] });
     var safeClientName = (clientName || 'Client').replace(/\s+/g, '_');
+    var docBase64 = null; // declared so a Packer failure cannot create an implicit
+                          // global that leaks the previous request's document
     try {
       var docBuffer = await Packer.toBuffer(doc);
       docBase64 = docBuffer.toString('base64');
