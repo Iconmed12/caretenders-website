@@ -432,7 +432,7 @@
     <div class="section-body">
       <div id="key-people-list"></div>
       <button type="button" onclick="addKeyPerson()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:0.5rem;">+ Add a key person</button>
-      <span class="form-hint" style="display:block;margin-top:0.75rem;">Cana matches these people to the right questions: Registered Manager and Safeguarding Lead for safeguarding sections, Operations Lead for KPIs and delivery, Nominated Individual for accountability, Care Coordinator for service delivery. The more complete, the fewer blanks left for you to fill.</span>
+      <span class="form-hint" id="key-people-hint" style="display:block;margin-top:0.75rem;">Cana matches these people to the right questions: Registered Manager and Safeguarding Lead for safeguarding sections, Operations Lead for KPIs and delivery, Nominated Individual for accountability, Care Coordinator for service delivery. The more complete, the fewer blanks left for you to fill.</span>
     </div>
   </div>
 
@@ -518,11 +518,19 @@
   function updateSectorFields() {
     var sel = document.getElementById('f-sector');
     var sector = sel ? sel.value : '';
+    var care = isCareSector(sector);
     var cqc = document.getElementById('section-cqc');
-    if (cqc) {
-      var showCqc = (!sector) || sector === 'Care & Support' || sector === 'Healthcare / Clinical';
-      cqc.style.display = showCqc ? '' : 'none';
-    }
+    if (cqc) cqc.style.display = care ? '' : 'none';
+    // Rebuild Key People role options and caption to match the sector.
+    var roles = currentRoleTypes();
+    document.querySelectorAll('.key-person-row .kp-role').forEach(function(rs){
+      var cur = rs.value;
+      var list = roles.slice();
+      if (cur && list.indexOf(cur) === -1) list = list.concat([cur]);
+      rs.innerHTML = list.map(function(r){ return '<option value="'+r+'"'+(r===cur?' selected':'')+'>'+r+'</option>'; }).join('');
+    });
+    var hint = document.getElementById('key-people-hint');
+    if (hint) hint.textContent = care ? CARE_HINT : COMMERCIAL_HINT;
   }
   window.updateSectorFields = updateSectorFields;
 
@@ -601,15 +609,26 @@
   }
 
   // ── Key People: named staff Cana pulls into tender answers ──
-  var ROLE_TYPES = ['Registered Manager','Safeguarding Lead','Operations Lead','Nominated Individual','Care Coordinator','Other'];
+  // Roles depend on the sector: care/clinical use care roles, everyone else uses
+  // generic professional roles.
+  var CARE_ROLES = ['Registered Manager','Safeguarding Lead','Operations Lead','Nominated Individual','Care Coordinator','Other'];
+  var COMMERCIAL_ROLES = ['Managing Director','Operations Lead','Contract / Account Manager','Project Manager','Quality Manager','Health & Safety Lead','Finance Lead','Technical Lead','Other'];
+  var CARE_HINT = 'Cana matches these people to the right questions: Registered Manager and Safeguarding Lead for safeguarding sections, Operations Lead for KPIs and delivery, Nominated Individual for accountability, Care Coordinator for service delivery. The more complete, the fewer blanks left for you to fill.';
+  var COMMERCIAL_HINT = 'Cana matches these people to the right questions: senior leaders for governance and accountability, operations and project leads for delivery and KPIs, quality and health & safety leads for compliance sections. The more complete, the fewer blanks left for you to fill.';
+  function isCareSector(s) { return !s || s === 'Care & Support' || s === 'Healthcare / Clinical'; }
+  function currentRoleTypes() { var sel = document.getElementById('f-sector'); return isCareSector(sel ? sel.value : '') ? CARE_ROLES : COMMERCIAL_ROLES; }
 
   window.addKeyPerson = function(person) {
-    person = person || { name:'', role:ROLE_TYPES[0], qualifications:'', experience:'' };
+    var roles = currentRoleTypes();
+    person = person || { name:'', role:roles[0], qualifications:'', experience:'' };
     var list = document.getElementById('key-people-list');
     var row = document.createElement('div');
     row.className = 'key-person-row';
     row.style.cssText = 'border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:0.85rem;background:#fafbfc;';
-    var roleOpts = ROLE_TYPES.map(function(r){
+    var roleList = roles.slice();
+    // Keep a saved role that is not in the current set, so nothing is lost.
+    if (person.role && roleList.indexOf(person.role) === -1) roleList = roleList.concat([person.role]);
+    var roleOpts = roleList.map(function(r){
       return '<option value="'+r+'"'+(r===person.role?' selected':'')+'>'+r+'</option>';
     }).join('');
     row.innerHTML =
