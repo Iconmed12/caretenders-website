@@ -3,7 +3,7 @@
 // to their own user id, so a customer can never read anyone else's requests
 // (Row-Level Security is not yet enabled on the database).
 
-const { memberInfo } = require('./_membership');
+const { memberInfo, enterpriseScope } = require('./_membership');
 
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
@@ -47,17 +47,28 @@ exports.handler = async (event) => {
     var rows = await res.json();
     rows = Array.isArray(rows) ? rows : [];
 
-    // S.A.T. allowance for this account (Gold unlimited, Pro 3, Access 1).
+    // S.A.T. allowance for this account (Gold unlimited, Pro 3, Access 1), SHARED
+    // across the whole company circle. So usage is counted across every seat.
     var mem = await memberInfo(user.email);
     var plan = (mem && mem.sub && mem.sub.plan) || null;
     var limit = satLimitFor(plan);
-    var monthStart = monthStartISO();
-    var usedThisMonth = rows.filter(function (r) { return r.created_at && r.created_at >= monthStart; }).length;
     var unlimited = limit === Infinity;
+    var monthStart = monthStartISO();
+
+    var usedThisMonth;
+    var scope = await enterpriseScope(user.email);
+    if (!unlimited && scope && scope.emails.length) {
+      var filter = 'email=in.(' + scope.emails.map(function (e) { return encodeURIComponent(e); }).join(',') + ')';
+      var cRes = await fetch(SB_URL + '/rest/v1/tender_requests?' + filter + '&created_at=gte.' + encodeURIComponent(monthStart) + '&select=id', { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
+      usedThisMonth = cRes.ok ? (await cRes.json()).length : 0;
+    } else {
+      usedThisMonth = rows.filter(function (r) { return r.created_at && r.created_at >= monthStart; }).length;
+    }
 
     return { statusCode: 200, headers: cors, body: JSON.stringify({
       requests: rows,
       plan: plan,
+      shared: !!(scope && scope.emails.length > 1),
       limit: unlimited ? null : limit,
       unlimited: unlimited,
       used_this_month: usedThisMonth,

@@ -4,7 +4,7 @@
 // the request body, so a request can never be filed under someone else.
 
 const { checkRate, checkKey, tooMany } = require('./_rate-limit');
-const { memberInfo } = require('./_membership');
+const { memberInfo, enterpriseScope } = require('./_membership');
 
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
@@ -66,15 +66,24 @@ exports.handler = async (event) => {
     var SB_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
 
     // Per-plan monthly limit: Gold unlimited, Pro 3, Access 1 (team members use the
-    // owner's plan, resolved by memberInfo). Locks automatically once used up.
+    // owner's plan). The allowance is SHARED across a whole company circle, so the
+    // count spans every seat's requests. Solo users count only their own.
     var mem = await memberInfo(user.email);
     var plan = (mem && mem.sub && mem.sub.plan) || null;
     var limit = satLimitFor(plan);
     if (limit !== Infinity) {
-      var cntRes = await fetch(SB_URL + '/rest/v1/tender_requests?user_id=eq.' + encodeURIComponent(user.id) + '&created_at=gte.' + encodeURIComponent(monthStartISO()) + '&select=id', { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
+      var scope = await enterpriseScope(user.email);
+      var filter;
+      if (scope && scope.emails.length) {
+        filter = 'email=in.(' + scope.emails.map(function (e) { return encodeURIComponent(e); }).join(',') + ')';
+      } else {
+        filter = 'user_id=eq.' + encodeURIComponent(user.id);
+      }
+      var cntRes = await fetch(SB_URL + '/rest/v1/tender_requests?' + filter + '&created_at=gte.' + encodeURIComponent(monthStartISO()) + '&select=id', { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
       var used = cntRes.ok ? (await cntRes.json()).length : 0;
       if (used >= limit) {
-        return { statusCode: 429, headers: cors, body: JSON.stringify({ error: 'You have used your ' + limit + ' S.A.T. request' + (limit > 1 ? 's' : '') + ' for this month.' + (plan === 'gold' ? '' : ' Upgrade your plan for more.'), limitReached: true, limit: limit, used: used, plan: plan }) };
+        var scopeMsg = (scope && scope.emails.length > 1) ? ' Your company has used its ' + limit + ' S.A.T. request' + (limit > 1 ? 's' : '') + ' for this month.' : ' You have used your ' + limit + ' S.A.T. request' + (limit > 1 ? 's' : '') + ' for this month.';
+        return { statusCode: 429, headers: cors, body: JSON.stringify({ error: scopeMsg.trim() + (plan === 'gold' ? '' : ' Upgrade your plan for more.'), limitReached: true, limit: limit, used: used, plan: plan }) };
       }
     }
 

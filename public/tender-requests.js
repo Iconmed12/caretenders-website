@@ -33,7 +33,8 @@
     var lim = data.limit || 0;
     var used = data.used_this_month || 0;
     var rem = (data.remaining != null) ? data.remaining : Math.max(0, lim - used);
-    allowEl.innerHTML = '<span style="color:#63707f;">S.A.T requests this month: <strong style="color:#0b1929;">' + used + ' of ' + lim + ' used</strong>' + (rem <= 0 ? ' &mdash; limit reached' : ' &middot; ' + rem + ' left') + '</span>';
+    var scopeLabel = data.shared ? 'S.A.T requests this month (shared across your company)' : 'S.A.T requests this month';
+    allowEl.innerHTML = '<span style="color:#63707f;">' + scopeLabel + ': <strong style="color:#0b1929;">' + used + ' of ' + lim + ' used</strong>' + (rem <= 0 ? ' &mdash; limit reached' : ' &middot; ' + rem + ' left') + '</span>';
     var locked = rem <= 0;
     if (sendEl) sendEl.disabled = locked;
     if (linkEl) linkEl.disabled = locked;

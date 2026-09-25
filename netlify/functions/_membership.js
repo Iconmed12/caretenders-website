@@ -102,4 +102,30 @@ async function companyProfileByUser(userId) {
   return (Array.isArray(rows) && rows[0]) || null;
 }
 
-module.exports = { memberInfo, activeSubFor, subIsActive, enterpriseSeatOwner, companyProfileByUser };
+// For usage that is SHARED across a whole company circle (e.g. S.A.T requests),
+// return the enterprise the email belongs to (as owner or active member) and the
+// set of emails that share the allowance. Returns null for solo users.
+//   -> { enterprise_id, owner_email, emails: [lowercased] } | null
+async function enterpriseScope(email) {
+  email = (email || '').trim().toLowerCase();
+  if (!email) return null;
+  var entId = null, ownerEmail = null;
+  var o = await sbGet('/rest/v1/enterprises?owner_email=eq.' + encodeURIComponent(email) + '&select=id,owner_email&limit=1');
+  if (Array.isArray(o) && o[0]) { entId = o[0].id; ownerEmail = String(o[0].owner_email || '').toLowerCase(); }
+  else {
+    var m = await sbGet('/rest/v1/enterprise_members?email=eq.' + encodeURIComponent(email) + '&status=eq.active&select=enterprise_id&limit=1');
+    if (Array.isArray(m) && m[0]) {
+      entId = m[0].enterprise_id;
+      var e = await sbGet('/rest/v1/enterprises?id=eq.' + encodeURIComponent(entId) + '&select=owner_email&limit=1');
+      ownerEmail = (Array.isArray(e) && e[0]) ? String(e[0].owner_email || '').toLowerCase() : null;
+    }
+  }
+  if (!entId) return null;
+  var mem = await sbGet('/rest/v1/enterprise_members?enterprise_id=eq.' + encodeURIComponent(entId) + '&status=in.(active,invited)&select=email');
+  var set = {};
+  (Array.isArray(mem) ? mem : []).forEach(function (r) { var k = String(r.email || '').toLowerCase(); if (k) set[k] = 1; });
+  if (ownerEmail) set[ownerEmail] = 1;
+  return { enterprise_id: entId, owner_email: ownerEmail, emails: Object.keys(set) };
+}
+
+module.exports = { memberInfo, activeSubFor, subIsActive, enterpriseSeatOwner, companyProfileByUser, enterpriseScope };
