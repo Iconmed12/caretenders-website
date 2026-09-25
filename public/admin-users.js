@@ -245,6 +245,35 @@ function openMembershipModal(email) {
         (m.renews ? ', expires ' + fmtDate(m.renews) : ''))
     : 'Free account';
 
+  // Team members inherit the owner's plan, so they cannot be managed here. Show a
+  // locked view that points to the owner instead.
+  var isTeamMember = m.role === 'member' && m.enterprise;
+  if (isTeamMember) {
+    var lo = document.createElement('div');
+    lo.className = 'mm-overlay';
+    lo.id = 'mm-overlay';
+    var ownerEmail = m.owner_email || '';
+    lo.innerHTML =
+      '<div class="mm-card">' +
+        '<div class="mm-head"><button class="mm-x" onclick="closeMembershipModal()">&times;</button>' +
+          '<h3>Manage membership</h3><p>' + (u.name || u.email) + ' · ' + (u.email || '') + '</p></div>' +
+        '<div class="mm-body">' +
+          '<div class="mm-cur"><strong>Current:</strong> ' + curText + (m.department ? ' · ' + m.department : '') + '</div>' +
+          '<div style="background:#e6f5f7;border:1px solid rgba(0,201,224,.35);border-radius:10px;padding:14px 16px;font-size:13px;color:#0b1929;line-height:1.55;margin-top:4px;">' +
+            '<strong>' + (u.name || 'This person') + ' is a team member of ' + (m.enterprise || 'a company circle') + '.</strong> ' +
+            'Their plan flows from the account owner, so it cannot be changed here. Manage the plan on the owner, or remove them from the team on the owner\'s Team screen.' +
+          '</div>' +
+          '<div class="mm-actions" style="margin-top:16px;">' +
+            (ownerEmail ? '<button class="mm-save" onclick="openMembershipModal(\'' + ownerEmail.replace(/'/g, "\\'") + '\')">Manage ' + (m.enterprise || 'the owner') + '’s plan</button>' : '') +
+            '<button class="mm-down" onclick="closeMembershipModal()">Close</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    lo.addEventListener('click', function (e) { if (e.target === lo) closeMembershipModal(); });
+    document.body.appendChild(lo);
+    return;
+  }
+
   var o = document.createElement('div');
   o.className = 'mm-overlay';
   o.id = 'mm-overlay';

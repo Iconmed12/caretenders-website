@@ -93,6 +93,7 @@ exports.handler = async (event) => {
           plan: sub ? (sub.plan || null) : null,
           renews: sub ? sub.current_period_end : null,
           enterprise: ent ? ent.name : null,
+          owner_email: (seat && seat.role === 'member' && ent) ? ent.owner_email : null,
           department: seat ? (seat.department || null) : null,
           role: seat ? seat.role : null,
           via: directMember ? 'direct' : null
