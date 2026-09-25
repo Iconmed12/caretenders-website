@@ -63,17 +63,17 @@
   <aside class="side">
     <a href="/" class="logo">Cana<b>Bids</b></a>
     <nav class="nav">
-      <a href="/dashboard.html"><span class="ic">▦</span> Dashboard</a>
-      <a href="/tenders.html"><span class="ic">◎</span> Opportunities</a>
-      <a href="/sat.html" class="on"><span class="ic">✉</span> S.A.T</a>
-      <a href="/profile.html"><span class="ic">🏢</span> Company profile</a>
-      <a href="/vault.html"><span class="ic">🗂</span> Documents</a>
-      <a href="/team.html"><span class="ic">👥</span> Team</a>
-      <a href="/plans.html"><span class="ic">⬆</span> Pricing</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/tenders.html">Opportunities</a>
+      <a href="/sat.html" class="on">S.A.T</a>
+      <a href="/profile.html">Company profile</a>
+      <a href="/vault.html">Documents</a>
+      <a href="/team.html">Team</a>
+      <a href="/plans.html" id="nav-pricing">Pricing</a>
     </nav>
     <div class="side-foot">
       <div class="org" id="org-box" style="display:none">
-        <div class="n"><span>🏢</span> <span id="org-name">—</span></div>
+        <div class="n"><span id="org-name">—</span></div>
         <div class="s" id="org-sub"></div>
       </div>
       <div class="userchip">
@@ -132,6 +132,9 @@
           document.getElementById('org-name').textContent = eData.enterprise.name;
           document.getElementById('org-sub').textContent = eData.role === 'owner' ? 'Enterprise · owner' : ((eData.department ? eData.department + ' · ' : '') + 'member');
           document.getElementById('org-box').style.display = 'block';
+        }
+        if (eData && eData.role === 'member') {
+          var np = document.getElementById('nav-pricing'); if (np) np.style.display = 'none';
         }
       }
     } catch (e) {}

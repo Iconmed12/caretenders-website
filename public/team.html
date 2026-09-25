@@ -65,16 +65,16 @@
   <aside class="side">
     <div class="logo">Cana<b>Bids</b></div>
     <nav class="nav">
-      <a href="/dashboard.html"><span>▦</span> Dashboard</a>
-      <a href="/tenders.html"><span>◎</span> Opportunities</a>
-      <a href="/sat.html"><span>✉</span> S.A.T</a>
-      <a href="/dashboard.html"><span>▤</span> My Bids</a>
-      <a href="/vault.html"><span>🗂</span> Documents</a>
-      <a href="/team.html" class="on"><span>👥</span> Team</a>
-      <a href="/profile.html"><span>⚙</span> Settings</a>
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/tenders.html">Opportunities</a>
+      <a href="/sat.html">S.A.T</a>
+      <a href="/profile.html">Company profile</a>
+      <a href="/vault.html">Documents</a>
+      <a href="/team.html" class="on">Team</a>
+      <a href="/plans.html" id="nav-pricing">Pricing</a>
     </nav>
     <div class="org" id="org-box" style="display:none">
-      <div class="n"><span>🏢</span> <span id="org-name">—</span></div>
+      <div class="n"><span id="org-name">—</span></div>
       <div class="s" id="org-seats"></div>
     </div>
   </aside>
@@ -97,7 +97,12 @@
     <!-- MEMBER (not owner) -->
     <div id="view-member" style="display:none">
       <div class="top"><div><h1>Your team</h1><p id="member-sub"></p></div></div>
-      <div class="panel"><h2 id="member-ent">—</h2><p id="member-note">You are a member of this company circle. You can browse opportunities and generate bids for your team, delivered to your own email. Your owner manages the team.</p><a class="btn" href="/dashboard.html">Go to your dashboard</a></div>
+      <div class="panel" style="max-width:none;margin-bottom:18px"><h2 id="member-ent">—</h2><p id="member-note" style="margin-bottom:0">You are a member of this company circle. You can browse opportunities and generate bids for your team, delivered to your own email. The account owner manages the team.</p></div>
+      <div class="card">
+        <div class="card-h">Members</div>
+        <table><thead><tr><th>Member</th><th>Department</th><th>Status</th></tr></thead>
+        <tbody id="member-roster"></tbody></table>
+      </div>
     </div>
 
     <!-- OWNER overview -->
@@ -154,11 +159,19 @@ async function load(){
   var d=r.data;
   if(!d.role){ show('view-create'); return; }
   if(d.role==='member'){
+    var np=document.getElementById('nav-pricing'); if(np) np.style.display='none';
     document.getElementById('member-ent').textContent=d.enterprise?d.enterprise.name:'Your company';
     document.getElementById('member-sub').textContent=(d.department?d.department+' · ':'')+'member';
     document.getElementById('org-box').style.display='block';
     document.getElementById('org-name').textContent=d.enterprise?d.enterprise.name:'';
     document.getElementById('org-seats').textContent=(d.department?d.department+' · ':'')+'member';
+    var roster=d.members||[];
+    document.getElementById('member-roster').innerHTML=roster.map(function(m){
+      var st=m.role==='owner'?'<span class="role">Owner</span>':(m.status==='active'?'<span class="st"><span class="dot" style="background:var(--good)"></span>Active</span>':'<span class="st"><span class="dot" style="background:var(--amber)"></span>Invited</span>');
+      return '<tr><td><div class="who"><span class="av">'+esc(initials("",m.email))+'</span><div><div class="nm">'+esc(m.email)+'</div></div></div></td>'+
+        '<td>'+(m.department?'<span class="dept">'+esc(m.department)+'</span>':'<span style="color:var(--muted)">—</span>')+'</td>'+
+        '<td>'+st+'</td></tr>';
+    }).join('');
     show('view-member'); return;
   }
   // owner

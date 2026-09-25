@@ -4,8 +4,14 @@
 // the request body, so a request can never be filed under someone else.
 
 const { checkRate, checkKey, tooMany } = require('./_rate-limit');
+const { memberInfo } = require('./_membership');
 
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+
+// Monthly S.A.T. allowance by plan. Gold is unlimited.
+var SAT_LIMITS = { gold: Infinity, pro: 3, access: 1 };
+function satLimitFor(plan) { return (plan && SAT_LIMITS[plan] != null) ? SAT_LIMITS[plan] : 1; }
+function monthStartISO() { var d = new Date(); d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0); return d.toISOString(); }
 
 // Verify the caller's Supabase access token and return their identity, or null.
 async function verifyUser(event) {
@@ -58,6 +64,20 @@ exports.handler = async (event) => {
     if (/[\s<>"'`\\]/.test(link)) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'That link contains invalid characters. Please paste the plain web address.' }) };
 
     var SB_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
+
+    // Per-plan monthly limit: Gold unlimited, Pro 3, Access 1 (team members use the
+    // owner's plan, resolved by memberInfo). Locks automatically once used up.
+    var mem = await memberInfo(user.email);
+    var plan = (mem && mem.sub && mem.sub.plan) || null;
+    var limit = satLimitFor(plan);
+    if (limit !== Infinity) {
+      var cntRes = await fetch(SB_URL + '/rest/v1/tender_requests?user_id=eq.' + encodeURIComponent(user.id) + '&created_at=gte.' + encodeURIComponent(monthStartISO()) + '&select=id', { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY } });
+      var used = cntRes.ok ? (await cntRes.json()).length : 0;
+      if (used >= limit) {
+        return { statusCode: 429, headers: cors, body: JSON.stringify({ error: 'You have used your ' + limit + ' S.A.T. request' + (limit > 1 ? 's' : '') + ' for this month.' + (plan === 'gold' ? '' : ' Upgrade your plan for more.'), limitReached: true, limit: limit, used: used, plan: plan }) };
+      }
+    }
+
     var row = {
       user_id: user.id,
       email: user.email,

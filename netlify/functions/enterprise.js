@@ -67,7 +67,10 @@ exports.handler = async (event) => {
       var ctx = await findEnterpriseForUser();
       if (!ctx) return { statusCode: 200, headers: cors, body: JSON.stringify({ role: null }) };
       if (ctx.role === 'member') {
-        return { statusCode: 200, headers: cors, body: JSON.stringify({ role: 'member', enterprise: { name: ctx.ent.name }, department: ctx.department }) };
+        // Members can SEE the roster (who is who and their department), read-only.
+        var mListRes = await sb('/rest/v1/enterprise_members?enterprise_id=eq.' + encodeURIComponent(ctx.ent.id) + '&status=in.(invited,active)&select=email,department,role,status&order=created_at.asc');
+        var mList = mListRes.ok ? (await mListRes.json()) : [];
+        return { statusCode: 200, headers: cors, body: JSON.stringify({ role: 'member', enterprise: { name: ctx.ent.name }, department: ctx.department, members: mList }) };
       }
       // Owner overview: members + a simple bid count per member email.
       var listRes = await sb('/rest/v1/enterprise_members?enterprise_id=eq.' + encodeURIComponent(ctx.ent.id) + '&status=in.(invited,active)&select=id,email,department,role,status,joined_at&order=created_at.asc');

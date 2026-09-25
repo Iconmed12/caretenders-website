@@ -10,6 +10,37 @@
   var mineEl = document.getElementById('tr-mine');
   if (!sendEl || typeof sb === 'undefined') return;
 
+  // Allowance line above the form (used/limit, or unlimited). Locks the form when
+  // the monthly S.A.T. allowance is used up.
+  var allowEl = document.getElementById('tr-allow');
+  var cardEl = document.getElementById('tr-card');
+  var formEl = document.getElementById('tr-form');
+  if (!allowEl && cardEl && formEl) {
+    allowEl = document.createElement('div');
+    allowEl.id = 'tr-allow';
+    allowEl.style.cssText = 'font-size:13px;margin-bottom:14px;';
+    cardEl.insertBefore(allowEl, formEl);
+  }
+  function applyAllowance(data) {
+    if (!allowEl || !data) return;
+    if (data.unlimited) {
+      allowEl.innerHTML = '<span style="color:#0891a3;font-weight:600;">Unlimited S.A.T requests on your plan.</span>';
+      if (sendEl) sendEl.disabled = false;
+      if (linkEl) linkEl.disabled = false;
+      if (noteEl) noteEl.disabled = false;
+      return;
+    }
+    var lim = data.limit || 0;
+    var used = data.used_this_month || 0;
+    var rem = (data.remaining != null) ? data.remaining : Math.max(0, lim - used);
+    allowEl.innerHTML = '<span style="color:#63707f;">S.A.T requests this month: <strong style="color:#0b1929;">' + used + ' of ' + lim + ' used</strong>' + (rem <= 0 ? ' &mdash; limit reached' : ' &middot; ' + rem + ' left') + '</span>';
+    var locked = rem <= 0;
+    if (sendEl) sendEl.disabled = locked;
+    if (linkEl) linkEl.disabled = locked;
+    if (noteEl) noteEl.disabled = locked;
+    if (locked && msgEl) { msgEl.textContent = 'You have used your ' + lim + ' request' + (lim > 1 ? 's' : '') + ' for this month. Upgrade your plan for more.'; msgEl.style.color = '#b91c1c'; }
+  }
+
   async function token() {
     try { var r = await sb.auth.getSession(); return r && r.data && r.data.session ? r.data.session.access_token : null; }
     catch (e) { return null; }
@@ -41,6 +72,7 @@
     try {
       var res = await fetch('/.netlify/functions/tender-request-mine', { headers: { Authorization: 'Bearer ' + tk } });
       var data = await res.json();
+      applyAllowance(data);
       var rows = (data && data.requests) || [];
       if (!rows.length) { mineEl.innerHTML = ''; return; }
       var html = '<div style="font-size:0.72rem;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#9aa3b2;margin:0 0 4px;padding-top:18px;border-top:1px solid #eef1f5;">Your requests</div>';

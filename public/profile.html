@@ -538,21 +538,6 @@
       el.value = (v == null ? '' : v);
       el.disabled = true; el.classList.add('locked-field');
     });
-    // Banner
-    var host = document.getElementById('main-page');
-    var head = host ? host.querySelector('.page-header') : null;
-    if (host && !document.getElementById('member-banner')) {
-      var b = document.createElement('div');
-      b.id = 'member-banner';
-      b.className = 'member-banner';
-      b.innerHTML = '<span class="mb-ic">🔒</span><span>Your company’s <b>legal details</b> (registered name, number, address) are managed by <b>' +
-        (cs.enterprise_name ? String(cs.enterprise_name).replace(/[&<>]/g,'') : 'your account owner') +
-        '</b> and are locked. Everything else here is your own ' +
-        (cs.department ? '<b>' + String(cs.department).replace(/[&<>]/g,'') + '</b> ' : '') +
-        'profile: set your sector, services, accreditations, case studies and evidence for the bids you go for.</span>';
-      if (head && head.nextSibling) head.parentNode.insertBefore(b, head.nextSibling);
-      else host.insertBefore(b, host.firstChild);
-    }
     updateCompletion();
   }
 
