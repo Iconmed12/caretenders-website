@@ -511,6 +511,7 @@
     if (nameEl) nameEl.textContent = companyName;
     if (linesEl) {
       var lines = [];
+      if (profile.sector) lines.push('Bidding as: ' + profile.sector);
       if (profile.cqc_status) lines.push('CQC: ' + profile.cqc_status);
       if (profile.services) lines.push('Services: ' + profile.services.substring(0, 80) + (profile.services.length > 80 ? '...' : ''));
       if (profile.regions) lines.push('Regions: ' + profile.regions);
