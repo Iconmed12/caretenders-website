@@ -68,6 +68,21 @@
         showLoggedOut();
         return;
       }
+      // Safety net: if this browser has a pending team invite (from an invite
+      // link where the confirmation round trip did not return the person to the
+      // join page), finish joining them now that they are signed in.
+      try {
+        var pend = localStorage.getItem('cana_pending_invite');
+        if (pend && s.access_token) {
+          fetch('/.netlify/functions/enterprise-accept', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + s.access_token },
+            body: JSON.stringify({ token: pend })
+          }).then(function (rr) {
+            if (rr.ok || [400, 404, 409, 410].indexOf(rr.status) >= 0) { try { localStorage.removeItem('cana_pending_invite'); } catch (e) {} }
+          }).catch(function () {});
+        }
+      } catch (e) {}
       fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email))
         .then(function (x) { return x.json(); })
         .then(function (mem) {

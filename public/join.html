@@ -44,6 +44,10 @@ async function run(){
   var tok=getToken();
   if(!tok){ render('<div class="badge">✕</div><h1>Invalid link</h1><p>This invitation link is missing its code. Please use the link from your email.</p>'); return; }
 
+  // Remember the invite in this browser, so we can still complete the join even
+  // if the account-confirmation round trip does not return the person here.
+  try{ localStorage.setItem('cana_pending_invite', tok); }catch(e){}
+
   var s=await sb.auth.getSession();
   if(!s.data.session){
     var here='/join.html?token='+encodeURIComponent(tok);
@@ -58,6 +62,7 @@ async function run(){
   render('<div class="spin">Joining your team…</div>');
   var r=await fetch('/.netlify/functions/enterprise-accept',{method:'POST',headers:{'Authorization':'Bearer '+s.data.session.access_token,'Content-Type':'application/json'},body:JSON.stringify({token:tok})});
   var d=await r.json().catch(()=>({}));
+  try{ localStorage.removeItem('cana_pending_invite'); }catch(e){}
   if(!r.ok){
     render('<div class="badge">✕</div><h1>Cannot accept invitation</h1><p>'+esc(d.error||'Something went wrong. Please ask for a new invite.')+'</p><a class="btn ghost" href="/dashboard.html">Go to dashboard</a>');
     return;

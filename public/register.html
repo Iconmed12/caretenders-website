@@ -282,18 +282,24 @@
     btn.textContent = 'Creating account...';
 
     try {
+      // If they arrived from an invite (or any redirect), send the confirmation
+      // email link back to that page so the round trip does not lose it.
+      var redirectParam = new URLSearchParams(window.location.search).get('redirect');
+      var signUpOpts = {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          company_name: company,
+          job_title: jobTitle
+        }
+      };
+      if (redirectParam) { signUpOpts.emailRedirectTo = window.location.origin + redirectParam; }
+
       // Create auth user
       var { data, error } = await sb.auth.signUp({
         email: email,
         password: password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            company_name: company,
-            job_title: jobTitle
-          }
-        }
+        options: signUpOpts
       });
 
       if (error) throw error;

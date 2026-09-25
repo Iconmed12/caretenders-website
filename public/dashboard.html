@@ -371,6 +371,16 @@
       }
     } catch(e) { /* leave the default upgrade wording */ }
 
+    // Safety net: complete a pending team invite (from an invite link) before
+    // we read the enterprise context, so the company box shows straight away.
+    try {
+      var pendInv = localStorage.getItem('cana_pending_invite');
+      if (pendInv) {
+        var accRes = await fetch('/.netlify/functions/enterprise-accept', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + session.access_token }, body: JSON.stringify({ token: pendInv }) });
+        if (accRes.ok || [400, 404, 409, 410].indexOf(accRes.status) >= 0) { try { localStorage.removeItem('cana_pending_invite'); } catch (e) {} }
+      }
+    } catch (e) {}
+
     // Enterprise context (company circle), non-blocking.
     try {
       var eRes = await fetch('/.netlify/functions/enterprise', { headers: { Authorization: 'Bearer ' + session.access_token } });
