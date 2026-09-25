@@ -79,4 +79,27 @@ async function memberInfo(email) {
   return { member: false, via: null, sub: null };
 }
 
-module.exports = { memberInfo, activeSubFor, subIsActive };
+// For an enterprise MEMBER seat (role 'member', active), return the owner whose
+// company profile is shared with them. Returns null for owners, solo users, or
+// anyone not on an active member seat, so callers only override for real members.
+//   -> { owner_user_id, department, enterprise_id, enterprise_name } | null
+async function enterpriseSeatOwner(email) {
+  email = (email || '').trim().toLowerCase();
+  if (!email) return null;
+  var mem = await sbGet('/rest/v1/enterprise_members?email=eq.' + encodeURIComponent(email) + '&status=eq.active&select=enterprise_id,department,role&limit=1');
+  var m = Array.isArray(mem) && mem[0];
+  if (!m || m.role === 'owner') return null;
+  var ent = await sbGet('/rest/v1/enterprises?id=eq.' + encodeURIComponent(m.enterprise_id) + '&select=owner_user_id,name&limit=1');
+  var e = Array.isArray(ent) && ent[0];
+  if (!e || !e.owner_user_id) return null;
+  return { owner_user_id: e.owner_user_id, department: m.department || '', enterprise_id: m.enterprise_id, enterprise_name: e.name || '' };
+}
+
+// The owner's company profile (the shared company profile), by owner user id.
+async function companyProfileByUser(userId) {
+  if (!userId) return null;
+  var rows = await sbGet('/rest/v1/company_profiles?user_id=eq.' + encodeURIComponent(userId) + '&select=*&limit=1');
+  return (Array.isArray(rows) && rows[0]) || null;
+}
+
+module.exports = { memberInfo, activeSubFor, subIsActive, enterpriseSeatOwner, companyProfileByUser };

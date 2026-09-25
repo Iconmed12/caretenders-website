@@ -3,7 +3,7 @@
 // server-side so the bypass cannot be forged from the browser.
 
 const { checkRate, checkKey, tooMany } = require('./_rate-limit');
-const { memberInfo } = require('./_membership');
+const { memberInfo, enterpriseSeatOwner, companyProfileByUser } = require('./_membership');
 
 exports.handler = async (event) => {
   const cors = {
@@ -50,6 +50,34 @@ exports.handler = async (event) => {
     if (!mem.member) {
       return { statusCode: 403, headers: cors, body: JSON.stringify({ error: 'No active membership found for ' + email }) };
     }
+
+    // ── Enterprise members bid on the SHARED company profile ──
+    // Company-level fields come from the account owner's profile (locked); the
+    // member keeps only their own department evidence (accreditations, examples)
+    // and their own delivery email. Enforced here on the server so it cannot be
+    // bypassed from the browser. Owners and solo members are unaffected.
+    var effectiveCo = Object.assign({}, companyDetails || {}, { email: email });
+    try {
+      var seat = await enterpriseSeatOwner(email);
+      if (seat) {
+        var op = await companyProfileByUser(seat.owner_user_id);
+        if (op) {
+          effectiveCo.name = op.company_name || effectiveCo.name || '';
+          effectiveCo.founded = op.founded_year || '';
+          effectiveCo.staff = op.total_staff || '';
+          effectiveCo.cqc = op.cqc_status || '';
+          effectiveCo.services = op.services || '';
+          effectiveCo.regions = op.regions || '';
+          effectiveCo.experience = op.experience || '';
+          effectiveCo.achievements = op.achievements || '';
+          effectiveCo.policies = op.policies || '';
+          effectiveCo.kpis = op.kpis || '';
+          effectiveCo.social_value = op.social_value || '';
+          effectiveCo.key_people = op.key_people || [];
+          // accreditations + contract_examples stay from the member (department)
+        }
+      }
+    } catch (e) { /* on any error, fall back to what the member sent */ }
 
     // ── Paid add-on: verify the REAL Stripe payment before generating ──
     // A member's base bid is free, but a paid add-on (expert review) must be
@@ -115,7 +143,7 @@ exports.handler = async (event) => {
         includeSq: !!includeSq,
         wantsReview: verifiedTier !== 'none',
         tier: verifiedTier,
-        companyDetails: Object.assign({}, companyDetails || {}, { email: email })
+        companyDetails: effectiveCo
       })
     };
   } catch (err) {
