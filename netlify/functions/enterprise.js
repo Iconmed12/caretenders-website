@@ -119,9 +119,22 @@ exports.handler = async (event) => {
       var used = cRes.ok ? (await cRes.json()).length : 0;
       if (used >= (mine.ent.seat_limit || 5)) return { statusCode: 409, headers: cors, body: JSON.stringify({ error: 'All ' + (mine.ent.seat_limit || 5) + ' seats are in use. Remove a member to free a seat.' }) };
       var tok = token();
-      // Member row (invited) + invite token.
-      var mIns = await sb('/rest/v1/enterprise_members', { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ enterprise_id: entId, email: email, department: department, role: 'member', status: 'invited' }) });
-      if (!mIns.ok) { var e2 = await mIns.text(); if (/duplicate|unique/i.test(e2)) return { statusCode: 409, headers: cors, body: JSON.stringify({ error: 'That person is already invited or a member.' }) }; return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e2.substring(0, 150) }) }; }
+      // A row may already exist for this email (unique per enterprise). If it is
+      // active/invited, block. If it was removed/revoked earlier, reactivate it
+      // (a plain insert would hit the unique constraint and wrongly say "already
+      // invited"). Otherwise insert a fresh seat.
+      var exRes = await sb('/rest/v1/enterprise_members?enterprise_id=eq.' + encodeURIComponent(entId) + '&email=eq.' + encodeURIComponent(email) + '&select=id,status&limit=1');
+      var existing = exRes.ok ? (await exRes.json())[0] : null;
+      if (existing && (existing.status === 'active' || existing.status === 'invited')) {
+        return { statusCode: 409, headers: cors, body: JSON.stringify({ error: 'That person is already invited or a member.' }) };
+      }
+      if (existing) {
+        var react = await sb('/rest/v1/enterprise_members?id=eq.' + encodeURIComponent(existing.id), { method: 'PATCH', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ department: department, role: 'member', status: 'invited', user_id: null, joined_at: null }) });
+        if (!react.ok) { var er = await react.text(); return { statusCode: 500, headers: cors, body: JSON.stringify({ error: er.substring(0, 150) }) }; }
+      } else {
+        var mIns = await sb('/rest/v1/enterprise_members', { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ enterprise_id: entId, email: email, department: department, role: 'member', status: 'invited' }) });
+        if (!mIns.ok) { var e2 = await mIns.text(); if (/duplicate|unique/i.test(e2)) return { statusCode: 409, headers: cors, body: JSON.stringify({ error: 'That person is already invited or a member.' }) }; return { statusCode: 500, headers: cors, body: JSON.stringify({ error: e2.substring(0, 150) }) }; }
+      }
       await sb('/rest/v1/enterprise_invites', { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify({ token: tok, enterprise_id: entId, email: email, department: department, expires_at: new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString() }) });
       // Email the invite link.
       try {
