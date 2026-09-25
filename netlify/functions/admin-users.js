@@ -67,11 +67,49 @@ exports.handler = async (event) => {
         return (new Date(sub.current_period_end).getTime() + GRACE_MS) > Date.now();
       }
 
+      // Enterprise (company circle) context, so team members show as members via
+      // the owner's plan rather than "Free".
+      var emRes = await fetch(SB_URL + '/rest/v1/enterprise_members?status=eq.active&select=email,enterprise_id,department,role', { headers: { apikey: srv, Authorization: 'Bearer ' + srv } });
+      var ems = emRes.ok ? await emRes.json() : [];
+      var entRes = await fetch(SB_URL + '/rest/v1/enterprises?select=id,name,owner_email', { headers: { apikey: srv, Authorization: 'Bearer ' + srv } });
+      var ents = entRes.ok ? await entRes.json() : [];
+      var entById = {};
+      (Array.isArray(ents) ? ents : []).forEach(function (e) { entById[e.id] = { name: e.name || '', owner_email: String(e.owner_email || '').toLowerCase() }; });
+      var seatByEmail = {};
+      (Array.isArray(ems) ? ems : []).forEach(function (s) { var k = String(s.email || '').toLowerCase(); if (k && !seatByEmail[k]) seatByEmail[k] = s; });
+
       const rows = users.map(function (u) {
         const email = String(u.email || '').toLowerCase();
         const meta = u.user_metadata || {};
         const sub = subByEmail[email] || null;
-        const isMember = activeNow(sub);
+        const directMember = activeNow(sub);
+        var seat = seatByEmail[email] || null;
+        var ent = seat ? entById[seat.enterprise_id] : null;
+
+        var membership = {
+          member: directMember,
+          status: sub ? sub.status : null,
+          term_months: sub ? sub.term_months : null,
+          plan: sub ? (sub.plan || null) : null,
+          renews: sub ? sub.current_period_end : null,
+          enterprise: ent ? ent.name : null,
+          department: seat ? (seat.department || null) : null,
+          role: seat ? seat.role : null,
+          via: directMember ? 'direct' : null
+        };
+        // A team member with no direct subscription inherits the owner's plan.
+        if (!directMember && seat && seat.role === 'member' && ent) {
+          var ownerSub = subByEmail[ent.owner_email] || null;
+          if (activeNow(ownerSub)) {
+            membership.member = true;
+            membership.via = 'enterprise';
+            membership.plan = ownerSub.plan || null;
+            membership.term_months = ownerSub.term_months || null;
+            membership.renews = ownerSub.current_period_end || null;
+            membership.status = ownerSub.status || null;
+          }
+        }
+
         return {
           id: u.id,
           email: u.email || '',
@@ -81,13 +119,7 @@ exports.handler = async (event) => {
           last_sign_in_at: u.last_sign_in_at || '',
           confirmed: !!(u.email_confirmed_at || u.confirmed_at),
           is_staff: email.indexOf('@staff.getcana.co.uk') !== -1,
-          membership: {
-            member: isMember,
-            status: sub ? sub.status : null,
-            term_months: sub ? sub.term_months : null,
-            plan: sub ? (sub.plan || null) : null,
-            renews: sub ? sub.current_period_end : null
-          }
+          membership: membership
         };
       });
 

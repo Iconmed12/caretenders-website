@@ -34,12 +34,27 @@ function membershipCell(m) {
   }
   var months = parseInt(m.term_months, 10) || 0;
   var planName = m.plan ? (m.plan.charAt(0).toUpperCase() + m.plan.slice(1)) : '';
+  var viaEnt = m.via === 'enterprise';
+  var isOwner = m.role === 'owner' && m.enterprise;
+
+  var badgeText = viaEnt ? 'Team member' : 'Member';
+  var badgeBg = viaEnt ? '#e6f5f7' : '#e8f7ee';
+  var badgeFg = viaEnt ? '#0891a3' : '#1a7a3f';
+  var out = '<span style="font-size:11px;font-weight:700;background:' + badgeBg + ';color:' + badgeFg + ';padding:3px 9px;border-radius:999px">' + badgeText + '</span>';
+
   var parts = [];
   if (planName) parts.push(planName);
-  if (months) parts.push(months + ' month' + (months > 1 ? 's' : ''));
+  if (viaEnt) {
+    if (m.enterprise) parts.push('via ' + m.enterprise);
+    if (m.department) parts.push(m.department);
+  } else {
+    if (months) parts.push(months + ' month' + (months > 1 ? 's' : ''));
+    if (isOwner) parts.push(m.enterprise + ' (owner)');
+  }
   var term = parts.join(' · ');
-  var out = '<span style="font-size:11px;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:3px 9px;border-radius:999px">Member</span>';
   if (term) out += '<div style="font-size:11px;color:var(--text-light);margin-top:3px">' + term + '</div>';
+  // Team members inherit the owner's renewal, so do not repeat expiry lines for them.
+  if (viaEnt) return out;
   if (m.renews) {
     var dl = daysLeft(m.renews);
     var colour = 'var(--text-light)';
