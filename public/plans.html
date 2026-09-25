@@ -39,6 +39,11 @@
   .price small { font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:500; color:var(--muted); }
   .billed { font-size:0.72rem; color:var(--muted); margin:8px 0 1.1rem; min-height:2.2em; }
   .seats { display:inline-block; background:rgba(0,201,224,0.1); color:var(--teal-dk); font-size:0.72rem; font-weight:700; padding:4px 10px; border-radius:999px; margin-bottom:1rem; }
+  .term-toggle { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; background:var(--offwhite); border:1px solid var(--border); border-radius:10px; padding:5px; margin:2px 0 1rem; }
+  .term-opt { position:relative; border:none; background:transparent; border-radius:7px; padding:9px 4px; font-family:'DM Sans',sans-serif; font-size:0.74rem; font-weight:700; color:var(--muted); cursor:pointer; transition:all 0.15s; }
+  .term-opt.sel { background:var(--navy); color:#fff; }
+  .term-opt .t-rate { display:block; font-size:0.66rem; font-weight:500; opacity:0.8; margin-top:2px; }
+  .term-best { position:absolute; top:-9px; left:50%; transform:translateX(-50%); background:var(--teal); color:var(--navy); font-size:0.53rem; font-weight:800; letter-spacing:0.05em; padding:2px 7px; border-radius:999px; text-transform:uppercase; white-space:nowrap; }
   .feat { list-style:none; display:flex; flex-direction:column; gap:0.5rem; margin-bottom:1.4rem; }
   .feat li { display:flex; gap:8px; font-size:0.8rem; color:#33475b; line-height:1.45; }
   .feat .tick { color:var(--teal-dk); font-weight:700; flex-shrink:0; }
@@ -126,8 +131,13 @@
     <div class="badge">Most popular</div>
     <div class="pname" style="margin-top:0.3rem;">Pro</div>
     <div class="pfor">For small teams bidding regularly</div>
-    <div class="price">£249<small>/month</small></div>
-    <div class="billed">One organisation, up to 5 people.</div>
+    <div class="term-toggle">
+      <button class="term-opt" data-term="3" onclick="setProTerm(3)">3 months<span class="t-rate">Bronze</span></button>
+      <button class="term-opt" data-term="6" onclick="setProTerm(6)">6 months<span class="t-rate">Silver</span></button>
+      <button class="term-opt sel" data-term="12" onclick="setProTerm(12)"><span class="term-best">Best value</span>12 months<span class="t-rate">Gold</span></button>
+    </div>
+    <div class="price" id="pro-price">£3,000<small> one payment</small></div>
+    <div class="billed" id="pro-billed">Covers 12 months for up to 5 users (Gold). Works out at £250 a month.</div>
     <span class="seats">Up to 5 users</span>
     <ul class="feat">
       <li><span class="tick">✓</span><span>Up to 5 users</span></li>
@@ -226,6 +236,21 @@
 </div></footer>
 
 <script>
+  // Pro term pricing (one payment per term). Tiers match the Bronze/Silver/Gold
+  // coins used elsewhere: 3 months Bronze, 6 months Silver, 12 months Gold.
+  var PRO_TERMS = {
+    3:  { total: '£1,000', billed: 'Covers 3 months for up to 5 users (Bronze). Works out at £333 a month.' },
+    6:  { total: '£1,750', billed: 'Covers 6 months for up to 5 users (Silver). Works out at £292 a month.' },
+    12: { total: '£3,000', billed: 'Covers 12 months for up to 5 users (Gold). Works out at £250 a month, the best value.' }
+  };
+  function setProTerm(t) {
+    document.querySelectorAll('.term-opt').forEach(function(b){ b.classList.toggle('sel', parseInt(b.getAttribute('data-term'), 10) === t); });
+    var pr = document.getElementById('pro-price');
+    var bl = document.getElementById('pro-billed');
+    if (pr) pr.innerHTML = PRO_TERMS[t].total + '<small> one payment</small>';
+    if (bl) bl.textContent = PRO_TERMS[t].billed;
+  }
+
   (function(){
     var sub = new URLSearchParams(location.search).get('subscribed');
     if (!sub) return;
