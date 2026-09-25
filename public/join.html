@@ -8,21 +8,32 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
- :root{--navy:#0b1929;--teal:#00c9e0;--teal-dk:#0891a3;--ink:#1a2433;--muted:#63707f;--line:#e7ebf1;--good:#16a37b;}
+ :root{--navy:#0b1929;--teal:#00c9e0;--teal-dk:#0891a3;--ink:#1a2433;--muted:#63707f;--line:#e7ebf1;--good:#16a37b;--soft:#f4f8fa;}
  *{box-sizing:border-box;margin:0;padding:0}
  body{font-family:'Plus Jakarta Sans',system-ui,Arial,sans-serif;background:#eef2f6;color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
- .card{background:#fff;border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:34px 32px;box-shadow:0 30px 60px -30px rgba(11,25,41,.3);text-align:center}
- .logo{font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--navy);margin-bottom:20px}
+ .card{background:#fff;border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:32px 30px;box-shadow:0 30px 60px -30px rgba(11,25,41,.3)}
+ .logo{font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--navy);margin-bottom:18px;text-align:center}
  .logo b{color:var(--teal-dk)}
- .badge{width:56px;height:56px;border-radius:15px;background:rgba(0,201,224,.13);color:var(--teal-dk);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
- h1{font-size:20px;color:var(--navy);margin-bottom:8px}
- p{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:8px}
+ .badge{width:52px;height:52px;border-radius:14px;background:rgba(0,201,224,.13);color:var(--teal-dk);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px}
+ h1{font-size:20px;color:var(--navy);margin-bottom:6px;text-align:center}
+ .sub{font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:18px;text-align:center}
  .ent{font-weight:700;color:var(--ink)}
- .btn{display:inline-block;width:100%;background:var(--teal);color:var(--navy);border:none;font-weight:700;font-size:15px;padding:13px 18px;border-radius:10px;cursor:pointer;font-family:inherit;margin-top:16px;text-decoration:none}
+ .field{margin-bottom:13px}
+ .field label{display:block;font-size:12px;font-weight:700;color:var(--navy);margin-bottom:5px}
+ .field input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 12px;font-size:14px;font-family:inherit;color:var(--ink)}
+ .field input:focus{outline:none;border-color:var(--teal)}
+ .field input[readonly]{background:#eef2f6;color:var(--muted);cursor:not-allowed}
+ .field .locknote{font-size:11px;color:var(--muted);margin-top:4px}
+ .two{display:flex;gap:10px}.two .field{flex:1}
+ .pw-wrap{position:relative}
+ .pw-wrap button{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;font-family:inherit;padding:4px}
+ .btn{display:block;width:100%;background:var(--teal);color:var(--navy);border:none;font-weight:700;font-size:15px;padding:13px 18px;border-radius:10px;cursor:pointer;font-family:inherit;margin-top:8px;text-decoration:none;text-align:center}
  .btn:hover{filter:brightness(.96)} .btn:disabled{opacity:.6;cursor:default}
  .btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink);margin-top:10px}
- .err{color:#b4232a;font-size:14px;margin-top:8px}
- .spin{color:var(--muted);font-size:14px}
+ .err{color:#b4232a;font-size:13px;margin-top:10px;text-align:center}
+ .spin{color:var(--muted);font-size:14px;text-align:center;padding:20px 0}
+ .alt{font-size:12.5px;color:var(--muted);text-align:center;margin-top:14px}
+ .alt a{color:var(--teal-dk);font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>
@@ -38,40 +49,101 @@ const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function getToken(){var m=location.search.match(/[?&]token=([^&]+)/);return m?decodeURIComponent(m[1]):'';}
-function render(html){document.getElementById('card').innerHTML='<div class="logo">Cana<b>Bids</b></div>'+html;}
+function setCard(html){document.getElementById('card').innerHTML='<div class="logo">Cana<b>Bids</b></div>'+html;}
+
+async function acceptExisting(tok, accessToken){
+  var r=await fetch('/.netlify/functions/enterprise-accept',{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({token:tok})});
+  var d=await r.json().catch(()=>({}));
+  try{ localStorage.removeItem('cana_pending_invite'); }catch(e){}
+  if(!r.ok){ setCard('<div class="badge">✕</div><h1>Cannot accept invitation</h1><p class="sub">'+esc(d.error||'Something went wrong. Please ask for a new invite.')+'</p><a class="btn ghost" href="/dashboard.html">Go to dashboard</a>'); return; }
+  successScreen(d.enterprise, d.department);
+}
+
+function successScreen(ent, dept){
+  setCard('<div class="badge" style="background:rgba(22,163,123,.13);color:var(--good)">✓</div>'+
+    '<h1>You are in!</h1>'+
+    '<p class="sub">You have joined <span class="ent">'+esc(ent||'your team')+'</span>'+(dept?' as <span class="ent">'+esc(dept)+'</span>':'')+'. Your bids go straight to your own email.</p>'+
+    '<a class="btn" href="/dashboard.html">Go to my dashboard</a>');
+}
+
+function renderForm(info, tok){
+  setCard(
+    '<div class="badge">👥</div>'+
+    '<h1>Join '+esc(info.company_name||info.enterprise_name||'your team')+'</h1>'+
+    '<p class="sub">You have been invited'+(info.department?' to the <span class="ent">'+esc(info.department)+'</span> team':'')+'. Create your login to get started. Just your name and a password.</p>'+
+    '<div class="field"><label>Email address</label><input id="j-email" type="email" value="'+esc(info.email)+'" readonly><div class="locknote">Locked to the address you were invited on.</div></div>'+
+    '<div class="field"><label>Company</label><input id="j-company" type="text" value="'+esc(info.company_name||info.enterprise_name)+'" readonly><div class="locknote">You are joining this organisation.</div></div>'+
+    '<div class="two"><div class="field"><label>First name</label><input id="j-first" type="text" placeholder="Jamie"></div>'+
+    '<div class="field"><label>Last name</label><input id="j-last" type="text" placeholder="Harris"></div></div>'+
+    '<div class="field"><label>Password</label><div class="pw-wrap"><input id="j-pass" type="password" placeholder="At least 8 characters"><button type="button" id="j-toggle">Show</button></div></div>'+
+    '<button class="btn" id="j-submit">Create account and join</button>'+
+    '<div class="err" id="j-err" style="display:none"></div>'+
+    '<div class="alt">Already have a Cana account? <a href="/login.html?redirect='+encodeURIComponent('/join.html?token='+tok)+'">Sign in to accept</a></div>'
+  );
+  document.getElementById('j-toggle').addEventListener('click',function(){
+    var p=document.getElementById('j-pass'); if(p.type==='password'){p.type='text';this.textContent='Hide';}else{p.type='password';this.textContent='Show';}
+  });
+  document.getElementById('j-submit').addEventListener('click',function(){ submitSignup(info, tok, this); });
+  document.getElementById('j-pass').addEventListener('keydown',function(e){ if(e.key==='Enter') document.getElementById('j-submit').click(); });
+}
+
+async function submitSignup(info, tok, btn){
+  var first=document.getElementById('j-first').value.trim();
+  var last=document.getElementById('j-last').value.trim();
+  var pass=document.getElementById('j-pass').value;
+  var err=document.getElementById('j-err');
+  err.style.display='none';
+  function fail(m){ err.textContent=m; err.style.display='block'; btn.disabled=false; btn.textContent='Create account and join'; }
+  if(!first){ return fail('Please enter your first name.'); }
+  if((pass||'').length<8){ return fail('Please choose a password of at least 8 characters.'); }
+  btn.disabled=true; btn.textContent='Creating your account…';
+  try{
+    var r=await fetch('/.netlify/functions/enterprise-signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tok,firstName:first,lastName:last,password:pass})});
+    var d=await r.json().catch(()=>({}));
+    if(!r.ok){
+      if(d.existing){ err.innerHTML=esc(d.error)+' <a href="/login.html?redirect='+encodeURIComponent('/join.html?token='+tok)+'">Sign in</a>'; err.style.display='block'; btn.disabled=false; btn.textContent='Create account and join'; return; }
+      return fail(d.error||'Could not create your account. Please try again.');
+    }
+    try{ localStorage.removeItem('cana_pending_invite'); }catch(e){}
+    // Sign them straight in and go to the dashboard.
+    var si=await sb.auth.signInWithPassword({email:info.email,password:pass});
+    if(si.error){ setCard('<div class="badge" style="background:rgba(22,163,123,.13);color:var(--good)">✓</div><h1>Account created</h1><p class="sub">Your account is ready. Please sign in to continue.</p><a class="btn" href="/login.html">Sign in</a>'); return; }
+    window.location.href='/dashboard.html';
+  }catch(e){ fail('Could not create your account. Please try again.'); }
+}
 
 async function run(){
   var tok=getToken();
-  if(!tok){ render('<div class="badge">✕</div><h1>Invalid link</h1><p>This invitation link is missing its code. Please use the link from your email.</p>'); return; }
+  if(!tok){ setCard('<div class="badge">✕</div><h1>Invalid link</h1><p class="sub">This invitation link is missing its code. Please use the link from your email.</p>'); return; }
 
-  // Remember the invite in this browser, so we can still complete the join even
-  // if the account-confirmation round trip does not return the person here.
+  var info;
+  try{ info=await fetch('/.netlify/functions/enterprise-invite-info?token='+encodeURIComponent(tok)).then(r=>r.json()); }catch(e){ info=null; }
+  if(!info || !info.valid){
+    var reason=info&&info.reason;
+    var msg=reason==='expired'?'This invitation has expired. Please ask for a new one.':reason==='used'?'This invitation has already been used.':'This invitation is not valid. Please ask for a new one.';
+    setCard('<div class="badge">✕</div><h1>Cannot join</h1><p class="sub">'+msg+'</p><a class="btn ghost" href="/login.html">Sign in</a>');
+    return;
+  }
+
   try{ localStorage.setItem('cana_pending_invite', tok); }catch(e){}
 
   var s=await sb.auth.getSession();
-  if(!s.data.session){
-    var here='/join.html?token='+encodeURIComponent(tok);
-    render('<div class="badge">👥</div><h1>You have been invited</h1>'+
-      '<p>You have been invited to join a team on Cana Bids. Sign in or create your account to accept.</p>'+
-      '<a class="btn" href="/register.html?redirect='+encodeURIComponent(here)+'">Create my account</a>'+
-      '<a class="btn ghost" href="/login.html?redirect='+encodeURIComponent(here)+'">I already have an account</a>');
+  var sess=s.data && s.data.session;
+  if(sess && sess.user){
+    var em=String(sess.user.email||'').toLowerCase();
+    if(em===String(info.email||'').toLowerCase()){
+      setCard('<div class="spin">Joining your team…</div>');
+      return acceptExisting(tok, sess.access_token);
+    }
+    // Signed in as someone else: the invite is locked to a specific email.
+    setCard('<div class="badge">👤</div><h1>Wrong account</h1>'+
+      '<p class="sub">This invitation is for <span class="ent">'+esc(info.email)+'</span>, but you are signed in as <span class="ent">'+esc(em)+'</span>. Sign out and continue with the invited email.</p>'+
+      '<button class="btn" id="j-signout">Sign out and continue</button>');
+    document.getElementById('j-signout').addEventListener('click',async function(){ await sb.auth.signOut(); location.reload(); });
     return;
   }
 
-  // Signed in: accept the invite.
-  render('<div class="spin">Joining your team…</div>');
-  var r=await fetch('/.netlify/functions/enterprise-accept',{method:'POST',headers:{'Authorization':'Bearer '+s.data.session.access_token,'Content-Type':'application/json'},body:JSON.stringify({token:tok})});
-  var d=await r.json().catch(()=>({}));
-  try{ localStorage.removeItem('cana_pending_invite'); }catch(e){}
-  if(!r.ok){
-    render('<div class="badge">✕</div><h1>Cannot accept invitation</h1><p>'+esc(d.error||'Something went wrong. Please ask for a new invite.')+'</p><a class="btn ghost" href="/dashboard.html">Go to dashboard</a>');
-    return;
-  }
-  render('<div class="badge" style="background:rgba(22,163,123,.13);color:var(--good)">✓</div>'+
-    '<h1>You are in!</h1>'+
-    '<p>You have joined <span class="ent">'+esc(d.enterprise||'your team')+'</span>'+(d.department?' as <span class="ent">'+esc(d.department)+'</span>':'')+'.</p>'+
-    '<p>You can now browse opportunities and generate bids for your team. Results go straight to your own email.</p>'+
-    '<a class="btn" href="/dashboard.html">Go to my dashboard</a>');
+  renderForm(info, tok);
 }
 run();
 </script>
