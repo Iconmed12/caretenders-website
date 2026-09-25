@@ -26,8 +26,11 @@
   .plans-hero h1 em { font-style:normal; color:var(--teal-dk); }
   .plans-hero p { color:var(--muted); font-size:0.95rem; max-width:560px; margin:0 auto; line-height:1.7; }
 
-  .cards-wrap { max-width:720px; margin:-4rem auto 0; padding:0 2rem 2rem; display:grid; grid-template-columns:repeat(2,1fr); gap:1.25rem; align-items:start; }
-  @media(max-width:620px){ .cards-wrap{grid-template-columns:1fr; max-width:460px;} }
+  .cards-wrap { max-width:1080px; margin:-3rem auto 0; padding:0 2rem 2rem; display:grid; grid-template-columns:repeat(3,1fr); gap:1.1rem; align-items:start; }
+  @media(max-width:900px){ .cards-wrap{grid-template-columns:1fr; max-width:440px;} }
+  .term-global { text-align:center; margin-top:1.6rem; }
+  .term-global .term-toggle { display:inline-grid; grid-template-columns:repeat(3,auto); gap:6px; margin:0; }
+  .term-global .term-opt { padding:9px 22px; }
 
   .card { background:#fff; border:1.5px solid var(--border); border-radius:16px; padding:1.6rem 1.4rem; position:relative; display:flex; flex-direction:column; }
   .card.pop { border:2px solid var(--teal); box-shadow:0 18px 48px rgba(0,201,224,0.16); }
@@ -99,52 +102,75 @@
 
 <div class="plans-hero">
   <h1>One platform. <em>Grows with your team.</em></h1>
-  <p>Pay for a single bid, or go unlimited with a Pro membership for your team. Every response delivered to your inbox. No credits.</p>
+  <p>Unlimited bids on every membership, delivered to your inbox. Choose your team size and the term that suits you. No credits.</p>
+  <div class="term-global">
+    <div class="term-toggle">
+      <button class="term-opt" data-term="3" onclick="setTerm(3)">3 months</button>
+      <button class="term-opt" data-term="6" onclick="setTerm(6)">6 months</button>
+      <button class="term-opt sel" data-term="12" onclick="setTerm(12)"><span class="term-best">Best value</span>12 months</button>
+    </div>
+  </div>
 </div>
 
 <div class="cards-wrap">
 
-  <!-- PAY AS YOU GO -->
+  <!-- CANA ACCESS -->
   <div class="card">
-    <div class="pname">One-Off Bid</div>
-    <div class="pfor">For businesses bidding on a single tender</div>
-    <div class="price">£480<small>/tender</small></div>
-    <div class="billed">One payment, one full bid. No commitment.</div>
-    <span class="seats">Single tender</span>
+    <div class="pname">Cana Access</div>
+    <div class="pfor">For solo providers</div>
+    <div class="price" id="price-access">£2,400<small> / 12 months</small></div>
+    <div class="billed" id="billed-access">£200 a month</div>
+    <span class="seats">1 user</span>
     <ul class="feat">
-      <li><span class="tick">✓</span><span class="hl">Full, tailored responses for every question</span></li>
-      <li><span class="tick">✓</span><span>Full pack delivered to your inbox</span></li>
+      <li><span class="tick">✓</span><span>1 user</span></li>
+      <li><span class="tick">✓</span><span class="hl">Unlimited bids</span></li>
+      <li><span class="tick">✓</span><span>1 S.A.T. request per month</span></li>
     </ul>
-    <a class="btn navy" href="/tenders.html">Find a tender to write</a>
+    <a class="btn navy" href="/contact.html">Register interest</a>
   </div>
 
-  <!-- PRO -->
+  <!-- CANA PRO -->
   <div class="card pop">
     <div class="badge">Most popular</div>
-    <div class="pname" style="margin-top:0.3rem;">Pro</div>
+    <div class="pname" style="margin-top:0.3rem;">Cana Pro</div>
     <div class="pfor">For small teams bidding regularly</div>
-    <div class="term-toggle">
-      <button class="term-opt" data-term="3" onclick="setProTerm(3)">3 months<span class="t-rate">Bronze</span></button>
-      <button class="term-opt" data-term="6" onclick="setProTerm(6)">6 months<span class="t-rate">Silver</span></button>
-      <button class="term-opt sel" data-term="12" onclick="setProTerm(12)"><span class="term-best">Best value</span>12 months<span class="t-rate">Gold</span></button>
-    </div>
-    <div class="price" id="pro-price">£3,000<small> one payment</small></div>
-    <span class="seats">Up to 5 users</span>
+    <div class="price" id="price-pro">£3,000<small> / 12 months</small></div>
+    <div class="billed" id="billed-pro">£250 a month</div>
+    <span class="seats">3 users</span>
     <ul class="feat">
-      <li><span class="tick">✓</span><span>Up to 5 users</span></li>
-      <li><span class="tick">✓</span><span class="hl">Unlimited tender generation</span></li>
-      <li><span class="tick">✓</span><span>Everything in pay as you go, on every tender</span></li>
-      <li><span class="tick">✓</span><span>Department/team allocation</span></li>
-      <li><span class="tick">✓</span><span>Owner/team overview</span></li>
-      <li><span class="tick">✓</span><span>Shared company profile</span></li>
-      <li><span class="tick">✓</span><span>Shared evidence</span></li>
-      <li><span class="tick">✓</span><span>Tender history</span></li>
-      <li><span class="tick">✓</span><span>Priority support</span></li>
-      <li><span class="tick">✓</span><span>Preferential add-on pricing</span></li>
+      <li><span class="tick">✓</span><span>3 users</span></li>
+      <li><span class="tick">✓</span><span class="hl">Unlimited bids</span></li>
+      <li><span class="tick">✓</span><span>2 response reviews per month</span></li>
+      <li><span class="tick">✓</span><span>3 S.A.T. requests per month</span></li>
     </ul>
     <a class="btn solid" href="/contact.html">Register interest</a>
   </div>
 
+  <!-- CANA GOLD -->
+  <div class="card">
+    <div class="pname">Cana Gold</div>
+    <div class="pfor">For organisations bidding at scale</div>
+    <div class="price" id="price-gold">£3,600<small> / 12 months</small></div>
+    <div class="billed" id="billed-gold">£300 a month</div>
+    <span class="seats">6 users</span>
+    <ul class="feat">
+      <li><span class="tick">✓</span><span>6 users</span></li>
+      <li><span class="tick">✓</span><span class="hl">Unlimited bids</span></li>
+      <li><span class="tick">✓</span><span>2 response reviews per month</span></li>
+      <li><span class="tick">✓</span><span class="hl">2 full tender reviews per month</span></li>
+      <li><span class="tick">✓</span><span>Unlimited S.A.T. requests</span></li>
+    </ul>
+    <a class="btn navy" href="/contact.html">Register interest</a>
+  </div>
+
+</div>
+
+<!-- ONE-OFF BID -->
+<div class="payg">
+  <div class="payg-box">
+    <div class="t"><b>Just bidding once?</b> One-off bid: <b>£480</b> for a single full tender response, no membership.</div>
+    <a class="btn outline" style="width:auto;padding:10px 20px;" href="/tenders.html">Find a tender to write</a>
+  </div>
 </div>
 
 <!-- OPTIONAL EXPERT REVIEW -->
@@ -179,7 +205,7 @@
   </div>
   <div class="qa">
     <p class="q">What is the difference between the plans?</p>
-    <p class="a"><b>Pay as you go</b> is £480 for a single tender, no membership. <b>Pro</b> gives unlimited generation for your term, delivered to your inbox, for up to 5 team members, with a shared company profile and evidence and priority support. Larger plans for bigger organisations are coming soon.</p>
+    <p class="a">Every membership includes <b>unlimited bids</b> delivered to your inbox, as one payment for your chosen term (3, 6 or 12 months). <b>Access</b> is one user. <b>Pro</b> covers a team of 3 and adds 2 response reviews a month and more tender requests. <b>Gold</b> covers 6 users and adds 2 full tender reviews a month and unlimited tender requests. Prefer not to commit? A one-off bid is £480.</p>
   </div>
   <div class="qa">
     <p class="q">How does the team work?</p>
@@ -219,19 +245,21 @@
 </div></footer>
 
 <script>
-  // Pro term pricing (one payment per term). Tiers match the Bronze/Silver/Gold
-  // coins used elsewhere: 3 months Bronze, 6 months Silver, 12 months Gold.
-  var PRO_TERMS = {
-    3:  { total: '£1,000', billed: 'Covers 3 months for up to 5 users (Bronze). Works out at £333 a month.' },
-    6:  { total: '£1,750', billed: 'Covers 6 months for up to 5 users (Silver). Works out at £292 a month.' },
-    12: { total: '£3,000', billed: 'Covers 12 months for up to 5 users (Gold). Works out at £250 a month, the best value.' }
+  // Term pricing (one payment per term) for the three memberships. Each entry is
+  // [total for the term, monthly equivalent]. One global toggle drives all three.
+  var TERMS = {
+    access: { 3: ['£750', '£250'],   6: ['£1,350', '£225'], 12: ['£2,400', '£200'] },
+    pro:    { 3: ['£1,000', '£333'], 6: ['£1,800', '£300'], 12: ['£3,000', '£250'] },
+    gold:   { 3: ['£1,250', '£417'], 6: ['£2,250', '£375'], 12: ['£3,600', '£300'] }
   };
-  function setProTerm(t) {
+  function setTerm(t) {
     document.querySelectorAll('.term-opt').forEach(function(b){ b.classList.toggle('sel', parseInt(b.getAttribute('data-term'), 10) === t); });
-    var pr = document.getElementById('pro-price');
-    var bl = document.getElementById('pro-billed');
-    if (pr) pr.innerHTML = PRO_TERMS[t].total + '<small> one payment</small>';
-    if (bl) bl.textContent = PRO_TERMS[t].billed;
+    ['access', 'pro', 'gold'].forEach(function(k){
+      var pr = document.getElementById('price-' + k);
+      var bl = document.getElementById('billed-' + k);
+      if (pr) pr.innerHTML = TERMS[k][t][0] + '<small> / ' + t + ' months</small>';
+      if (bl) bl.textContent = TERMS[k][t][1] + ' a month';
+    });
   }
 
   (function(){
