@@ -17,24 +17,24 @@
   if (!target) return;
   var loggedOutHTML = target.innerHTML; // keep the original so we can restore it
 
-  function tierStyle(name) {
-    if (name === 'Gold')   return { grad: 'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg: '#5f4c0e' };
-    if (name === 'Silver') return { grad: 'radial-gradient(circle at 34% 28%,#f3f5f8,#b7c0cb)', fg: '#3f4a56' };
-    return { grad: 'radial-gradient(circle at 34% 28%,#eccba0,#b3763f)', fg: '#5c3a17' };
+  // Plan coin: Gold plan gets a gold coin, Access/Pro get teal, unknown a plain teal.
+  function planStyle(plan) {
+    if (plan === 'gold') return { grad: 'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg: '#5f4c0e' };
+    return { grad: 'radial-gradient(circle at 34% 28%,#d6f3f8,#00c9e0)', fg: '#04303a' };
   }
-  function tierName(months) {
-    var m = parseInt(months, 10) || 0;
-    return m >= 12 ? 'Gold' : m >= 6 ? 'Silver' : 'Bronze';
+  function planLabel(plan) {
+    if (!plan) return 'Member';
+    return plan.charAt(0).toUpperCase() + plan.slice(1) + ' member';
   }
 
-  function chipHTML(tier) {
+  function chipHTML(plan) {
     var out = '';
-    // Members get a coin + tier name. Non-members get nothing here: "My account"
-    // next to "My dashboard" was just noise, so it is removed.
-    if (tier) {
-      var t = tierStyle(tier);
-      var coin = '<span style="width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:' + t.grad + ';color:' + t.fg + ';box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.2)">' + tier.charAt(0) + '</span>';
-      out += '<a href="/dashboard.html" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:#0b1929;font-weight:600;font-size:14.5px;margin-right:14px">' + coin + '<span>' + tier + ' member</span></a>';
+    // Members get a coin + plan name (Access / Pro / Gold). Non-members get nothing.
+    if (plan !== false) {
+      var t = planStyle(plan);
+      var ch = plan ? plan.charAt(0).toUpperCase() : 'M';
+      var coin = '<span style="width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;background:' + t.grad + ';color:' + t.fg + ';box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.2)">' + ch + '</span>';
+      out += '<a href="/dashboard.html" style="display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:#0b1929;font-weight:600;font-size:14.5px;margin-right:14px">' + coin + '<span>' + planLabel(plan) + '</span></a>';
     }
     out += '<a href="/dashboard.html" style="display:inline-block;background:#00c9e0;color:#04303a;font-weight:700;border-radius:10px;padding:9px 16px;text-decoration:none;font-size:14px;margin-right:12px">My dashboard</a>' +
       '<a href="#" data-signout style="color:#5b6b78;font-size:13px;text-decoration:none;cursor:pointer">Sign out</a>';
@@ -47,7 +47,7 @@
   // 1. Instant render from cache, so a returning member never sees the wrong nav.
   try {
     var cached = JSON.parse(localStorage.getItem('cana_nav') || 'null');
-    if (cached && cached.signedIn) showChip(cached.tier || null);
+    if (cached && cached.signedIn) showChip(cached.member ? (cached.plan || null) : false);
   } catch (e) {}
 
   // 2. Verify with Supabase once the library is available, then refresh + cache.
@@ -86,11 +86,11 @@
       fetch('/.netlify/functions/check-membership?email=' + encodeURIComponent(email))
         .then(function (x) { return x.json(); })
         .then(function (mem) {
-          var tier = (mem && mem.member) ? tierName(mem.term_months) : null;
-          showChip(tier);
-          try { localStorage.setItem('cana_nav', JSON.stringify({ signedIn: true, tier: tier })); } catch (e) {}
+          var isMem = !!(mem && mem.member);
+          showChip(isMem ? (mem.plan || null) : false);
+          try { localStorage.setItem('cana_nav', JSON.stringify({ signedIn: true, member: isMem, plan: (mem && mem.plan) || null })); } catch (e) {}
         })
-        .catch(function () { showChip(null); });
+        .catch(function () { showChip(false); });
     }).catch(function () {});
   })();
 

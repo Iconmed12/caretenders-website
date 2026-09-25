@@ -39,7 +39,7 @@ function subIsActive(sub) {
 async function activeSubFor(email) {
   var rows = await sbGet(
     '/rest/v1/subscriptions?email=eq.' + encodeURIComponent(email) +
-    '&status=in.(active,trialing,past_due)&select=id,status,term_months,current_period_end,created_at' +
+    '&status=in.(active,trialing,past_due)&select=*' +
     '&order=current_period_end.desc&limit=1'
   );
   var sub = Array.isArray(rows) && rows[0];

@@ -325,19 +325,20 @@
         if (uP) uP.textContent = 'You are a member. View or change your plan and add-ons.';
         if (uA) uA.textContent = 'Manage →';
 
-        // The account chip becomes a tier coin plus "Bronze/Silver/Gold member".
+        // The account chip becomes a plan coin plus "Access / Pro / Gold member".
         // Their name still shows in the welcome banner below, so it is not lost.
-        var mm = parseInt(memData.term_months, 10) || 0;
-        var tier = mm >= 12 ? { n:'Gold',   grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
-                 : mm >= 6  ? { n:'Silver', grad:'radial-gradient(circle at 34% 28%,#f3f5f8,#b7c0cb)', fg:'#3f4a56' }
-                 :            { n:'Bronze', grad:'radial-gradient(circle at 34% 28%,#eccba0,#b3763f)', fg:'#5c3a17' };
+        var plan = memData.plan || null;
+        var planCap = plan ? (plan.charAt(0).toUpperCase() + plan.slice(1)) : '';
+        var coinStyle = plan === 'gold'
+          ? { grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
+          : { grad:'radial-gradient(circle at 34% 28%,#d6f3f8,#00c9e0)', fg:'#04303a' };
         var coin = document.getElementById('nav-avatar');
         if (coin) {
-          coin.textContent = tier.n.charAt(0);
-          coin.style.cssText = 'width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;background:' + tier.grad + ';color:' + tier.fg + ';box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.2)';
+          coin.textContent = plan ? planCap.charAt(0) : 'M';
+          coin.style.cssText = 'width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;flex-shrink:0;background:' + coinStyle.grad + ';color:' + coinStyle.fg + ';box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.2)';
         }
         var nm = document.getElementById('nav-name');
-        if (nm) nm.textContent = tier.n + ' member';
+        if (nm) nm.textContent = plan ? (planCap + ' member') : 'Member';
       }
     } catch(e) { /* leave the default upgrade wording */ }
 

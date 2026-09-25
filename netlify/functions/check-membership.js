@@ -44,6 +44,7 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         member: member,
         via: mem.via,
+        plan: sub ? (sub.plan || null) : null,
         has_account: hasAccount,
         status: sub ? sub.status : null,
         term_months: sub ? sub.term_months : null,

@@ -878,19 +878,20 @@
     var planDetail = document.getElementById('profile-plan-detail');
     if (!section) return;
     section.style.display = 'block';
-    // Term maps to a tier: 3 = Bronze, 6 = Silver, 12 = Gold (any 12+ is Gold).
-    var mmT = parseInt(memData.term_months, 10) || 0;
-    var canaTier = mmT >= 12 ? { n:'Gold',   grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
-                 : mmT >= 6  ? { n:'Silver', grad:'radial-gradient(circle at 34% 28%,#f3f5f8,#b7c0cb)', fg:'#3f4a56' }
-                 :             { n:'Bronze', grad:'radial-gradient(circle at 34% 28%,#eccba0,#b3763f)', fg:'#5c3a17' };
-    if (planName && memData.term_months) {
-      planName.textContent = canaTier.n + ' membership';
+    // Plan tier: Access / Pro / Gold (from the subscription's plan).
+    var plan = memData.plan || null;
+    var planCap = plan ? (plan.charAt(0).toUpperCase() + plan.slice(1)) : '';
+    var coinStyle = plan === 'gold'
+      ? { grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
+      : { grad:'radial-gradient(circle at 34% 28%,#d6f3f8,#00c9e0)', fg:'#04303a' };
+    if (planName) {
+      planName.textContent = plan ? (planCap + ' membership') : 'Cana membership';
     }
     var coin = document.getElementById('profile-tier-coin');
-    if (coin && memData.term_months) {
-      coin.textContent = canaTier.n.charAt(0);
-      coin.style.background = canaTier.grad;
-      coin.style.color = canaTier.fg;
+    if (coin) {
+      coin.textContent = plan ? planCap.charAt(0) : 'C';
+      coin.style.background = coinStyle.grad;
+      coin.style.color = coinStyle.fg;
       coin.style.boxShadow = 'inset 0 0 0 1.5px rgba(255,255,255,.55), 0 1px 2px rgba(0,0,0,.25)';
     }
     if (planDetail && memData.current_period_end) {

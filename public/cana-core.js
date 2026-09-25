@@ -479,23 +479,22 @@
       if (src && dst) dst.innerHTML = src.innerHTML;
     });
 
-    // Membership status card. Term maps to tier: 3 Bronze, 6 Silver, 12+ Gold.
+    // Membership status card. Shows the plan: Access / Pro / Gold.
     var planLabel = document.getElementById('member-plan-label');
     var renewsLabel = document.getElementById('member-renews-label');
-    var mmT = parseInt(memRes.term_months, 10) || 0;
-    var tierT = mmT >= 12 ? { n:'Gold',   grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
-              : mmT >= 6  ? { n:'Silver', grad:'radial-gradient(circle at 34% 28%,#f3f5f8,#b7c0cb)', fg:'#3f4a56' }
-              :             { n:'Bronze', grad:'radial-gradient(circle at 34% 28%,#eccba0,#b3763f)', fg:'#5c3a17' };
-    // Always show the tier for a member. When the term is missing this defaults
-    // to Bronze, matching how the nav labels the same membership.
+    var planV = memRes.plan || null;
+    var planCap = planV ? (planV.charAt(0).toUpperCase() + planV.slice(1)) : '';
+    var coinStyle = planV === 'gold'
+      ? { grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)', fg:'#5f4c0e' }
+      : { grad:'radial-gradient(circle at 34% 28%,#d6f3f8,#00c9e0)', fg:'#04303a' };
     if (planLabel) {
-      planLabel.textContent = tierT.n + ' membership';
+      planLabel.textContent = planV ? (planCap + ' membership') : 'Cana membership';
     }
     var tierCoin = document.getElementById('member-tier-coin');
     if (tierCoin) {
-      tierCoin.textContent = tierT.n.charAt(0);
-      tierCoin.style.background = tierT.grad;
-      tierCoin.style.color = tierT.fg;
+      tierCoin.textContent = planV ? planCap.charAt(0) : 'C';
+      tierCoin.style.background = coinStyle.grad;
+      tierCoin.style.color = coinStyle.fg;
       tierCoin.style.boxShadow = 'inset 0 0 0 1.5px rgba(255,255,255,.55), 0 1px 2px rgba(0,0,0,.25)';
     }
     if (renewsLabel && memRes.current_period_end) {
