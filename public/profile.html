@@ -194,6 +194,24 @@
           <label class="form-label">Job title</label>
           <input class="form-input" type="text" id="f-jobtitle" placeholder="Director / Manager / Bid Writer">
         </div>
+        <div class="form-group">
+          <label class="form-label">Your sector <span>(tailors this profile)</span></label>
+          <select class="form-select" id="f-sector" onchange="updateSectorFields()">
+            <option value="">Select your sector</option>
+            <option>Care &amp; Support</option>
+            <option>Healthcare / Clinical</option>
+            <option>Finance &amp; Accounting</option>
+            <option>IT &amp; Digital</option>
+            <option>Facilities &amp; Maintenance</option>
+            <option>Recruitment &amp; Staffing</option>
+            <option>Construction</option>
+            <option>Professional Services</option>
+            <option>Cleaning</option>
+            <option>Transport &amp; Logistics</option>
+            <option>Education &amp; Training</option>
+            <option>Other</option>
+          </select>
+        </div>
       </div>
     </div>
   </div>
@@ -247,7 +265,7 @@
   </div>
 
   <!-- SECTION 3: CQC & REGULATORY -->
-  <div class="section-card">
+  <div class="section-card" id="section-cqc">
     <div class="section-head">
       <div class="section-head-icon green">⚕️</div>
       <div class="section-head-text">
@@ -486,36 +504,38 @@
     setTimeout(function(){ t.classList.remove('show'); }, 3000);
   }
 
-  // Company-level fields (mirror the account owner for enterprise members).
-  var COMPANY_FIELDS = {
+  // Only the LEGAL ENTITY is shared and locked for members. Everything else
+  // (services, accreditations, CQC, case studies, key people...) is the member's
+  // own department profile, so a Finance seat and a Care seat each keep their own.
+  var LEGAL_FIELDS = {
     'f-company':'company_name','f-co-number':'company_number','f-vat':'vat_number',
-    'f-founded':'founded_year','f-co-type':'company_type','f-address':'registered_address',
-    'f-cqc-status':'cqc_status','f-cqc-id':'cqc_provider_id','f-cqc-date':'cqc_inspection_date',
-    'f-ico':'ico_number','f-regulated':'regulated_activities','f-staff':'total_staff',
-    'f-turnover':'turnover_range','f-services':'services','f-regions':'regions',
-    'f-achievements':'achievements','f-kpis':'kpis','f-policies':'policies',
-    'f-experience':'experience','f-social':'social_value'
+    'f-founded':'founded_year','f-co-type':'company_type','f-address':'registered_address'
   };
+  var LEGAL_COLS = ['company_name','company_number','vat_number','founded_year','company_type','registered_address'];
   window._isMemberProfile = false;
+
+  // Show the CQC section only when the sector is care/clinical (or not yet chosen).
+  function updateSectorFields() {
+    var sel = document.getElementById('f-sector');
+    var sector = sel ? sel.value : '';
+    var cqc = document.getElementById('section-cqc');
+    if (cqc) {
+      var showCqc = (!sector) || sector === 'Care & Support' || sector === 'Healthcare / Clinical';
+      cqc.style.display = showCqc ? '' : 'none';
+    }
+  }
+  window.updateSectorFields = updateSectorFields;
 
   function applyMemberLock(cs) {
     window._isMemberProfile = true;
     var shared = cs.shared || {};
-    // Fill and lock every company-level field with the owner's live values.
-    Object.keys(COMPANY_FIELDS).forEach(function(fid){
+    // Fill and lock only the legal-entity fields with the owner's live values.
+    Object.keys(LEGAL_FIELDS).forEach(function(fid){
       var el = document.getElementById(fid); if (!el) return;
-      var v = shared[COMPANY_FIELDS[fid]];
+      var v = shared[LEGAL_FIELDS[fid]];
       el.value = (v == null ? '' : v);
       el.disabled = true; el.classList.add('locked-field');
     });
-    // Key people are company-level: show the owner's, lock editing.
-    loadKeyPeople(shared.key_people || []);
-    var kpWrap = document.getElementById('key-people-list');
-    if (kpWrap) {
-      kpWrap.querySelectorAll('input, select, textarea, button').forEach(function(el){ el.disabled = true; el.classList.add('locked-field'); });
-      var addBtn = kpWrap.nextElementSibling;
-      if (addBtn && addBtn.tagName === 'BUTTON') addBtn.style.display = 'none';
-    }
     // Banner
     var host = document.getElementById('main-page');
     var head = host ? host.querySelector('.page-header') : null;
@@ -523,11 +543,11 @@
       var b = document.createElement('div');
       b.id = 'member-banner';
       b.className = 'member-banner';
-      b.innerHTML = '<span class="mb-ic">🔒</span><span>Your company details are managed by <b>' +
+      b.innerHTML = '<span class="mb-ic">🔒</span><span>Your company’s <b>legal details</b> (registered name, number, address) are managed by <b>' +
         (cs.enterprise_name ? String(cs.enterprise_name).replace(/[&<>]/g,'') : 'your account owner') +
-        '</b> and are shown here read-only. You can add your ' +
+        '</b> and are locked. Everything else here is your own ' +
         (cs.department ? '<b>' + String(cs.department).replace(/[&<>]/g,'') + '</b> ' : '') +
-        'accreditations and contract examples below, and manage your own evidence in the Evidence Vault.</span>';
+        'profile: set your sector, services, accreditations, case studies and evidence for the bids you go for.</span>';
       if (head && head.nextSibling) head.parentNode.insertBefore(b, head.nextSibling);
       else host.insertBefore(b, host.firstChild);
     }
@@ -560,7 +580,8 @@
       'f-policies':     p.policies,
       'f-accreditations':p.accreditations,
       'f-experience':   p.experience,
-      'f-social':       p.social_value
+      'f-social':       p.social_value,
+      'f-sector':       p.sector
     };
     Object.keys(map).forEach(function(id){
       var el = document.getElementById(id);
@@ -569,6 +590,7 @@
     loadKeyPeople(p.key_people);
     loadContractExamples(p.contract_examples);
     updateCompletion();
+    updateSectorFields();
     if (p.company_name) {
       document.getElementById('save-bar-company').textContent = p.company_name;
     }
@@ -731,6 +753,7 @@
       accreditations:      document.getElementById('f-accreditations').value.trim(),
       experience:          document.getElementById('f-experience').value.trim(),
       social_value:        document.getElementById('f-social').value.trim(),
+      sector:              document.getElementById('f-sector').value,
       key_people:          readKeyPeople(),
       contract_examples:   readContractExamples(),
       updated_at:          new Date().toISOString()
@@ -742,22 +765,13 @@
     btn.disabled = true;
     btn.textContent = 'Saving...';
     try {
-      var data;
+      var data = readForm();
+      data.user_id = currentUser.id;
       if (window._isMemberProfile) {
-        // Members save only their own details and department evidence. Company
-        // fields are the owner's and stay locked, so they are not written.
-        data = {
-          user_id: currentUser.id,
-          contact_first_name: document.getElementById('f-first').value.trim(),
-          contact_last_name:  document.getElementById('f-last').value.trim(),
-          contact_email:      document.getElementById('f-email').value.trim(),
-          contact_job_title:  document.getElementById('f-jobtitle').value.trim(),
-          accreditations:     document.getElementById('f-accreditations').value.trim(),
-          contract_examples:  readContractExamples()
-        };
+        // Members own their whole department profile, but the shared LEGAL entity
+        // (name, number, address...) belongs to the owner, so it is not written.
+        LEGAL_COLS.forEach(function(k){ delete data[k]; });
       } else {
-        data = readForm();
-        data.user_id = currentUser.id;
         data.profile_complete = SCORED_FIELDS.filter(function(id){
           var el = document.getElementById(id); return el && el.value.trim().length > 0;
         }).length === SCORED_FIELDS.length;
@@ -811,6 +825,7 @@
     } catch (e) { /* not an enterprise member, edit own profile as normal */ }
 
     updateCompletion();
+    updateSectorFields();
     document.getElementById('loading-screen').style.display = 'none';
     document.getElementById('main-page').style.display = 'block';
     document.getElementById('save-bar').style.display = 'flex';

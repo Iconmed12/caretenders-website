@@ -39,29 +39,15 @@ exports.handler = async (event) => {
     if (!seat) return { statusCode: 200, headers: cors, body: JSON.stringify({ role: 'owner_or_solo' }) };
 
     var op = await companyProfileByUser(seat.owner_user_id) || {};
-    // Only the company-level fields (never the owner's personal contact details).
+    // Only the shared LEGAL ENTITY. Everything else (services, CQC, accreditations,
+    // case studies, key people) is the member's own department profile.
     var shared = {
       company_name: op.company_name || '',
       company_number: op.company_number || '',
       vat_number: op.vat_number || '',
       founded_year: op.founded_year || '',
       company_type: op.company_type || '',
-      registered_address: op.registered_address || '',
-      cqc_status: op.cqc_status || '',
-      cqc_provider_id: op.cqc_provider_id || '',
-      cqc_inspection_date: op.cqc_inspection_date || '',
-      ico_number: op.ico_number || '',
-      regulated_activities: op.regulated_activities || '',
-      total_staff: op.total_staff || '',
-      turnover_range: op.turnover_range || '',
-      services: op.services || '',
-      regions: op.regions || '',
-      achievements: op.achievements || '',
-      kpis: op.kpis || '',
-      policies: op.policies || '',
-      experience: op.experience || '',
-      social_value: op.social_value || '',
-      key_people: op.key_people || []
+      registered_address: op.registered_address || ''
     };
 
     return { statusCode: 200, headers: cors, body: JSON.stringify({ role: 'member', department: seat.department || '', enterprise_name: seat.enterprise_name || '', shared: shared }) };
