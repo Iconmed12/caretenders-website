@@ -33,8 +33,11 @@ function membershipCell(m) {
     return '<span style="font-size:11px;font-weight:700;background:#eef3f6;color:#5a6b7a;padding:3px 9px;border-radius:999px">Free</span>';
   }
   var months = parseInt(m.term_months, 10) || 0;
-  var tierName = months >= 12 ? 'Gold' : months >= 6 ? 'Silver' : months >= 1 ? 'Bronze' : '';
-  var term = months ? (tierName + ' · ' + months + ' month' + (months > 1 ? 's' : '')) : '';
+  var planName = m.plan ? (m.plan.charAt(0).toUpperCase() + m.plan.slice(1)) : '';
+  var parts = [];
+  if (planName) parts.push(planName);
+  if (months) parts.push(months + ' month' + (months > 1 ? 's' : ''));
+  var term = parts.join(' · ');
   var out = '<span style="font-size:11px;font-weight:700;background:#e8f7ee;color:#1a7a3f;padding:3px 9px;border-radius:999px">Member</span>';
   if (term) out += '<div style="font-size:11px;color:var(--text-light);margin-top:3px">' + term + '</div>';
   if (m.renews) {
@@ -219,9 +222,11 @@ function openMembershipModal(email) {
 
   var m = u.membership || {};
   var isMember = !!m.member;
+  var curPlan = m.plan || '';
+  var curPlanCap = curPlan ? (curPlan.charAt(0).toUpperCase() + curPlan.slice(1)) : '';
   var today = new Date().toISOString().slice(0, 10);
   var curText = isMember
-    ? ('Member' + (m.term_months ? ', ' + m.term_months + ' month' + (m.term_months > 1 ? 's' : '') : '') +
+    ? ((curPlanCap ? curPlanCap : 'Member') + (m.term_months ? ', ' + m.term_months + ' month' + (m.term_months > 1 ? 's' : '') : '') +
         (m.renews ? ', expires ' + fmtDate(m.renews) : ''))
     : 'Free account';
 
@@ -241,6 +246,15 @@ function openMembershipModal(email) {
           '<button type="button" id="mm-plan-free" onclick="mmSetPlan(false)">Free</button>' +
         '</div>' +
         '<div id="mm-member-fields">' +
+          '<div class="mm-row">' +
+            '<div><span class="mm-fl">Plan</span>' +
+              '<select id="mm-tier">' +
+                '<option value="access"' + (curPlan === 'access' ? ' selected' : '') + '>Access</option>' +
+                '<option value="pro"' + (curPlan === 'pro' || !curPlan ? ' selected' : '') + '>Pro</option>' +
+                '<option value="gold"' + (curPlan === 'gold' ? ' selected' : '') + '>Gold</option>' +
+              '</select>' +
+            '</div>' +
+          '</div>' +
           '<div class="mm-row">' +
             '<div><span class="mm-fl">Term</span>' +
               '<select id="mm-term" onchange="mmRecompute()">' +
@@ -295,11 +309,13 @@ async function mmSave() {
     : parseInt(termSel, 10);
   if (!months || months < 1 || months > 60) { alert('Enter a term between 1 and 60 months.'); return; }
   var start = modal.querySelector('#mm-start').value || new Date().toISOString().slice(0, 10);
+  var tierSel = modal.querySelector('#mm-tier');
+  var tier = tierSel ? tierSel.value : '';
 
   var btn = modal.querySelector('#mm-save');
   btn.disabled = true; btn.textContent = 'Saving...';
   try {
-    await usersApi({ action: 'set-membership', email: email, plan: 'member', term_months: months, start_date: start, note: note });
+    await usersApi({ action: 'set-membership', email: email, plan: 'member', tier: tier, term_months: months, start_date: start, note: note });
     if (typeof showToast === 'function') showToast('Membership set for ' + email, 'success');
     closeMembershipModal();
     loadUsers();

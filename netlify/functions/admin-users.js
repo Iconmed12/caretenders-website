@@ -45,7 +45,7 @@ exports.handler = async (event) => {
 
       // Membership from the subscriptions table, newest period first
       const subRes = await fetch(
-        SB_URL + '/rest/v1/subscriptions?select=email,status,term_months,current_period_end,created_at&order=current_period_end.desc',
+        SB_URL + '/rest/v1/subscriptions?select=email,status,term_months,plan,current_period_end,created_at&order=current_period_end.desc',
         { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
       );
       const subs = subRes.ok ? await subRes.json() : [];
@@ -85,6 +85,7 @@ exports.handler = async (event) => {
             member: isMember,
             status: sub ? sub.status : null,
             term_months: sub ? sub.term_months : null,
+            plan: sub ? (sub.plan || null) : null,
             renews: sub ? sub.current_period_end : null
           }
         };
@@ -194,6 +195,12 @@ exports.handler = async (event) => {
       end.setMonth(end.getMonth() + term);
       const endISO = end.toISOString();
 
+      // Plan tier (Access / Pro / Gold). Optional so older callers still work.
+      var tier = String(body.tier || '').toLowerCase();
+      if (tier && ['access', 'pro', 'gold'].indexOf(tier) === -1) {
+        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Plan must be access, pro or gold' }) };
+      }
+
       const payload = {
         email: email,
         product: 'membership',
@@ -202,6 +209,7 @@ exports.handler = async (event) => {
         current_period_end: endISO,
         updated_at: new Date().toISOString()
       };
+      if (tier) payload.plan = tier;
 
       // Reuse the latest existing row for this email if there is one, otherwise
       // create a manual row (id prefixed so it is clearly not from Stripe).
