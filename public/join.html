@@ -13,8 +13,8 @@
  *{box-sizing:border-box;margin:0;padding:0}
  body{font-family:'Inter',system-ui,Arial,sans-serif;background:#eef2f6;color:var(--ink);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
  .card{background:#fff;border:1px solid var(--line);border-radius:16px;max-width:460px;width:100%;padding:32px 30px;box-shadow:0 30px 60px -30px rgba(11,25,41,.3)}
- .logo{font-weight:800;font-size:22px;letter-spacing:-.02em;color:var(--navy);margin-bottom:18px;text-align:center}
- .logo b{color:var(--teal-dk)}
+ .logo{font-weight:800;font-size:19px;letter-spacing:-.02em;color:var(--navy);margin-bottom:18px;text-align:center}
+ .logo b{color:var(--teal)}
  .badge{width:52px;height:52px;border-radius:14px;background:rgba(0,201,224,.13);color:var(--teal-dk);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px}
  h1{font-size:20px;color:var(--navy);margin-bottom:6px;text-align:center}
  .sub{font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:18px;text-align:center}
@@ -39,7 +39,7 @@
 </head>
 <body>
 <div class="card" id="card">
-  <div class="logo">Cana<b>Bids</b></div>
+  <div class="logo"><span style="display:inline-flex;align-items:center;gap:9px;line-height:1"><svg viewBox="0 0 64 64" style="height:42px;width:42px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#0b1929" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-weight:700;font-size:1.5rem;letter-spacing:-0.02em;color:#0b1929">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></span></div>
   <div class="spin" id="loading">Checking your invitation…</div>
 </div>
 
@@ -50,7 +50,7 @@ const SUPABASE_ANON='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON);
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function getToken(){var m=location.search.match(/[?&]token=([^&]+)/);return m?decodeURIComponent(m[1]):'';}
-function setCard(html){document.getElementById('card').innerHTML='<div class="logo">Cana<b>Bids</b></div>'+html;}
+function setCard(html){document.getElementById('card').innerHTML='<div class="logo"><span style="display:inline-flex;align-items:center;gap:9px;line-height:1"><svg viewBox="0 0 64 64" style="height:42px;width:42px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#0b1929" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-weight:700;font-size:1.5rem;letter-spacing:-0.02em;color:#0b1929">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></span></div>'+html;}
 
 async function acceptExisting(tok, accessToken){
   var r=await fetch('/.netlify/functions/enterprise-accept',{method:'POST',headers:{'Authorization':'Bearer '+accessToken,'Content-Type':'application/json'},body:JSON.stringify({token:tok})});
