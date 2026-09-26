@@ -53,7 +53,7 @@ export default function TenderDetailScreen({ route, navigation }) {
       navigation.navigate('BidReady', { tender });
       return;
     }
-    navigation.navigate('Generating', { tender, questions });
+    navigation.navigate('Generating', { tender });
   }
 
   const ctaText = alreadyRunning

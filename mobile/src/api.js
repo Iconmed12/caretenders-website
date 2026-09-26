@@ -136,11 +136,83 @@ export async function fetchCompanyProfile(userId) {
   if (!userId) return null;
   const { data, error } = await supabase
     .from('company_profiles')
-    .select('user_id,company_name')
+    .select('*')
     .eq('user_id', userId)
     .limit(1);
   if (error) return null;
   return (data && data[0]) || null;
+}
+
+// ── generation ──
+// The same two-step flow the website uses: member-start verifies membership and
+// creates the job, then generate-cana-background writes and emails the bid. The
+// server emails the finished document; the app polls status only.
+
+/** Build the companyDetails the engine expects from a saved company profile. */
+export function memberCompanyDetails(profile, email) {
+  const p = profile || {};
+  return {
+    name: p.company_name || '',
+    founded: p.founded_year || '',
+    staff: p.total_staff || '',
+    cqc: p.cqc_status || '',
+    services: p.services || '',
+    regions: p.regions || '',
+    experience: p.experience || '',
+    achievements: p.achievements || '',
+    policies: p.policies || '',
+    accreditations: p.accreditations || '',
+    kpis: p.kpis || '',
+    social_value: p.social_value || '',
+    key_people: p.key_people || [],
+    contract_examples: p.contract_examples || [],
+    email: email || '',
+  };
+}
+
+/**
+ * Start a real generation for a member. Returns the job id to poll. Throws with
+ * the server's message on failure (e.g. no active membership).
+ */
+export async function startGeneration(tender, user, token) {
+  const profile = await fetchCompanyProfile(user.id);
+  const companyDetails = memberCompanyDetails(profile, user.email);
+
+  const msRes = await fetch(`${API_BASE}/.netlify/functions/member-start`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tenderId: tender.id, includeSq: false, companyDetails, accessToken: token, wantsReview: false }),
+  });
+  const data = await msRes.json().catch(() => ({}));
+  if (!msRes.ok) throw new Error(data.error || 'Could not start generation.');
+
+  // Kick off the background writer (returns quickly; it runs on the server).
+  await fetch(`${API_BASE}/.netlify/functions/generate-cana-background`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      jobId: data.jobId,
+      tenderId: data.tenderId || tender.id,
+      sessionId: 'member_' + data.jobId,
+      includeSq: false,
+      wantsReview: false,
+      tier: 'none',
+      companyDetails: data.companyDetails || companyDetails,
+    }),
+  }).catch(() => {});
+
+  return { jobId: data.jobId, email: data.email || user.email };
+}
+
+/** Poll a job's status. Returns the raw status string ('pending' if unknown). */
+export async function fetchJobStatus(jobId) {
+  if (!jobId) return 'pending';
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/get-cana-result?jobId=${encodeURIComponent(jobId)}`);
+    if (!res.ok) return 'running';
+    const data = await res.json().catch(() => ({}));
+    return data.status || 'pending';
+  } catch (e) { return 'running'; }
 }
 
 // ── evidence vault ──
