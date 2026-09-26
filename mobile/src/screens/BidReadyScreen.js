@@ -62,7 +62,7 @@ export default function BidReadyScreen({ route, navigation }) {
           activeOpacity={0.85}
           onPress={() => Linking.openURL('https://caretenders-website.netlify.app/plans.html')}
         >
-          <Text style={s.ghostText}>Add Silver Add-on review</Text>
+          <Text style={s.ghostText}>Add expert review</Text>
         </TouchableOpacity>
       </View>
     </View>

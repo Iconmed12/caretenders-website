@@ -11,7 +11,7 @@ const COMMERCIAL_CATS = ['commercial','construction','facilities','facilities ma
 const CARE_CATS = ['domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];
 const BUSINESS_TITLE_RE = /\b(start[ -]?up|business (support|growth|planning)|enterprise skills?|employab\w*|employment (support|programme|services?)|connect to work|careers?|digital marketing|ux|service design|incubat\w*|accelerat\w*)\b/i;
 
-function isCare(t) {
+export function isCareTender(t) {
   if (BUSINESS_TITLE_RE.test(t.title || '')) return false;
   const cat = String(t.category || '').toLowerCase().trim();
   if (!cat) return !!t.is_non_cqc;
@@ -51,13 +51,13 @@ export function valueLabel(t) {
   return t.value || '';
 }
 
-/** Live care tenders, newest first. */
+/** Live tenders across every sector, newest first. */
 export async function fetchTenders() {
   const res = await fetch(`${API_BASE}/.netlify/functions/get-tenders`);
   if (!res.ok) throw new Error('Could not load tenders');
   const data = await res.json();
   if (!Array.isArray(data)) return [];
-  return data.filter((t) => isCare(t) && isLive(t));
+  return data.filter((t) => isLive(t));
 }
 
 /**

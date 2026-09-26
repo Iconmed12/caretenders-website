@@ -43,7 +43,7 @@ export default function ProfileScreen({ navigation }) {
 
     supabase
       .from('subscriptions')
-      .select('status,term_months,current_period_end')
+      .select('status,term_months,plan,current_period_end')
       .eq('email', user.email)
       .order('current_period_end', { ascending: false })
       .limit(1)
@@ -59,10 +59,11 @@ export default function ProfileScreen({ navigation }) {
           return;
         }
         const active = row.status === 'active' || row.status === 'trialing';
-        const term = row.term_months ? row.term_months + ' month' : '';
+        // Plan tier (Access / Pro / Gold), matching the website.
+        const plan = row.plan ? row.plan.charAt(0).toUpperCase() + row.plan.slice(1) : '';
         setMembership({
           state: active ? 'active' : 'inactive',
-          label: active ? ['Member', term].filter(Boolean).join(', ') : 'Membership ' + row.status,
+          label: active ? (plan ? plan + ' member' : 'Member') : 'Membership ' + row.status,
           renews: row.current_period_end,
         });
       });
@@ -149,7 +150,7 @@ export default function ProfileScreen({ navigation }) {
       <View style={s.help}>
         <Text style={s.helpTitle}>Not sure where to start?</Text>
         <Text style={s.helpBody}>
-          Book fifteen minutes with a bid writer who knows the care sector.
+          Book fifteen minutes with a bid writer who knows the public sector.
         </Text>
         <TouchableOpacity style={s.helpBtn} activeOpacity={0.85} onPress={bookCall}>
           <Text style={s.helpBtnText}>Book a call</Text>

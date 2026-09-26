@@ -191,7 +191,7 @@ export default function HomeScreen({ navigation }) {
               <View style={s.noneIcon}><IconFind size={21} color={c.muted2} /></View>
               <Text style={s.noneTitle}>{error ? 'Could not load' : 'Nothing open right now'}</Text>
               <Text style={s.noneText}>
-                {error || 'We check for new care contracts every day. You will hear from us the moment one lands.'}
+                {error || 'We check for new public-sector contracts every day. You will hear from us the moment one lands.'}
               </Text>
             </View>
           )}

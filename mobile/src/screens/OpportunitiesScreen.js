@@ -2,9 +2,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
 import { c, t } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
-import { fetchTenders, closingLabel, valueLabel } from '../api';
+import { fetchTenders, closingLabel, valueLabel, isCareTender } from '../api';
 
-const FILTERS = ['All', 'Domiciliary care', 'Supported living', 'Residential', 'Nursing', 'Mental health'];
+const FILTERS = ['All', 'Care', 'Commercial'];
 
 export default function OpportunitiesScreen({ navigation }) {
   const [all, setAll] = useState([]);
@@ -30,7 +30,8 @@ export default function OpportunitiesScreen({ navigation }) {
   useEffect(() => { load(); }, [load]);
 
   const visible = all.filter((x) => {
-    if (filter !== 'All' && String(x.category || '').toLowerCase() !== filter.toLowerCase()) return false;
+    if (filter === 'Care' && !isCareTender(x)) return false;
+    if (filter === 'Commercial' && isCareTender(x)) return false;
     if (!q) return true;
     const s = q.toLowerCase();
     return String(x.title || '').toLowerCase().includes(s)
@@ -56,13 +57,13 @@ export default function OpportunitiesScreen({ navigation }) {
     <View style={s.wrap}>
       <ScreenHeader
         title="Find tenders"
-        subtitle={visible.length + (visible.length === 1 ? ' care contract open' : ' care contracts open')}
+        subtitle={visible.length + (visible.length === 1 ? ' opportunity open' : ' opportunities open')}
       />
 
       <View style={s.inner}>
       <TextInput
         style={s.search}
-        placeholder="Search care tenders"
+        placeholder="Search opportunities"
         placeholderTextColor={c.muted2}
         value={q}
         onChangeText={setQ}
@@ -88,7 +89,7 @@ export default function OpportunitiesScreen({ navigation }) {
           contentContainerStyle={{ paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.teal} />}
-          ListEmptyComponent={<View style={s.empty}><Text style={s.emptyText}>No care tenders match that search.</Text></View>}
+          ListEmptyComponent={<View style={s.empty}><Text style={s.emptyText}>No tenders match that search.</Text></View>}
         />
       )}
       </View>
