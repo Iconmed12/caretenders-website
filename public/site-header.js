@@ -15,7 +15,10 @@
   var hide = document.createElement('style');
   hide.textContent = [
     'nav:not(.ch-nav){display:none!important}',
-    '#cana-header{position:sticky;top:0;z-index:300;background:#fff;border-bottom:1px solid #eef1f5;font-family:Inter,system-ui,Arial,sans-serif}',
+    // Reserve the header height immediately (before the header is inserted) so the
+    // page never jumps: the header is fixed and overlays this reserved space.
+    'body{padding-top:67px!important}',
+    '#cana-header{position:fixed;top:0;left:0;right:0;z-index:300;background:#fff;border-bottom:1px solid #eef1f5;font-family:Inter,system-ui,Arial,sans-serif}',
     '#cana-header .ch-nav{max-width:1280px;margin:0 auto;padding:0 2rem;height:66px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem}',
     '#cana-header .ch-logo{justify-self:start;display:inline-flex;align-items:center;gap:9px;text-decoration:none;line-height:1}',
     '#cana-header .ch-word{font-weight:700;font-size:1.5rem;letter-spacing:-0.02em;color:#0b1929}',
