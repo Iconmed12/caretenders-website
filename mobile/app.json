@@ -19,7 +19,7 @@
       "buildNumber": "1"
     },
     "android": {
-      "package": "co.uk.getcana.bids",
+      "package": "getcana.co.uk",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#071A2F"
