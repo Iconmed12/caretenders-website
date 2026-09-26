@@ -49,11 +49,6 @@ exports.handler = async (event) => {
         { headers: { apikey: srv, Authorization: 'Bearer ' + srv } }
       );
       const subs = subRes.ok ? await subRes.json() : [];
-      const subByEmail = {};
-      (Array.isArray(subs) ? subs : []).forEach(function (s) {
-        const key = String(s.email || '').toLowerCase();
-        if (key && !subByEmail[key]) subByEmail[key] = s;   // first = latest period
-      });
 
       // Active means the status is live AND, if there is an end date, it has not
       // passed (plus a 3 day grace). This matches check-membership, so the admin
@@ -66,6 +61,19 @@ exports.handler = async (event) => {
         if (!sub.current_period_end) return String(sub.status || '').toLowerCase() === 'active';
         return (new Date(sub.current_period_end).getTime() + GRACE_MS) > Date.now();
       }
+
+      // Pick the best subscription per email: prefer an ACTIVE row so a stale
+      // cancelled/expired row with a later end date can't mask a live membership
+      // (which is how check-membership resolves it, so the two agree). Rows arrive
+      // newest-period first, so the first active one seen is the latest active.
+      const subByEmail = {};
+      (Array.isArray(subs) ? subs : []).forEach(function (s) {
+        const key = String(s.email || '').toLowerCase();
+        if (!key) return;
+        const existing = subByEmail[key];
+        if (!existing) { subByEmail[key] = s; return; }
+        if (activeNow(s) && !activeNow(existing)) subByEmail[key] = s;
+      });
 
       // Enterprise (company circle) context, so team members show as members via
       // the owner's plan rather than "Free".
