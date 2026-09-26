@@ -20,7 +20,6 @@
     },
     "android": {
       "package": "co.uk.getcana.bids",
-      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#071A2F"
@@ -29,7 +28,10 @@
     "extra": {
       "supabaseUrl": "https://igpjfpncfuawikoyzfcd.supabase.co",
       "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA",
-      "apiBase": "https://caretenders-website.netlify.app"
+      "apiBase": "https://caretenders-website.netlify.app",
+      "eas": {
+        "projectId": "95dfaf89-148b-49cd-881f-928c95f1077a"
+      }
     },
     "plugins": [
       "expo-asset"
