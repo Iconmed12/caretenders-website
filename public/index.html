@@ -38,6 +38,10 @@ svg{display:block}
 .wrap{max-width:1500px;margin:0 auto;padding:0 40px}
 .sec{padding:84px 0}
 @media(max-width:700px){.sec{padding:56px 0}}
+/* Mobile safety: stack every inline grid to one column, and never let anything overflow. */
+@media(max-width:760px){[style*="display:grid"]{grid-template-columns:1fr!important}}
+img{max-width:100%;height:auto}
+html,body{max-width:100%;overflow-x:hidden}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--teal-dk);background:var(--bg3);padding:7px 14px;border-radius:999px}
 .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--cyan)}
 .h2{font-size:clamp(28px,4vw,44px)}
@@ -528,7 +532,7 @@ footer ul a:hover{color:var(--cyan)}
       <li style="display:flex;align-items:center;gap:11px;font-weight:600;color:var(--ink);"><span style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--teal-dk);color:#fff;display:flex;align-items:center;justify-content:center;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg></span>Generate yourself. Review when it matters.</li>
     </ul>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch;">
+  <div class="cmp-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch;">
       <div style="background:var(--tint);border:1px solid var(--line);border-radius:16px;padding:28px;display:flex;flex-direction:column;">
         <div style="font-size:17px;font-weight:700;color:var(--navy);margin-bottom:18px;">Traditional approach</div>
         <div style="display:flex;flex-direction:column;gap:15px;font-size:15px;color:var(--muted);">
