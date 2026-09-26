@@ -1,9 +1,10 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { c, t } from '../theme';
-import { closingLabel, valueLabel, fetchOngoing, jobState } from '../api';
+import { valueCompact, daysUntil, fetchOngoing, jobState } from '../api';
 import { useAuth } from '../auth';
+import { IconBars, IconClock, IconShield, IconPin } from '../icons';
 
 // Placeholder question set. Once the tender's own questions are stored against
 // the record, this reads them from the tender instead.
@@ -23,50 +24,40 @@ export default function TenderDetailScreen({ route, navigation }) {
     : FALLBACK_QUESTIONS;
 
   const { session } = useAuth();
-  const email = (session && session.user && session.user.email) || '';
-  // If this tender has already been started, the button takes them to it
-  // instead of paying to write the same bid twice.
-  const [existing, setExisting] = useState(null);
+  const token = (session && session.access_token) || '';
+  // We block a NEW run only while one is actively running. A finished bid does
+  // not stop them generating again (e.g. a fresh version later).
+  const [mine, setMine] = useState([]);
+  // Stays false until the first check returns, so the footer shows a spinner
+  // rather than flashing the wrong button. It is not reset on later focuses.
+  const [checked, setChecked] = useState(false);
 
   useFocusEffect(useCallback(() => {
     let alive = true;
-    fetchOngoing(email)
+    fetchOngoing(token)
       .then((jobs) => {
         if (!alive) return;
-        const mine = jobs.filter((j) => j.tender_id === tender.id);
-        setExisting(mine.length ? mine[0] : null);
+        setMine(jobs.filter((j) => j.tender_id === tender.id));
+        setChecked(true);
       })
-      .catch(() => { if (alive) setExisting(null); });
+      .catch(() => { if (alive) { setMine([]); setChecked(true); } });
     return () => { alive = false; };
-  }, [email, tender.id]));
+  }, [token, tender.id]));
 
-  const state = existing ? jobState(existing) : null;
-  const alreadyRunning = state === 'running' || state === 'queued';
-  const alreadyDone = state === 'ready';
+  const runningJob = mine.find((j) => ['running', 'queued'].includes(jobState(j)));
+  const completedJob = mine.find((j) => jobState(j) === 'ready');
 
-  function onPress() {
-    if (alreadyRunning) {
-      navigation.getParent()?.navigate('Ongoing');
-      return;
-    }
-    if (alreadyDone) {
-      navigation.navigate('BidReady', { tender });
-      return;
-    }
-    navigation.navigate('Generating', { tender });
-  }
+  function seeProgress() { navigation.getParent()?.navigate('Ongoing'); }
+  function viewBid() { navigation.navigate('BidReady', { tender }); }
+  function generate() { navigation.navigate('Generating', { tender }); }
 
-  const ctaText = alreadyRunning
-    ? 'Already writing, see progress'
-    : alreadyDone
-      ? 'View your bid'
-      : 'Generate responses';
-
+  const days = daysUntil(tender.deadline);
+  const closesValue = days == null ? '—' : days < 0 ? 'Closed' : days === 0 ? 'Today' : days + (days === 1 ? ' day' : ' days');
   const meta = [
-    { label: 'Value', value: valueLabel(tender) || 'Not stated' },
-    { label: 'Closes', value: closingLabel(tender) || 'Not stated' },
-    { label: 'CQC', value: tender.is_non_cqc ? 'Open to new providers' : 'Required' },
-    { label: 'Region', value: tender.region || 'UK' },
+    { Icon: IconBars, value: valueCompact(tender) || 'N/A', label: 'Contract value' },
+    { Icon: IconClock, value: closesValue, label: 'Until close', urgent: days != null && days >= 0 && days <= 7 },
+    { Icon: IconShield, value: tender.is_non_cqc ? 'Open' : 'Required', label: tender.is_non_cqc ? 'New providers' : 'CQC status' },
+    { Icon: IconPin, value: tender.region || 'UK', label: 'Region' },
   ];
 
   return (
@@ -78,8 +69,9 @@ export default function TenderDetailScreen({ route, navigation }) {
         <View style={s.metaGrid}>
           {meta.map((m) => (
             <View key={m.label} style={s.metaCell}>
-              <Text style={s.metaLabel}>{m.label.toUpperCase()}</Text>
-              <Text style={s.metaValue}>{m.value}</Text>
+              <m.Icon size={18} color={c.navy} />
+              <Text style={[s.metaValue, m.urgent && { color: c.amber }]}>{m.value}</Text>
+              <Text style={s.metaLabel}>{m.label}</Text>
             </View>
           ))}
         </View>
@@ -101,17 +93,31 @@ export default function TenderDetailScreen({ route, navigation }) {
       </ScrollView>
 
       <View style={s.footer}>
-        <TouchableOpacity
-          style={[s.cta, (alreadyRunning || alreadyDone) && s.ctaQuiet]}
-          activeOpacity={0.85}
-          onPress={onPress}
-        >
-          <Text style={[s.ctaText, (alreadyRunning || alreadyDone) && s.ctaQuietText]}>
-            {ctaText}
-          </Text>
-        </TouchableOpacity>
-        {alreadyDone && (
-          <Text style={s.ctaNote}>You have already generated a bid for this tender.</Text>
+        {!checked ? (
+          <View style={[s.cta, s.ctaQuiet]}><ActivityIndicator color={c.teal} /></View>
+        ) : runningJob ? (
+          <>
+            <TouchableOpacity style={[s.cta, s.ctaQuiet]} activeOpacity={0.85} onPress={seeProgress}>
+              <Text style={[s.ctaText, s.ctaQuietText]}>Being written, see progress</Text>
+            </TouchableOpacity>
+            <Text style={s.ctaNote}>This tender is currently being generated. We will email you when it is ready.</Text>
+          </>
+        ) : completedJob ? (
+          <>
+            <View style={s.btnRow}>
+              <TouchableOpacity style={[s.cta, s.ctaQuiet, s.half]} activeOpacity={0.85} onPress={viewBid}>
+                <Text style={[s.ctaText, s.ctaQuietText]}>View your bid</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[s.cta, s.half]} activeOpacity={0.85} onPress={generate}>
+                <Text style={s.ctaText}>Generate</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={s.ctaNote}>You have already generated a bid. You can generate a fresh one any time.</Text>
+          </>
+        ) : (
+          <TouchableOpacity style={s.cta} activeOpacity={0.85} onPress={generate}>
+            <Text style={s.ctaText}>Generate responses</Text>
+          </TouchableOpacity>
         )}
       </View>
     </View>
@@ -120,12 +126,12 @@ export default function TenderDetailScreen({ route, navigation }) {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.white },
-  title: { fontSize: 21, fontWeight: '700', color: c.navy, lineHeight: 27 },
-  org: { fontSize: 13, color: c.muted2, marginTop: 5 },
-  metaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 16 },
-  metaCell: { flexGrow: 1, flexBasis: '46%', backgroundColor: c.bg, borderRadius: 11, padding: 11 },
-  metaLabel: { fontSize: 9.5, fontWeight: '700', letterSpacing: 0.5, color: c.muted2 },
-  metaValue: { fontSize: 14, fontWeight: '700', color: c.navy, marginTop: 3 },
+  title: { fontSize: 25, fontWeight: '800', color: c.navy, lineHeight: 31, letterSpacing: -0.4 },
+  org: { fontSize: 13.5, color: c.muted, marginTop: 6 },
+  metaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 18 },
+  metaCell: { flexGrow: 1, flexBasis: '46%', backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 12, padding: 14, gap: 7 },
+  metaValue: { fontSize: 19, fontWeight: '800', color: c.navy },
+  metaLabel: { fontSize: 11.5, fontWeight: '600', color: c.muted2 },
   secTitle: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.8, color: c.muted2, marginTop: 22, marginBottom: 8 },
   about: { ...t.body, color: c.muted, lineHeight: 21 },
   qRow: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: c.line2 },
@@ -133,9 +139,11 @@ const s = StyleSheet.create({
   qNumText: { fontSize: 11, fontWeight: '800', color: c.muted },
   qText: { fontSize: 14, color: c.ink, flex: 1 },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: c.line2, backgroundColor: c.white },
-  cta: { backgroundColor: c.cyan, borderRadius: 13, paddingVertical: 16, alignItems: 'center' },
+  cta: { backgroundColor: c.brand, borderRadius: 13, paddingVertical: 16, alignItems: 'center' },
   ctaText: { fontSize: 15, fontWeight: '700', color: '#04303a' },
   ctaQuiet: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line },
   ctaQuietText: { color: c.navy },
   ctaNote: { fontSize: 11.5, color: c.muted2, textAlign: 'center', marginTop: 9 },
+  btnRow: { flexDirection: 'row', gap: 10 },
+  half: { flex: 1 },
 });

@@ -1,18 +1,44 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, RefreshControl, ActivityIndicator, StyleSheet } from 'react-native';
-import { c, t } from '../theme';
-import ScreenHeader from '../components/ScreenHeader';
-import { fetchTenders, closingLabel, valueLabel, isCareTender } from '../api';
+import { c } from '../theme';
+import TopBar from '../components/TopBar';
+import TenderCard from '../components/TenderCard';
+import { IconFind, IconSliders, IconChevron } from '../icons';
+import { useAuth } from '../auth';
+import {
+  fetchTenders, fetchCompanyProfile, sectorKeyOf, sectorMeta, isNewTender, daysUntil,
+} from '../api';
 
-const FILTERS = ['All', 'Care', 'Commercial'];
+// The profile's own sector label maps to one of our card buckets, so "My
+// Department" can filter the list to the member's area.
+const PROFILE_TO_KEY = {
+  'Care & Support': 'care', 'Healthcare / Clinical': 'care',
+  'IT & Digital': 'it', 'Recruitment & Staffing': 'recruitment',
+  'Facilities & Maintenance': 'facilities', 'Cleaning': 'facilities',
+  'Construction': 'construction',
+};
 
-export default function OpportunitiesScreen({ navigation }) {
+function initialsOf(user) {
+  const meta = (user && user.user_metadata) || {};
+  const first = meta.first_name || meta.firstName || '';
+  const last = meta.last_name || meta.lastName || '';
+  if (first) return (first.charAt(0) + (last.charAt(0) || '')).toUpperCase();
+  return ((user && user.email) || '?').charAt(0).toUpperCase();
+}
+
+export default function OpportunitiesScreen({ navigation, route }) {
+  const { session } = useAuth();
+  const user = (session && session.user) || {};
+
   const [all, setAll] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [q, setQ] = useState('');
-  const [filter, setFilter] = useState('All');
+  const [chip, setChip] = useState('All');
+  const [sort, setSort] = useState('closing'); // closing | new
+  const [mySectorKey, setMySectorKey] = useState(null);
+  const [sectorFilter, setSectorFilter] = useState((route.params && route.params.sector) || null);
 
   const load = useCallback(async () => {
     try {
@@ -29,52 +55,102 @@ export default function OpportunitiesScreen({ navigation }) {
 
   useEffect(() => { load(); }, [load]);
 
-  const visible = all.filter((x) => {
-    if (filter === 'Care' && !isCareTender(x)) return false;
-    if (filter === 'Commercial' && isCareTender(x)) return false;
+  // Work out the member's own sector once, for the "My Department" filter.
+  useEffect(() => {
+    let alive = true;
+    fetchCompanyProfile(user.id).then((p) => {
+      if (!alive) return;
+      const key = p && p.sector ? PROFILE_TO_KEY[p.sector] : null;
+      setMySectorKey(key || null);
+    });
+    return () => { alive = false; };
+  }, [user.id]);
+
+  // A sector tapped on Home arrives as a route param.
+  useEffect(() => {
+    if (route.params && route.params.sector) setSectorFilter(route.params.sector);
+  }, [route.params]);
+
+  const chips = ['All', 'New', 'Closing Soon'].concat(mySectorKey ? ['My Department'] : []);
+
+  let visible = all.filter((t) => {
+    if (sectorFilter && sectorKeyOf(t) !== sectorFilter) return false;
+    if (chip === 'New' && !isNewTender(t)) return false;
+    if (chip === 'Closing Soon') { const d = daysUntil(t.deadline); if (d === null || d < 0 || d > 14) return false; }
+    if (chip === 'My Department' && sectorKeyOf(t) !== mySectorKey) return false;
     if (!q) return true;
     const s = q.toLowerCase();
-    return String(x.title || '').toLowerCase().includes(s)
-      || String(x.org || '').toLowerCase().includes(s)
-      || String(x.region || '').toLowerCase().includes(s);
+    return String(t.title || '').toLowerCase().includes(s)
+      || String(t.org || t.organisation || '').toLowerCase().includes(s)
+      || String(t.region || '').toLowerCase().includes(s)
+      || String(t.reference || t.ref || '').toLowerCase().includes(s);
   });
 
-  const renderCard = ({ item }) => (
-    <TouchableOpacity style={s.card} activeOpacity={0.85} onPress={() => navigation.navigate('TenderDetail', { tender: item })}>
-      <Text style={s.cardTitle}>{item.title}</Text>
-      <Text style={s.cardOrg}>{item.org || item.organisation || ''}</Text>
-      {!!item.category && (
-        <View style={s.tagRow}><View style={s.tag}><Text style={s.tagText}>{item.category}</Text></View></View>
-      )}
-      <View style={s.cardFoot}>
-        <Text style={s.value}>{valueLabel(item)}</Text>
-        <Text style={s.closing}>{closingLabel(item)}</Text>
-      </View>
-    </TouchableOpacity>
+  visible = visible.sort((a, b) => {
+    if (sort === 'new') {
+      return new Date(b.published_date || b.created_at) - new Date(a.published_date || a.created_at);
+    }
+    const da = daysUntil(a.deadline); const db = daysUntil(b.deadline);
+    if (da === null) return 1; if (db === null) return -1;
+    return da - db;
+  });
+
+  const header = (
+    <View style={s.listHead}>
+      <Text style={s.count}>{visible.length} {visible.length === 1 ? 'opportunity' : 'opportunities'}</Text>
+      <TouchableOpacity
+        style={s.sort}
+        activeOpacity={0.7}
+        onPress={() => setSort((v) => (v === 'closing' ? 'new' : 'closing'))}
+      >
+        <Text style={s.sortText}>Sort by: {sort === 'closing' ? 'Closing soon' : 'Newest'}</Text>
+        <IconChevron size={14} color={c.muted2} />
+      </TouchableOpacity>
+    </View>
   );
 
   return (
     <View style={s.wrap}>
-      <ScreenHeader
-        title="Find tenders"
-        subtitle={visible.length + (visible.length === 1 ? ' opportunity open' : ' opportunities open')}
-      />
+      <TopBar
+        title="Opportunities"
+        initials={initialsOf(user)}
+        onBell={() => navigation.getParent()?.navigate('Ongoing')}
+        onAvatar={() => navigation.getParent()?.navigate('Profile')}
+      >
+        <View style={s.search}>
+          <IconFind size={19} color={c.muted2} />
+          <TextInput
+            style={s.searchInput}
+            value={q}
+            onChangeText={setQ}
+            placeholder="Search tenders, keywords or reference number"
+            placeholderTextColor={c.muted2}
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <IconSliders size={19} color={c.muted2} />
+        </View>
+      </TopBar>
 
-      <View style={s.inner}>
-      <TextInput
-        style={s.search}
-        placeholder="Search opportunities"
-        placeholderTextColor={c.muted2}
-        value={q}
-        onChangeText={setQ}
-      />
-
-      <View style={s.chips}>
-        {FILTERS.map((f) => (
-          <TouchableOpacity key={f} onPress={() => setFilter(f)} style={[s.chip, filter === f && s.chipOn]}>
-            <Text style={[s.chipText, filter === f && s.chipTextOn]}>{f}</Text>
-          </TouchableOpacity>
-        ))}
+      {/* Filters. */}
+      <View style={s.chipsWrap}>
+        <FlatList
+          horizontal
+          data={chips}
+          keyExtractor={(x) => x}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 16, gap: 8 }}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => setChip(item)} style={[s.chip, chip === item && s.chipOn]} activeOpacity={0.85}>
+              <Text style={[s.chipText, chip === item && s.chipTextOn]}>{item}</Text>
+            </TouchableOpacity>
+          )}
+          ListFooterComponent={sectorFilter ? (
+            <TouchableOpacity onPress={() => setSectorFilter(null)} style={[s.chip, s.chipSector]} activeOpacity={0.85}>
+              <Text style={[s.chipText, s.chipSectorText]}>{sectorMeta(sectorFilter).label}  ✕</Text>
+            </TouchableOpacity>
+          ) : null}
+        />
       </View>
 
       {loading ? (
@@ -85,39 +161,35 @@ export default function OpportunitiesScreen({ navigation }) {
         <FlatList
           data={visible}
           keyExtractor={(item, i) => String(item.id || i)}
-          renderItem={renderCard}
-          contentContainerStyle={{ paddingBottom: 24 }}
+          renderItem={({ item }) => (
+            <TenderCard tender={item} onPress={() => navigation.navigate('TenderDetail', { tender: item })} />
+          )}
+          ListHeaderComponent={header}
+          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.teal} />}
-          ListEmptyComponent={<View style={s.empty}><Text style={s.emptyText}>No tenders match that search.</Text></View>}
+          ListEmptyComponent={<View style={s.empty}><Text style={s.emptyText}>No tenders match that filter.</Text></View>}
         />
       )}
-      </View>
     </View>
   );
 }
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
-  inner: { flex: 1, paddingHorizontal: 16, paddingTop: 14 },
-  search: {
-    backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: c.ink, marginBottom: 10,
-  },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 7, marginBottom: 12 },
-  chip: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
-  chipOn: { backgroundColor: c.navy, borderColor: c.navy },
-  chipText: { fontSize: 12, fontWeight: '600', color: c.muted },
-  chipTextOn: { color: c.white },
-  card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 14, marginBottom: 10 },
-  cardTitle: { fontSize: 15, fontWeight: '700', color: c.navy, lineHeight: 20 },
-  cardOrg: { fontSize: 12, color: c.muted2, marginTop: 3 },
-  tagRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 9 },
-  tag: { backgroundColor: c.tealBg, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },
-  tagText: { fontSize: 11, fontWeight: '600', color: c.teal },
-  cardFoot: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 11, paddingTop: 10, borderTopWidth: 1, borderTopColor: c.line2 },
-  value: { fontSize: 16, fontWeight: '700', color: c.navy },
-  closing: { fontSize: 11, fontWeight: '700', color: c.amber },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 4, marginTop: 16 },
+  searchInput: { flex: 1, paddingVertical: 11, fontSize: 13.5, color: c.ink },
+  chipsWrap: { paddingVertical: 12, backgroundColor: c.bg },
+  chip: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 15, paddingVertical: 9 },
+  chipOn: { backgroundColor: c.teal, borderColor: c.teal },
+  chipText: { fontSize: 12.5, fontWeight: '700', color: c.muted },
+  chipTextOn: { color: '#fff' },
+  chipSector: { backgroundColor: c.navy, borderColor: c.navy, marginLeft: 8 },
+  chipSectorText: { color: '#fff' },
+  listHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, marginTop: 2 },
+  count: { fontSize: 14, fontWeight: '800', color: c.navy },
+  sort: { flexDirection: 'row', alignItems: 'center', gap: 3 },
+  sortText: { fontSize: 12.5, color: c.muted, fontWeight: '600' },
   empty: { padding: 30, alignItems: 'center' },
-  emptyText: { ...t.small, textAlign: 'center' },
+  emptyText: { fontSize: 13, color: c.muted, textAlign: 'center' },
 });

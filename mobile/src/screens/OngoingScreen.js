@@ -7,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { c } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import { useAuth } from '../auth';
-import { fetchOngoing, jobState, jobStageLabel, agoLabel } from '../api';
+import { fetchOngoing, jobState, jobStageLabel, agoLabel, orderRef } from '../api';
 
 /**
  * Everything this member has started, so a bid is never started twice and a
@@ -19,7 +19,7 @@ import { fetchOngoing, jobState, jobStageLabel, agoLabel } from '../api';
  */
 export default function OngoingScreen({ navigation }) {
   const { session } = useAuth();
-  const email = (session && session.user && session.user.email) || '';
+  const token = (session && session.access_token) || '';
 
   const [jobs, setJobs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +29,7 @@ export default function OngoingScreen({ navigation }) {
   const load = useCallback(async (isPull) => {
     if (isPull) setRefreshing(true);
     try {
-      setJobs(await fetchOngoing(email));
+      setJobs(await fetchOngoing(token));
       setError('');
     } catch (e) {
       setError('Could not load your bids. Pull down to try again.');
@@ -37,11 +37,15 @@ export default function OngoingScreen({ navigation }) {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [email]);
+  }, [token]);
 
-  // Refresh every time the tab is opened, so a bid that finished while they
-  // were elsewhere shows as ready without them doing anything.
-  useFocusEffect(useCallback(() => { load(false); }, [load]));
+  // Refresh on open, then keep it live: while the tab is focused, poll so a bid
+  // being written updates its stage and flips to ready on its own.
+  useFocusEffect(useCallback(() => {
+    load(false);
+    const id = setInterval(() => load(false), 10000);
+    return () => clearInterval(id);
+  }, [load]));
 
   function openJob(job) {
     const state = jobState(job);
@@ -75,7 +79,7 @@ export default function OngoingScreen({ navigation }) {
         onPress={() => openJob(item)}
       >
         <Text style={s.title}>{item.tender_title}</Text>
-        {!!item.org && <Text style={s.org}>{item.org}</Text>}
+        <Text style={s.ref}>{orderRef(item)}{item.org ? '  ·  ' + item.org : ''}</Text>
 
         {state === 'running' && (
           <View style={s.bar}><View style={s.barFill} /></View>
@@ -97,11 +101,29 @@ export default function OngoingScreen({ navigation }) {
   }
 
   const running = jobs.filter((j) => ['running', 'queued'].includes(jobState(j))).length;
+  const ready = jobs.filter((j) => jobState(j) === 'ready').length;
+
+  const stats = jobs.length > 0 ? (
+    <View style={s.stats}>
+      <View style={s.statCell}>
+        <Text style={s.statNum}>{running}</Text>
+        <Text style={s.statLabel}>Being written</Text>
+      </View>
+      <View style={s.statCell}>
+        <Text style={s.statNum}>{ready}</Text>
+        <Text style={s.statLabel}>Ready</Text>
+      </View>
+      <View style={s.statCell}>
+        <Text style={s.statNum}>{jobs.length}</Text>
+        <Text style={s.statLabel}>Total</Text>
+      </View>
+    </View>
+  ) : null;
 
   if (loading) {
     return (
       <View style={s.wrap}>
-        <ScreenHeader title="Ongoing tenders" subtitle="Everything you have started" />
+        <ScreenHeader title="My bids" subtitle="Everything you have started" />
         <View style={s.centre}><ActivityIndicator color={c.teal} /></View>
       </View>
     );
@@ -110,7 +132,7 @@ export default function OngoingScreen({ navigation }) {
   return (
     <View style={s.wrap}>
       <ScreenHeader
-        title="Ongoing tenders"
+        title="My bids"
         subtitle={running > 0
           ? running + (running === 1 ? ' bid being written' : ' bids being written')
           : 'Everything you have started'}
@@ -120,6 +142,7 @@ export default function OngoingScreen({ navigation }) {
         data={jobs}
         keyExtractor={(j) => String(j.id)}
         renderItem={renderItem}
+        ListHeaderComponent={stats}
         contentContainerStyle={{ padding: 13, paddingTop: 4, paddingBottom: 24, flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -142,14 +165,19 @@ const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
+  stats: { flexDirection: 'row', gap: 8, marginTop: 10, marginBottom: 2 },
+  statCell: { flex: 1, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 13, paddingVertical: 13, alignItems: 'center' },
+  statNum: { fontSize: 21, fontWeight: '800', color: c.navy, lineHeight: 24 },
+  statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3, color: c.muted2, marginTop: 4 },
+
   card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 13, marginTop: 10, gap: 7 },
   title: { fontSize: 14.5, fontWeight: '700', color: c.navy, lineHeight: 19 },
-  org: { fontSize: 11.5, color: c.muted2 },
+  ref: { fontSize: 11, color: c.muted2, fontWeight: '600', letterSpacing: 0.2 },
 
   bar: { height: 5, borderRadius: 3, backgroundColor: c.line, overflow: 'hidden', marginTop: 2 },
   // Indeterminate on purpose: the server records that a run is in progress but
   // not how far through it is, so a precise percentage would be invented.
-  barFill: { height: '100%', width: '45%', borderRadius: 3, backgroundColor: c.cyan },
+  barFill: { height: '100%', width: '45%', borderRadius: 3, backgroundColor: c.brand },
 
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
   chip: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },

@@ -92,7 +92,7 @@ export default function EvidenceScreen() {
           const st = stateOf(d);
           return (
             <View key={String(d.id)} style={s.doc}>
-              <View style={s.icon}><IconDoc size={17} color={c.teal} /></View>
+              <View style={s.icon}><IconDoc size={17} color={c.navy} /></View>
               <View style={{ flex: 1 }}>
                 <Text style={s.docName}>{docLabelOf(d)}</Text>
                 <Text style={s.docMeta}>{metaOf(d)}</Text>

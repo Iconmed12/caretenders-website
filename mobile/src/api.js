@@ -25,6 +25,48 @@ function isLive(t) {
   return t.status !== 'pending_review' && t.status !== 'rejected' && t.status !== 'Draft';
 }
 
+// ── sectors ──
+// Buckets used for the home tiles, filters and card tags. Colours mirror the
+// mockups. Every tender maps to exactly one bucket via sectorKeyOf().
+// Category is shown by icon + label, not colour. Every sector uses the same navy
+// icon on a neutral surface, keeping the interface restrained and premium.
+const SECTOR_INK = '#071A2F';
+const SECTOR_SURFACE = '#EFF3F6';
+export const SECTORS = [
+  { key: 'care', label: 'Care & Health', tag: 'CARE & HEALTH', color: SECTOR_INK, bg: SECTOR_SURFACE },
+  { key: 'facilities', label: 'Facilities Management', tag: 'FACILITIES MANAGEMENT', color: SECTOR_INK, bg: SECTOR_SURFACE },
+  { key: 'recruitment', label: 'Recruitment & HR', tag: 'RECRUITMENT & HR', color: SECTOR_INK, bg: SECTOR_SURFACE },
+  { key: 'construction', label: 'Construction & Property', tag: 'CONSTRUCTION & PROPERTY', color: SECTOR_INK, bg: SECTOR_SURFACE },
+  { key: 'it', label: 'IT & Technology', tag: 'IT & TECHNOLOGY', color: SECTOR_INK, bg: SECTOR_SURFACE },
+  { key: 'other', label: 'Other', tag: 'OPPORTUNITY', color: SECTOR_INK, bg: SECTOR_SURFACE },
+];
+
+export function sectorKeyOf(t) {
+  if (isCareTender(t)) return 'care';
+  const s = (String(t.category || '') + ' ' + String(t.title || '')).toLowerCase();
+  if (/\bict\b|\bit\b|digital|technolog|software|cyber|\bdata\b|network/.test(s)) return 'it';
+  if (/recruit|staffing|employ|\bhr\b|workforce|temporary staff|resourcing/.test(s)) return 'recruitment';
+  if (/facilit|cleaning|estate|catering|grounds|\bfm\b/.test(s)) return 'facilities';
+  if (/construc|building|refurb|property|\bworks\b|highway|civil/.test(s)) return 'construction';
+  return 'other';
+}
+
+export function sectorOf(t) {
+  const key = sectorKeyOf(t);
+  return SECTORS.find((x) => x.key === key) || SECTORS[SECTORS.length - 1];
+}
+
+export function sectorMeta(key) {
+  return SECTORS.find((x) => x.key === key) || SECTORS[SECTORS.length - 1];
+}
+
+// Recently added: within two weeks of when we first saw it.
+export function isNewTender(t) {
+  const d = new Date(t.published_date || t.created_at);
+  if (isNaN(d.getTime())) return false;
+  return (Date.now() - d.getTime()) <= 14 * 86400000;
+}
+
 export function daysUntil(dateStr) {
   if (!dateStr) return null;
   const d = new Date(dateStr);
@@ -66,16 +108,26 @@ export async function fetchTenders() {
  * Generation happens on the server, so this list is the truth about what is
  * happening. Closing the app does not stop a run and does not lose it.
  */
-export async function fetchOngoing(email) {
-  if (!email) return [];
+// The server takes the identity from the signed-in token, not from the body, so
+// a member can only ever see their own history. Pass the session access token.
+export async function fetchOngoing(token) {
+  if (!token) return [];
   const res = await fetch(`${API_BASE}/.netlify/functions/get-bid-history`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email }),
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: '{}',
   });
   if (!res.ok) throw new Error('Could not load your bids');
   const data = await res.json();
   return Array.isArray(data) ? data : [];
+}
+
+// A short, human order reference for a job, shown on the confirmation and in My
+// Bids so a member can quote it to us. Derived from the job id, stable per job.
+export function orderRef(job) {
+  const id = job && typeof job === 'object' ? (job.id != null ? job.id : job.jobId) : job;
+  const s = String(id == null ? '' : id).replace(/[^a-zA-Z0-9]/g, '');
+  return 'CB-' + (s.slice(-6).toUpperCase() || '000000');
 }
 
 // The server records a run as pending, processing, done or error. Everything
@@ -143,6 +195,39 @@ export async function fetchCompanyProfile(userId) {
   return (data && data[0]) || null;
 }
 
+// The shared legal entity belongs to the company owner, so an enterprise member
+// never writes these columns; their own department owns everything else. Mirrors
+// LEGAL_COLS in the website's profile.html.
+export const LEGAL_COLS = ['company_name', 'company_number', 'vat_number', 'founded_year', 'company_type', 'registered_address'];
+
+/**
+ * If the caller is an enterprise member, returns { role:'member', shared:{...},
+ * department, enterprise_name } so the app can lock the legal fields to the
+ * owner's values. Owners and solo users get role:'owner_or_solo'. Null on error.
+ */
+export async function fetchCompanyShared(token) {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/company-shared`, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
+}
+
+/**
+ * Save the company profile, exactly as the website does: upsert on user_id.
+ * Members do not write the shared legal columns, so those stay the owner's.
+ */
+export async function saveCompanyProfile(userId, data, isMember) {
+  const row = Object.assign({}, data, { user_id: userId, updated_at: new Date().toISOString() });
+  if (isMember) LEGAL_COLS.forEach((k) => { delete row[k]; });
+  const { error } = await supabase.from('company_profiles').upsert(row, { onConflict: 'user_id' });
+  if (error) throw new Error(error.message || 'Could not save your profile.');
+  return true;
+}
+
 // ── generation ──
 // The same two-step flow the website uses: member-start verifies membership and
 // creates the job, then generate-cana-background writes and emails the bid. The
@@ -202,6 +287,134 @@ export async function startGeneration(tender, user, token) {
   }).catch(() => {});
 
   return { jobId: data.jobId, email: data.email || user.email };
+}
+
+/**
+ * Membership for an email, via the same check-membership function the website
+ * uses (service key, so it works past row-level security, and it resolves
+ * enterprise members to the owner's plan). Returns { member, plan, ... } or null.
+ */
+export async function fetchMembership(email) {
+  if (!email) return null;
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/check-membership?email=${encodeURIComponent(email)}`);
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
+}
+
+// ── company invite (join an existing company) ──
+// An invited teammate joins the owner's company with no purchase, so this stays
+// inside App Store / Play rules. The invite email carries a link with ?token=,
+// which the app looks up, then creates the already-confirmed account.
+
+/** Pull the token out of a pasted invite link (or accept a bare token). */
+export function inviteTokenFrom(input) {
+  const s = String(input || '').trim();
+  if (!s) return '';
+  const m = s.match(/[?&]token=([^&\s]+)/i);
+  if (m) return decodeURIComponent(m[1]);
+  // A bare token: letters, numbers, dashes, no spaces or slashes.
+  if (/^[A-Za-z0-9._-]+$/.test(s)) return s;
+  return '';
+}
+
+/** Look up an invite. Returns { valid, email, department, enterprise_name, reason }. */
+export async function fetchInviteInfo(token) {
+  if (!token) return { valid: false, reason: 'not_found' };
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/enterprise-invite-info?token=${encodeURIComponent(token)}`);
+    if (!res.ok) return { valid: false, reason: 'error' };
+    return await res.json();
+  } catch (e) { return { valid: false, reason: 'error' }; }
+}
+
+/** Accept an invite and create the account. Throws with the server's message. */
+export async function acceptInvite({ token, firstName, lastName, password }) {
+  const res = await fetch(`${API_BASE}/.netlify/functions/enterprise-signup`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, firstName, lastName, password }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { const e = new Error(data.error || 'Could not create your account.'); e.existing = !!data.existing; throw e; }
+  return data; // { ok, email, enterprise, department }
+}
+
+// ── teams (company circle) ──
+// Mirrors the website's enterprise.js. Members see the roster read-only; the
+// owner sees an overview and can invite or remove seats. All access is via the
+// server (service key), since the tables are locked by row-level security.
+
+/**
+ * Returns { role:null } | { role:'member', enterprise, department, members } |
+ * { role:'owner', enterprise, seats_used, members }. Null on network error.
+ */
+export async function fetchTeam(token) {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/enterprise`, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
+}
+
+/** Owner actions: {action:'create',name} | {action:'invite',email,department} | {action:'remove',memberId}. */
+export async function teamAction(token, payload) {
+  const res = await fetch(`${API_BASE}/.netlify/functions/enterprise`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Something went wrong.');
+  return data;
+}
+
+// ── S.A.T (Send A Tender) ──
+// The customer pastes a tender link they cannot find on Cana; the team sources
+// it by hand. Same two functions the website uses. The monthly allowance is set
+// by plan (Access 1, Pro 3, Gold unlimited) and SHARED across a company circle,
+// and the server, not the app, enforces it.
+
+/** This account's S.A.T requests plus its allowance for the month. */
+export async function fetchTenderRequests(token) {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/tender-request-mine`, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
+}
+
+/** Send a new S.A.T request. Throws with the server's message on failure. */
+export async function createTenderRequest(token, { link, note, companyName }) {
+  const res = await fetch(`${API_BASE}/.netlify/functions/tender-request-create`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify({ link, note, companyName }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not send your request.');
+  return data;
+}
+
+// Plain-English labels for the status the admin sets on a request.
+const SAT_STATUS = {
+  new: { label: 'Received', tone: 'wait' },
+  sourcing: { label: 'Sourcing', tone: 'wait' },
+  sourced: { label: 'Added to Cana', tone: 'good' },
+  added: { label: 'Added to Cana', tone: 'good' },
+  done: { label: 'Added to Cana', tone: 'good' },
+  declined: { label: 'Not found', tone: 'off' },
+  rejected: { label: 'Not found', tone: 'off' },
+};
+export function satStatusOf(status) {
+  return SAT_STATUS[String(status || '').toLowerCase()] || { label: 'Received', tone: 'wait' };
 }
 
 /** Poll a job's status. Returns the raw status string ('pending' if unknown). */

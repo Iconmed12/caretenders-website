@@ -1,22 +1,25 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Image,
+  View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView, ActivityIndicator, Alert,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { c } from '../theme';
 import { supabase, friendlyAuthError } from '../auth';
-import { IconEye, IconEyeOff } from '../icons';
+import Wordmark from '../components/Wordmark';
+import { IconEye, IconEyeOff, IconMail, IconLock, IconArrowRight, IconBank } from '../icons';
 
 /**
- * The front door. Cana Bids is members only, so this is the whole app until
- * someone signs in.
+ * The front door. Cana Bids is members only.
  *
- * Deliberately no "sign up" or "see pricing" button. Accounts are bought on the
- * website. Keeping purchase out of the app is what keeps the Apple and Google
- * commission at zero, so do not add a buy link here without checking the store
- * rules first.
+ * Deliberately no "create account" / buy button: paid accounts are set up on the
+ * website, and keeping purchase out of the app is what keeps the Apple and Google
+ * commission at zero. "Continue with company invite" is a FREE join (a seat on an
+ * owner's plan), so it is allowed. Do not add a buy link here without checking the
+ * store rules first.
  */
-export default function SignInScreen() {
+export default function SignInScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,12 +32,7 @@ export default function SignInScreen() {
     if (!canSubmit) return;
     setBusy(true);
     setError('');
-    const { error: err } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password,
-    });
-    // On success the auth listener swaps this screen out, so there is nothing
-    // to do here but clear the spinner if it failed.
+    const { error: err } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (err) {
       setError(friendlyAuthError(err));
       setBusy(false);
@@ -43,139 +41,134 @@ export default function SignInScreen() {
 
   async function forgotPassword() {
     const addr = email.trim();
-    if (!addr) {
-      setError('Enter your email address first, then tap Forgot password.');
-      return;
-    }
+    if (!addr) { setError('Enter your email address first, then tap Forgot password.'); return; }
     setBusy(true);
     setError('');
     const { error: err } = await supabase.auth.resetPasswordForEmail(addr);
     setBusy(false);
-    if (err) {
-      setError(friendlyAuthError(err));
-      return;
-    }
-    Alert.alert(
-      'Check your email',
-      'If there is a Cana Bids account for ' + addr + ', a link to set a new password is on its way.'
-    );
+    if (err) { setError(friendlyAuthError(err)); return; }
+    Alert.alert('Check your email', 'If there is a Cana Bids account for ' + addr + ', a link to set a new password is on its way.');
   }
 
   return (
-    <KeyboardAvoidingView
-      style={s.wrap}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
+    <KeyboardAvoidingView style={s.wrap} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
-        contentContainerStyle={s.scroll}
+        contentContainerStyle={[s.scroll, { paddingTop: Math.max(insets.top, 20) + 14, paddingBottom: Math.max(insets.bottom, 20) + 10 }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Image source={require('../../assets/logo-white.png')} style={s.logo} resizeMode="contain" />
-        <Text style={s.strap}>Bid on the Go</Text>
+        <Wordmark height={34} />
 
-        <View style={s.card}>
-          <Text style={s.label}>Email</Text>
+        <Text style={s.h1}>Welcome back</Text>
+        <Text style={s.sub}>Sign in to find opportunities, manage your bids and stay updated.</Text>
+
+        {/* Trust panel, matches the website's tone. */}
+        <View style={s.trust}>
+          <View style={s.trustIcon}><IconLock size={20} color={c.navy} /></View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.trustTitle}>Secure access to public sector opportunities</Text>
+            <Text style={s.trustBody}>Verified procurement access, tenders from across the UK.</Text>
+          </View>
+        </View>
+
+        <Text style={s.label}>EMAIL ADDRESS</Text>
+        <View style={s.field}>
+          <IconMail size={19} color={c.muted2} />
           <TextInput
-            style={s.input}
+            style={s.fieldInput}
             value={email}
             onChangeText={setEmail}
-            placeholder="you@yourcompany.co.uk"
+            placeholder="name@organisation.co.uk"
             placeholderTextColor={c.muted2}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
             textContentType="username"
-            returnKeyType="next"
             editable={!busy}
           />
+        </View>
 
-          <Text style={[s.label, { marginTop: 14 }]}>Password</Text>
-          <View style={s.passwordRow}>
-            <TextInput
-              style={s.passwordInput}
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Your password"
-              placeholderTextColor={c.muted2}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              textContentType="password"
-              returnKeyType="go"
-              onSubmitEditing={signIn}
-              editable={!busy}
-            />
-            <TouchableOpacity
-              onPress={() => setShowPassword((on) => !on)}
-              style={s.eye}
-              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              accessibilityRole="button"
-              accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
-            >
-              {showPassword
-                ? <IconEyeOff size={20} color={c.muted} />
-                : <IconEye size={20} color={c.muted2} />}
-            </TouchableOpacity>
-          </View>
-
-          {!!error && <Text style={s.error}>{error}</Text>}
-
+        <Text style={s.label}>PASSWORD</Text>
+        <View style={s.field}>
+          <IconLock size={19} color={c.muted2} />
+          <TextInput
+            style={s.fieldInput}
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            placeholderTextColor={c.muted2}
+            secureTextEntry={!showPassword}
+            autoCapitalize="none"
+            autoCorrect={false}
+            textContentType="password"
+            returnKeyType="go"
+            onSubmitEditing={signIn}
+            editable={!busy}
+          />
           <TouchableOpacity
-            style={[s.cta, !canSubmit && s.ctaOff]}
-            onPress={signIn}
-            disabled={!canSubmit}
-            activeOpacity={0.85}
+            onPress={() => setShowPassword((on) => !on)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            accessibilityRole="button"
+            accessibilityLabel={showPassword ? 'Hide password' : 'Show password'}
           >
-            {busy
-              ? <ActivityIndicator color="#04303a" />
-              : <Text style={s.ctaText}>Sign in</Text>}
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={forgotPassword} disabled={busy} activeOpacity={0.7}>
-            <Text style={s.forgot}>Forgot password</Text>
+            {showPassword ? <IconEyeOff size={19} color={c.muted} /> : <IconEye size={19} color={c.muted2} />}
           </TouchableOpacity>
         </View>
 
-        {/* Plain text on purpose, not a tappable link. See the note at the top. */}
-        <Text style={s.foot}>
-          Cana Bids is for members. Accounts are set up at getcana.co.uk
-        </Text>
+        <TouchableOpacity onPress={forgotPassword} disabled={busy} activeOpacity={0.7} style={s.forgotWrap}>
+          <Text style={s.forgot}>Forgot password?</Text>
+        </TouchableOpacity>
+
+        {!!error && <Text style={s.error}>{error}</Text>}
+
+        <TouchableOpacity style={[s.cta, !canSubmit && s.ctaOff]} onPress={signIn} disabled={!canSubmit} activeOpacity={0.85}>
+          {busy ? <ActivityIndicator color="#04303a" /> : (
+            <>
+              <Text style={s.ctaText}>Sign in</Text>
+              <IconArrowRight size={19} color="#04303a" />
+            </>
+          )}
+        </TouchableOpacity>
+
+        <View style={s.orRow}>
+          <View style={s.orLine} />
+          <Text style={s.orText}>or</Text>
+          <View style={s.orLine} />
+        </View>
+
+        <TouchableOpacity style={s.invite} activeOpacity={0.85} onPress={() => navigation.navigate('Join')}>
+          <IconBank size={20} color={c.navy} />
+          <Text style={s.inviteText}>Continue with company invite</Text>
+        </TouchableOpacity>
+
+        <Text style={s.foot}>New to Cana? Accounts are set up at getcana.co.uk</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: c.navy },
-  scroll: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  logo: { width: 168, height: 46, alignSelf: 'center' },
-  strap: { color: '#8fa7b8', fontSize: 13.5, textAlign: 'center', marginTop: 10, marginBottom: 26 },
-  card: { backgroundColor: c.white, borderRadius: 18, padding: 20 },
-  label: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5, color: c.muted2, marginBottom: 6 },
-  input: {
-    borderWidth: 1, borderColor: c.line, borderRadius: 12,
-    paddingHorizontal: 13, paddingVertical: 13,
-    fontSize: 15, color: c.ink, backgroundColor: c.white,
-  },
-  // The border moves to the row so the eye sits inside the field rather than
-  // beside it.
-  passwordRow: {
-    flexDirection: 'row', alignItems: 'center',
-    borderWidth: 1, borderColor: c.line, borderRadius: 12, backgroundColor: c.white,
-  },
-  passwordInput: {
-    flex: 1, paddingHorizontal: 13, paddingVertical: 13,
-    fontSize: 15, color: c.ink,
-  },
-  eye: { paddingHorizontal: 13, paddingVertical: 12 },
-  error: {
-    fontSize: 13, color: '#b4232a', backgroundColor: '#fdeaea',
-    borderRadius: 10, padding: 11, marginTop: 14, lineHeight: 18,
-  },
-  cta: { backgroundColor: c.cyan, borderRadius: 13, paddingVertical: 16, alignItems: 'center', marginTop: 18 },
+  wrap: { flex: 1, backgroundColor: c.white },
+  scroll: { flexGrow: 1, paddingHorizontal: 24 },
+  h1: { fontSize: 30, fontWeight: '800', color: c.navy, marginTop: 26, letterSpacing: -0.6 },
+  sub: { fontSize: 14.5, color: c.muted, marginTop: 8, lineHeight: 21 },
+  trust: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.tealBg, borderRadius: 15, padding: 15, marginTop: 22 },
+  trustIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#d3eef3', alignItems: 'center', justifyContent: 'center' },
+  trustTitle: { fontSize: 13.5, fontWeight: '800', color: c.navy, lineHeight: 18 },
+  trustBody: { fontSize: 12, color: c.muted, marginTop: 3, lineHeight: 16 },
+  label: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.6, color: c.muted2, marginTop: 22, marginBottom: 7 },
+  field: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: c.line, borderRadius: 13, paddingHorizontal: 13, backgroundColor: c.white },
+  fieldInput: { flex: 1, paddingVertical: 14, fontSize: 15, color: c.ink },
+  forgotWrap: { alignSelf: 'flex-end', marginTop: 12 },
+  forgot: { fontSize: 13, fontWeight: '700', color: c.teal },
+  error: { fontSize: 13, color: '#b4232a', backgroundColor: '#fdeaea', borderRadius: 10, padding: 11, marginTop: 14, lineHeight: 18 },
+  cta: { flexDirection: 'row', gap: 8, backgroundColor: c.brand, borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 18 },
   ctaOff: { opacity: 0.45 },
-  ctaText: { fontSize: 15, fontWeight: '700', color: '#04303a' },
-  forgot: { fontSize: 13, fontWeight: '600', color: c.teal, textAlign: 'center', marginTop: 16 },
-  foot: { fontSize: 12.5, color: '#7b93a5', textAlign: 'center', marginTop: 26, lineHeight: 19 },
+  ctaText: { fontSize: 15.5, fontWeight: '800', color: '#04303a' },
+  orRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 22 },
+  orLine: { flex: 1, height: 1, backgroundColor: c.line },
+  orText: { fontSize: 12.5, color: c.muted2, fontWeight: '600' },
+  invite: { flexDirection: 'row', gap: 10, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', marginTop: 22 },
+  inviteText: { fontSize: 14.5, fontWeight: '700', color: c.navy },
+  foot: { fontSize: 12.5, color: c.muted2, textAlign: 'center', marginTop: 20, lineHeight: 19 },
 });

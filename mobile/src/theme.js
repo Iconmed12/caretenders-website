@@ -1,20 +1,25 @@
 // Cana Bids design tokens. Mirrors the website so the app feels like the
 // same product.
+// Restrained, premium palette: mostly neutrals and navy, with teal reserved for
+// ACTION only (buttons + the Generate FAB). No rainbow category colours.
 export const c = {
-  navy: '#0b1929',
-  ink: '#1c3040',
-  cyan: '#00c9e0',
-  teal: '#0891a3',
-  muted: '#5b6b78',
-  muted2: '#93a6b1',
-  line: '#e9eff3',
-  line2: '#f2f6f8',
-  bg: '#f4f8fa',
-  white: '#ffffff',
-  good: '#0e9f6e',
-  goodBg: '#e6f8ef',
-  amber: '#e8912b',
-  tealBg: '#e7f6f9',
+  navy: '#071A2F',     // primary navy (headings, icons)
+  navy2: '#10283F',    // deep secondary navy
+  ink: '#0B1F33',      // main body text
+  cyan: '#00C9E0',     // LOGO ONLY (brand mandate: the "Bids" mark)
+  teal: '#00AFC1',     // Cana teal, used only for action
+  // Buttons and the Generate FAB use the action teal, so they all match.
+  brand: '#00AFC1',
+  muted: '#667487',    // secondary text
+  muted2: '#9AA7B3',   // hints, meta, captions
+  line: '#E4E9EE',     // hairline borders
+  line2: '#EFF2F5',    // lighter dividers
+  bg: '#F7F9FA',       // premium off white page background
+  white: '#FFFFFF',
+  good: '#0E9F6E',     // status: complete
+  goodBg: '#E6F8EF',
+  amber: '#B7791F',    // status: urgency / warning
+  tealBg: '#EFF3F6',   // neutral light surface (was a teal tint; now grey)
 };
 
 export const t = {
