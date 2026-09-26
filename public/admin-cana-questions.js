@@ -96,8 +96,9 @@ function showToast(msg,type){
 
 
 
-// Stay logged in across refreshes
-document.addEventListener('DOMContentLoaded', function(){ loadTenders(); });
+// Tenders are loaded by showAdminApp() once the admin session is confirmed, so
+// we do not call loadTenders() here: doing it on DOMContentLoaded ran before the
+// admin token was set and caused a "Could not load tenders" error.
 
   // ── SELECTION QUESTIONNAIRE UPLOAD ──────────────────────────────
   var sqSelectedFile = null;

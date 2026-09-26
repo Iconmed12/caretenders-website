@@ -342,9 +342,15 @@ async function saveCanaDocs() {
 // Auto-login on page load
 
 async function loadTenders(){
+  // The admin scope needs a signed-in token. If we are not authed yet (e.g. this
+  // ran before login finished), skip quietly; showAdminApp() calls this again
+  // once the token is set.
+  if (!window._adminToken) return;
   try{
     const res=await fetch(API+'/get-tenders?scope=all',{ headers: (typeof adminHeaders==='function'?adminHeaders():{}) });
-    allTenders=await res.json()||[];
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data=await res.json();
+    allTenders=Array.isArray(data)?data:[];
     // Sync nextId to avoid overwriting existing tenders
     allTenders.forEach(function(t){
       var m=t.id&&t.id.match(/(\d+)$/);
