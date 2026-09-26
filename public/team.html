@@ -53,8 +53,8 @@
  .panel p{font-size:13.5px;color:var(--muted);margin-bottom:16px}
  .field{margin-bottom:12px}
  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--navy);margin-bottom:5px}
- .field input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 12px;font-size:14px;font-family:inherit}
- .field input:focus{outline:none;border-color:var(--teal)}
+ .field input,.field select{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 12px;font-size:14px;font-family:inherit;background:#fff;color:var(--navy)}
+ .field input:focus,.field select:focus{outline:none;border-color:var(--teal)}
  .msg{font-size:13px;margin-top:10px}
  .inv-row{display:grid;grid-template-columns:1.4fr 1fr auto;gap:10px;align-items:end}
  @media(max-width:640px){.inv-row{grid-template-columns:1fr}}
@@ -123,7 +123,16 @@
         <p>Send an invite link. They create their own login and join your circle.</p>
         <div class="inv-row">
           <div class="field" style="margin:0"><label>Email address</label><input id="inv-email" type="email" placeholder="michael@icongroup.co.uk"></div>
-          <div class="field" style="margin:0"><label>Department</label><input id="inv-dept" placeholder="Logistics"></div>
+          <div class="field" style="margin:0"><label>Department</label><select id="inv-dept">
+            <option value="">Select a department (optional)</option>
+            <option>Care &amp; Health</option>
+            <option>Facilities Management</option>
+            <option>Recruitment &amp; HR</option>
+            <option>Construction &amp; Property</option>
+            <option>IT &amp; Technology</option>
+            <option>Professional Services</option>
+            <option>Other</option>
+          </select></div>
           <button class="btn" id="inv-btn">Send invite</button>
         </div>
         <div class="msg" id="inv-msg"></div>
