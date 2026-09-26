@@ -3,7 +3,8 @@
 // server-side so the bypass cannot be forged from the browser.
 
 const { checkRate, checkKey, tooMany } = require('./_rate-limit');
-const { memberInfo, enterpriseSeatOwner, companyProfileByUser } = require('./_membership');
+const { memberInfo, enterpriseSeatOwner, companyProfileByUser, enterpriseScope } = require('./_membership');
+const { limitsFor, countReviewUsage, recordReviewUsage } = require('./_reviews');
 
 exports.handler = async (event) => {
   const cors = {
@@ -16,7 +17,7 @@ exports.handler = async (event) => {
   if (!(await checkRate(event, 'member-start', 8, 60))) return tooMany(cors);
 
   try {
-    const { companyDetails, tenderId, includeSq, accessToken, wantsReview, reviewSessionId } = JSON.parse(event.body);
+    const { companyDetails, tenderId, includeSq, accessToken, wantsReview, reviewSessionId, includedReview } = JSON.parse(event.body);
     const email = (companyDetails && companyDetails.email || '').trim().toLowerCase();
     if (!email || !tenderId) {
       return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing email or tender' }) };
@@ -74,6 +75,8 @@ exports.handler = async (event) => {
     // it is paid, is a review product, and is for THIS tender. This closes the
     // hole where someone could hit the return URL without paying.
     var verifiedTier = 'none';
+    var reviewScope = null;   // 'response' | 'full' for an included expert review
+    var reviewSource = null;  // 'included' when covered by the plan, else paid
     if (wantsReview) {
       if (!reviewSessionId) {
         return { statusCode: 402, headers: cors, body: JSON.stringify({ error: 'Add-on payment was not found. Please try again or email hello@getcana.co.uk' }) };
@@ -90,6 +93,26 @@ exports.handler = async (event) => {
         return { statusCode: 402, headers: cors, body: JSON.stringify({ error: 'Add-on payment could not be confirmed. If you were charged, email hello@getcana.co.uk with your reference.' }) };
       }
       verifiedTier = (sess.metadata.tier === 'review_docs') ? 'review_docs' : 'review';
+      reviewSource = 'paid';
+    } else if (includedReview === 'response' || includedReview === 'full') {
+      // Plan-included expert review: FREE, capped per month, shared across the
+      // company. No Stripe. Document completion is never included, so this only
+      // ever flags an expert review (tier 'review').
+      var plan = (mem.sub && mem.sub.plan) || null;
+      var limit = (limitsFor(plan)[includedReview]) || 0;
+      if (limit <= 0) {
+        return { statusCode: 403, headers: cors, body: JSON.stringify({ error: 'Your plan does not include this review. You can add it on getcana.co.uk.' }) };
+      }
+      var scope = await enterpriseScope(email);
+      var scopeEmails = scope && scope.emails && scope.emails.length ? scope.emails : null;
+      var used = await countReviewUsage(scopeEmails, userData.id, includedReview, svcKey);
+      if (used >= limit) {
+        return { statusCode: 429, headers: cors, body: JSON.stringify({ error: 'You have used your included ' + (includedReview === 'full' ? 'full tender reviews' : 'response reviews') + ' for this month. You can add more on getcana.co.uk.', limitReached: true }) };
+      }
+      await recordReviewUsage({ email: email, user_id: userData.id, tender_id: tenderId, review_type: includedReview }, svcKey);
+      verifiedTier = 'review';
+      reviewScope = includedReview;
+      reviewSource = 'included';
     }
 
     // ── Daily anti-extraction cap: at most 10 DISTINCT tenders per member per
@@ -132,6 +155,8 @@ exports.handler = async (event) => {
         includeSq: !!includeSq,
         wantsReview: verifiedTier !== 'none',
         tier: verifiedTier,
+        reviewScope: reviewScope,
+        reviewSource: reviewSource,
         companyDetails: effectiveCo
       })
     };

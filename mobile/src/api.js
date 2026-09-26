@@ -259,19 +259,23 @@ export function memberCompanyDetails(profile, email) {
  * Start a real generation for a member. Returns the job id to poll. Throws with
  * the server's message on failure (e.g. no active membership).
  */
-export async function startGeneration(tender, user, token) {
+export async function startGeneration(tender, user, token, includedReview) {
   const profile = await fetchCompanyProfile(user.id);
   const companyDetails = memberCompanyDetails(profile, user.email);
 
   const msRes = await fetch(`${API_BASE}/.netlify/functions/member-start`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ tenderId: tender.id, includeSq: false, companyDetails, accessToken: token, wantsReview: false }),
+    body: JSON.stringify({
+      tenderId: tender.id, includeSq: false, companyDetails, accessToken: token,
+      wantsReview: false, includedReview: includedReview || null,
+    }),
   });
   const data = await msRes.json().catch(() => ({}));
   if (!msRes.ok) throw new Error(data.error || 'Could not start generation.');
 
-  // Kick off the background writer (returns quickly; it runs on the server).
+  // Kick off the background writer (returns quickly; it runs on the server). Pass
+  // through whatever review the server confirmed, so the ops team is told the scope.
   await fetch(`${API_BASE}/.netlify/functions/generate-cana-background`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -280,13 +284,27 @@ export async function startGeneration(tender, user, token) {
       tenderId: data.tenderId || tender.id,
       sessionId: 'member_' + data.jobId,
       includeSq: false,
-      wantsReview: false,
-      tier: 'none',
+      wantsReview: !!data.wantsReview,
+      tier: data.tier || 'none',
+      reviewScope: data.reviewScope || null,
+      reviewSource: data.reviewSource || null,
       companyDetails: data.companyDetails || companyDetails,
     }),
   }).catch(() => {});
 
-  return { jobId: data.jobId, email: data.email || user.email };
+  return { jobId: data.jobId, email: data.email || user.email, tier: data.tier || 'none', reviewScope: data.reviewScope || null };
+}
+
+/** The member's included-review allowance this month (per type), or null. */
+export async function fetchReviewAllowance(token) {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/review-allowance`, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
 }
 
 /**

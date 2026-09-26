@@ -1,10 +1,15 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Linking } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { c, t } from '../theme';
-import { valueCompact, daysUntil, fetchOngoing, jobState } from '../api';
+import { valueCompact, daysUntil, fetchOngoing, jobState, fetchReviewAllowance } from '../api';
 import { useAuth } from '../auth';
 import { IconBars, IconClock, IconShield, IconPin } from '../icons';
+
+const REVIEW_OPTIONS = [
+  { key: 'full', title: 'Full tender review', body: 'A Cana expert reviews your whole bid.' },
+  { key: 'response', title: 'Response review', body: 'An expert reviews a specific response or section.' },
+];
 
 // Placeholder question set. Once the tender's own questions are stored against
 // the record, this reads them from the tender instead.
@@ -28,6 +33,8 @@ export default function TenderDetailScreen({ route, navigation }) {
   // We block a NEW run only while one is actively running. A finished bid does
   // not stop them generating again (e.g. a fresh version later).
   const [mine, setMine] = useState([]);
+  const [allowance, setAllowance] = useState(null);
+  const [review, setReview] = useState(null); // 'response' | 'full' | null
   // Stays false until the first check returns, so the footer shows a spinner
   // rather than flashing the wrong button. It is not reset on later focuses.
   const [checked, setChecked] = useState(false);
@@ -41,6 +48,7 @@ export default function TenderDetailScreen({ route, navigation }) {
         setChecked(true);
       })
       .catch(() => { if (alive) { setMine([]); setChecked(true); } });
+    fetchReviewAllowance(token).then((a) => { if (alive) setAllowance(a); });
     return () => { alive = false; };
   }, [token, tender.id]));
 
@@ -49,7 +57,8 @@ export default function TenderDetailScreen({ route, navigation }) {
 
   function seeProgress() { navigation.getParent()?.navigate('Ongoing'); }
   function viewBid() { navigation.navigate('BidReady', { tender }); }
-  function generate() { navigation.navigate('Generating', { tender }); }
+  function generate() { navigation.navigate('Generating', { tender, includedReview: review }); }
+  function openPlans() { Linking.openURL('https://getcana.co.uk/plans.html').catch(() => {}); }
 
   const days = daysUntil(tender.deadline);
   const closesValue = days == null ? '—' : days < 0 ? 'Closed' : days === 0 ? 'Today' : days + (days === 1 ? ' day' : ' days');
@@ -90,6 +99,50 @@ export default function TenderDetailScreen({ route, navigation }) {
             <Text style={s.qText}>{typeof q === 'string' ? q : q.title || q.question}</Text>
           </View>
         ))}
+
+        {checked && !runningJob && (
+          <View style={s.reviewBlock}>
+            <Text style={s.secTitle}>ADD AN EXPERT REVIEW</Text>
+            <Text style={s.reviewIntro}>A Cana expert checks your bid before you submit.</Text>
+
+            <TouchableOpacity style={[s.revRow, review === null && s.revRowOn]} activeOpacity={0.85} onPress={() => setReview(null)}>
+              <View style={[s.radio, review === null && s.radioOn]} />
+              <View style={{ flex: 1 }}>
+                <Text style={s.revTitle}>No review</Text>
+                <Text style={s.revBody}>Generate the bid on its own.</Text>
+              </View>
+            </TouchableOpacity>
+
+            {REVIEW_OPTIONS.map((opt) => {
+              const box = allowance && allowance[opt.key];
+              const included = !!(box && box.limit > 0);
+              const remaining = box ? box.remaining : 0;
+              const available = included && remaining > 0;
+              const selected = review === opt.key;
+              return (
+                <TouchableOpacity
+                  key={opt.key}
+                  style={[s.revRow, selected && s.revRowOn, !available && s.revRowOff]}
+                  activeOpacity={0.85}
+                  onPress={() => (available ? setReview(opt.key) : openPlans())}
+                >
+                  <View style={[s.radio, selected && s.radioOn]} />
+                  <View style={{ flex: 1 }}>
+                    <View style={s.revHead}>
+                      <Text style={s.revTitle}>{opt.title}</Text>
+                      {available
+                        ? <View style={s.revBadge}><Text style={s.revBadgeText}>{remaining} left this month</Text></View>
+                        : included
+                          ? <Text style={s.revNote}>Used this month</Text>
+                          : <Text style={s.revNote}>Add on website</Text>}
+                    </View>
+                    <Text style={s.revBody}>{opt.body}</Text>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
       </ScrollView>
 
       <View style={s.footer}>
@@ -109,14 +162,14 @@ export default function TenderDetailScreen({ route, navigation }) {
                 <Text style={[s.ctaText, s.ctaQuietText]}>View your bid</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[s.cta, s.half]} activeOpacity={0.85} onPress={generate}>
-                <Text style={s.ctaText}>Generate</Text>
+                <Text style={s.ctaText}>{review ? 'Generate with review' : 'Generate'}</Text>
               </TouchableOpacity>
             </View>
             <Text style={s.ctaNote}>You have already generated a bid. You can generate a fresh one any time.</Text>
           </>
         ) : (
           <TouchableOpacity style={s.cta} activeOpacity={0.85} onPress={generate}>
-            <Text style={s.ctaText}>Generate responses</Text>
+            <Text style={s.ctaText}>{review ? 'Generate with review' : 'Generate responses'}</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -146,4 +199,17 @@ const s = StyleSheet.create({
   ctaNote: { fontSize: 11.5, color: c.muted2, textAlign: 'center', marginTop: 9 },
   btnRow: { flexDirection: 'row', gap: 10 },
   half: { flex: 1 },
+  reviewBlock: { marginTop: 4 },
+  reviewIntro: { fontSize: 12.5, color: c.muted, marginTop: -2, marginBottom: 12, lineHeight: 18 },
+  revRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 11, borderWidth: 1, borderColor: c.line, borderRadius: 12, padding: 13, marginBottom: 10 },
+  revRowOn: { borderColor: c.teal, backgroundColor: '#F5FDFE' },
+  revRowOff: { opacity: 0.75 },
+  radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: '#C9D2DA', marginTop: 1 },
+  radioOn: { borderColor: c.teal, borderWidth: 6 },
+  revHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  revTitle: { fontSize: 14, fontWeight: '700', color: c.navy, flexShrink: 1 },
+  revBody: { fontSize: 12, color: c.muted, marginTop: 3, lineHeight: 16 },
+  revBadge: { backgroundColor: c.goodBg, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 },
+  revBadgeText: { fontSize: 10, fontWeight: '800', color: c.good },
+  revNote: { fontSize: 11, fontWeight: '700', color: c.teal },
 });

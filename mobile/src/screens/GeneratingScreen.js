@@ -42,6 +42,7 @@ function activeStepFor(phase, status) {
 
 export default function GeneratingScreen({ route, navigation }) {
   const tender = (route.params && route.params.tender) || {};
+  const includedReview = (route.params && route.params.includedReview) || null;
   const { session } = useAuth();
   const user = (session && session.user) || {};
   const token = (session && session.access_token) || '';
@@ -79,7 +80,7 @@ export default function GeneratingScreen({ route, navigation }) {
           return;
         }
 
-        const { jobId } = await startGeneration(tender, user, token);
+        const { jobId } = await startGeneration(tender, user, token, includedReview);
         if (!alive) return;
         jobRef.current = jobId;
         setRef(orderRef(jobId));
@@ -151,6 +152,11 @@ export default function GeneratingScreen({ route, navigation }) {
             <Text style={s.confirmBody}>
               This is now running on our servers. You can close the app. We will email you when it is ready, and you can track it under My Bids.
             </Text>
+            {!!includedReview && (
+              <Text style={s.confirmReview}>
+                {includedReview === 'full' ? 'Full tender review' : 'Response review'} added. A Cana expert will check it before you submit.
+              </Text>
+            )}
           </View>
         )}
 
@@ -233,6 +239,7 @@ const s = StyleSheet.create({
   refPill: { backgroundColor: '#fff', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   refText: { fontSize: 12, fontWeight: '800', color: c.good, letterSpacing: 0.5 },
   confirmBody: { fontSize: 12.5, color: c.ink, marginTop: 6, lineHeight: 18 },
+  confirmReview: { fontSize: 12.5, color: c.good, fontWeight: '700', marginTop: 8, lineHeight: 18 },
 
   card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 16, marginTop: 14 },
   cardTitle: { fontSize: 17, fontWeight: '800', color: c.navy },

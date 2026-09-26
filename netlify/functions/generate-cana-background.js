@@ -83,7 +83,7 @@ exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body || '{}');
     jobId = body.jobId;
-    const { tenderId, companyDetails, sessionId, includeSq, wantsReview, tier, lotName, lotRef } = body;
+    const { tenderId, companyDetails, sessionId, includeSq, wantsReview, tier, lotName, lotRef, reviewScope, reviewSource } = body;
 
     if (!jobId) return;
 
@@ -888,8 +888,18 @@ exports.handler = async (event) => {
         subjectPrefix = 'REVIEW + DOC COMPLETION: ';
         banner = '<div style="background:#fee2e2;border:2px solid #dc2626;border-radius:8px;padding:14px 16px;margin-bottom:16px;color:#991b1b;font-weight:700;">REVIEW + DOCUMENT COMPLETION PURCHASED (£1,000 add-on). The client has paid for us to: (1) review and sharpen their responses, AND (2) complete their SQ and all other required tender documents, EXCLUDING pricing. Documents are attached. Please action within agreed turnaround.</div>';
       } else if (orderTier === 'review') {
-        subjectPrefix = 'REVIEW REQUESTED: ';
-        banner = '<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#92400e;font-weight:700;">EXPERT REVIEW PURCHASED: please review and sharpen the attached responses against the scoring criteria within 48 hours.</div>';
+        if (reviewSource === 'included') {
+          // Free with the member's plan (no payment). Scope tells the team how
+          // wide to review: a specific response/section, or the whole bid.
+          var scopeLine = (reviewScope === 'full')
+            ? 'FULL TENDER REVIEW (included with plan): please review and sharpen the WHOLE bid against the scoring criteria within 48 hours.'
+            : 'RESPONSE REVIEW (included with plan): please review and sharpen the responses against the scoring criteria within 48 hours.';
+          subjectPrefix = (reviewScope === 'full' ? 'FULL REVIEW (plan): ' : 'RESPONSE REVIEW (plan): ');
+          banner = '<div style="background:#e7f6f9;border:1px solid #0891a3;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#075e6b;font-weight:700;">' + scopeLine + '</div>';
+        } else {
+          subjectPrefix = 'REVIEW REQUESTED: ';
+          banner = '<div style="background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px 16px;margin-bottom:16px;color:#92400e;font-weight:700;">EXPERT REVIEW PURCHASED: please review and sharpen the attached responses against the scoring criteria within 48 hours.</div>';
+        }
       } else {
         subjectPrefix = 'New: ';
         banner = '';
