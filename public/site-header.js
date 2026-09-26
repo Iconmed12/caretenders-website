@@ -59,6 +59,7 @@
     return out;
   }
   function setAuth(html) { var a = document.getElementById('nav-right'); if (a) a.innerHTML = html; }
+  function removeOldNavs() { document.querySelectorAll('nav').forEach(function (n) { if (!n.classList.contains('ch-nav')) n.remove(); }); }
 
   function build() {
     if (document.getElementById('cana-header')) return;
@@ -68,7 +69,7 @@
     header.id = 'cana-header';
     header.innerHTML = '<nav class="ch-nav">' + logo + links + '<div class="ch-auth" id="nav-right">' + loggedOutHTML() + '</div></nav>';
     document.body.insertBefore(header, document.body.firstChild);
-    document.querySelectorAll('nav').forEach(function (n) { if (!n.classList.contains('ch-nav')) n.remove(); });
+    removeOldNavs();
 
     // Instant render from cache so a returning member never sees the wrong state.
     try { var c = JSON.parse(localStorage.getItem('cana_nav') || 'null'); if (c && c.signedIn) setAuth(memberHTML(c.member ? (c.plan || null) : false)); } catch (e) {}
@@ -120,4 +121,7 @@
 
   if (document.body) build();
   else document.addEventListener('DOMContentLoaded', build);
+  // Old page navs are parsed after this script (when it loads at the top of body),
+  // so sweep them again once the document is ready.
+  document.addEventListener('DOMContentLoaded', removeOldNavs);
 })();
