@@ -167,6 +167,7 @@ exports.handler = async (event) => {
     if (action === 'delete') {
       const id = String(body.id || '').trim();
       const email = String(body.email || '').trim().toLowerCase();
+      const mode = String(body.mode || 'login').toLowerCase(); // 'login' | 'full'
       if (!id) return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Missing user id' }) };
 
       // Never let an owner delete themselves out of the system.
@@ -186,16 +187,36 @@ exports.handler = async (event) => {
         return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'That is an owner account and cannot be deleted here' }) };
       }
 
+      // Permanent delete: wipe the person's working data so nothing re-attaches
+      // if the same email signs up again. Billing rows are KEPT for tax, but
+      // marked cancelled so they no longer grant membership. Best effort per
+      // table so one failure does not block the rest.
+      if (mode === 'full') {
+        const minimal = Object.assign({ Prefer: 'return=minimal' }, svcHeaders);
+        const del = function (path) { return fetch(SB_URL + path, { method: 'DELETE', headers: minimal }).catch(function () {}); };
+        // Keep subscription rows (billing record) but cancel them.
+        await fetch(SB_URL + '/rest/v1/subscriptions?email=eq.' + encodeURIComponent(email), {
+          method: 'PATCH', headers: minimal, body: JSON.stringify({ status: 'cancelled', updated_at: new Date().toISOString() })
+        }).catch(function () {});
+        await del('/rest/v1/cana_jobs?client_email=eq.' + encodeURIComponent(email));
+        await del('/rest/v1/company_profiles?user_id=eq.' + encodeURIComponent(id));
+        await del('/rest/v1/vault_documents?user_id=eq.' + encodeURIComponent(id));
+        await del('/rest/v1/enterprise_members?email=eq.' + encodeURIComponent(email));
+        await del('/rest/v1/enterprise_invites?email=eq.' + encodeURIComponent(email));
+        await del('/rest/v1/tender_requests?email=eq.' + encodeURIComponent(email));
+        await del('/rest/v1/review_usage?email=eq.' + encodeURIComponent(email));
+      }
+
       const r = await fetch(SB_URL + '/auth/v1/admin/users/' + encodeURIComponent(id), { method: 'DELETE', headers: svcHeaders });
       if (!r.ok) {
         const t = await r.text();
         return { statusCode: 502, headers: cors, body: JSON.stringify({ error: 'Could not delete user', detail: t.slice(0, 160) }) };
       }
 
-      // Subscription rows are deliberately left in place: they are the billing
-      // record. Deleting the login does not cancel Stripe billing.
-      try { await logAudit(event, 'admin-users:user_deleted', { email: email, id: id }); } catch (e) {}
-      return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, deleted: email || id }) };
+      // Login-only delete leaves records in place (billing history stays). Deleting
+      // the login never cancels Stripe billing either way.
+      try { await logAudit(event, 'admin-users:user_deleted', { email: email, id: id, mode: mode }); } catch (e) {}
+      return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, deleted: email || id, mode: mode }) };
     }
 
     if (action === 'set-membership') {

@@ -136,33 +136,58 @@ async function loadUsers() {
   }
 }
 
-async function deleteUser(id, email, isMember, btn) {
+function deleteUser(id, email, isMember) {
   if (!id) return;
+  ensureMemStyles();
+  closeMembershipModal();
+  var esc = String(email || '').replace(/'/g, "\\'");
+  var warn = isMember
+    ? '<div style="background:#fff4e2;border:1px solid #f0c98a;border-radius:8px;padding:10px 12px;font-size:12.5px;color:#8a5a12;line-height:1.5;margin-bottom:14px">This person is an active member. Deleting the login does not cancel Stripe billing, so cancel their subscription in Stripe first if they pay by card.</div>'
+    : '';
+  var o = document.createElement('div');
+  o.className = 'mm-overlay';
+  o.id = 'mm-overlay';
+  o.innerHTML =
+    '<div class="mm-card">' +
+      '<div class="mm-head"><button class="mm-x" onclick="closeMembershipModal()">&times;</button>' +
+        '<h3>Delete user</h3><p>' + email + '</p></div>' +
+      '<div class="mm-body">' + warn +
+        '<div style="border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:12px">' +
+          '<div style="font-weight:700;margin-bottom:4px">Delete login only</div>' +
+          '<div style="font-size:12.5px;color:var(--text-light);line-height:1.5;margin-bottom:10px">Removes their sign-in but keeps all their records (bids, membership history). If the same email signs up again, that data re-attaches.</div>' +
+          '<button class="mm-save" style="width:100%" onclick="doDelete(\'' + id + '\',\'' + esc + '\',\'login\')">Delete login only</button>' +
+        '</div>' +
+        '<div style="border:1px solid #f0c2c2;border-radius:10px;padding:14px;background:#fff8f8">' +
+          '<div style="font-weight:700;color:#c53030;margin-bottom:4px">Delete permanently</div>' +
+          '<div style="font-size:12.5px;color:var(--text-light);line-height:1.5;margin-bottom:10px">Removes the login AND wipes their data: bids, company profile, evidence documents, S.A.T requests, team seat and review usage. Billing/invoice rows are kept (marked cancelled) for tax. This cannot be undone.</div>' +
+          '<label style="font-size:12px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:6px">Type the email to confirm</label>' +
+          '<input id="del-confirm" placeholder="' + email + '" autocomplete="off" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-family:inherit;font-size:14px;margin-bottom:10px">' +
+          '<button class="mm-down" style="width:100%" onclick="doDelete(\'' + id + '\',\'' + esc + '\',\'full\')">Delete permanently</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  o.addEventListener('click', function (e) { if (e.target === o) closeMembershipModal(); });
+  document.body.appendChild(o);
+}
 
-  var warning = 'Permanently delete ' + email + '?\n\n' +
-    'This removes their login for good. It cannot be undone and they would have to sign up again.';
-  if (isMember) {
-    warning += '\n\nWARNING: this person is an ACTIVE MEMBER. Deleting the login does NOT cancel their Stripe billing, ' +
-               'so cancel their subscription in Stripe first or they may keep being charged.';
+async function doDelete(id, email, mode) {
+  var m = document.getElementById('mm-overlay');
+  if (mode === 'full') {
+    var typed = ((m && m.querySelector('#del-confirm') || {}).value || '').trim().toLowerCase();
+    if (typed !== String(email).toLowerCase()) { alert('Type the email exactly to confirm permanent deletion.'); return; }
+    if (!confirm('Permanently delete ' + email + ' and all their data? This cannot be undone.')) return;
+  } else {
+    if (!confirm('Delete the login for ' + email + '? Their records are kept.')) return;
   }
-  warning += '\n\nTheir billing history is kept for your records.';
-  if (!confirm(warning)) return;
-
-  var typed = prompt('To confirm, type the email address exactly:\n\n' + email);
-  if (typed === null) return;
-  if (String(typed).trim().toLowerCase() !== String(email).trim().toLowerCase()) {
-    alert('That did not match, so nothing was deleted.');
-    return;
-  }
-
-  var original = btn ? btn.textContent : '';
+  var btn = m ? m.querySelector(mode === 'full' ? '.mm-down' : '.mm-save') : null;
   if (btn) { btn.disabled = true; btn.textContent = 'Deleting...'; }
   try {
-    await usersApi({ action: 'delete', id: id, email: email });
-    if (typeof showToast === 'function') showToast(email + ' deleted', 'success');
+    await usersApi({ action: 'delete', id: id, email: email, mode: mode });
+    if (typeof showToast === 'function') showToast(email + (mode === 'full' ? ' permanently deleted' : ' login deleted'), 'success');
+    closeMembershipModal();
     loadUsers();
   } catch (e) {
-    if (btn) { btn.disabled = false; btn.textContent = original; }
+    if (btn) { btn.disabled = false; btn.textContent = mode === 'full' ? 'Delete permanently' : 'Delete login only'; }
     if (typeof showToast === 'function') showToast(e.message, 'error'); else alert(e.message);
   }
 }
