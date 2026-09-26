@@ -17,7 +17,7 @@
     --muted:#6B8FA3; --border:rgba(11,25,41,0.09);
     --success:#38A169; --error:#E53E3E;
   }
-  body { font-family:'DM Sans',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; }
+  body { font-family:'Inter',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; }
 
   /* NAV */
   nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; border-bottom:1px solid rgba(255,255,255,0.06); position:sticky; top:0; z-index:100; }
@@ -33,7 +33,7 @@
   .nav-right { display:flex; align-items:center; gap:1rem; }
   .nav-user { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,0.8); font-size:0.88rem; }
   .nav-avatar { width:30px; height:30px; background:var(--teal); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; color:var(--navy); flex-shrink:0; }
-  .nav-signout { font-size:0.82rem; color:rgba(255,255,255,0.4); cursor:pointer; background:none; border:none; font-family:'DM Sans',sans-serif; transition:color 0.2s; }
+  .nav-signout { font-size:0.82rem; color:rgba(255,255,255,0.4); cursor:pointer; background:none; border:none; font-family:'Inter',sans-serif; transition:color 0.2s; }
   .nav-signout:hover { color:rgba(255,255,255,0.8); }
 
   /* LOADING */
@@ -75,7 +75,7 @@
   .form-label span { font-weight:400; color:var(--muted); }
   .form-input, .form-textarea, .form-select {
     padding:10px 13px; border:1.5px solid var(--border); border-radius:8px;
-    font-size:0.9rem; font-family:'DM Sans',sans-serif; color:var(--navy);
+    font-size:0.9rem; font-family:'Inter',sans-serif; color:var(--navy);
     outline:none; transition:border-color 0.2s, box-shadow 0.2s; background:var(--white); width:100%;
   }
   .form-input:focus, .form-textarea:focus, .form-select:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,201,224,0.07); }
@@ -86,7 +86,7 @@
   .save-bar { position:sticky; bottom:0; background:var(--white); border-top:1px solid var(--border); padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; box-shadow:0 -4px 20px rgba(11,25,41,0.06); z-index:50; }
   .save-bar-left { font-size:0.85rem; color:var(--muted); }
   .save-bar-left strong { color:var(--navy); }
-  .btn-save { background:var(--navy); color:var(--white); border:none; border-radius:9px; padding:11px 28px; font-size:0.92rem; font-weight:700; font-family:'DM Sans',sans-serif; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; gap:8px; }
+  .btn-save { background:var(--navy); color:var(--white); border:none; border-radius:9px; padding:11px 28px; font-size:0.92rem; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; transition:background 0.2s; display:flex; align-items:center; gap:8px; }
   .btn-save:hover { background:#1a3550; }
   .btn-save:disabled { opacity:0.6; cursor:not-allowed; }
   .save-status { font-size:0.82rem; color:var(--success); font-weight:500; display:none; }
@@ -121,7 +121,7 @@
 
 <nav>
   <a href="/" class="nav-logo">
-    <span style="display:inline-flex;align-items:center;gap:9px;line-height:1"><svg viewBox="0 0 64 64" style="height:42px;width:42px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-family:'Space Grotesk','Inter',sans-serif;font-weight:700;font-size:1.6rem;letter-spacing:-0.02em;color:#fff">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></span>
+    <span style="display:inline-flex;align-items:center;gap:9px;line-height:1"><svg viewBox="0 0 64 64" style="height:42px;width:42px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-family:'Inter','Inter',sans-serif;font-weight:700;font-size:1.6rem;letter-spacing:-0.02em;color:#fff">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></span>
     
   </a>
   <ul class="nav-links">
@@ -418,7 +418,7 @@
     </div>
     <div class="section-body">
       <div id="key-people-list"></div>
-      <button type="button" onclick="addKeyPerson()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:0.5rem;">+ Add a key person</button>
+      <button type="button" onclick="addKeyPerson()" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:0.82rem;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-top:0.5rem;">+ Add a key person</button>
     </div>
   </div>
 
@@ -431,7 +431,7 @@
     </div>
     <div class="section-body">
       <div id="contract-examples-list"></div>
-      <button type="button" onclick="addContractExample()" id="add-contract-btn" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:0.82rem;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:0.5rem;">+ Add a contract example</button>
+      <button type="button" onclick="addContractExample()" id="add-contract-btn" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:10px 18px;font-size:0.82rem;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-top:0.5rem;">+ Add a contract example</button>
     </div>
   </div>
 

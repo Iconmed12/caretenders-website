@@ -22,7 +22,7 @@
 
 <nav>
   <a href="/" class="nav-logo">
-    <span style="display:inline-flex;align-items:center;gap:9px;line-height:1"><svg viewBox="0 0 64 64" style="height:42px;width:42px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-family:'Space Grotesk','Inter',sans-serif;font-weight:700;font-size:1.6rem;letter-spacing:-0.02em;color:#fff">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></span>
+    <span style="display:inline-flex;align-items:center;gap:9px;line-height:1"><svg viewBox="0 0 64 64" style="height:42px;width:42px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-family:'Inter','Inter',sans-serif;font-weight:700;font-size:1.6rem;letter-spacing:-0.02em;color:#fff">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></span>
     
   </a>
 </nav>
@@ -215,7 +215,7 @@
         <div style="display:flex;gap:0.75rem;">
           <div style="flex:1;position:relative;">
             <input type="text" id="ch-search-cana" placeholder="Search by company name or number..."
-              style="width:100%;padding:13px 16px 13px 44px;border:1.5px solid var(--border);border-radius:9px;font-size:0.95rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;"
+              style="width:100%;padding:13px 16px 13px 44px;border:1.5px solid var(--border);border-radius:9px;font-size:0.95rem;font-family:'Inter',sans-serif;outline:none;transition:border-color 0.2s;"
               oninput="canaChSearch(this.value)"
               onkeydown="if(event.key==='Escape')closeCanaChDropdown()"
               onfocus="this.style.borderColor='#00C9E0'" onblur="setTimeout(closeCanaChDropdown,200)">
@@ -240,11 +240,11 @@
       </div>
 
       <!-- Continue -->
-      <button id="ch-continue-btn-cana" onclick="canaChContinue()" style="display:none;width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.75rem;">
+      <button id="ch-continue-btn-cana" onclick="canaChContinue()" style="display:none;width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;margin-bottom:0.75rem;">
         Next step
       </button>
       <div style="text-align:center;">
-        <button onclick="canaChSkip()" style="background:none;border:none;color:var(--muted);font-size:0.85rem;cursor:pointer;font-family:'DM Sans',sans-serif;">
+        <button onclick="canaChSkip()" style="background:none;border:none;color:var(--muted);font-size:0.85rem;cursor:pointer;font-family:'Inter',sans-serif;">
           Skip for now, I'll add my company number later
         </button>
         <p style="text-align:center;margin-top:0.75rem;">
@@ -276,7 +276,7 @@
         </div>
 
         <!-- Document body -->
-        <div style="padding:1.5rem 1.75rem;font-family:'DM Sans',sans-serif;">
+        <div style="padding:1.5rem 1.75rem;font-family:'Inter',sans-serif;">
           <div id="sq-sections-cana"></div>
         </div>
       </div>
@@ -311,11 +311,11 @@
         Please confirm all four declarations before continuing.
       </div>
 
-      <button onclick="sqContinue()" style="width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:0.75rem;transition:background 0.2s;">
+      <button onclick="sqContinue()" style="width:100%;background:#0B1929;color:#fff;border:none;border-radius:10px;padding:14px;font-size:0.95rem;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;margin-bottom:0.75rem;transition:background 0.2s;">
         ✓ Confirmed, generate my responses
       </button>
       <div style="text-align:center;">
-        <button onclick="setStep(2);showState('ch');" style="background:none;border:none;color:var(--muted);font-size:0.83rem;cursor:pointer;font-family:'DM Sans',sans-serif;">← Back to company lookup</button>
+        <button onclick="setStep(2);showState('ch');" style="background:none;border:none;color:var(--muted);font-size:0.83rem;cursor:pointer;font-family:'Inter',sans-serif;">← Back to company lookup</button>
       </div>
 
     </div>
