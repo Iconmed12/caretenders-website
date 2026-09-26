@@ -388,6 +388,87 @@ async function mmDowngrade() {
   }
 }
 
+// ── Create user modal ────────────────────────────────────────────────────
+function openCreateUserModal() {
+  ensureMemStyles();
+  closeMembershipModal();
+  var o = document.createElement('div');
+  o.className = 'mm-overlay';
+  o.id = 'mm-overlay';
+  o.innerHTML =
+    '<div class="mm-card">' +
+      '<div class="mm-head"><button class="mm-x" onclick="closeMembershipModal()">&times;</button>' +
+        '<h3>Create user</h3><p>Creates a confirmed account. Handy for a test or demo login.</p></div>' +
+      '<div class="mm-body">' +
+        '<div class="mm-row">' +
+          '<div><span class="mm-fl">First name</span><input id="cu-first" placeholder="First"></div>' +
+          '<div><span class="mm-fl">Last name</span><input id="cu-last" placeholder="Last"></div>' +
+        '</div>' +
+        '<div class="mm-note"><span class="mm-fl">Email</span><input id="cu-email" type="email" placeholder="name@example.com"></div>' +
+        '<div class="mm-note"><span class="mm-fl">Password</span><input id="cu-pass" type="text" placeholder="At least 8 characters">' +
+          '<button type="button" style="' + UBTN + 'margin-top:8px" onclick="cuGenPass()">Generate a password</button></div>' +
+        '<div class="mm-row">' +
+          '<div><span class="mm-fl">Plan</span>' +
+            '<select id="cu-plan" onchange="cuTermToggle()">' +
+              '<option value="">Free (no plan)</option>' +
+              '<option value="access">Access</option>' +
+              '<option value="pro" selected>Pro</option>' +
+              '<option value="gold">Gold</option>' +
+            '</select></div>' +
+          '<div id="cu-term-wrap"><span class="mm-fl">Term (months)</span>' +
+            '<select id="cu-term"><option value="3">3</option><option value="6">6</option><option value="12" selected>12</option></select></div>' +
+        '</div>' +
+        '<div class="mm-actions"><button class="mm-save" id="cu-save" onclick="submitCreateUser()">Create user</button>' +
+          '<button class="mm-down" onclick="closeMembershipModal()">Cancel</button></div>' +
+        '<p class="mm-note-p">The account is created already confirmed, so they can sign in straight away. If you set a plan, it is active for the chosen term. This does not take payment or touch Stripe.</p>' +
+      '</div>' +
+    '</div>';
+  o.addEventListener('click', function (e) { if (e.target === o) closeMembershipModal(); });
+  document.body.appendChild(o);
+  cuTermToggle();
+}
+
+function cuTermToggle() {
+  var m = document.getElementById('mm-overlay');
+  if (!m) return;
+  var plan = m.querySelector('#cu-plan').value;
+  m.querySelector('#cu-term-wrap').style.display = plan ? 'block' : 'none';
+}
+
+function cuGenPass() {
+  var m = document.getElementById('mm-overlay');
+  if (!m) return;
+  var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  var p = '';
+  for (var i = 0; i < 12; i++) p += chars.charAt(Math.floor(Math.random() * chars.length));
+  m.querySelector('#cu-pass').value = p;
+}
+
+async function submitCreateUser() {
+  var m = document.getElementById('mm-overlay');
+  if (!m) return;
+  var email = (m.querySelector('#cu-email').value || '').trim();
+  var pass = (m.querySelector('#cu-pass').value || '');
+  var first = (m.querySelector('#cu-first').value || '').trim();
+  var last = (m.querySelector('#cu-last').value || '').trim();
+  var plan = m.querySelector('#cu-plan').value;
+  var term = parseInt(m.querySelector('#cu-term').value, 10) || 12;
+  if (!email) { alert('Enter an email address.'); return; }
+  if (pass.length < 8) { alert('Password must be at least 8 characters.'); return; }
+  var btn = m.querySelector('#cu-save');
+  btn.disabled = true; btn.textContent = 'Creating...';
+  try {
+    await usersApi({ action: 'create', email: email, password: pass, first_name: first, last_name: last, tier: plan || '', term_months: term });
+    if (typeof showToast === 'function') showToast('User created: ' + email, 'success');
+    alert('Account created.\n\nEmail: ' + email + '\nPassword: ' + pass + '\n\nCopy these now. The password is not stored in readable form, so this is the only time it is shown.');
+    closeMembershipModal();
+    loadUsers();
+  } catch (e) {
+    btn.disabled = false; btn.textContent = 'Create user';
+    if (typeof showToast === 'function') showToast(e.message, 'error'); else alert(e.message);
+  }
+}
+
 async function resetUserPassword(email, btn) {
   if (!email) return;
   if (!confirm('Send a password reset email to ' + email + '?\n\nThey will get a link to set a new password themselves. Their current password stays active until they use it.')) return;

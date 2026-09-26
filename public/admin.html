@@ -521,6 +521,7 @@
               <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-light)"><input type="checkbox" id="userHideStaff" onchange="filterUsers()" checked> Hide staff logins</label>
               <input class="login-input" id="userSearch" oninput="filterUsers()" placeholder="Search name, email or company..." style="margin:0;width:280px">
               <button style="font-size:12px;padding:6px 11px;border:1px solid var(--border);background:#fff;border-radius:6px;cursor:pointer;font-family:inherit" onclick="loadUsers()">Refresh</button>
+              <button style="font-size:12px;padding:6px 13px;border:1px solid #1a7a3f;background:#1a7a3f;color:#fff;border-radius:6px;cursor:pointer;font-family:inherit;font-weight:700" onclick="openCreateUserModal()">+ Create user</button>
             </div>
           </div>
           <table><thead><tr><th>User</th><th>Membership</th><th>Joined</th><th>Last sign-in</th><th>Actions</th></tr></thead><tbody id="usersTable"></tbody></table>

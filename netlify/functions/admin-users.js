@@ -274,6 +274,61 @@ exports.handler = async (event) => {
       return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, membership: { member: true, term_months: term, renews: endISO } }) };
     }
 
+    if (action === 'create') {
+      // Create a new customer account directly (email confirmed), optionally with
+      // an active plan. Handy for a test/demo login, e.g. for a store reviewer.
+      const email = String(body.email || '').trim().toLowerCase();
+      const password = String(body.password || '');
+      const firstName = String(body.first_name || body.firstName || '').trim().slice(0, 60);
+      const lastName = String(body.last_name || body.lastName || '').trim().slice(0, 60);
+      const company = String(body.company || '').trim().slice(0, 200);
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Enter a valid email address' }) };
+      }
+      if (password.length < 8) {
+        return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Password must be at least 8 characters' }) };
+      }
+
+      // Create the account, already confirmed (no email verification step).
+      const cRes = await fetch(SB_URL + '/auth/v1/admin/users', {
+        method: 'POST', headers: svcHeaders,
+        body: JSON.stringify({ email: email, password: password, email_confirm: true, user_metadata: { first_name: firstName, last_name: lastName, company_name: company } })
+      });
+      if (!cRes.ok) {
+        const t = await cRes.text();
+        if (/already.*regist|already exists|duplicate|has been/i.test(t)) {
+          return { statusCode: 409, headers: cors, body: JSON.stringify({ error: 'An account with that email already exists' }) };
+        }
+        return { statusCode: 502, headers: cors, body: JSON.stringify({ error: 'Could not create the account', detail: t.slice(0, 160) }) };
+      }
+
+      // Optional active plan.
+      let membershipInfo = { member: false };
+      const tier = String(body.tier || '').toLowerCase();
+      if (tier) {
+        if (['access', 'pro', 'gold'].indexOf(tier) === -1) {
+          return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Plan must be access, pro or gold' }) };
+        }
+        let term = parseInt(body.term_months, 10) || 12;
+        if (term < 1 || term > 60) term = 12;
+        const end = new Date();
+        end.setMonth(end.getMonth() + term);
+        const endISO = end.toISOString();
+        const subPayload = {
+          id: 'manual_' + Date.now(), email: email, product: 'membership', plan: tier,
+          term_months: term, status: 'active', current_period_end: endISO,
+          created_at: new Date().toISOString(), updated_at: new Date().toISOString()
+        };
+        const sRes = await fetch(SB_URL + '/rest/v1/subscriptions', {
+          method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, svcHeaders), body: JSON.stringify(subPayload)
+        });
+        if (sRes.ok) membershipInfo = { member: true, plan: tier, term_months: term, renews: endISO };
+      }
+
+      try { await logAudit(event, 'admin-users:user_created', { email: email, tier: tier || null }); } catch (e) {}
+      return { statusCode: 200, headers: cors, body: JSON.stringify({ ok: true, created: email, membership: membershipInfo }) };
+    }
+
     return { statusCode: 400, headers: cors, body: JSON.stringify({ error: 'Unknown action' }) };
 
   } catch (err) {
