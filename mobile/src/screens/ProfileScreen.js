@@ -106,7 +106,7 @@ export default function ProfileScreen({ navigation }) {
         <View style={s.group}>
           <Row icon={IconBuilding} label="Company profile" onPress={() => navigation.navigate('CompanyProfile')} />
           <View style={s.divider} />
-          <Row icon={IconCard} label="My plan & billing" onPress={() => openWeb('')} />
+          <Row icon={IconCard} label="My plan & billing" onPress={() => navigation.navigate('PlanBilling')} />
           <View style={s.divider} />
           <Row icon={IconAlerts} label="Notifications" onPress={() => Alert.alert('Notifications', 'Notification settings are coming soon.')} />
           <View style={s.divider} />
