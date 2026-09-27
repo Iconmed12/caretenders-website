@@ -124,6 +124,6 @@ const s = StyleSheet.create({
 
   cta: { backgroundColor: c.cyan, borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 15 },
   ctaQuiet: { backgroundColor: 'rgba(255,255,255,0.12)' },
-  ctaText: { fontSize: 13.5, fontWeight: '800', color: '#04303a' },
+  ctaText: { fontSize: 13.5, fontWeight: '800', color: '#ffffff' },
   ctaTextQuiet: { color: '#fff' },
 });

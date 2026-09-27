@@ -65,6 +65,7 @@ export default function HomeScreen({ navigation }) {
 
   const openTab = (name, params) => navigation.getParent()?.navigate(name, params);
   const openFind = (sector) => openTab('Find', { screen: 'Opportunities', params: sector ? { sector } : undefined });
+  const openAlerts = () => openTab('Profile', { screen: 'Alerts' });
 
   return (
     <View style={s.wrap}>
@@ -86,7 +87,14 @@ export default function HomeScreen({ navigation }) {
         <TouchableOpacity style={s.search} activeOpacity={0.8} onPress={() => openFind()}>
           <IconFind size={19} color={c.muted2} />
           <Text style={s.searchText}>Search tenders, keywords or reference number</Text>
-          <IconSliders size={19} color={c.muted2} />
+          <TouchableOpacity
+            onPress={openAlerts}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Tender alerts"
+          >
+            <IconSliders size={19} color={c.teal} />
+          </TouchableOpacity>
         </TouchableOpacity>
 
         {/* Sector tiles. */}

@@ -118,7 +118,7 @@ export default function SatScreen() {
               disabled={sending || atLimit}
             >
               {sending
-                ? <ActivityIndicator color="#04303a" />
+                ? <ActivityIndicator color="#ffffff" />
                 : <Text style={s.sendText}>{atLimit ? 'Monthly limit reached' : 'Send to Cana'}</Text>}
             </TouchableOpacity>
             {atLimit && (
@@ -178,7 +178,7 @@ const s = StyleSheet.create({
   multiline: { height: 76, textAlignVertical: 'top' },
   send: { backgroundColor: c.brand, borderRadius: 12, paddingVertical: 15, alignItems: 'center', marginTop: 18 },
   sendOff: { backgroundColor: c.line, borderWidth: 1, borderColor: c.line },
-  sendText: { fontSize: 14.5, fontWeight: '800', color: '#04303a' },
+  sendText: { fontSize: 14.5, fontWeight: '800', color: '#ffffff' },
   limitNote: { fontSize: 11.5, color: c.muted, textAlign: 'center', marginTop: 10, lineHeight: 17 },
   secTitle: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.8, color: c.muted2, marginTop: 24, marginBottom: 10 },
   empty: { backgroundColor: c.white, borderRadius: 14, borderWidth: 1, borderColor: c.line, padding: 18, alignItems: 'center' },

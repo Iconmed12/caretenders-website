@@ -275,5 +275,5 @@ const s = StyleSheet.create({
   errTitle: { fontSize: 18, fontWeight: '800', color: c.navy, marginTop: 14 },
   errText: { fontSize: 13, color: c.muted, textAlign: 'center', marginTop: 8, lineHeight: 19, paddingHorizontal: 10 },
   retry: { backgroundColor: c.brand, borderRadius: 12, paddingVertical: 13, paddingHorizontal: 26, marginTop: 20 },
-  retryText: { fontSize: 14, fontWeight: '800', color: '#04303a' },
+  retryText: { fontSize: 14, fontWeight: '800', color: '#ffffff' },
 });

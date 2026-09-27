@@ -211,7 +211,7 @@ const s = StyleSheet.create({
   qText: { fontSize: 14, color: c.ink, flex: 1 },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: c.line2, backgroundColor: c.white },
   cta: { backgroundColor: c.brand, borderRadius: 13, paddingVertical: 16, alignItems: 'center' },
-  ctaText: { fontSize: 15, fontWeight: '700', color: '#04303a' },
+  ctaText: { fontSize: 15, fontWeight: '700', color: '#ffffff' },
   ctaQuiet: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line },
   ctaQuietText: { color: c.navy },
   ctaNote: { fontSize: 11.5, color: c.muted2, textAlign: 'center', marginTop: 9 },

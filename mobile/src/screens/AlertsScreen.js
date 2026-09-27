@@ -194,7 +194,7 @@ export default function AlertsScreen() {
       </View>
 
       <TouchableOpacity style={[s.cta, saving && s.ctaOff]} activeOpacity={0.9} onPress={save} disabled={saving}>
-        {saving ? <ActivityIndicator color="#04303a" /> : <Text style={s.ctaText}>Save alert preferences</Text>}
+        {saving ? <ActivityIndicator color="#ffffff" /> : <Text style={s.ctaText}>Save alert preferences</Text>}
       </TouchableOpacity>
     </ScrollView>
   );
@@ -205,7 +205,7 @@ const s = StyleSheet.create({
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.bg, padding: 24 },
   err: { fontSize: 13, color: c.muted, textAlign: 'center', lineHeight: 19 },
   retry: { marginTop: 14, backgroundColor: c.brand, borderRadius: 12, paddingHorizontal: 20, paddingVertical: 12 },
-  retryText: { fontSize: 14, fontWeight: '800', color: '#04303a' },
+  retryText: { fontSize: 14, fontWeight: '800', color: '#ffffff' },
 
   h1: { fontSize: 24, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
   sub: { fontSize: 13, color: c.muted, marginTop: 4, lineHeight: 19 },
@@ -245,5 +245,5 @@ const s = StyleSheet.create({
 
   cta: { backgroundColor: c.brand, borderRadius: 14, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', marginTop: 18 },
   ctaOff: { opacity: 0.6 },
-  ctaText: { fontSize: 14.5, fontWeight: '800', color: '#04303a' },
+  ctaText: { fontSize: 14.5, fontWeight: '800', color: '#ffffff' },
 });

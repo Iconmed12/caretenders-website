@@ -248,7 +248,7 @@ export default function CompanyProfileScreen({ navigation }) {
         </View>
 
         <TouchableOpacity style={[s.save, saving && s.saveOff]} activeOpacity={0.85} onPress={save} disabled={saving}>
-          {saving ? <ActivityIndicator color="#04303a" /> : <Text style={s.saveText}>Save profile</Text>}
+          {saving ? <ActivityIndicator color="#ffffff" /> : <Text style={s.saveText}>Save profile</Text>}
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -304,5 +304,5 @@ const s = StyleSheet.create({
   addText: { fontSize: 13.5, fontWeight: '700', color: c.teal },
   save: { backgroundColor: c.brand, borderRadius: 13, paddingVertical: 16, alignItems: 'center', marginTop: 6 },
   saveOff: { opacity: 0.7 },
-  saveText: { fontSize: 15, fontWeight: '800', color: '#04303a' },
+  saveText: { fontSize: 15, fontWeight: '800', color: '#ffffff' },
 });

@@ -107,7 +107,7 @@ export default function PlanBillingScreen({ navigation }) {
           <Text style={s.noneBody}>You do not have a Cana plan on this account yet. Plans are set up on our website.</Text>
           <TouchableOpacity style={s.cta} activeOpacity={0.9} onPress={() => openWeb('/plans.html')}>
             <Text style={s.ctaText}>See plans</Text>
-            <IconLink size={16} color="#04303a" />
+            <IconLink size={16} color="#ffffff" />
           </TouchableOpacity>
         </View>
       ) : (
@@ -155,7 +155,7 @@ export default function PlanBillingScreen({ navigation }) {
 
       <TouchableOpacity style={s.cta} activeOpacity={0.9} onPress={() => openWeb('/plans.html')}>
         <Text style={s.ctaText}>{isMember ? 'Change or upgrade plan' : 'See plans'}</Text>
-        <IconLink size={16} color="#04303a" />
+        <IconLink size={16} color="#ffffff" />
       </TouchableOpacity>
       <TouchableOpacity style={s.secondary} activeOpacity={0.85} onPress={() => openWeb('')}>
         <Text style={s.secondaryText}>View invoices</Text>
@@ -199,7 +199,7 @@ const s = StyleSheet.create({
   noteText: { flex: 1, fontSize: 11.5, color: c.muted, lineHeight: 17 },
 
   cta: { flexDirection: 'row', gap: 6, backgroundColor: c.brand, borderRadius: 14, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', marginTop: 14 },
-  ctaText: { fontSize: 14.5, fontWeight: '800', color: '#04303a' },
+  ctaText: { fontSize: 14.5, fontWeight: '800', color: '#ffffff' },
   secondary: { flexDirection: 'row', gap: 6, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', marginTop: 10 },
   secondaryText: { fontSize: 14, fontWeight: '700', color: c.navy },
 

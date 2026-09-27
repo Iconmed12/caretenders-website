@@ -128,7 +128,14 @@ export default function OpportunitiesScreen({ navigation, route }) {
             autoCapitalize="none"
             autoCorrect={false}
           />
-          <IconSliders size={19} color={c.muted2} />
+          <TouchableOpacity
+            onPress={() => navigation.getParent()?.navigate('Profile', { screen: 'Alerts' })}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            accessibilityRole="button"
+            accessibilityLabel="Tender alerts"
+          >
+            <IconSliders size={19} color={c.teal} />
+          </TouchableOpacity>
         </View>
       </TopBar>
 

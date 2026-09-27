@@ -89,8 +89,8 @@ export default function TeamInviteScreen({ navigation }) {
         </View>
 
         <TouchableOpacity style={[s.send, busy && s.off]} activeOpacity={0.85} onPress={send} disabled={busy}>
-          {busy ? <ActivityIndicator color="#04303a" /> : (
-            <><Text style={s.sendText}>Send invitation</Text><IconArrowRight size={19} color="#04303a" /></>
+          {busy ? <ActivityIndicator color="#ffffff" /> : (
+            <><Text style={s.sendText}>Send invitation</Text><IconArrowRight size={19} color="#ffffff" /></>
           )}
         </TouchableOpacity>
       </ScrollView>
@@ -120,5 +120,5 @@ const s = StyleSheet.create({
   canText: { fontSize: 12.5, color: c.ink, flex: 1 },
   send: { flexDirection: 'row', gap: 8, backgroundColor: c.brand, borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 24 },
   off: { opacity: 0.6 },
-  sendText: { fontSize: 15.5, fontWeight: '800', color: '#04303a' },
+  sendText: { fontSize: 15.5, fontWeight: '800', color: '#ffffff' },
 });

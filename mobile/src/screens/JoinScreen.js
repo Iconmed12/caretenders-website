@@ -97,8 +97,8 @@ export default function JoinScreen({ navigation }) {
             />
             {!!error && <Text style={s.error}>{error}</Text>}
             <TouchableOpacity style={[s.cta, busy && s.ctaOff]} onPress={lookUp} disabled={busy} activeOpacity={0.85}>
-              {busy ? <ActivityIndicator color="#04303a" /> : (
-                <><Text style={s.ctaText}>Find my invitation</Text><IconArrowRight size={19} color="#04303a" /></>
+              {busy ? <ActivityIndicator color="#ffffff" /> : (
+                <><Text style={s.ctaText}>Find my invitation</Text><IconArrowRight size={19} color="#ffffff" /></>
               )}
             </TouchableOpacity>
           </>
@@ -145,8 +145,8 @@ export default function JoinScreen({ navigation }) {
             {!!error && <Text style={s.error}>{error}</Text>}
 
             <TouchableOpacity style={[s.cta, busy && s.ctaOff]} onPress={join} disabled={busy} activeOpacity={0.85}>
-              {busy ? <ActivityIndicator color="#04303a" /> : (
-                <><Text style={s.ctaText}>Create account and join</Text><IconArrowRight size={19} color="#04303a" /></>
+              {busy ? <ActivityIndicator color="#ffffff" /> : (
+                <><Text style={s.ctaText}>Create account and join</Text><IconArrowRight size={19} color="#ffffff" /></>
               )}
             </TouchableOpacity>
           </>
@@ -177,6 +177,6 @@ const s = StyleSheet.create({
   error: { fontSize: 13, color: '#b4232a', backgroundColor: '#fdeaea', borderRadius: 10, padding: 11, marginTop: 14, lineHeight: 18 },
   cta: { flexDirection: 'row', gap: 8, backgroundColor: c.brand, borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 18 },
   ctaOff: { opacity: 0.55 },
-  ctaText: { fontSize: 15.5, fontWeight: '800', color: '#04303a' },
+  ctaText: { fontSize: 15.5, fontWeight: '800', color: '#ffffff' },
   back: { fontSize: 13.5, fontWeight: '700', color: c.teal, textAlign: 'center' },
 });

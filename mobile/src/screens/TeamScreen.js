@@ -98,7 +98,7 @@ export default function TeamScreen({ navigation }) {
               <Text style={s.label}>COMPANY NAME</Text>
               <TextInput style={s.input} value={newName} onChangeText={setNewName} placeholder="Your company name" placeholderTextColor={c.muted2} />
               <TouchableOpacity style={[s.primary, busy && s.off]} activeOpacity={0.85} onPress={createTeam} disabled={busy}>
-                {busy ? <ActivityIndicator color="#04303a" /> : <Text style={s.primaryText}>Create company circle</Text>}
+                {busy ? <ActivityIndicator color="#ffffff" /> : <Text style={s.primaryText}>Create company circle</Text>}
               </TouchableOpacity>
             </View>
           </ScrollView>
@@ -137,7 +137,7 @@ export default function TeamScreen({ navigation }) {
           </View>
           {isOwner && (
             <TouchableOpacity style={s.inviteBtn} activeOpacity={0.85} onPress={() => navigation.navigate('TeamInvite')}>
-              <IconSend size={15} color="#04303a" />
+              <IconSend size={15} color="#ffffff" />
               <Text style={s.inviteBtnText}>Invite</Text>
             </TouchableOpacity>
           )}
@@ -227,13 +227,13 @@ const s = StyleSheet.create({
   input: { borderWidth: 1, borderColor: c.line, borderRadius: 11, paddingHorizontal: 12, paddingVertical: 12, fontSize: 14, color: c.ink, backgroundColor: c.white },
   primary: { backgroundColor: c.brand, borderRadius: 12, paddingVertical: 15, alignItems: 'center', marginTop: 18 },
   off: { opacity: 0.7 },
-  primaryText: { fontSize: 14.5, fontWeight: '800', color: '#04303a' },
+  primaryText: { fontSize: 14.5, fontWeight: '800', color: '#ffffff' },
 
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   pageTitle: { fontSize: 22, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
   pageSub: { fontSize: 12.5, color: c.muted, marginTop: 3 },
   inviteBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: c.brand, borderRadius: 11, paddingHorizontal: 13, paddingVertical: 10 },
-  inviteBtnText: { fontSize: 13, fontWeight: '800', color: '#04303a' },
+  inviteBtnText: { fontSize: 13, fontWeight: '800', color: '#ffffff' },
 
   summary: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, padding: 15, marginTop: 16 },
   summaryIcon: { width: 46, height: 46, borderRadius: 14, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },

@@ -48,7 +48,7 @@ export default function OnboardingScreen({ navigation }) {
       <View style={s.footer}>
         <TouchableOpacity style={s.primary} activeOpacity={0.85} onPress={go}>
           <Text style={s.primaryText}>Get started</Text>
-          <IconArrowRight size={19} color="#04303a" />
+          <IconArrowRight size={19} color="#ffffff" />
         </TouchableOpacity>
         <TouchableOpacity style={s.ghost} activeOpacity={0.85} onPress={go}>
           <Text style={s.ghostText}>Sign in</Text>
@@ -72,7 +72,7 @@ const s = StyleSheet.create({
   illus: { width: 44, height: 44, borderRadius: 12, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' },
   footer: { paddingHorizontal: 22, paddingTop: 8, gap: 11 },
   primary: { flexDirection: 'row', gap: 8, backgroundColor: c.brand, borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center' },
-  primaryText: { fontSize: 15.5, fontWeight: '800', color: '#04303a' },
+  primaryText: { fontSize: 15.5, fontWeight: '800', color: '#ffffff' },
   ghost: { borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingVertical: 15, alignItems: 'center' },
   ghostText: { fontSize: 15, fontWeight: '700', color: c.navy },
 });

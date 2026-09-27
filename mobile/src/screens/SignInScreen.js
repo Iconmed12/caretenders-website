@@ -122,10 +122,10 @@ export default function SignInScreen({ navigation }) {
         {!!error && <Text style={s.error}>{error}</Text>}
 
         <TouchableOpacity style={[s.cta, !canSubmit && s.ctaOff]} onPress={signIn} disabled={!canSubmit} activeOpacity={0.85}>
-          {busy ? <ActivityIndicator color="#04303a" /> : (
+          {busy ? <ActivityIndicator color="#ffffff" /> : (
             <>
               <Text style={s.ctaText}>Sign in</Text>
-              <IconArrowRight size={19} color="#04303a" />
+              <IconArrowRight size={19} color="#ffffff" />
             </>
           )}
         </TouchableOpacity>
@@ -164,7 +164,7 @@ const s = StyleSheet.create({
   error: { fontSize: 13, color: '#b4232a', backgroundColor: '#fdeaea', borderRadius: 10, padding: 11, marginTop: 14, lineHeight: 18 },
   cta: { flexDirection: 'row', gap: 8, backgroundColor: c.brand, borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 18 },
   ctaOff: { opacity: 0.45 },
-  ctaText: { fontSize: 15.5, fontWeight: '800', color: '#04303a' },
+  ctaText: { fontSize: 15.5, fontWeight: '800', color: '#ffffff' },
   orRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 22 },
   orLine: { flex: 1, height: 1, backgroundColor: c.line },
   orText: { fontSize: 12.5, color: c.muted2, fontWeight: '600' },
