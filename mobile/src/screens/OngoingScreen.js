@@ -127,11 +127,11 @@ export default function OngoingScreen({ navigation }) {
           <Text style={s.statLabel}>Total bids</Text>
         </View>
         <View style={s.statCell}>
-          <Text style={s.statNum}>{running}</Text>
+          <Text style={[s.statNum, { color: c.amber }]}>{running}</Text>
           <Text style={s.statLabel}>Generating</Text>
         </View>
         <View style={s.statCell}>
-          <Text style={s.statNum}>{ready}</Text>
+          <Text style={[s.statNum, { color: c.good }]}>{ready}</Text>
           <Text style={s.statLabel}>Ready</Text>
         </View>
       </View>

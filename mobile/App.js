@@ -134,7 +134,8 @@ function AppTabBar({ state, navigation }) {
         const meta = TAB_META[route.name];
         if (!meta) return null;
         const isFocused = state.index === index;
-        const color = isFocused ? c.navy : c.muted2;
+        // Active tab lights up teal (the action colour); inactive stays muted grey.
+        const color = isFocused ? c.teal : c.muted2;
 
         const onPress = () => {
           const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
