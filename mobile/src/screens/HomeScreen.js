@@ -127,16 +127,16 @@ export default function HomeScreen({ navigation }) {
 
         {/* Two actions. */}
         <View style={[s.pad, s.tiles]}>
-          <TouchableOpacity style={[s.tile, s.tileDark]} activeOpacity={0.9} onPress={() => openTab('Profile', { screen: 'Sat' })}>
-            <View style={s.tileIconDark}><IconDoc size={19} color={c.cyan} /></View>
-            <Text style={s.tileTitleDark}>Send a Tender (S.A.T)</Text>
-            <Text style={s.tileBodyDark}>Found a tender elsewhere? Paste the link and we will add it for you.</Text>
+          <TouchableOpacity style={s.tile} activeOpacity={0.9} onPress={() => openFind()}>
+            <View style={s.tileIconTeal}><IconFind size={19} color={c.teal} /></View>
+            <Text style={s.tileTitle}>Find a tender</Text>
+            <Text style={s.tileBody}>Browse opportunities ready to generate.</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={[s.tile, s.tileTeal]} activeOpacity={0.9} onPress={() => openFind()}>
-            <View style={s.tileIconTeal}><IconSpark size={19} color={c.navy} /></View>
-            <Text style={s.tileTitleTeal}>Generate a Response</Text>
-            <Text style={s.tileBodyTeal}>Open a tender and let Cana generate your full response and documents.</Text>
+          <TouchableOpacity style={s.tile} activeOpacity={0.9} onPress={() => openTab('Profile', { screen: 'Sat' })}>
+            <View style={s.tileIconNavy}><IconDoc size={19} color={c.navy} /></View>
+            <Text style={s.tileTitle}>Send a Tender (S.A.T)</Text>
+            <Text style={s.tileBody}>Found a tender elsewhere? Send us the link.</Text>
           </TouchableOpacity>
         </View>
 
@@ -200,15 +200,11 @@ const s = StyleSheet.create({
   noneText: { fontSize: 12.5, color: c.muted, textAlign: 'center', marginTop: 6, lineHeight: 18 },
 
   tiles: { flexDirection: 'row', gap: 12, marginTop: 6 },
-  tile: { flex: 1, borderRadius: 16, padding: 15, minHeight: 150, justifyContent: 'flex-start' },
-  tileDark: { backgroundColor: '#0e2033' },
-  tileTeal: { backgroundColor: c.tealBg },
-  tileIconDark: { width: 38, height: 38, borderRadius: 11, backgroundColor: 'rgba(255,255,255,0.1)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  tileIconTeal: { width: 38, height: 38, borderRadius: 11, backgroundColor: '#d3eef3', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
-  tileTitleDark: { fontSize: 14.5, fontWeight: '800', color: '#fff' },
-  tileBodyDark: { fontSize: 11.5, color: '#8fa7b8', marginTop: 5, lineHeight: 16 },
-  tileTitleTeal: { fontSize: 14.5, fontWeight: '800', color: c.navy },
-  tileBodyTeal: { fontSize: 11.5, color: c.muted, marginTop: 5, lineHeight: 16 },
+  tile: { flex: 1, borderRadius: 16, padding: 15, minHeight: 138, justifyContent: 'flex-start', backgroundColor: c.white, borderWidth: 1, borderColor: c.line },
+  tileIconTeal: { width: 38, height: 38, borderRadius: 11, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  tileIconNavy: { width: 38, height: 38, borderRadius: 11, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  tileTitle: { fontSize: 14.5, fontWeight: '800', color: c.navy },
+  tileBody: { fontSize: 11.5, color: c.muted, marginTop: 5, lineHeight: 16 },
 
   actRow: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 13, padding: 12, marginBottom: 10 },
   actIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },

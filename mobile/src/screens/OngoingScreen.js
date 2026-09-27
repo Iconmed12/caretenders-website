@@ -72,9 +72,12 @@ export default function OngoingScreen({ navigation }) {
         ? agoLabel(item.created_at)
         : 'Started ' + agoLabel(item.created_at);
 
+    // Subtle left status bar: teal = ready, amber = still going, grey = did not finish.
+    const accent = state === 'ready' ? c.teal : state === 'failed' ? c.line : c.amber;
+
     return (
       <TouchableOpacity
-        style={s.card}
+        style={[s.card, { borderLeftWidth: 3, borderLeftColor: accent }]}
         activeOpacity={state === 'ready' ? 0.8 : 1}
         onPress={() => openJob(item)}
       >
@@ -106,16 +109,16 @@ export default function OngoingScreen({ navigation }) {
   const stats = jobs.length > 0 ? (
     <View style={s.stats}>
       <View style={s.statCell}>
+        <Text style={s.statNum}>{jobs.length}</Text>
+        <Text style={s.statLabel}>Total bids</Text>
+      </View>
+      <View style={s.statCell}>
         <Text style={s.statNum}>{running}</Text>
-        <Text style={s.statLabel}>Being written</Text>
+        <Text style={s.statLabel}>Generating</Text>
       </View>
       <View style={s.statCell}>
         <Text style={s.statNum}>{ready}</Text>
         <Text style={s.statLabel}>Ready</Text>
-      </View>
-      <View style={s.statCell}>
-        <Text style={s.statNum}>{jobs.length}</Text>
-        <Text style={s.statLabel}>Total</Text>
       </View>
     </View>
   ) : null;

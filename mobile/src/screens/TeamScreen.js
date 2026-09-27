@@ -110,7 +110,7 @@ export default function TeamScreen({ navigation }) {
   const isOwner = role === 'owner';
   const members = (data && data.members) || [];
   const seatLimit = data && data.enterprise && data.enterprise.seat_limit;
-  const usersLabel = isOwner && seatLimit ? `${members.length} / ${seatLimit} users` : `${members.length} ${members.length === 1 ? 'user' : 'users'}`;
+  const usersLabel = isOwner && seatLimit ? `${members.length} of ${seatLimit} seats in use` : `${members.length} ${members.length === 1 ? 'person' : 'people'} in your team`;
   const planLabel = plan ? plan.charAt(0).toUpperCase() + plan.slice(1) + ' plan' : 'Member';
 
   const shown = members.filter((m) => {
@@ -133,7 +133,7 @@ export default function TeamScreen({ navigation }) {
         <View style={s.titleRow}>
           <View style={{ flex: 1 }}>
             <Text style={s.pageTitle}>{data.enterprise && data.enterprise.name ? data.enterprise.name : 'Your team'}</Text>
-            <Text style={s.pageSub}>Manage your team, access and activity.</Text>
+            <Text style={s.pageSub}>Manage your team, access and departments.</Text>
           </View>
           {isOwner && (
             <TouchableOpacity style={s.inviteBtn} activeOpacity={0.85} onPress={() => navigation.navigate('TeamInvite')}>
@@ -238,7 +238,7 @@ const s = StyleSheet.create({
   summary: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, padding: 15, marginTop: 16 },
   summaryIcon: { width: 46, height: 46, borderRadius: 14, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
   summaryTitle: { fontSize: 16, fontWeight: '800', color: c.navy },
-  summaryPlan: { fontSize: 12.5, fontWeight: '700', color: c.teal, marginTop: 1 },
+  summaryPlan: { fontSize: 12.5, fontWeight: '700', color: c.muted, marginTop: 1 },
   summarySub: { fontSize: 11.5, color: c.muted2, marginTop: 2 },
 
   tabs: { flexDirection: 'row', gap: 22, borderBottomWidth: 1, borderBottomColor: c.line, marginTop: 18 },

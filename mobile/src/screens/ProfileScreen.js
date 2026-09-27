@@ -134,15 +134,15 @@ const s = StyleSheet.create({
   h1: { fontSize: 30, fontWeight: '800', color: c.navy, letterSpacing: -0.6, marginTop: 2 },
   sub: { fontSize: 14, color: c.muted, marginTop: 6, lineHeight: 20 },
 
-  feature: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: c.tealBg, borderRadius: 16, padding: 16, marginTop: 18 },
-  featureIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: '#d3eef3', alignItems: 'center', justifyContent: 'center' },
+  feature: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 16, marginTop: 18 },
+  featureIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
   featureTitle: { fontSize: 16, fontWeight: '800', color: c.navy },
   featureBody: { fontSize: 12.5, color: c.muted, marginTop: 3, lineHeight: 17 },
 
-  reviews: { backgroundColor: c.tealBg, borderRadius: 16, padding: 16, marginTop: 12 },
+  reviews: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 16, marginTop: 12 },
   reviewHead: { flexDirection: 'row', alignItems: 'center', gap: 14 },
   reviewCards: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  reviewCard: { flex: 1, backgroundColor: c.white, borderRadius: 13, padding: 13, gap: 6 },
+  reviewCard: { flex: 1, backgroundColor: c.bg, borderWidth: 1, borderColor: c.line, borderRadius: 13, padding: 13, gap: 6 },
   reviewCardTitle: { fontSize: 13, fontWeight: '800', color: c.navy, marginTop: 2 },
   reviewCardBody: { fontSize: 11, color: c.muted, lineHeight: 15 },
 
