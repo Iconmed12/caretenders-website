@@ -60,14 +60,14 @@ export default function SignInScreen({ navigation }) {
         <Wordmark height={34} />
 
         <Text style={s.h1}>Welcome back</Text>
-        <Text style={s.sub}>Sign in to find opportunities, manage your bids and stay updated.</Text>
+        <Text style={s.sub}>Sign in to manage your opportunities and bids.</Text>
 
         {/* Trust panel, matches the website's tone. */}
         <View style={s.trust}>
-          <View style={s.trustIcon}><IconLock size={20} color={c.navy} /></View>
+          <View style={s.trustIcon}><IconLock size={19} color={c.navy} /></View>
           <View style={{ flex: 1 }}>
-            <Text style={s.trustTitle}>Secure access to public sector opportunities</Text>
-            <Text style={s.trustBody}>Verified procurement access, tenders from across the UK.</Text>
+            <Text style={s.trustTitle}>Secure access</Text>
+            <Text style={s.trustBody}>Your Cana account keeps your bids, opportunities and company information in one place.</Text>
           </View>
         </View>
 
@@ -141,7 +141,7 @@ export default function SignInScreen({ navigation }) {
           <Text style={s.inviteText}>Continue with company invite</Text>
         </TouchableOpacity>
 
-        <Text style={s.foot}>New to Cana? Accounts are set up at getcana.co.uk</Text>
+        <Text style={s.foot}>New to Cana? Create your organisation account at getcana.co.uk</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -152,10 +152,10 @@ const s = StyleSheet.create({
   scroll: { flexGrow: 1, paddingHorizontal: 24 },
   h1: { fontSize: 30, fontWeight: '800', color: c.navy, marginTop: 26, letterSpacing: -0.6 },
   sub: { fontSize: 14.5, color: c.muted, marginTop: 8, lineHeight: 21 },
-  trust: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.tealBg, borderRadius: 15, padding: 15, marginTop: 22 },
-  trustIcon: { width: 40, height: 40, borderRadius: 20, backgroundColor: '#d3eef3', alignItems: 'center', justifyContent: 'center' },
-  trustTitle: { fontSize: 13.5, fontWeight: '800', color: c.navy, lineHeight: 18 },
-  trustBody: { fontSize: 12, color: c.muted, marginTop: 3, lineHeight: 16 },
+  trust: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.bg, borderWidth: 1, borderColor: c.line2, borderRadius: 14, padding: 13, marginTop: 20 },
+  trustIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#EDF1F4', alignItems: 'center', justifyContent: 'center' },
+  trustTitle: { fontSize: 13, fontWeight: '800', color: c.navy, lineHeight: 17 },
+  trustBody: { fontSize: 11.5, color: c.muted, marginTop: 3, lineHeight: 16 },
   label: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.6, color: c.muted2, marginTop: 22, marginBottom: 7 },
   field: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: c.line, borderRadius: 13, paddingHorizontal: 13, backgroundColor: c.white },
   fieldInput: { flex: 1, paddingVertical: 14, fontSize: 15, color: c.ink },
