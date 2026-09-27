@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import {
   View, Text, ScrollView, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
@@ -24,13 +24,17 @@ export default function SatScreen() {
   const [link, setLink] = useState('');
   const [note, setNote] = useState('');
   const [sending, setSending] = useState(false);
+  const hasData = useRef(false);
 
+  // Only show the spinner on the very first load. On later visits we keep what
+  // is already on screen and refresh quietly in the background, so reopening the
+  // page feels instant. A slow or failed refresh never blanks the list.
   const load = useCallback(() => {
     let alive = true;
-    setLoading(true);
+    if (!hasData.current) setLoading(true);
     fetchTenderRequests(token).then((d) => {
       if (!alive) return;
-      setData(d);
+      if (d) { setData(d); hasData.current = true; }
       setLoading(false);
     });
     return () => { alive = false; };
