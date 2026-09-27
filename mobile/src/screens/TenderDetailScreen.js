@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Linking } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Linking, Modal } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { c, t } from '../theme';
 import { valueCompact, daysUntil, fetchOngoing, jobState, fetchReviewAllowance } from '../api';
@@ -35,6 +35,7 @@ export default function TenderDetailScreen({ route, navigation }) {
   const [mine, setMine] = useState([]);
   const [allowance, setAllowance] = useState(null);
   const [review, setReview] = useState(null); // 'response' | 'full' | null
+  const [showGen, setShowGen] = useState(false); // the confirm sheet
   // Stays false until the first check returns, so the footer shows a spinner
   // rather than flashing the wrong button. It is not reset on later focuses.
   const [checked, setChecked] = useState(false);
@@ -57,7 +58,9 @@ export default function TenderDetailScreen({ route, navigation }) {
 
   function seeProgress() { navigation.getParent()?.navigate('Ongoing'); }
   function viewBid() { navigation.navigate('BidReady', { tender }); }
-  function generate() { navigation.navigate('Generating', { tender, includedReview: review }); }
+  // Tapping Generate opens the confirm sheet; nothing runs until "Generate now".
+  function openGenerate() { setShowGen(true); }
+  function confirmGenerate() { setShowGen(false); navigation.navigate('Generating', { tender, includedReview: review }); }
   function openPlans() { Linking.openURL('https://getcana.co.uk/plans.html').catch(() => {}); }
 
   const days = daysUntil(tender.deadline);
@@ -99,50 +102,6 @@ export default function TenderDetailScreen({ route, navigation }) {
             <Text style={s.qText}>{typeof q === 'string' ? q : q.title || q.question}</Text>
           </View>
         ))}
-
-        {checked && !runningJob && (
-          <View style={s.reviewBlock}>
-            <Text style={s.secTitle}>ADD AN EXPERT REVIEW</Text>
-            <Text style={s.reviewIntro}>A Cana expert checks your bid before you submit.</Text>
-
-            <TouchableOpacity style={[s.revRow, review === null && s.revRowOn]} activeOpacity={0.85} onPress={() => setReview(null)}>
-              <View style={[s.radio, review === null && s.radioOn]} />
-              <View style={{ flex: 1 }}>
-                <Text style={s.revTitle}>No review</Text>
-                <Text style={s.revBody}>Generate the bid on its own.</Text>
-              </View>
-            </TouchableOpacity>
-
-            {REVIEW_OPTIONS.map((opt) => {
-              const box = allowance && allowance[opt.key];
-              const included = !!(box && box.limit > 0);
-              const remaining = box ? box.remaining : 0;
-              const available = included && remaining > 0;
-              const selected = review === opt.key;
-              return (
-                <TouchableOpacity
-                  key={opt.key}
-                  style={[s.revRow, selected && s.revRowOn, !available && s.revRowOff]}
-                  activeOpacity={0.85}
-                  onPress={() => (available ? setReview(opt.key) : openPlans())}
-                >
-                  <View style={[s.radio, selected && s.radioOn]} />
-                  <View style={{ flex: 1 }}>
-                    <View style={s.revHead}>
-                      <Text style={s.revTitle}>{opt.title}</Text>
-                      {available
-                        ? <View style={s.revBadge}><Text style={s.revBadgeText}>{remaining} left this month</Text></View>
-                        : included
-                          ? <Text style={s.revNote}>Used this month</Text>
-                          : <Text style={s.revNote}>Add on website</Text>}
-                    </View>
-                    <Text style={s.revBody}>{opt.body}</Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
       </ScrollView>
 
       <View style={s.footer}>
@@ -161,18 +120,77 @@ export default function TenderDetailScreen({ route, navigation }) {
               <TouchableOpacity style={[s.cta, s.ctaQuiet, s.half]} activeOpacity={0.85} onPress={viewBid}>
                 <Text style={[s.ctaText, s.ctaQuietText]}>View your bid</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[s.cta, s.half]} activeOpacity={0.85} onPress={generate}>
-                <Text style={s.ctaText}>{review ? 'Generate with review' : 'Generate'}</Text>
+              <TouchableOpacity style={[s.cta, s.half]} activeOpacity={0.85} onPress={openGenerate}>
+                <Text style={s.ctaText}>Generate</Text>
               </TouchableOpacity>
             </View>
             <Text style={s.ctaNote}>You have already generated a bid. You can generate a fresh one any time.</Text>
           </>
         ) : (
-          <TouchableOpacity style={s.cta} activeOpacity={0.85} onPress={generate}>
-            <Text style={s.ctaText}>{review ? 'Generate with review' : 'Generate responses'}</Text>
+          <TouchableOpacity style={s.cta} activeOpacity={0.85} onPress={openGenerate}>
+            <Text style={s.ctaText}>Generate responses</Text>
           </TouchableOpacity>
         )}
       </View>
+
+      {/* Confirm sheet: choose a review (or none), then confirm. Nothing runs
+          until "Generate now". */}
+      <Modal visible={showGen} transparent animationType="slide" onRequestClose={() => setShowGen(false)}>
+        <View style={s.sheetOverlay}>
+          <TouchableOpacity style={s.sheetBackdrop} activeOpacity={1} onPress={() => setShowGen(false)} />
+          <View style={s.sheet}>
+            <View style={s.sheetHandle} />
+            <Text style={s.sheetTitle}>Generate response</Text>
+            <Text style={s.sheetSub}>Add an expert review if you want one, then confirm.</Text>
+
+            <ScrollView style={{ maxHeight: 320 }} showsVerticalScrollIndicator={false}>
+              <TouchableOpacity style={[s.revRow, review === null && s.revRowOn]} activeOpacity={0.85} onPress={() => setReview(null)}>
+                <View style={[s.radio, review === null && s.radioOn]} />
+                <View style={{ flex: 1 }}>
+                  <Text style={s.revTitle}>No review</Text>
+                  <Text style={s.revBody}>Generate the bid on its own.</Text>
+                </View>
+              </TouchableOpacity>
+
+              {REVIEW_OPTIONS.map((opt) => {
+                const box = allowance && allowance[opt.key];
+                const included = !!(box && box.limit > 0);
+                const remaining = box ? box.remaining : 0;
+                const available = included && remaining > 0;
+                const selected = review === opt.key;
+                return (
+                  <TouchableOpacity
+                    key={opt.key}
+                    style={[s.revRow, selected && s.revRowOn, !available && s.revRowOff]}
+                    activeOpacity={0.85}
+                    onPress={() => (available ? setReview(opt.key) : openPlans())}
+                  >
+                    <View style={[s.radio, selected && s.radioOn]} />
+                    <View style={{ flex: 1 }}>
+                      <View style={s.revHead}>
+                        <Text style={s.revTitle}>{opt.title}</Text>
+                        {available
+                          ? <View style={s.revBadge}><Text style={s.revBadgeText}>{remaining} left this month</Text></View>
+                          : included
+                            ? <Text style={s.revNote}>Used this month</Text>
+                            : <Text style={s.revNote}>Add on website</Text>}
+                      </View>
+                      <Text style={s.revBody}>{opt.body}</Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+
+            <TouchableOpacity style={[s.cta, { marginTop: 14 }]} activeOpacity={0.85} onPress={confirmGenerate}>
+              <Text style={s.ctaText}>Generate now</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={s.sheetCancel} activeOpacity={0.7} onPress={() => setShowGen(false)}>
+              <Text style={s.sheetCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -212,4 +230,13 @@ const s = StyleSheet.create({
   revBadge: { backgroundColor: c.goodBg, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 },
   revBadgeText: { fontSize: 10, fontWeight: '800', color: c.good },
   revNote: { fontSize: 11, fontWeight: '700', color: c.teal },
+
+  sheetOverlay: { flex: 1, justifyContent: 'flex-end' },
+  sheetBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(7,26,47,0.5)' },
+  sheet: { backgroundColor: c.white, borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 18, paddingTop: 8, paddingBottom: 28 },
+  sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: c.line, alignSelf: 'center', marginBottom: 14 },
+  sheetTitle: { fontSize: 19, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
+  sheetSub: { fontSize: 12.5, color: c.muted, marginTop: 4, marginBottom: 14, lineHeight: 18 },
+  sheetCancel: { paddingVertical: 12, alignItems: 'center', marginTop: 4 },
+  sheetCancelText: { fontSize: 14, fontWeight: '700', color: c.muted },
 });
