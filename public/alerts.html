@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tender Alerts | Cana Bids</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  :root {
+    --navy:#0B1929; --navy-mid:#112236; --teal:#00C9E0; --teal-dk:#0099AA;
+    --amber:#F5A623; --white:#ffffff; --offwhite:#F4F6F9;
+    --muted:#6B8FA3; --border:rgba(11,25,41,0.09);
+    --success:#38A169; --error:#E53E3E;
+  }
+  body { font-family:'Inter',sans-serif; background:var(--offwhite); color:var(--navy); min-height:100vh; }
+
+  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; border-bottom:1px solid rgba(255,255,255,0.06); position:sticky; top:0; z-index:100; }
+  .nav-logo { display:flex; align-items:baseline; gap:8px; text-decoration:none; }
+  .nav-links { display:flex; align-items:center; gap:1.75rem; list-style:none; }
+  .nav-links a { color:rgba(255,255,255,0.6); text-decoration:none; font-size:0.88rem; transition:color 0.2s; }
+  .nav-links a:hover, .nav-links a.active { color:var(--white); }
+  .nav-right { display:flex; align-items:center; gap:1rem; }
+  .nav-user { display:flex; align-items:center; gap:8px; color:rgba(255,255,255,0.8); font-size:0.88rem; }
+  .nav-avatar { width:30px; height:30px; background:var(--teal); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; color:var(--navy); flex-shrink:0; }
+  .nav-signout { font-size:0.82rem; color:rgba(255,255,255,0.4); cursor:pointer; background:none; border:none; font-family:'Inter',sans-serif; transition:color 0.2s; }
+  .nav-signout:hover { color:rgba(255,255,255,0.8); }
+
+  #loading-screen { position:fixed; inset:0; background:var(--offwhite); display:flex; align-items:center; justify-content:center; z-index:999; }
+  .spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--teal); border-radius:50%; animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  .page { max-width:760px; margin:0 auto; padding:2.5rem 1.5rem 6rem; }
+  .page-header { margin-bottom:2rem; }
+  .page-header h1 { letter-spacing:-0.02em; font-size:1.75rem; color:var(--navy); margin-bottom:0.4rem; }
+  .page-header p { font-size:0.9rem; color:var(--muted); line-height:1.6; }
+
+  .section-card { background:var(--white); border:1px solid var(--border); border-radius:14px; margin-bottom:1.25rem; padding:1.4rem 1.5rem; }
+  .section-card h2 { font-size:0.78rem; font-weight:700; letter-spacing:0.05em; color:var(--muted); text-transform:uppercase; margin-bottom:1rem; }
+
+  .chips { display:flex; flex-wrap:wrap; gap:9px; }
+  .chip { background:var(--white); border:1.5px solid var(--border); border-radius:999px; padding:8px 15px; font-size:0.85rem; font-weight:600; color:var(--navy); cursor:pointer; transition:all 0.15s; font-family:'Inter',sans-serif; }
+  .chip.on { background:var(--teal-dk); border-color:var(--teal-dk); color:var(--white); }
+  .muted-note { font-size:0.8rem; color:var(--muted); margin-top:0.6rem; line-height:1.5; }
+
+  .form-select { padding:11px 13px; border:1.5px solid var(--border); border-radius:8px; font-size:0.9rem; font-family:'Inter',sans-serif; color:var(--navy); background:var(--white); width:100%; outline:none; }
+  .form-select:focus { border-color:var(--teal); box-shadow:0 0 0 3px rgba(0,201,224,0.07); }
+
+  .toggle-row { display:flex; align-items:center; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); }
+  .toggle-row:last-child { border-bottom:none; }
+  .toggle-left { display:flex; align-items:center; gap:10px; }
+  .toggle-left .t-title { font-size:0.92rem; font-weight:600; color:var(--navy); }
+  .toggle-left .t-note { font-size:0.75rem; color:var(--muted); }
+  .switch { position:relative; width:44px; height:26px; border-radius:999px; background:var(--border); cursor:pointer; transition:background 0.15s; flex-shrink:0; border:none; }
+  .switch.on { background:var(--teal-dk); }
+  .switch.disabled { opacity:0.5; cursor:not-allowed; }
+  .switch .knob { position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:left 0.15s; }
+  .switch.on .knob { left:21px; }
+
+  .seg { display:flex; gap:8px; margin-top:0.9rem; }
+  .seg button { flex:1; padding:10px 0; border:1.5px solid var(--border); border-radius:9px; background:var(--white); font-size:0.85rem; font-weight:600; color:var(--muted); cursor:pointer; font-family:'Inter',sans-serif; }
+  .seg button.on { background:var(--navy); border-color:var(--navy); color:var(--white); }
+
+  .save-bar { position:fixed; bottom:0; left:0; right:0; background:var(--white); border-top:1px solid var(--border); padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; box-shadow:0 -4px 20px rgba(11,25,41,0.06); z-index:50; }
+  .save-bar-inner { max-width:760px; margin:0 auto; width:100%; display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+  .save-bar-left { font-size:0.85rem; color:var(--muted); }
+  .btn-save { background:var(--teal-dk); color:var(--white); border:none; border-radius:9px; padding:11px 30px; font-size:0.92rem; font-weight:700; font-family:'Inter',sans-serif; cursor:pointer; }
+  .btn-save:disabled { opacity:0.6; cursor:not-allowed; }
+
+  .toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:var(--navy); color:var(--white); padding:12px 24px; border-radius:10px; font-size:0.88rem; font-weight:500; box-shadow:0 8px 32px rgba(0,0,0,0.2); display:none; z-index:999; }
+  .toast.show { display:block; }
+  .toast.success { background:#1a5c38; } .toast.error { background:#c53030; }
+
+  @media (max-width:640px){ nav .nav-links { display:none; } }
+</style>
+  <meta name="theme-color" content="#0B1929">
+</head>
+<body>
+
+<div id="loading-screen"><div class="spinner"></div></div>
+<div class="toast" id="toast"></div>
+
+<nav>
+  <a href="/" class="nav-logo">
+    <span style="display:inline-flex;align-items:center;gap:9px;line-height:1"><svg viewBox="0 0 64 64" style="height:42px;width:42px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-family:'Inter',sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:-0.02em;color:#fff">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="/dashboard.html">Dashboard</a></li>
+    <li><a href="/profile.html">My Profile</a></li>
+    <li><a href="/alerts.html" class="active">Tender Alerts</a></li>
+    <li><a href="/vault.html">Evidence Vault</a></li>
+    <li><a href="/">Find Tenders</a></li>
+  </ul>
+  <div class="nav-right">
+    <div class="nav-user"><div class="nav-avatar" id="nav-avatar">?</div><span id="nav-name"></span></div>
+    <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-header">
+    <h1>Tender alerts</h1>
+    <p>Pick what you want. We alert you the moment a matching tender appears. Everything here is a selection, so what you choose is exactly what we match.</p>
+  </div>
+
+  <div class="section-card">
+    <h2>Sectors</h2>
+    <div class="chips" id="sectors"></div>
+  </div>
+
+  <div class="section-card">
+    <h2>Service type</h2>
+    <div class="chips" id="services"></div>
+    <p class="muted-note" id="services-note">Tip: choose a sector above and the list narrows to it.</p>
+  </div>
+
+  <div class="section-card">
+    <h2>Region</h2>
+    <div class="chips" id="regions"></div>
+  </div>
+
+  <div class="section-card">
+    <h2>Contract value</h2>
+    <select class="form-select" id="band"></select>
+  </div>
+
+  <div class="section-card">
+    <h2>How you get alerts</h2>
+    <div class="toggle-row">
+      <div class="toggle-left"><span class="t-title">Email</span></div>
+      <button class="switch on" id="sw-email" onclick="toggleSwitch('email')"><span class="knob"></span></button>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-left"><span class="t-title">Push notification</span><span class="t-note">Coming soon</span></div>
+      <button class="switch disabled" id="sw-push" disabled><span class="knob"></span></button>
+    </div>
+    <div class="seg" id="freq">
+      <button data-k="instant" onclick="setFreq('instant')">Instant</button>
+      <button data-k="daily" onclick="setFreq('daily')">Daily</button>
+      <button data-k="weekly" onclick="setFreq('weekly')">Weekly</button>
+    </div>
+  </div>
+</div>
+
+<div class="save-bar">
+  <div class="save-bar-inner">
+    <span class="save-bar-left">We check for new tenders every day.</span>
+    <button class="btn-save" id="saveBtn" onclick="save()">Save preferences</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  var SUPABASE_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
+  var SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
+  var sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  var token = '';
+  var options = null;
+  var state = { sectors: [], services: [], regions: [], band: 'any', email: true, push: false, freq: 'daily' };
+
+  function toast(msg, kind) {
+    var t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'toast show ' + (kind || '');
+    setTimeout(function () { t.className = 'toast'; }, 2600);
+  }
+
+  function chip(label, on) {
+    var b = document.createElement('button');
+    b.className = 'chip' + (on ? ' on' : '');
+    b.textContent = label;
+    return b;
+  }
+
+  function renderSectors() {
+    var wrap = document.getElementById('sectors');
+    wrap.innerHTML = '';
+    options.sectors.filter(function (x) { return x.key !== 'other'; }).forEach(function (sec) {
+      var el = chip(sec.label, state.sectors.indexOf(sec.key) !== -1);
+      el.onclick = function () {
+        var i = state.sectors.indexOf(sec.key);
+        if (i === -1) state.sectors.push(sec.key); else state.sectors.splice(i, 1);
+        renderSectors(); renderServices();
+      };
+      wrap.appendChild(el);
+    });
+  }
+
+  function renderServices() {
+    var wrap = document.getElementById('services');
+    wrap.innerHTML = '';
+    var list = state.sectors.length
+      ? options.serviceTypes.filter(function (st) { return state.sectors.indexOf(st.sector) !== -1; })
+      : options.serviceTypes;
+    list.forEach(function (st) {
+      var el = chip(st.label, state.services.indexOf(st.key) !== -1);
+      el.onclick = function () {
+        var i = state.services.indexOf(st.key);
+        if (i === -1) state.services.push(st.key); else state.services.splice(i, 1);
+        renderServices();
+      };
+      wrap.appendChild(el);
+    });
+  }
+
+  function renderRegions() {
+    var wrap = document.getElementById('regions');
+    wrap.innerHTML = '';
+    options.regions.forEach(function (r) {
+      var el = chip(r.label, state.regions.indexOf(r.key) !== -1);
+      el.onclick = function () {
+        var i = state.regions.indexOf(r.key);
+        if (i === -1) state.regions.push(r.key); else state.regions.splice(i, 1);
+        renderRegions();
+      };
+      wrap.appendChild(el);
+    });
+  }
+
+  function renderBand() {
+    var sel = document.getElementById('band');
+    sel.innerHTML = '';
+    options.valueBands.forEach(function (b) {
+      var o = document.createElement('option');
+      o.value = b.key; o.textContent = b.label;
+      if (state.band === b.key) o.selected = true;
+      sel.appendChild(o);
+    });
+    sel.onchange = function () { state.band = sel.value; };
+  }
+
+  function renderFreq() {
+    document.querySelectorAll('#freq button').forEach(function (b) {
+      b.className = (b.getAttribute('data-k') === state.freq) ? 'on' : '';
+    });
+  }
+  window.setFreq = function (k) { state.freq = k; renderFreq(); };
+
+  window.toggleSwitch = function (which) {
+    if (which === 'email') { state.email = !state.email; document.getElementById('sw-email').className = 'switch' + (state.email ? ' on' : ''); }
+  };
+
+  window.handleSignOut = function () { sb.auth.signOut().then(function () { window.location.href = '/login.html'; }); };
+
+  window.save = function () {
+    var btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    fetch('/.netlify/functions/tender-alerts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({
+        sectors: state.sectors, service_types: state.services, regions: state.regions,
+        value_band: state.band, email_on: state.email, push_on: state.push, frequency: state.freq,
+      }),
+    }).then(function (r) {
+      btn.disabled = false;
+      if (!r.ok) { toast('Could not save. Please try again.', 'error'); return; }
+      toast('Saved. We will alert you when a match appears.', 'success');
+    }).catch(function () { btn.disabled = false; toast('Could not save. Please try again.', 'error'); });
+  };
+
+  (async function init() {
+    var res = await sb.auth.getSession();
+    var session = res.data.session;
+    if (!session) { window.location.href = '/login.html?redirect=/alerts.html'; return; }
+    token = session.access_token;
+    var email = (session.user.email || '');
+    document.getElementById('nav-avatar').textContent = (email[0] || '?').toUpperCase();
+    document.getElementById('nav-name').textContent = email;
+
+    try {
+      var r = await fetch('/.netlify/functions/tender-alerts', { headers: { Authorization: 'Bearer ' + token } });
+      var data = await r.json();
+      options = data.options;
+      var p = data.prefs || {};
+      state.sectors = Array.isArray(p.sectors) ? p.sectors : [];
+      state.services = Array.isArray(p.service_types) ? p.service_types : [];
+      state.regions = Array.isArray(p.regions) ? p.regions : [];
+      state.band = p.value_band || 'any';
+      state.email = p.email_on !== false;
+      state.push = p.push_on === true;
+      state.freq = p.frequency || 'daily';
+
+      renderSectors(); renderServices(); renderRegions(); renderBand(); renderFreq();
+      document.getElementById('sw-email').className = 'switch' + (state.email ? ' on' : '');
+    } catch (e) {
+      toast('Could not load your alerts.', 'error');
+    }
+    document.getElementById('loading-screen').style.display = 'none';
+  })();
+</script>
+</body>
+</html>

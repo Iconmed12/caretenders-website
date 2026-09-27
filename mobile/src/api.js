@@ -321,6 +321,32 @@ export async function fetchMembership(email) {
   } catch (e) { return null; }
 }
 
+// ── tender alerts (saved searches) ──
+// One backend for app and website. GET returns the pick-list options and the
+// member's saved row; POST saves it. Auth is the Bearer access token.
+
+export async function fetchAlerts(token) {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/tender-alerts`, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
+}
+
+export async function saveAlerts(token, prefs) {
+  const res = await fetch(`${API_BASE}/.netlify/functions/tender-alerts`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify(prefs),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not save your alerts.');
+  return data.prefs;
+}
+
 // ── company invite (join an existing company) ──
 // An invited teammate joins the owner's company with no purchase, so this stays
 // inside App Store / Play rules. The invite email carries a link with ?token=,

@@ -104,6 +104,8 @@ export default function ProfileScreen({ navigation }) {
         {/* Company & account */}
         <Text style={s.section}>Company & account</Text>
         <View style={s.group}>
+          <Row icon={IconAlerts} label="Tender alerts" sub="Get alerted when a match appears" onPress={() => navigation.navigate('Alerts')} />
+          <View style={s.divider} />
           <Row icon={IconBuilding} label="Company profile" onPress={() => navigation.navigate('CompanyProfile')} />
           <View style={s.divider} />
           <Row icon={IconCard} label="My plan & billing" onPress={() => navigation.navigate('PlanBilling')} />

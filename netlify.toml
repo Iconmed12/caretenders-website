@@ -50,3 +50,6 @@
 
 [functions."purge-rejected"]
   schedule = "0 2 * * *"
+
+[functions."send-alerts"]
+  schedule = "0 8 * * *"

@@ -23,6 +23,7 @@ import TeamMemberScreen from './src/screens/TeamMemberScreen';
 import SatScreen from './src/screens/SatScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import PlanBillingScreen from './src/screens/PlanBillingScreen';
+import AlertsScreen from './src/screens/AlertsScreen';
 import SignInScreen from './src/screens/SignInScreen';
 import { AuthProvider, useAuth } from './src/auth';
 import { IconHome, IconDoc, IconTeam, IconMore, IconSpark } from './src/icons';
@@ -84,6 +85,7 @@ function ProfileStack() {
     <Stack.Navigator screenOptions={stackOptions}>
       <Stack.Screen name="ProfileHome" component={ProfileScreen} options={{ headerShown: false }} />
       <Stack.Screen name="PlanBilling" component={PlanBillingScreen} options={{ title: 'My plan and billing' }} />
+      <Stack.Screen name="Alerts" component={AlertsScreen} options={{ title: 'Tender alerts' }} />
       <Stack.Screen name="CompanyProfile" component={CompanyProfileScreen} options={{ title: 'Company profile' }} />
       <Stack.Screen name="Sat" component={SatScreen} options={{ title: 'Send a tender' }} />
       <Stack.Screen name="Evidence" component={EvidenceScreen} options={{ title: 'Evidence library' }} />
