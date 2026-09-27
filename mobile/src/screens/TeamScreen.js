@@ -149,8 +149,8 @@ export default function TeamScreen({ navigation }) {
           <View style={{ flex: 1 }}>
             <Text style={s.summaryTitle}>{usersLabel}</Text>
             <Text style={s.summaryPlan}>{planLabel}</Text>
-            <Text style={s.summarySub}>Your team members and their departments.</Text>
           </View>
+          <IconChevron size={18} color={c.muted2} />
         </View>
 
         {/* Tabs */}

@@ -66,37 +66,39 @@ export default function ProfileScreen({ navigation }) {
         <Text style={s.h1}>More</Text>
         <Text style={s.sub}>Tools, settings and support to help you get the most out of Cana Bids.</Text>
 
+        <Text style={s.section}>Services</Text>
+
         {/* S.A.T */}
         <TouchableOpacity style={s.feature} activeOpacity={0.85} onPress={() => navigation.navigate('Sat')}>
-          <View style={s.featureIcon}><IconLink size={24} color={c.navy} /></View>
+          <View style={s.featureIcon}><IconLink size={22} color={c.navy} /></View>
           <View style={{ flex: 1 }}>
             <Text style={s.featureTitle}>S.A.T. - Send A Tender</Text>
-            <Text style={s.featureBody}>Paste a tender link and let Cana add it for you.</Text>
+            <Text style={s.featureBody}>Found something outside Cana? Send us the link.</Text>
           </View>
           <IconChevron size={18} color={c.muted2} />
         </TouchableOpacity>
 
         {/* Cana Reviews */}
-        <View style={s.reviews}>
-          <View style={s.reviewHead}>
-            <View style={s.featureIcon}><IconReview size={24} color={c.navy} /></View>
-            <View style={{ flex: 1 }}>
-              <Text style={s.featureTitle}>Cana Reviews</Text>
-              <Text style={s.featureBody}>Get expert feedback to make your bid stronger.</Text>
-            </View>
+        <TouchableOpacity style={s.feature} activeOpacity={0.85} onPress={() => openWeb('/plans.html')}>
+          <View style={s.featureIcon}><IconReview size={22} color={c.navy} /></View>
+          <View style={{ flex: 1 }}>
+            <Text style={s.featureTitle}>Cana Reviews</Text>
+            <Text style={s.featureBody}>Get expert feedback to make your bid stronger.</Text>
           </View>
-          <View style={s.reviewCards}>
-            <TouchableOpacity style={s.reviewCard} activeOpacity={0.85} onPress={() => openWeb('/plans.html')}>
-              <IconDoc size={19} color={c.navy} />
-              <Text style={s.reviewCardTitle}>Response Review</Text>
-              <Text style={s.reviewCardBody}>Review a specific response or section.</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={s.reviewCard} activeOpacity={0.85} onPress={() => openWeb('/plans.html')}>
-              <IconReview size={19} color={c.navy} />
-              <Text style={s.reviewCardTitle}>Full Tender Review</Text>
-              <Text style={s.reviewCardBody}>A complete review of your bid.</Text>
-            </TouchableOpacity>
-          </View>
+          <IconChevron size={18} color={c.muted2} />
+        </TouchableOpacity>
+
+        <View style={s.reviewCards}>
+          <TouchableOpacity style={s.reviewCard} activeOpacity={0.85} onPress={() => openWeb('/plans.html')}>
+            <IconDoc size={19} color={c.navy} />
+            <Text style={s.reviewCardTitle}>Response Review</Text>
+            <Text style={s.reviewCardBody}>Review a specific response or section.</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={s.reviewCard} activeOpacity={0.85} onPress={() => openWeb('/plans.html')}>
+            <IconReview size={19} color={c.navy} />
+            <Text style={s.reviewCardTitle}>Full Tender Review</Text>
+            <Text style={s.reviewCardBody}>A complete review of your bid.</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Company & account */}
@@ -134,14 +136,12 @@ const s = StyleSheet.create({
   h1: { fontSize: 30, fontWeight: '800', color: c.navy, letterSpacing: -0.6, marginTop: 2 },
   sub: { fontSize: 14, color: c.muted, marginTop: 6, lineHeight: 20 },
 
-  feature: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 16, marginTop: 18 },
-  featureIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
-  featureTitle: { fontSize: 16, fontWeight: '800', color: c.navy },
+  feature: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 15, marginTop: 12 },
+  featureIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
+  featureTitle: { fontSize: 15.5, fontWeight: '800', color: c.navy },
   featureBody: { fontSize: 12.5, color: c.muted, marginTop: 3, lineHeight: 17 },
 
-  reviews: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 16, marginTop: 12 },
-  reviewHead: { flexDirection: 'row', alignItems: 'center', gap: 14 },
-  reviewCards: { flexDirection: 'row', gap: 10, marginTop: 14 },
+  reviewCards: { flexDirection: 'row', gap: 10, marginTop: 12 },
   reviewCard: { flex: 1, backgroundColor: c.bg, borderWidth: 1, borderColor: c.line, borderRadius: 13, padding: 13, gap: 6 },
   reviewCardTitle: { fontSize: 13, fontWeight: '800', color: c.navy, marginTop: 2 },
   reviewCardBody: { fontSize: 11, color: c.muted, lineHeight: 15 },

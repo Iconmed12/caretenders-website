@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import {
-  View, Text, FlatList, RefreshControl, TouchableOpacity,
+  View, Text, FlatList, RefreshControl, TouchableOpacity, TextInput,
   ActivityIndicator, StyleSheet,
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
@@ -8,6 +8,7 @@ import { c } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import { useAuth } from '../auth';
 import { fetchOngoing, jobState, jobStageLabel, agoLabel, orderRef } from '../api';
+import { IconFind, IconDoc, IconChevron } from '../icons';
 
 /**
  * Everything this member has started, so a bid is never started twice and a
@@ -25,6 +26,7 @@ export default function OngoingScreen({ navigation }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
+  const [q, setQ] = useState('');
 
   const load = useCallback(async (isPull) => {
     if (isPull) setRefreshing(true);
@@ -72,33 +74,36 @@ export default function OngoingScreen({ navigation }) {
         ? agoLabel(item.created_at)
         : 'Started ' + agoLabel(item.created_at);
 
-    // Subtle left status bar: teal = ready, amber = still going, grey = did not finish.
-    const accent = state === 'ready' ? c.teal : state === 'failed' ? c.line : c.amber;
-
     return (
       <TouchableOpacity
-        style={[s.card, { borderLeftWidth: 3, borderLeftColor: accent }]}
+        style={s.card}
         activeOpacity={state === 'ready' ? 0.8 : 1}
         onPress={() => openJob(item)}
       >
-        <Text style={s.title}>{item.tender_title}</Text>
-        <Text style={s.ref}>{orderRef(item)}{item.org ? '  ·  ' + item.org : ''}</Text>
+        <View style={s.cardIcon}><IconDoc size={18} color={c.navy} /></View>
 
-        {state === 'running' && (
-          <View style={s.bar}><View style={s.barFill} /></View>
-        )}
+        <View style={{ flex: 1 }}>
+          <Text style={s.title} numberOfLines={2}>{item.tender_title}</Text>
+          <Text style={s.ref} numberOfLines={1}>{orderRef(item)}{item.org ? '  ·  ' + item.org : ''}</Text>
 
-        <View style={s.row}>
-          <View style={[s.chip, chip.style]}>
-            <Text style={[s.chipText, chip.textStyle]}>{chip.text}</Text>
+          {state === 'running' && (
+            <View style={s.bar}><View style={s.barFill} /></View>
+          )}
+
+          <View style={s.row}>
+            <View style={[s.chip, chip.style]}>
+              <Text style={[s.chipText, chip.textStyle]}>{chip.text}</Text>
+            </View>
+            <Text style={s.when} numberOfLines={1}>{when}</Text>
           </View>
-          <Text style={s.when}>{when}</Text>
+
+          {state === 'ready' && <Text style={s.link}>View your bid</Text>}
+          {state === 'failed' && (
+            <Text style={s.failNote}>Something went wrong. Open the tender to start it again.</Text>
+          )}
         </View>
 
-        {state === 'ready' && <Text style={s.link}>View your bid</Text>}
-        {state === 'failed' && (
-          <Text style={s.failNote}>Something went wrong. Open the tender to start it again.</Text>
-        )}
+        {state === 'ready' && <IconChevron size={16} color={c.muted2} />}
       </TouchableOpacity>
     );
   }
@@ -106,19 +111,41 @@ export default function OngoingScreen({ navigation }) {
   const running = jobs.filter((j) => ['running', 'queued'].includes(jobState(j))).length;
   const ready = jobs.filter((j) => jobState(j) === 'ready').length;
 
+  const shown = jobs.filter((j) => {
+    if (!q) return true;
+    const needle = q.toLowerCase();
+    return String(j.tender_title || '').toLowerCase().includes(needle)
+      || String(orderRef(j) || '').toLowerCase().includes(needle)
+      || String(j.org || '').toLowerCase().includes(needle);
+  });
+
   const stats = jobs.length > 0 ? (
-    <View style={s.stats}>
-      <View style={s.statCell}>
-        <Text style={s.statNum}>{jobs.length}</Text>
-        <Text style={s.statLabel}>Total bids</Text>
+    <View>
+      <View style={s.stats}>
+        <View style={s.statCell}>
+          <Text style={s.statNum}>{jobs.length}</Text>
+          <Text style={s.statLabel}>Total bids</Text>
+        </View>
+        <View style={s.statCell}>
+          <Text style={s.statNum}>{running}</Text>
+          <Text style={s.statLabel}>Generating</Text>
+        </View>
+        <View style={s.statCell}>
+          <Text style={s.statNum}>{ready}</Text>
+          <Text style={s.statLabel}>Ready</Text>
+        </View>
       </View>
-      <View style={s.statCell}>
-        <Text style={s.statNum}>{running}</Text>
-        <Text style={s.statLabel}>Generating</Text>
-      </View>
-      <View style={s.statCell}>
-        <Text style={s.statNum}>{ready}</Text>
-        <Text style={s.statLabel}>Ready</Text>
+      <View style={s.search}>
+        <IconFind size={17} color={c.muted2} />
+        <TextInput
+          style={s.searchInput}
+          value={q}
+          onChangeText={setQ}
+          placeholder="Search your bids"
+          placeholderTextColor={c.muted2}
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
       </View>
     </View>
   ) : null;
@@ -142,7 +169,7 @@ export default function OngoingScreen({ navigation }) {
       />
 
       <FlatList
-        data={jobs}
+        data={shown}
         keyExtractor={(j) => String(j.id)}
         renderItem={renderItem}
         ListHeaderComponent={stats}
@@ -152,12 +179,16 @@ export default function OngoingScreen({ navigation }) {
           <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={c.teal} />
         }
         ListEmptyComponent={
-          <View style={s.empty}>
-            <Text style={s.emptyTitle}>{error ? 'Could not load' : 'Nothing started yet'}</Text>
-            <Text style={s.emptyText}>
-              {error || 'Find a tender you want to bid for and tap Generate responses. It will appear here while it is being written.'}
-            </Text>
-          </View>
+          jobs.length > 0 ? (
+            <Text style={s.noMatch}>No bids match that search.</Text>
+          ) : (
+            <View style={s.empty}>
+              <Text style={s.emptyTitle}>{error ? 'Could not load' : 'Nothing started yet'}</Text>
+              <Text style={s.emptyText}>
+                {error || 'Find a tender you want to bid for and tap Generate responses. It will appear here while it is being written.'}
+              </Text>
+            </View>
+          )
         }
       />
     </View>
@@ -173,16 +204,20 @@ const s = StyleSheet.create({
   statNum: { fontSize: 21, fontWeight: '800', color: c.navy, lineHeight: 24 },
   statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3, color: c.muted2, marginTop: 4 },
 
-  card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 13, marginTop: 10, gap: 7 },
-  title: { fontSize: 14.5, fontWeight: '700', color: c.navy, lineHeight: 19 },
-  ref: { fontSize: 11, color: c.muted2, fontWeight: '600', letterSpacing: 0.2 },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 12, paddingHorizontal: 12, marginTop: 12 },
+  searchInput: { flex: 1, paddingVertical: 11, fontSize: 13.5, color: c.ink },
 
-  bar: { height: 5, borderRadius: 3, backgroundColor: c.line, overflow: 'hidden', marginTop: 2 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 13, marginTop: 10 },
+  cardIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 14.5, fontWeight: '800', color: c.navy, lineHeight: 19 },
+  ref: { fontSize: 11, color: c.muted2, fontWeight: '600', letterSpacing: 0.2, marginTop: 3 },
+
+  bar: { height: 5, borderRadius: 3, backgroundColor: c.line, overflow: 'hidden', marginTop: 8 },
   // Indeterminate on purpose: the server records that a run is in progress but
   // not how far through it is, so a precise percentage would be invented.
   barFill: { height: '100%', width: '45%', borderRadius: 3, backgroundColor: c.brand },
 
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginTop: 8 },
   chip: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },
   chipText: { fontSize: 10.5, fontWeight: '800', letterSpacing: 0.3 },
   chipRun: { backgroundColor: c.tealBg }, chipRunText: { color: c.teal },
@@ -191,8 +226,9 @@ const s = StyleSheet.create({
   chipFail: { backgroundColor: '#fdeaea' }, chipFailText: { color: '#b4232a' },
   when: { fontSize: 11, color: c.muted2 },
 
-  link: { fontSize: 12.5, fontWeight: '700', color: c.teal },
-  failNote: { fontSize: 11.5, color: c.muted, lineHeight: 17 },
+  link: { fontSize: 12.5, fontWeight: '700', color: c.teal, marginTop: 8 },
+  failNote: { fontSize: 11.5, color: c.muted, lineHeight: 17, marginTop: 6 },
+  noMatch: { fontSize: 12.5, color: c.muted2, textAlign: 'center', marginTop: 24 },
 
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 30, paddingBottom: 60 },
   emptyTitle: { fontSize: 16, fontWeight: '700', color: c.navy },

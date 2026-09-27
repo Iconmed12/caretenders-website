@@ -8,7 +8,7 @@ import { c } from '../theme';
 import TopBar from '../components/TopBar';
 import TenderCard from '../components/TenderCard';
 import {
-  IconFind, IconSliders, IconChevron, IconDoc, IconSpark,
+  IconFind, IconSliders, IconChevron, IconDoc, IconLink,
   IconHeart, IconBuilding, IconTeam, IconHardhat, IconLaptop,
 } from '../icons';
 import { useAuth } from '../auth';
@@ -127,14 +127,14 @@ export default function HomeScreen({ navigation }) {
 
         {/* Two actions. */}
         <View style={[s.pad, s.tiles]}>
-          <TouchableOpacity style={s.tile} activeOpacity={0.9} onPress={() => openFind()}>
-            <View style={s.tileIconTeal}><IconFind size={19} color={c.teal} /></View>
-            <Text style={s.tileTitle}>Find a tender</Text>
-            <Text style={s.tileBody}>Browse opportunities ready to generate.</Text>
+          <TouchableOpacity style={[s.tile, s.tileFind]} activeOpacity={0.9} onPress={() => openFind()}>
+            <View style={s.tileIconFind}><IconFind size={19} color="#fff" /></View>
+            <Text style={s.tileTitleFind}>Find a tender</Text>
+            <Text style={s.tileBodyFind}>Browse opportunities ready to generate.</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={s.tile} activeOpacity={0.9} onPress={() => openTab('Profile', { screen: 'Sat' })}>
-            <View style={s.tileIconNavy}><IconDoc size={19} color={c.navy} /></View>
+            <View style={s.tileIconNavy}><IconLink size={19} color={c.navy} /></View>
             <Text style={s.tileTitle}>Send a Tender (S.A.T)</Text>
             <Text style={s.tileBody}>Found a tender elsewhere? Send us the link.</Text>
           </TouchableOpacity>
@@ -201,7 +201,10 @@ const s = StyleSheet.create({
 
   tiles: { flexDirection: 'row', gap: 12, marginTop: 6 },
   tile: { flex: 1, borderRadius: 16, padding: 15, minHeight: 138, justifyContent: 'flex-start', backgroundColor: c.white, borderWidth: 1, borderColor: c.line },
-  tileIconTeal: { width: 38, height: 38, borderRadius: 11, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  tileFind: { backgroundColor: c.teal, borderColor: c.teal },
+  tileIconFind: { width: 38, height: 38, borderRadius: 11, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
+  tileTitleFind: { fontSize: 14.5, fontWeight: '800', color: '#fff' },
+  tileBodyFind: { fontSize: 11.5, color: 'rgba(255,255,255,0.9)', marginTop: 5, lineHeight: 16 },
   tileIconNavy: { width: 38, height: 38, borderRadius: 11, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', marginBottom: 12 },
   tileTitle: { fontSize: 14.5, fontWeight: '800', color: c.navy },
   tileBody: { fontSize: 11.5, color: c.muted, marginTop: 5, lineHeight: 16 },
