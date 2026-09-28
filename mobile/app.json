@@ -22,6 +22,7 @@
     },
     "android": {
       "package": "co.uk.getcana.bids",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#071A2F"

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "934206659422",
+    "project_id": "cana-bids-push",
+    "storage_bucket": "cana-bids-push.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:934206659422:android:1d510f92e811217f894dcf",
+        "android_client_info": {
+          "package_name": "co.uk.getcana.bids"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAxoLvlKMXCV93jeMcY6H4od7K6JXKaLQI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
