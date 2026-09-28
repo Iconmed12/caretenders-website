@@ -63,6 +63,7 @@ function HomeStack() {
       <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
       <Stack.Screen name="Generating" component={GeneratingScreen} options={{ headerShown: false }} />
       <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
+      <Stack.Screen name="Alerts" component={AlertsScreen} options={{ title: 'Tender alerts', headerTitle: 'Tender alerts' }} />
     </Stack.Navigator>
   );
 }
@@ -75,6 +76,7 @@ function FindStack() {
       <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
       <Stack.Screen name="Generating" component={GeneratingScreen} options={{ headerShown: false }} />
       <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
+      <Stack.Screen name="Alerts" component={AlertsScreen} options={{ title: 'Tender alerts', headerTitle: 'Tender alerts' }} />
     </Stack.Navigator>
   );
 }

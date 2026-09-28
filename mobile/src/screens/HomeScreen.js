@@ -65,7 +65,7 @@ export default function HomeScreen({ navigation }) {
 
   const openTab = (name, params) => navigation.getParent()?.navigate(name, params);
   const openFind = (sector) => openTab('Find', { screen: 'Opportunities', params: sector ? { sector } : undefined });
-  const openAlerts = () => openTab('Profile', { screen: 'Alerts' });
+  const openAlerts = () => navigation.navigate('Alerts');
 
   return (
     <View style={s.wrap}>

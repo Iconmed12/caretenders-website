@@ -129,7 +129,7 @@ export default function OpportunitiesScreen({ navigation, route }) {
             autoCorrect={false}
           />
           <TouchableOpacity
-            onPress={() => navigation.getParent()?.navigate('Profile', { screen: 'Alerts' })}
+            onPress={() => navigation.navigate('Alerts')}
             hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
             accessibilityRole="button"
             accessibilityLabel="Tender alerts"
