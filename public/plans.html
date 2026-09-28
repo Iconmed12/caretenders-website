@@ -87,6 +87,26 @@
 
   footer { background:var(--navy); text-align:center; padding:1.5rem; font-size:0.75rem; color:rgba(255,255,255,0.4); }
   .nav-logo-img { height:48px; width:auto; display:block; }
+
+  .feat .no { color:#c2ccd6; flex-shrink:0; }
+  .psec { max-width:1000px; margin:3.5rem auto 0; padding:0 2rem; }
+  .psec h2 { font-size:1.5rem; font-weight:800; letter-spacing:-0.02em; text-align:center; margin-bottom:0.4rem; color:var(--navy); }
+  .psec .lead { text-align:center; color:var(--muted); font-size:0.9rem; margin-bottom:1.8rem; line-height:1.6; }
+  table.cmp { width:100%; border-collapse:collapse; background:#fff; border:1px solid var(--border); border-radius:14px; overflow:hidden; font-size:0.83rem; }
+  table.cmp th, table.cmp td { padding:12px 14px; text-align:center; border-bottom:1px solid var(--border); }
+  table.cmp th { background:var(--navy); color:#fff; font-weight:700; font-size:0.8rem; }
+  table.cmp th:first-child, table.cmp td:first-child { text-align:left; color:#33475b; }
+  table.cmp tr:last-child td { border-bottom:none; }
+  table.cmp td.y { color:var(--good); font-weight:700; }
+  table.cmp td.n { color:#c2ccd6; }
+  table.cmp .ghdr td { background:var(--offwhite); font-weight:800; color:var(--navy); text-align:left; font-size:0.78rem; }
+  table.cmp td.cg { background:rgba(0,201,224,0.06); font-weight:700; color:var(--navy); }
+  .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+  @media(max-width:760px){ .steps{grid-template-columns:1fr 1fr;} }
+  .step { background:#fff; border:1px solid var(--border); border-radius:14px; padding:1.1rem; }
+  .step .num { width:28px; height:28px; border-radius:8px; background:rgba(0,201,224,0.12); color:var(--teal-dk); font-weight:800; display:flex; align-items:center; justify-content:center; font-size:0.85rem; margin-bottom:0.6rem; }
+  .step h4 { font-size:0.88rem; font-weight:700; margin-bottom:3px; color:var(--navy); }
+  .step p { font-size:0.78rem; color:var(--muted); line-height:1.45; }
 </style>
 <link rel="stylesheet" href="/site-chrome.css">
 <style id="cana-header-css">nav:not(.ch-nav){display:none!important}body{padding-top:67px!important}#cana-header{position:fixed;top:0;left:0;right:0;z-index:300;background:#fff;border-bottom:1px solid #eef1f5;font-family:Inter,system-ui,Arial,sans-serif}#cana-header .ch-nav{max-width:1280px;margin:0 auto;padding:0 2rem;height:66px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:1rem}#cana-header .ch-logo{justify-self:start;display:inline-flex;align-items:center;gap:9px;text-decoration:none;line-height:1}#cana-header .ch-word{font-weight:700;font-size:1.5rem;letter-spacing:-0.02em;color:#0b1929}#cana-header .ch-word b{color:#00C9E0;font-weight:700;margin-left:0.3em}#cana-header .ch-links{justify-self:center;display:flex;gap:1.9rem;list-style:none;margin:0;padding:0}#cana-header .ch-links a{color:#33475b;text-decoration:none;font-size:0.92rem;font-weight:500;white-space:nowrap}#cana-header .ch-links a.on,#cana-header .ch-links a:hover{color:#0891a3}#cana-header .ch-auth{justify-self:end;display:flex;align-items:center;gap:14px;white-space:nowrap}#cana-header .ch-btn{background:#00c9e0;color:#04303a;font-weight:700;border-radius:10px;padding:9px 16px;text-decoration:none;font-size:14px}#cana-header .ch-btn:hover{filter:brightness(.96)}#cana-header .ch-link{color:#5b6b78;font-size:13px;text-decoration:none;cursor:pointer;background:none;border:none;font-family:inherit}#cana-header .ch-link:hover{color:#0b1929}#cana-header .ch-status{display:inline-flex;align-items:center;gap:9px;color:#0b1929;font-weight:600;font-size:14px}#cana-header .ch-coin{width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:800}@media(max-width:860px){#cana-header .ch-links{display:none}#cana-header .ch-nav{grid-template-columns:1fr auto;padding:0 1rem}#cana-header .ch-status{display:none}}</style>
@@ -105,15 +125,8 @@
 </nav>
 
 <div class="plans-hero">
-  <h1>One platform. <em>Grows with your team.</em></h1>
-  <p>Unlimited bids on every membership, delivered to your inbox. Choose your team size and the term that suits you. No credits.</p>
-  <div class="term-global">
-    <div class="term-toggle">
-      <button class="term-opt" data-term="3" onclick="setTerm(3)">3 months</button>
-      <button class="term-opt" data-term="6" onclick="setTerm(6)">6 months</button>
-      <button class="term-opt sel" data-term="12" onclick="setTerm(12)"><span class="term-best">Best value</span>12 months</button>
-    </div>
-  </div>
+  <h1>Simple pricing, <em>serious results</em></h1>
+  <p>Win more public sector work. Choose the plan that fits your team, or run a single bid with a one-off. Every plan is billed annually.</p>
 </div>
 
 <div class="cards-wrap">
@@ -121,31 +134,38 @@
   <!-- CANA ACCESS -->
   <div class="card">
     <div class="pname">Cana Access</div>
-    <div class="pfor">For solo providers</div>
-    <div class="price" id="price-access">£2,400<small> / 12 months</small></div>
-    <div class="billed" id="billed-access">£200 a month</div>
+    <div class="pfor">For a single bid writer getting started</div>
+    <div class="price">£1,000<small> / year</small></div>
+    <div class="billed">Billed annually</div>
     <span class="seats">1 user</span>
     <ul class="feat">
-      <li><span class="tick">✓</span><span>1 user</span></li>
-      <li><span class="tick">✓</span><span class="hl">Unlimited bids</span></li>
-      <li><span class="tick">✓</span><span>1 S.A.T. request per month</span></li>
+      <li><span class="tick">✓</span><span class="hl">36 tender generations per year</span></li>
+      <li><span class="tick">✓</span><span>Full tender package sent to your email</span></li>
+      <li><span class="tick">✓</span><span>Original tender documents included</span></li>
+      <li><span class="tick">✓</span><span>Tender alerts with sector, service, region and value preferences</span></li>
+      <li><span class="tick">✓</span><span>Desktop and mobile access</span></li>
+      <li><span class="no">-</span><span>S.A.T. Send A Tender</span></li>
+      <li><span class="no">-</span><span>Included reviews</span></li>
+      <li><span class="no">-</span><span>Team members</span></li>
     </ul>
-    <a class="btn navy" href="/contact.html">Register interest</a>
+    <a class="btn outline" href="/contact.html">Register interest</a>
   </div>
 
   <!-- CANA PRO -->
   <div class="card pop">
     <div class="badge">Most popular</div>
     <div class="pname" style="margin-top:0.3rem;">Cana Pro</div>
-    <div class="pfor">For small teams bidding regularly</div>
-    <div class="price" id="price-pro">£3,000<small> / 12 months</small></div>
-    <div class="billed" id="billed-pro">£250 a month</div>
-    <span class="seats">3 users</span>
+    <div class="pfor">For a small team bidding regularly</div>
+    <div class="price">£1,600<small> / year</small></div>
+    <div class="billed">Billed annually</div>
+    <span class="seats">Up to 3 users</span>
     <ul class="feat">
-      <li><span class="tick">✓</span><span>3 users</span></li>
-      <li><span class="tick">✓</span><span class="hl">Unlimited bids</span></li>
-      <li><span class="tick">✓</span><span>2 response reviews per month</span></li>
-      <li><span class="tick">✓</span><span>3 S.A.T. requests per month</span></li>
+      <li><span class="tick">✓</span><span class="hl">72 tender generations per year</span></li>
+      <li><span class="tick">✓</span><span class="hl">12 S.A.T. requests per year</span></li>
+      <li><span class="tick">✓</span><span>Everything in Access</span></li>
+      <li><span class="tick">✓</span><span>Invite team members</span></li>
+      <li><span class="tick">✓</span><span>Department based access</span></li>
+      <li><span class="no">-</span><span>Included reviews</span></li>
     </ul>
     <a class="btn solid" href="/contact.html">Register interest</a>
   </div>
@@ -153,16 +173,17 @@
   <!-- CANA GOLD -->
   <div class="card">
     <div class="pname">Cana Gold</div>
-    <div class="pfor">For organisations bidding at scale</div>
-    <div class="price" id="price-gold">£3,600<small> / 12 months</small></div>
-    <div class="billed" id="billed-gold">£300 a month</div>
-    <span class="seats">6 users</span>
+    <div class="pfor">For teams that bid seriously and want expert review</div>
+    <div class="price">£2,995<small> / year</small></div>
+    <div class="billed">Billed annually</div>
+    <span class="seats">Up to 5 users</span>
     <ul class="feat">
-      <li><span class="tick">✓</span><span>6 users</span></li>
-      <li><span class="tick">✓</span><span class="hl">Unlimited bids</span></li>
-      <li><span class="tick">✓</span><span>2 response reviews per month</span></li>
-      <li><span class="tick">✓</span><span class="hl">2 full tender reviews per month</span></li>
-      <li><span class="tick">✓</span><span>Unlimited S.A.T. requests</span></li>
+      <li><span class="tick">✓</span><span class="hl">Unlimited tender generations</span></li>
+      <li><span class="tick">✓</span><span class="hl">Unlimited S.A.T. requests</span></li>
+      <li><span class="tick">✓</span><span class="hl">2 Response Reviews included per year</span></li>
+      <li><span class="tick">✓</span><span class="hl">1 Full Tender Review included per year</span></li>
+      <li><span class="tick">✓</span><span>Everything in Pro</span></li>
+      <li><span class="tick">✓</span><span>Invite team and department access</span></li>
     </ul>
     <a class="btn navy" href="/contact.html">Register interest</a>
   </div>
@@ -177,27 +198,64 @@
   </div>
 </div>
 
-<!-- OPTIONAL EXPERT REVIEW -->
-<div class="addon-wrap">
-  <div class="addon-box">
-    <div class="addon-txt">
-      <span class="addon-tag">Optional add-on</span>
-      <h3>Expert human review</h3>
-      <p>A consultant reads and sharpens your responses against the scoring criteria before you submit. Available on any bid, on any plan.</p>
-    </div>
-    <div class="addon-cost" style="text-align:right;flex:none;">
-      <div class="p">£350</div>
-      <div class="l">per tender</div>
-    </div>
-  </div>
+<!-- COMPARE PLANS -->
+<div class="psec">
+  <h2>Compare plans</h2>
+  <p class="lead">Everything each plan includes, side by side.</p>
+  <table class="cmp">
+    <tr><th>Feature</th><th>Access</th><th>Pro</th><th class="cg">Gold</th></tr>
+    <tr><td>Annual price</td><td>£1,000</td><td>£1,600</td><td class="cg">£2,995</td></tr>
+    <tr><td>Users</td><td>1</td><td>Up to 3</td><td class="cg">Up to 5</td></tr>
+    <tr><td>Tender generations</td><td>36 / year</td><td>72 / year</td><td class="cg">Unlimited</td></tr>
+    <tr><td>S.A.T. Send A Tender</td><td class="n">-</td><td>12 / year</td><td class="cg">Unlimited</td></tr>
+    <tr><td>Response Reviews included</td><td class="n">-</td><td class="n">-</td><td class="cg">2 / year</td></tr>
+    <tr><td>Full Tender Reviews included</td><td class="n">-</td><td class="n">-</td><td class="cg">1 / year</td></tr>
+    <tr class="ghdr"><td colspan="4">In every plan</td></tr>
+    <tr><td>Full tender package sent to your email</td><td class="y">✓</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Original tender documents included</td><td class="y">✓</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Tender alerts</td><td class="y">✓</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Sector alert preferences</td><td class="y">✓</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Service type alert preferences</td><td class="y">✓</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Region alert preferences</td><td class="y">✓</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Contract value alert preferences</td><td class="y">✓</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Desktop access</td><td class="y">✓</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Mobile access</td><td class="y">✓</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Invite team members</td><td class="n">-</td><td class="y">✓</td><td class="cg">✓</td></tr>
+    <tr><td>Department based access</td><td class="n">-</td><td class="y">✓</td><td class="cg">✓</td></tr>
+  </table>
 </div>
 
-<!-- ADD-ONS -->
-<div class="addlist">
-  <div class="addcard"><div class="n">Expert review</div><div class="d">Human sharpening before you submit.</div><div class="pr">£350 / tender</div></div>
-  <div class="addcard"><div class="n">PSQ / SQ completion</div><div class="d">Our team completes the selection questionnaire for you.</div><div class="pr">Pricing coming soon</div></div>
-  <div class="addcard"><div class="n">ITT / form completion</div><div class="d">We fill in the tender forms on your behalf.</div><div class="pr">Pricing coming soon</div></div>
-  <div class="addcard"><div class="n">Tender administration</div><div class="d">Full submission handling and portal management.</div><div class="pr">Pricing coming soon</div></div>
+<!-- S.A.T. -->
+<div class="psec">
+  <h2>S.A.T. - Send A Tender</h2>
+  <p class="lead">Found a tender somewhere else? We will fetch it for you.</p>
+  <div class="steps">
+    <div class="step"><div class="num">1</div><h4>Paste the link</h4><p>Drop the tender URL into S.A.T.</p></div>
+    <div class="step"><div class="num">2</div><h4>We locate it</h4><p>Cana finds the tender and its documents.</p></div>
+    <div class="step"><div class="num">3</div><h4>We add it</h4><p>The opportunity is prepared and uploaded to the platform.</p></div>
+    <div class="step"><div class="num">4</div><h4>You are notified</h4><p>Open it and generate your bid.</p></div>
+  </div>
+  <p class="lead" style="margin-top:1.2rem">Allowance: Access not included &middot; Pro 12 per year &middot; Gold unlimited</p>
+</div>
+
+<!-- CANA REVIEWS -->
+<div class="psec">
+  <h2>Cana Reviews</h2>
+  <p class="lead">Expert eyes on your bid before you submit.</p>
+  <table class="cmp">
+    <tr><th>What we check</th><th>Response Review</th><th>Full Tender Review</th></tr>
+    <tr><td>Generated response reviewed</td><td class="y">✓</td><td class="y">✓</td></tr>
+    <tr><td>Question alignment checked</td><td class="y">✓</td><td class="y">✓</td></tr>
+    <tr><td>Structure and clarity checked</td><td class="y">✓</td><td class="y">✓</td></tr>
+    <tr><td>Strength of response reviewed</td><td class="y">✓</td><td class="y">✓</td></tr>
+    <tr><td>Improvements recommended</td><td class="y">✓</td><td class="y">✓</td></tr>
+    <tr><td>PSQ / SQ reviewed where applicable</td><td class="n">-</td><td class="y">✓</td></tr>
+    <tr><td>Wider tender requirements checked</td><td class="n">-</td><td class="y">✓</td></tr>
+    <tr><td>Submission consistency checked</td><td class="n">-</td><td class="y">✓</td></tr>
+    <tr><td>Gaps or missing areas identified</td><td class="n">-</td><td class="y">✓</td></tr>
+    <tr><td>Final tender feedback</td><td class="n">-</td><td class="y">✓</td></tr>
+  </table>
+  <p class="lead" style="margin-top:1.2rem">Included with Gold: 2 Response Reviews and 1 Full Tender Review per year.</p>
 </div>
 
 <!-- FAQ -->
@@ -209,19 +267,19 @@
   </div>
   <div class="qa">
     <p class="q">What is the difference between the plans?</p>
-    <p class="a">Every membership includes <b>unlimited bids</b> delivered to your inbox, as one payment for your chosen term (3, 6 or 12 months). <b>Access</b> is one user. <b>Pro</b> covers a team of 3 and adds 2 response reviews a month and more tender requests. <b>Gold</b> covers 6 users and adds 2 full tender reviews a month and unlimited tender requests. Prefer not to commit? A one-off bid is £480.</p>
+    <p class="a">Every membership is billed annually and includes the full tender package to your inbox, tender alerts and all alert preferences. <b>Access</b> (£1,000) is one user with 36 generations a year. <b>Pro</b> (£1,600) covers up to 3 users with 72 generations a year, 12 S.A.T. requests, team invites and department access. <b>Gold</b> (£2,995) covers up to 5 users with unlimited generations, unlimited S.A.T., and includes 2 Response Reviews and 1 Full Tender Review a year. Prefer not to commit? A one-off bid is £480.</p>
   </div>
   <div class="qa">
     <p class="q">How does the team work?</p>
     <p class="a">Everyone gets their own login and their bids go to <b>their own email</b>. On team plans you share one company profile and evidence library, and the account owner gets an overview of the whole team. There is no live co-editing of a single document: Cana is a central procurement hub, not a shared word processor.</p>
   </div>
   <div class="qa">
-    <p class="q">Can I get the expert review on any plan?</p>
-    <p class="a"><b>Yes.</b> The £350 review can be added to any bid, whether you pay as you go or are on a plan.</p>
+    <p class="q">How do the reviews work?</p>
+    <p class="a">Cana Reviews put expert eyes on your bid before you submit. A <b>Response Review</b> checks a generated response for alignment, structure, strength and improvements. A <b>Full Tender Review</b> goes wider, covering PSQ/SQ where applicable, wider requirements, consistency and gaps. <b>Gold includes 2 Response Reviews and 1 Full Tender Review a year.</b> Need one on another plan? Get in touch and we will sort it.</p>
   </div>
 </div>
 
-<div class="fineprint">Plan pricing is being finalised. Register your interest and we will be in touch with pricing and to set up your account.</div>
+<div class="fineprint">All memberships are billed annually as a single payment. Prices shown are per year. Register your interest and we will get your account set up.</div>
 
 <footer><div class="wrap">
   <div class="foot-grid">
@@ -249,23 +307,6 @@
 </div></footer>
 
 <script>
-  // Term pricing (one payment per term) for the three memberships. Each entry is
-  // [total for the term, monthly equivalent]. One global toggle drives all three.
-  var TERMS = {
-    access: { 3: ['£750', '£250'],   6: ['£1,350', '£225'], 12: ['£2,400', '£200'] },
-    pro:    { 3: ['£1,000', '£333'], 6: ['£1,800', '£300'], 12: ['£3,000', '£250'] },
-    gold:   { 3: ['£1,250', '£417'], 6: ['£2,250', '£375'], 12: ['£3,600', '£300'] }
-  };
-  function setTerm(t) {
-    document.querySelectorAll('.term-opt').forEach(function(b){ b.classList.toggle('sel', parseInt(b.getAttribute('data-term'), 10) === t); });
-    ['access', 'pro', 'gold'].forEach(function(k){
-      var pr = document.getElementById('price-' + k);
-      var bl = document.getElementById('billed-' + k);
-      if (pr) pr.innerHTML = TERMS[k][t][0] + '<small> / ' + t + ' months</small>';
-      if (bl) bl.textContent = TERMS[k][t][1] + ' a month';
-    });
-  }
-
   (function(){
     var sub = new URLSearchParams(location.search).get('subscribed');
     if (!sub) return;
