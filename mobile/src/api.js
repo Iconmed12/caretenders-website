@@ -357,6 +357,17 @@ export async function registerPush(token, expoToken, platform) {
   return res.ok;
 }
 
+export async function sendTestPush(token) {
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/push-test`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    const data = await res.json().catch(() => ({}));
+    return res.ok && data.sent > 0;
+  } catch (e) { return false; }
+}
+
 export async function unregisterPush(token, expoToken) {
   try {
     await fetch(`${API_BASE}/.netlify/functions/register-push`, {

@@ -6,7 +6,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { c } from '../theme';
 import { useAuth } from '../auth';
-import { fetchAlerts, saveAlerts } from '../api';
+import { fetchAlerts, saveAlerts, sendTestPush } from '../api';
 import { enablePush, disablePush } from '../push';
 import { IconChevron, IconMail, IconAlerts } from '../icons';
 
@@ -79,20 +79,29 @@ export default function AlertsScreen() {
     setList(list.indexOf(key) === -1 ? list.concat(key) : list.filter((x) => x !== key));
   };
 
+  // Flip the switch straight away (optimistic), then register in the background.
+  // Only revert if registration genuinely fails, so it never feels sticky.
   async function onPushToggle(next) {
+    setPushOn(next);
     if (next) {
-      setPushBusy(true);
       const ok = await enablePush(token);
-      setPushBusy(false);
       if (!ok) {
+        setPushOn(false);
         Alert.alert('Turn on notifications', 'Please allow notifications for Cana Bids in your phone settings, then try again.');
-        return;
       }
-      setPushOn(true);
     } else {
-      setPushOn(false);
       disablePush(token);
     }
+  }
+
+  async function sendTest() {
+    setPushBusy(true);
+    const ok = await sendTestPush(token);
+    setPushBusy(false);
+    Alert.alert(
+      ok ? 'Test sent' : 'Could not send',
+      ok ? 'A test notification is on its way to this phone.' : 'Make sure push is on and try again.'
+    );
   }
 
   async function save() {
@@ -196,9 +205,15 @@ export default function AlertsScreen() {
               <Text style={s.toggleNote}>A buzz on your phone when a match appears</Text>
             </View>
           </View>
-          <Switch value={pushOn} onValueChange={onPushToggle} disabled={pushBusy} trackColor={{ true: c.teal, false: c.line }} thumbColor="#fff" />
+          <Switch value={pushOn} onValueChange={onPushToggle} trackColor={{ true: c.teal, false: c.line }} thumbColor="#fff" />
         </View>
       </View>
+
+      {pushOn && (
+        <TouchableOpacity style={s.testBtn} activeOpacity={0.8} onPress={sendTest} disabled={pushBusy}>
+          <Text style={s.testText}>{pushBusy ? 'Sending...' : 'Send a test notification'}</Text>
+        </TouchableOpacity>
+      )}
 
       <View style={s.freq}>
         {[['instant', 'Instant'], ['daily', 'Daily'], ['weekly', 'Weekly']].map(([key, label]) => {
@@ -254,6 +269,9 @@ const s = StyleSheet.create({
   toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   toggleLabel: { fontSize: 14, fontWeight: '700', color: c.navy },
   toggleNote: { fontSize: 11, color: c.muted2, marginTop: 1 },
+
+  testBtn: { alignSelf: 'flex-start', marginTop: 10, paddingVertical: 6 },
+  testText: { fontSize: 13, fontWeight: '700', color: c.teal },
 
   freq: { flexDirection: 'row', gap: 8, marginTop: 12 },
   freqCell: { flex: 1, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 11, paddingVertical: 11, alignItems: 'center' },
