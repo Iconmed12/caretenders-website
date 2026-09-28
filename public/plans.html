@@ -126,7 +126,14 @@
 
 <div class="plans-hero">
   <h1>Simple pricing, <em>serious results</em></h1>
-  <p>Win more public sector work. Choose the plan that fits your team, or run a single bid with a one-off. Every plan is billed annually.</p>
+  <p>Win more public sector work. Choose the plan that fits your team and the term that suits you, or run a single bid with a one-off.</p>
+  <div class="term-global">
+    <div class="term-toggle">
+      <button class="term-opt" data-term="3" onclick="setTerm(3)">3 months</button>
+      <button class="term-opt" data-term="6" onclick="setTerm(6)">6 months</button>
+      <button class="term-opt sel" data-term="12" onclick="setTerm(12)"><span class="term-best">Best value</span>12 months</button>
+    </div>
+  </div>
 </div>
 
 <div class="cards-wrap">
@@ -135,8 +142,8 @@
   <div class="card">
     <div class="pname">Cana Access</div>
     <div class="pfor">For a single bid writer getting started</div>
-    <div class="price">£1,000<small> / year</small></div>
-    <div class="billed">Billed annually</div>
+    <div class="price" id="price-access">£1,000<small> / 12 months</small></div>
+    <div class="billed" id="billed-access">£83 a month</div>
     <span class="seats">1 user</span>
     <ul class="feat">
       <li><span class="tick">✓</span><span class="hl">36 tender generations per year</span></li>
@@ -156,8 +163,8 @@
     <div class="badge">Most popular</div>
     <div class="pname" style="margin-top:0.3rem;">Cana Pro</div>
     <div class="pfor">For a small team bidding regularly</div>
-    <div class="price">£1,600<small> / year</small></div>
-    <div class="billed">Billed annually</div>
+    <div class="price" id="price-pro">£1,600<small> / 12 months</small></div>
+    <div class="billed" id="billed-pro">£133 a month</div>
     <span class="seats">Up to 3 users</span>
     <ul class="feat">
       <li><span class="tick">✓</span><span class="hl">72 tender generations per year</span></li>
@@ -174,8 +181,8 @@
   <div class="card">
     <div class="pname">Cana Gold</div>
     <div class="pfor">For teams that bid seriously and want expert review</div>
-    <div class="price">£2,995<small> / year</small></div>
-    <div class="billed">Billed annually</div>
+    <div class="price" id="price-gold">£2,995<small> / 12 months</small></div>
+    <div class="billed" id="billed-gold">£250 a month</div>
     <span class="seats">Up to 5 users</span>
     <ul class="feat">
       <li><span class="tick">✓</span><span class="hl">Unlimited tender generations</span></li>
@@ -204,7 +211,7 @@
   <p class="lead">Everything each plan includes, side by side.</p>
   <table class="cmp">
     <tr><th>Feature</th><th>Access</th><th>Pro</th><th class="cg">Gold</th></tr>
-    <tr><td>Annual price</td><td>£1,000</td><td>£1,600</td><td class="cg">£2,995</td></tr>
+    <tr><td>Price (12 months)</td><td>£1,000</td><td>£1,600</td><td class="cg">£2,995</td></tr>
     <tr><td>Users</td><td>1</td><td>Up to 3</td><td class="cg">Up to 5</td></tr>
     <tr><td>Tender generations</td><td>36 / year</td><td>72 / year</td><td class="cg">Unlimited</td></tr>
     <tr><td>S.A.T. Send A Tender</td><td class="n">-</td><td>12 / year</td><td class="cg">Unlimited</td></tr>
@@ -267,7 +274,7 @@
   </div>
   <div class="qa">
     <p class="q">What is the difference between the plans?</p>
-    <p class="a">Every membership is billed annually and includes the full tender package to your inbox, tender alerts and all alert preferences. <b>Access</b> (£1,000) is one user with 36 generations a year. <b>Pro</b> (£1,600) covers up to 3 users with 72 generations a year, 12 S.A.T. requests, team invites and department access. <b>Gold</b> (£2,995) covers up to 5 users with unlimited generations, unlimited S.A.T., and includes 2 Response Reviews and 1 Full Tender Review a year. Prefer not to commit? A one-off bid is £480.</p>
+    <p class="a">Every membership is one payment for your chosen term (3, 6 or 12 months) and includes the full tender package to your inbox, tender alerts and all alert preferences. Prices shown are for the 12-month term. <b>Access</b> (£1,000) is one user with 36 generations a year. <b>Pro</b> (£1,600) covers up to 3 users with 72 generations a year, 12 S.A.T. requests, team invites and department access. <b>Gold</b> (£2,995) covers up to 5 users with unlimited generations, unlimited S.A.T., and includes 2 Response Reviews and 1 Full Tender Review a year. Prefer not to commit? A one-off bid is £480.</p>
   </div>
   <div class="qa">
     <p class="q">How does the team work?</p>
@@ -279,7 +286,7 @@
   </div>
 </div>
 
-<div class="fineprint">All memberships are billed annually as a single payment. Prices shown are per year. Register your interest and we will get your account set up.</div>
+<div class="fineprint">Each membership is one payment for your chosen term (3, 6 or 12 months). Register your interest and we will get your account set up.</div>
 
 <footer><div class="wrap">
   <div class="foot-grid">
@@ -307,6 +314,23 @@
 </div></footer>
 
 <script>
+  // Term pricing (one payment per term) for the three memberships. Each entry is
+  // [total for the term, monthly equivalent]. One global toggle drives all three.
+  var TERMS = {
+    access: { 3: ['£300', '£100'],  6: ['£550', '£92'],   12: ['£1,000', '£83'] },
+    pro:    { 3: ['£480', '£160'],  6: ['£880', '£147'],  12: ['£1,600', '£133'] },
+    gold:   { 3: ['£900', '£300'],  6: ['£1,650', '£275'], 12: ['£2,995', '£250'] }
+  };
+  function setTerm(t) {
+    document.querySelectorAll('.term-opt').forEach(function(b){ b.classList.toggle('sel', parseInt(b.getAttribute('data-term'), 10) === t); });
+    ['access', 'pro', 'gold'].forEach(function(k){
+      var pr = document.getElementById('price-' + k);
+      var bl = document.getElementById('billed-' + k);
+      if (pr) pr.innerHTML = TERMS[k][t][0] + '<small> / ' + t + ' months</small>';
+      if (bl) bl.textContent = TERMS[k][t][1] + ' a month';
+    });
+  }
+
   (function(){
     var sub = new URLSearchParams(location.search).get('subscribed');
     if (!sub) return;
