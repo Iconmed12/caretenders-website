@@ -12,6 +12,11 @@ nav .nav-signin{color:#1c3040!important}
 nav .cb-mark path[stroke="#fff"]{stroke:#0b1929}
 nav .cb-wm{color:#0b1929!important}
 
+/* Keep the fixed header bar border-box so pages without a global box-sizing reset
+   (e.g. the legal/contact pages) do not render it 64px wider and shove the logo out,
+   which made the header jump between pages. */
+#cana-header .ch-nav{box-sizing:border-box}
+
 /* ── FOOTER: same structure and styling as the homepage ── */
 footer{background:#0b1929;color:#93a8b6;padding:64px 0 34px;font-size:14px;text-align:left}
 footer .wrap{max-width:1200px;margin:0 auto;padding:0 24px}
