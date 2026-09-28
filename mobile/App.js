@@ -63,7 +63,6 @@ function HomeStack() {
       <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
       <Stack.Screen name="Generating" component={GeneratingScreen} options={{ headerShown: false }} />
       <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
-      <Stack.Screen name="Alerts" component={AlertsScreen} options={{ title: 'Tender alerts', headerTitle: 'Tender alerts' }} />
     </Stack.Navigator>
   );
 }
@@ -76,7 +75,6 @@ function FindStack() {
       <Stack.Screen name="TenderDetail" component={TenderDetailScreen} options={{ title: 'Tender' }} />
       <Stack.Screen name="Generating" component={GeneratingScreen} options={{ headerShown: false }} />
       <Stack.Screen name="BidReady" component={BidReadyScreen} options={{ title: 'Your bid' }} />
-      <Stack.Screen name="Alerts" component={AlertsScreen} options={{ title: 'Tender alerts', headerTitle: 'Tender alerts' }} />
     </Stack.Navigator>
   );
 }
@@ -88,7 +86,6 @@ function ProfileStack() {
     <Stack.Navigator screenOptions={stackOptions}>
       <Stack.Screen name="ProfileHome" component={ProfileScreen} options={{ headerShown: false }} />
       <Stack.Screen name="PlanBilling" component={PlanBillingScreen} options={{ title: 'My plan and billing' }} />
-      <Stack.Screen name="Alerts" component={AlertsScreen} options={{ title: 'Tender alerts' }} />
       <Stack.Screen name="CompanyProfile" component={CompanyProfileScreen} options={{ title: 'Company profile' }} />
       <Stack.Screen name="Sat" component={SatScreen} options={{ title: 'Send a tender' }} />
       <Stack.Screen name="Evidence" component={EvidenceScreen} options={{ title: 'Evidence library' }} />
@@ -174,17 +171,34 @@ function AppTabBar({ state, navigation }) {
   );
 }
 
+function MainTabs() {
+  return (
+    <Tabs.Navigator screenOptions={{ headerShown: false }} tabBar={(props) => <AppTabBar {...props} />}>
+      <Tabs.Screen name="HomeTab" component={HomeStack} />
+      <Tabs.Screen name="Ongoing" component={OngoingScreen} />
+      <Tabs.Screen name="Generate" component={GeneratePlaceholder} />
+      <Tabs.Screen name="Team" component={TeamStack} />
+      <Tabs.Screen name="Profile" component={ProfileStack} />
+      <Tabs.Screen name="Find" component={FindStack} />
+    </Tabs.Navigator>
+  );
+}
+
+// Alerts sits ABOVE the tabs (root level), so opening it from the search filter
+// on any tab covers the whole app and the back arrow returns you exactly where
+// you were. It never lodges inside a tab's own stack, which is what left the
+// More tab stuck on it before.
 function SignedInApp() {
   return (
     <NavigationContainer>
-      <Tabs.Navigator screenOptions={{ headerShown: false }} tabBar={(props) => <AppTabBar {...props} />}>
-        <Tabs.Screen name="HomeTab" component={HomeStack} />
-        <Tabs.Screen name="Ongoing" component={OngoingScreen} />
-        <Tabs.Screen name="Generate" component={GeneratePlaceholder} />
-        <Tabs.Screen name="Team" component={TeamStack} />
-        <Tabs.Screen name="Profile" component={ProfileStack} />
-        <Tabs.Screen name="Find" component={FindStack} />
-      </Tabs.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Tabs" component={MainTabs} />
+        <Stack.Screen
+          name="Alerts"
+          component={AlertsScreen}
+          options={{ ...stackOptions, headerShown: true, title: 'Tender alerts', headerTitle: 'Tender alerts' }}
+        />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }

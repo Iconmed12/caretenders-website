@@ -7,7 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { c } from '../theme';
 import ScreenHeader from '../components/ScreenHeader';
 import { useAuth } from '../auth';
-import { fetchOngoing, jobState, jobStageLabel, agoLabel, orderRef } from '../api';
+import { fetchOngoing, cachedOngoing, jobState, jobStageLabel, agoLabel, orderRef } from '../api';
 import { IconFind, IconDoc, IconChevron } from '../icons';
 
 /**
@@ -22,8 +22,8 @@ export default function OngoingScreen({ navigation }) {
   const { session } = useAuth();
   const token = (session && session.access_token) || '';
 
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [jobs, setJobs] = useState(cachedOngoing() || []);
+  const [loading, setLoading] = useState(!cachedOngoing());
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
   const [q, setQ] = useState('');

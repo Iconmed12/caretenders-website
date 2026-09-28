@@ -13,7 +13,7 @@ import {
 } from '../icons';
 import { useAuth } from '../auth';
 import {
-  fetchTenders, fetchOngoing, jobState, agoLabel, daysUntil, SECTORS,
+  fetchTenders, fetchOngoing, cachedTenders, cachedOngoing, jobState, agoLabel, daysUntil, SECTORS,
 } from '../api';
 
 const SECTOR_ICON = { care: IconHeart, facilities: IconBuilding, recruitment: IconTeam, construction: IconHardhat, it: IconLaptop };
@@ -32,9 +32,9 @@ export default function HomeScreen({ navigation }) {
   const user = (session && session.user) || {};
   const token = (session && session.access_token) || '';
 
-  const [tenders, setTenders] = useState([]);
-  const [jobs, setJobs] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [tenders, setTenders] = useState(cachedTenders() || []);
+  const [jobs, setJobs] = useState(cachedOngoing() || []);
+  const [loading, setLoading] = useState(!cachedTenders());
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
 

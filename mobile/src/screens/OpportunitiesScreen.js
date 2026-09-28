@@ -6,7 +6,7 @@ import TenderCard from '../components/TenderCard';
 import { IconFind, IconSliders, IconChevron } from '../icons';
 import { useAuth } from '../auth';
 import {
-  fetchTenders, fetchCompanyProfile, sectorKeyOf, sectorMeta, isNewTender, daysUntil,
+  fetchTenders, cachedTenders, fetchCompanyProfile, sectorKeyOf, sectorMeta, isNewTender, daysUntil,
 } from '../api';
 
 // The profile's own sector label maps to one of our card buckets, so "My
@@ -30,8 +30,8 @@ export default function OpportunitiesScreen({ navigation, route }) {
   const { session } = useAuth();
   const user = (session && session.user) || {};
 
-  const [all, setAll] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [all, setAll] = useState(cachedTenders() || []);
+  const [loading, setLoading] = useState(!cachedTenders());
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [q, setQ] = useState('');

@@ -93,13 +93,29 @@ export function valueLabel(t) {
   return t.value || '';
 }
 
-/** Live tenders across every sector, newest first. */
-export async function fetchTenders() {
+// Lightweight in-memory caches so moving between tabs shows the last data
+// instantly and refreshes quietly, instead of a spinner on every screen. Lives
+// for the session only; cleared naturally when the app restarts.
+let _tenders = null;
+let _tendersAt = 0;
+let _ongoing = null;
+const TENDERS_TTL = 60000; // 60s: skip a repeat network call when hopping tabs
+
+/** Last tenders we loaded, or null. Lets a screen render before the network returns. */
+export function cachedTenders() { return _tenders; }
+/** Last bid history we loaded, or null. */
+export function cachedOngoing() { return _ongoing; }
+
+/** Live tenders across every sector, newest first. Served from cache within the TTL. */
+export async function fetchTenders(force) {
+  if (!force && _tenders && (Date.now() - _tendersAt) < TENDERS_TTL) return _tenders;
   const res = await fetch(`${API_BASE}/.netlify/functions/get-tenders`);
   if (!res.ok) throw new Error('Could not load tenders');
   const data = await res.json();
-  if (!Array.isArray(data)) return [];
-  return data.filter((t) => isLive(t));
+  const list = Array.isArray(data) ? data.filter((t) => isLive(t)) : [];
+  _tenders = list;
+  _tendersAt = Date.now();
+  return list;
 }
 
 /**
@@ -119,7 +135,9 @@ export async function fetchOngoing(token) {
   });
   if (!res.ok) throw new Error('Could not load your bids');
   const data = await res.json();
-  return Array.isArray(data) ? data : [];
+  const list = Array.isArray(data) ? data : [];
+  _ongoing = list;
+  return list;
 }
 
 // A short, human order reference for a job, shown on the confirmation and in My
