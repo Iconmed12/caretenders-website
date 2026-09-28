@@ -8,9 +8,9 @@ const { memberInfo, enterpriseScope } = require('./_membership');
 
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
-// Monthly S.A.T. allowance by plan. Gold is unlimited.
-var SAT_LIMITS = { gold: Infinity, pro: 3, access: 1 };
-function satLimitFor(plan) { return (plan && SAT_LIMITS[plan] != null) ? SAT_LIMITS[plan] : 1; }
+// Monthly S.A.T. allowance by plan. Gold unlimited, Pro 1, Access none.
+var SAT_LIMITS = { gold: Infinity, pro: 1, access: 0 };
+function satLimitFor(plan) { return (plan && SAT_LIMITS[plan] != null) ? SAT_LIMITS[plan] : 0; }
 function monthStartISO() { var d = new Date(); d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0); return d.toISOString(); }
 
 // Verify the caller's Supabase access token and return their identity, or null.
@@ -65,7 +65,7 @@ exports.handler = async (event) => {
 
     var SB_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
 
-    // Per-plan monthly limit: Gold unlimited, Pro 3, Access 1 (team members use the
+    // Per-plan monthly limit: Gold unlimited, Pro 1, Access none (team members use the
     // owner's plan). The allowance is SHARED across a whole company circle, so the
     // count spans every seat's requests. Solo users count only their own.
     var mem = await memberInfo(user.email);

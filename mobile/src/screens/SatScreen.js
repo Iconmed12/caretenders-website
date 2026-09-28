@@ -12,7 +12,7 @@ import { IconLink } from '../icons';
 /**
  * Send A Tender. The member pastes the link to a tender they want but cannot
  * find on Cana, and the team sources it by hand. The monthly allowance (Access
- * 1, Pro 3, Gold unlimited) is set by plan and shared across the company; the
+ * none, Pro 1, Gold unlimited) is set by plan and shared across the company; the
  * server enforces it, this screen just shows where they are up to.
  */
 export default function SatScreen() {

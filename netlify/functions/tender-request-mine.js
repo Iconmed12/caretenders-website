@@ -7,8 +7,8 @@ const { memberInfo, enterpriseScope } = require('./_membership');
 
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
 
-var SAT_LIMITS = { gold: Infinity, pro: 3, access: 1 };
-function satLimitFor(plan) { return (plan && SAT_LIMITS[plan] != null) ? SAT_LIMITS[plan] : 1; }
+var SAT_LIMITS = { gold: Infinity, pro: 1, access: 0 };
+function satLimitFor(plan) { return (plan && SAT_LIMITS[plan] != null) ? SAT_LIMITS[plan] : 0; }
 function monthStartISO() { var d = new Date(); d.setUTCDate(1); d.setUTCHours(0, 0, 0, 0); return d.toISOString(); }
 
 async function verifyUser(event) {
@@ -47,7 +47,7 @@ exports.handler = async (event) => {
     var rows = await res.json();
     rows = Array.isArray(rows) ? rows : [];
 
-    // S.A.T. allowance for this account (Gold unlimited, Pro 3, Access 1), SHARED
+    // S.A.T. allowance for this account (Gold unlimited, Pro 1, Access none), SHARED
     // across the whole company circle. So usage is counted across every seat.
     var mem = await memberInfo(user.email);
     var plan = (mem && mem.sub && mem.sub.plan) || null;
