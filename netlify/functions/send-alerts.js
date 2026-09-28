@@ -65,6 +65,24 @@ async function sendEmail(to, subject, html) {
   return r.ok;
 }
 
+// Push to every device this user has registered, via Expo's push service.
+async function sendPush(userId, matches, sbHeaders) {
+  const tRes = await fetch(SB_URL + '/rest/v1/push_tokens?user_id=eq.' + userId + '&select=token', { headers: sbHeaders });
+  const toks = tRes.ok ? await tRes.json() : [];
+  if (!toks.length) return false;
+  const title = matches.length === 1 ? 'New tender match' : matches.length + ' new tender matches';
+  const body = matches[0].title || 'Tap to view in Cana Bids';
+  const messages = toks.map(function (t) {
+    return { to: t.token, title: title, body: body, sound: 'default', data: { type: 'alerts' } };
+  });
+  const r = await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(messages),
+  });
+  return r.ok;
+}
+
 exports.handler = async () => {
   const key = svcKey();
   if (!key) return { statusCode: 500, body: 'Not configured' };
@@ -83,15 +101,16 @@ exports.handler = async () => {
   );
   const recent = tRes.ok ? await tRes.json() : [];
 
-  // Everyone who wants email alerts.
+  // Everyone with an alert set up (we decide per row whether to email, push, or both).
   const aRes = await fetch(
-    SB_URL + '/rest/v1/tender_alerts?email_on=eq.true&select=*',
+    SB_URL + '/rest/v1/tender_alerts?select=*',
     { headers: sbHeaders }
   );
   const alerts = aRes.ok ? await aRes.json() : [];
 
   let sent = 0;
   for (const a of alerts) {
+    if (!a.email_on && !a.push_on) continue;
     if (a.frequency === 'weekly' && !isMonday) continue;
 
     const cutoff = a.last_notified_at ? new Date(a.last_notified_at).getTime() : (Date.now() - 2 * 24 * 60 * 60 * 1000);
@@ -103,11 +122,18 @@ exports.handler = async () => {
 
     if (!matches.length) continue;
 
-    const subject = matches.length === 1
-      ? 'A new tender matches your alerts'
-      : matches.length + ' new tenders match your alerts';
-    const ok = await sendEmail(a.email, subject, digestHtml(a.email, matches));
-    if (ok) {
+    let delivered = false;
+    if (a.email_on) {
+      const subject = matches.length === 1
+        ? 'A new tender matches your alerts'
+        : matches.length + ' new tenders match your alerts';
+      if (await sendEmail(a.email, subject, digestHtml(a.email, matches))) delivered = true;
+    }
+    if (a.push_on) {
+      if (await sendPush(a.user_id, matches, sbHeaders)) delivered = true;
+    }
+
+    if (delivered) {
       sent++;
       await fetch(
         SB_URL + '/rest/v1/tender_alerts?user_id=eq.' + a.user_id,

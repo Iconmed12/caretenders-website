@@ -347,6 +347,26 @@ export async function saveAlerts(token, prefs) {
   return data.prefs;
 }
 
+// Register / remove this device's Expo push token for the signed-in user.
+export async function registerPush(token, expoToken, platform) {
+  const res = await fetch(`${API_BASE}/.netlify/functions/register-push`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify({ token: expoToken, platform }),
+  });
+  return res.ok;
+}
+
+export async function unregisterPush(token, expoToken) {
+  try {
+    await fetch(`${API_BASE}/.netlify/functions/register-push`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+      body: JSON.stringify({ token: expoToken }),
+    });
+  } catch (e) { /* best effort */ }
+}
+
 // ── company invite (join an existing company) ──
 // An invited teammate joins the owner's company with no purchase, so this stays
 // inside App Store / Play rules. The invite email carries a link with ?token=,

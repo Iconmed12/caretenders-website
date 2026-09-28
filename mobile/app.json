@@ -2,7 +2,7 @@
   "expo": {
     "name": "Cana Bids",
     "slug": "cana-bids",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "scheme": "canabids",
     "userInterfaceStyle": "light",
@@ -36,7 +36,14 @@
       }
     },
     "plugins": [
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/adaptive-icon.png",
+          "color": "#00AFC1"
+        }
+      ]
     ]
   }
 }

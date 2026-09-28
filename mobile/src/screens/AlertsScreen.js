@@ -7,6 +7,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { c } from '../theme';
 import { useAuth } from '../auth';
 import { fetchAlerts, saveAlerts } from '../api';
+import { enablePush, disablePush } from '../push';
 import { IconChevron, IconMail, IconAlerts } from '../icons';
 
 // A collapsible section: header shows a summary, tapping opens the pick list.
@@ -51,6 +52,7 @@ export default function AlertsScreen() {
   const [band, setBand] = useState('any');
   const [emailOn, setEmailOn] = useState(true);
   const [pushOn, setPushOn] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
   const [frequency, setFrequency] = useState('daily');
 
   const load = useCallback(() => {
@@ -76,6 +78,22 @@ export default function AlertsScreen() {
   const toggle = (list, setList, key) => {
     setList(list.indexOf(key) === -1 ? list.concat(key) : list.filter((x) => x !== key));
   };
+
+  async function onPushToggle(next) {
+    if (next) {
+      setPushBusy(true);
+      const ok = await enablePush(token);
+      setPushBusy(false);
+      if (!ok) {
+        Alert.alert('Turn on notifications', 'Please allow notifications for Cana Bids in your phone settings, then try again.');
+        return;
+      }
+      setPushOn(true);
+    } else {
+      setPushOn(false);
+      disablePush(token);
+    }
+  }
 
   async function save() {
     setSaving(true);
@@ -175,10 +193,10 @@ export default function AlertsScreen() {
             <IconAlerts size={17} color={c.muted} />
             <View>
               <Text style={s.toggleLabel}>Push notification</Text>
-              <Text style={s.toggleNote}>Coming soon</Text>
+              <Text style={s.toggleNote}>A buzz on your phone when a match appears</Text>
             </View>
           </View>
-          <Switch value={pushOn} onValueChange={setPushOn} disabled trackColor={{ true: c.teal, false: c.line }} thumbColor="#fff" />
+          <Switch value={pushOn} onValueChange={onPushToggle} disabled={pushBusy} trackColor={{ true: c.teal, false: c.line }} thumbColor="#fff" />
         </View>
       </View>
 

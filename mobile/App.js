@@ -24,6 +24,7 @@ import SatScreen from './src/screens/SatScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
 import PlanBillingScreen from './src/screens/PlanBillingScreen';
 import AlertsScreen from './src/screens/AlertsScreen';
+import './src/push';
 import SignInScreen from './src/screens/SignInScreen';
 import { AuthProvider, useAuth } from './src/auth';
 import { IconHome, IconDoc, IconTeam, IconMore, IconSpark } from './src/icons';
