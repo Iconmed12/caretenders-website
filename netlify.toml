@@ -2,6 +2,13 @@
   publish = "public"
   functions = "netlify/functions"
 
+# The mobile app source (mobile/) is not part of the website deploy. Skip it in
+# secret scanning: google-services.json holds the Firebase Android client key,
+# which is a public client identifier bundled in every Android app (locked to the
+# package name + signing key), not a server secret.
+[build.environment]
+  SECRETS_SCAN_OMIT_PATHS = "mobile/**"
+
 # Keep the raw netlify.app address from ever showing to visitors: send it to
 # the brand domain. Function calls (Stripe webhooks, scheduled jobs) are left
 # alone by the first rule so a redirect can never break a webhook POST.
