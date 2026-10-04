@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cana Bids | Launching soon</title>
+<meta name="description" content="Cana Bids helps UK organisations find public sector tenders and generate submission-ready bids in hours. Launching soon - join the list.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#0B1929">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--navy:#0B1929;--navy2:#11243A;--teal:#00C9E0;--teal-dk:#0891a3;--muted:#8ba0ad;--line:rgba(255,255,255,0.12)}
+  body{font-family:'Inter',sans-serif;background:var(--navy);color:#fff;min-height:100vh;display:flex;flex-direction:column}
+  .bgwrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;text-align:center;position:relative;overflow:hidden}
+  .glow{position:absolute;width:680px;height:680px;border-radius:50%;background:radial-gradient(circle,rgba(0,201,224,0.16),transparent 65%);top:-220px;filter:blur(10px);pointer-events:none}
+  .inner{position:relative;max-width:620px;width:100%}
+  .logo{display:inline-flex;align-items:center;gap:11px;margin-bottom:34px}
+  .logo .wm{font-size:1.9rem;font-weight:700;letter-spacing:-0.02em;color:#fff}
+  .logo .wm b{color:var(--teal);font-weight:700;margin-left:0.25em}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(0,201,224,0.12);border:1px solid rgba(0,201,224,0.3);color:#7fe6f2;font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:7px 15px;border-radius:999px;margin-bottom:22px}
+  .eyebrow .pdot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 4px rgba(0,201,224,0.25)}
+  h1{font-size:clamp(2.1rem,6vw,3.3rem);font-weight:800;letter-spacing:-0.03em;line-height:1.05}
+  h1 em{font-style:normal;color:var(--teal)}
+  .lead{color:#b9c7d2;font-size:clamp(1rem,2.2vw,1.15rem);line-height:1.6;margin:20px auto 0;max-width:30em}
+  form{margin:34px auto 0;max-width:460px;display:flex;gap:10px}
+  input[type=email]{flex:1;background:var(--navy2);border:1.5px solid var(--line);border-radius:12px;padding:15px 16px;font-size:1rem;color:#fff;font-family:'Inter',sans-serif;outline:none}
+  input[type=email]::placeholder{color:#6f8494}
+  input[type=email]:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(0,201,224,0.12)}
+  button{background:var(--teal);color:#04303a;border:none;border-radius:12px;padding:0 24px;font-size:1rem;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;transition:filter 0.15s}
+  button:hover{filter:brightness(0.96)}
+  button:disabled{opacity:0.6;cursor:default}
+  .note{color:var(--muted);font-size:0.82rem;margin-top:14px}
+  .msg{margin-top:18px;font-size:0.95rem;font-weight:600;min-height:1.2em}
+  .msg.ok{color:#3ddc97}
+  .msg.err{color:#ff8a8a}
+  .done{display:none;margin:34px auto 0;max-width:460px;background:var(--navy2);border:1px solid rgba(0,201,224,0.3);border-radius:14px;padding:22px}
+  .done h3{font-size:1.1rem;font-weight:700;margin-bottom:6px}
+  .done p{color:#b9c7d2;font-size:0.92rem;line-height:1.55}
+  .feats{display:flex;gap:26px;justify-content:center;flex-wrap:wrap;margin-top:40px;color:#9fb4c2;font-size:0.86rem}
+  .feats span{display:inline-flex;align-items:center;gap:8px}
+  .feats svg{color:var(--teal)}
+  @media(max-width:520px){ form{flex-direction:column} button{padding:14px} }
+  footer{border-top:1px solid rgba(255,255,255,0.07);padding:20px;text-align:center;color:#6f8494;font-size:0.78rem}
+  footer a{color:#9fb4c2;text-decoration:none}
+</style>
+</head>
+<body>
+  <div class="bgwrap">
+    <div class="glow"></div>
+    <div class="inner">
+      <div class="logo">
+        <svg viewBox="0 0 64 64" style="height:46px;width:46px" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="wm">Cana<b>Bids</b></span>
+      </div>
+
+      <div class="eyebrow"><span class="pdot"></span> Launching soon</div>
+      <h1>Win more public sector tenders, <em>in hours not weeks</em></h1>
+      <p class="lead">Cana Bids finds live public sector opportunities and generates submission-ready bids, tailored to each tender and delivered to your inbox. We are putting the finishing touches in place.</p>
+
+      <form id="waitForm" novalidate>
+        <input type="email" id="email" placeholder="you@organisation.co.uk" autocomplete="email" required>
+        <button type="submit" id="submitBtn">Notify me</button>
+      </form>
+      <div class="note">Be first to know when we go live. One email at launch, no spam.</div>
+      <div class="msg" id="msg"></div>
+
+      <div class="done" id="done">
+        <h3>You are on the list.</h3>
+        <p>Thanks for your interest. We will email you the moment Cana Bids is live.</p>
+      </div>
+
+      <div class="feats">
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Public sector tenders</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Tailored bid generation</span>
+        <span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7"/></svg> Expert review</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>&copy; 2026 Cana Bids &middot; <a href="mailto:hello@getcana.co.uk">hello@getcana.co.uk</a> &middot; <a href="/privacy.html">Privacy</a></footer>
+
+<script>
+  (function(){
+    var form=document.getElementById('waitForm');
+    var email=document.getElementById('email');
+    var btn=document.getElementById('submitBtn');
+    var msg=document.getElementById('msg');
+    var done=document.getElementById('done');
+    function valid(e){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+    form.addEventListener('submit', function(ev){
+      ev.preventDefault();
+      msg.className='msg'; msg.textContent='';
+      var val=(email.value||'').trim();
+      if(!valid(val)){ msg.className='msg err'; msg.textContent='Please enter a valid email address.'; return; }
+      btn.disabled=true; btn.textContent='Adding you...';
+      fetch('/.netlify/functions/waitlist-signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:val})})
+        .then(function(r){ return r.json().catch(function(){return {};}).then(function(d){ return {ok:r.ok,d:d}; }); })
+        .then(function(res){
+          if(!res.ok){ throw new Error((res.d&&res.d.error)||'Something went wrong'); }
+          form.style.display='none'; document.querySelector('.note').style.display='none'; done.style.display='block';
+        })
+        .catch(function(e){ btn.disabled=false; btn.textContent='Notify me'; msg.className='msg err'; msg.textContent=e.message||'Could not add you. Please try again.'; });
+    });
+  })();
+</script>
+</body>
+</html>
