@@ -109,7 +109,7 @@ export default function CompanyProfileScreen({ navigation }) {
 
   return (
     <KeyboardAvoidingView style={s.wrap} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
         <Text style={s.lead}>
           The fuller this is, the more of your bid Cana can write, and the fewer blanks left for you.
         </Text>
@@ -276,33 +276,33 @@ function Field({ label, value, onChange, multiline, locked, keyboardType, tight 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
   centre: { alignItems: 'center', justifyContent: 'center' },
-  lead: { fontSize: 13, color: c.muted, lineHeight: 19, marginBottom: 14 },
-  evidence: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 14, marginBottom: 12 },
-  evidenceIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
-  evidenceTitle: { fontSize: 14, fontWeight: '700', color: c.navy },
+  lead: { fontSize: 13.5, color: c.muted, lineHeight: 20, marginBottom: 14 },
+  evidence: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, padding: 15, marginBottom: 12 },
+  evidenceIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
+  evidenceTitle: { fontSize: 15.5, fontWeight: '700', color: c.navy },
   evidenceSub: { fontSize: 11.5, color: c.muted2, marginTop: 2 },
-  card: { backgroundColor: c.white, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: c.line, marginBottom: 12 },
-  cardTitle: { fontSize: 15.5, fontWeight: '800', color: c.navy },
-  cardHint: { fontSize: 12, color: c.muted2, marginTop: 3, lineHeight: 17 },
-  locked: { fontSize: 12, color: c.teal, marginTop: 8, lineHeight: 17 },
-  label: { fontSize: 10, fontWeight: '700', letterSpacing: 0.6, color: c.muted2, marginBottom: 6 },
-  input: { borderWidth: 1, borderColor: c.line, borderRadius: 11, paddingHorizontal: 12, paddingVertical: 11, fontSize: 14, color: c.ink, backgroundColor: c.white },
-  inputMulti: { height: 78, textAlignVertical: 'top', paddingTop: 11 },
+  card: { backgroundColor: c.white, borderRadius: 15, padding: 16, borderWidth: 1, borderColor: c.line, marginBottom: 12 },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: c.navy },
+  cardHint: { fontSize: 13, color: c.muted2, marginTop: 3, lineHeight: 18 },
+  locked: { fontSize: 13, color: c.teal, marginTop: 8, lineHeight: 18 },
+  label: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6, color: c.muted2, marginBottom: 6 },
+  input: { borderWidth: 1, borderColor: c.line, borderRadius: 15, paddingHorizontal: 14, paddingVertical: 16, fontSize: 16, color: c.ink, backgroundColor: c.white },
+  inputMulti: { height: 84, textAlignVertical: 'top', paddingTop: 14 },
   inputLocked: { backgroundColor: c.bg, color: c.muted },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
-  chip: { borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 13, paddingVertical: 8, backgroundColor: c.white },
-  chipSm: { borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 6, backgroundColor: c.white },
+  chip: { borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 9, backgroundColor: c.white },
+  chipSm: { borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7, backgroundColor: c.white },
   chipOn: { backgroundColor: c.navy, borderColor: c.navy },
-  chipText: { fontSize: 12.5, fontWeight: '600', color: c.muted },
-  chipTextSm: { fontSize: 11.5, fontWeight: '600', color: c.muted },
+  chipText: { fontSize: 13, fontWeight: '600', color: c.muted },
+  chipTextSm: { fontSize: 12, fontWeight: '600', color: c.muted },
   chipTextOn: { color: '#fff' },
-  subCard: { borderWidth: 1, borderColor: c.line, borderRadius: 12, padding: 13, marginTop: 12, backgroundColor: c.bg },
+  subCard: { borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 15, marginTop: 12, backgroundColor: c.bg },
   subHead: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  subTitle: { fontSize: 13, fontWeight: '800', color: c.navy },
+  subTitle: { fontSize: 14, fontWeight: '800', color: c.navy },
   remove: { fontSize: 12.5, fontWeight: '700', color: '#b4232a' },
-  addBtn: { borderWidth: 1, borderColor: c.line, borderStyle: 'dashed', borderRadius: 12, paddingVertical: 13, alignItems: 'center', marginTop: 12 },
-  addText: { fontSize: 13.5, fontWeight: '700', color: c.teal },
-  save: { backgroundColor: c.brand, borderRadius: 13, paddingVertical: 16, alignItems: 'center', marginTop: 6 },
+  addBtn: { borderWidth: 1, borderColor: c.line, borderStyle: 'dashed', borderRadius: 14, paddingVertical: 14, alignItems: 'center', marginTop: 12 },
+  addText: { fontSize: 14, fontWeight: '700', color: c.teal },
+  save: { backgroundColor: c.brand, borderRadius: 15, paddingVertical: 16, alignItems: 'center', marginTop: 6 },
   saveOff: { opacity: 0.7 },
-  saveText: { fontSize: 15, fontWeight: '800', color: '#ffffff' },
+  saveText: { fontSize: 17, fontWeight: '800', color: '#ffffff' },
 });

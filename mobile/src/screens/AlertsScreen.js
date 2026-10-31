@@ -142,7 +142,7 @@ export default function AlertsScreen() {
     : options.serviceTypes;
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ padding: 16, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+    <ScrollView style={s.wrap} contentContainerStyle={{ padding: 18, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
       <Text style={s.h1}>Tender alerts</Text>
       <Text style={s.sub}>Pick what you want. We alert you the moment it appears.</Text>
 
@@ -236,50 +236,50 @@ export default function AlertsScreen() {
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.bg, padding: 24 },
-  err: { fontSize: 13, color: c.muted, textAlign: 'center', lineHeight: 19 },
-  retry: { marginTop: 14, backgroundColor: c.brand, borderRadius: 12, paddingHorizontal: 20, paddingVertical: 12 },
-  retryText: { fontSize: 14, fontWeight: '800', color: '#ffffff' },
+  err: { fontSize: 14, color: c.muted, textAlign: 'center', lineHeight: 20 },
+  retry: { marginTop: 14, backgroundColor: c.brand, borderRadius: 14, paddingHorizontal: 20, paddingVertical: 14 },
+  retryText: { fontSize: 16, fontWeight: '800', color: '#ffffff' },
 
-  h1: { fontSize: 24, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
-  sub: { fontSize: 13, color: c.muted, marginTop: 4, lineHeight: 19 },
+  h1: { fontSize: 32, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
+  sub: { fontSize: 14, color: c.muted, marginTop: 4, lineHeight: 20 },
 
-  groupLabel: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5, color: c.muted2, marginTop: 22, marginBottom: 10 },
+  groupLabel: { fontSize: 11.5, fontWeight: '800', letterSpacing: 0.5, color: c.muted2, marginTop: 22, marginBottom: 10 },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
-  chip: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  chip: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 9 },
   chipOn: { backgroundColor: c.teal, borderColor: c.teal },
-  chipText: { fontSize: 12.5, fontWeight: '700', color: c.navy },
+  chipText: { fontSize: 13, fontWeight: '700', color: c.navy },
   chipTextOn: { color: '#fff' },
 
-  section: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, marginTop: 12, overflow: 'hidden' },
-  secHead: { flexDirection: 'row', alignItems: 'center', padding: 15 },
-  secTitle: { fontSize: 14.5, fontWeight: '800', color: c.navy },
-  secSummary: { fontSize: 12, color: c.muted, marginTop: 3 },
-  secBody: { borderTopWidth: 1, borderTopColor: c.line2, paddingHorizontal: 15 },
+  section: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, marginTop: 12, overflow: 'hidden' },
+  secHead: { flexDirection: 'row', alignItems: 'center', padding: 16 },
+  secTitle: { fontSize: 15.5, fontWeight: '800', color: c.navy },
+  secSummary: { fontSize: 13, color: c.muted, marginTop: 3 },
+  secBody: { borderTopWidth: 1, borderTopColor: c.line2, paddingHorizontal: 16 },
 
-  checkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 13 },
+  checkRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14 },
   checkDivider: { borderBottomWidth: 1, borderBottomColor: c.line2 },
-  checkLabel: { fontSize: 13.5, color: c.muted, flex: 1 },
+  checkLabel: { fontSize: 14.5, color: c.muted, flex: 1 },
   checkLabelOn: { color: c.navy, fontWeight: '700' },
   box: { width: 22, height: 22, borderRadius: 6, borderWidth: 1.5, borderColor: c.line, alignItems: 'center', justifyContent: 'center' },
   boxOn: { backgroundColor: c.teal, borderColor: c.teal },
   tick: { width: 10, height: 6, borderLeftWidth: 2, borderBottomWidth: 2, borderColor: '#fff', transform: [{ rotate: '-45deg' }, { translateY: -1 }] },
 
-  card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingHorizontal: 15 },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 13 },
+  card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, paddingHorizontal: 16 },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14 },
   toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  toggleLabel: { fontSize: 14, fontWeight: '700', color: c.navy },
+  toggleLabel: { fontSize: 15, fontWeight: '700', color: c.navy },
   toggleNote: { fontSize: 11, color: c.muted2, marginTop: 1 },
 
   testBtn: { alignSelf: 'flex-start', marginTop: 10, paddingVertical: 6 },
-  testText: { fontSize: 13, fontWeight: '700', color: c.teal },
+  testText: { fontSize: 13.5, fontWeight: '700', color: c.teal },
 
   freq: { flexDirection: 'row', gap: 8, marginTop: 12 },
-  freqCell: { flex: 1, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 11, paddingVertical: 11, alignItems: 'center' },
+  freqCell: { flex: 1, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingVertical: 13, alignItems: 'center' },
   freqCellOn: { backgroundColor: c.navy, borderColor: c.navy },
-  freqText: { fontSize: 12.5, fontWeight: '700', color: c.muted },
+  freqText: { fontSize: 13, fontWeight: '700', color: c.muted },
   freqTextOn: { color: '#fff' },
 
-  cta: { backgroundColor: c.brand, borderRadius: 14, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', marginTop: 18 },
+  cta: { backgroundColor: c.brand, borderRadius: 15, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 18 },
   ctaOff: { opacity: 0.6 },
-  ctaText: { fontSize: 14.5, fontWeight: '800', color: '#ffffff' },
+  ctaText: { fontSize: 17, fontWeight: '800', color: '#ffffff' },
 });

@@ -36,7 +36,7 @@ export default function TeamMemberScreen({ route, navigation }) {
 
   return (
     <View style={s.wrap}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
         <View style={s.headCard}>
           <View style={s.avatar}><Text style={s.avatarText}>{initialsOfEmail(member.email)}</Text></View>
           <Text style={s.name}>{displayName(member.email)}</Text>
@@ -81,10 +81,10 @@ function Row({ label, value, last }) {
 }
 
 const rs = StyleSheet.create({
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 13 },
+  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 14 },
   rowBorder: { borderBottomWidth: 1, borderBottomColor: c.line2 },
-  label: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.5, color: c.muted2 },
-  value: { fontSize: 14, fontWeight: '700', color: c.navy, flexShrink: 1, textAlign: 'right', marginLeft: 12 },
+  label: { fontSize: 11, fontWeight: '700', letterSpacing: 0.5, color: c.muted2 },
+  value: { fontSize: 15, fontWeight: '700', color: c.navy, flexShrink: 1, textAlign: 'right', marginLeft: 12 },
 });
 
 const s = StyleSheet.create({
@@ -92,10 +92,10 @@ const s = StyleSheet.create({
   headCard: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 18, alignItems: 'center' },
   avatar: { width: 68, height: 68, borderRadius: 34, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: 22, fontWeight: '800', color: c.navy },
-  name: { fontSize: 19, fontWeight: '800', color: c.navy, marginTop: 12 },
-  email: { fontSize: 13, color: c.muted2, marginTop: 3 },
+  name: { fontSize: 21, fontWeight: '800', color: c.navy, marginTop: 12 },
+  email: { fontSize: 13.5, color: c.muted2, marginTop: 3 },
   badgeRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12 },
-  badge: { backgroundColor: c.line, borderRadius: 999, paddingHorizontal: 11, paddingVertical: 5 },
+  badge: { backgroundColor: c.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
   badgeTeal: { backgroundColor: c.tealBg },
   badgeText: { fontSize: 11.5, fontWeight: '800', color: c.muted },
   badgeTextTeal: { color: c.teal },
@@ -103,21 +103,21 @@ const s = StyleSheet.create({
   dot: { width: 8, height: 8, borderRadius: 4 },
   dotOn: { backgroundColor: c.good },
   dotWait: { backgroundColor: c.amber },
-  statusText: { fontSize: 12.5, fontWeight: '700', color: c.muted },
+  statusText: { fontSize: 13.5, fontWeight: '700', color: c.muted },
 
   tabs: { flexDirection: 'row', gap: 22, borderBottomWidth: 1, borderBottomColor: c.line, marginTop: 18, marginBottom: 14 },
   tab: { paddingBottom: 10 },
   tabOn: { borderBottomWidth: 2, borderBottomColor: c.teal, marginBottom: -1 },
-  tabText: { fontSize: 14, fontWeight: '700', color: c.muted2 },
+  tabText: { fontSize: 15, fontWeight: '700', color: c.muted2 },
   tabTextOn: { color: c.navy },
 
-  card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingHorizontal: 16, paddingVertical: 2 },
-  bidRow: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 13, padding: 13, marginBottom: 10 },
-  bidTitle: { fontSize: 13.5, fontWeight: '700', color: c.navy },
+  card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, paddingHorizontal: 16, paddingVertical: 2 },
+  bidRow: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, padding: 15, marginBottom: 10 },
+  bidTitle: { fontSize: 15, fontWeight: '700', color: c.navy },
   bidWhen: { fontSize: 11.5, color: c.muted2, marginTop: 3 },
-  empty: { fontSize: 12.5, color: c.muted2, textAlign: 'center', marginTop: 20 },
+  empty: { fontSize: 13.5, color: c.muted2, textAlign: 'center', marginTop: 20 },
 
-  remove: { flexDirection: 'row', gap: 8, borderWidth: 1, borderColor: '#f3c9c9', backgroundColor: '#fdf4f4', borderRadius: 13, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', marginTop: 22 },
+  remove: { flexDirection: 'row', gap: 8, borderWidth: 1, borderColor: '#f3c9c9', backgroundColor: '#fdf4f4', borderRadius: 15, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 22 },
   off: { opacity: 0.6 },
-  removeText: { fontSize: 14, fontWeight: '800', color: '#b4232a' },
+  removeText: { fontSize: 16, fontWeight: '800', color: '#b4232a' },
 });

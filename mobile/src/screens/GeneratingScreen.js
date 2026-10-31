@@ -139,7 +139,7 @@ export default function GeneratingScreen({ route, navigation }) {
         onAvatar={() => navigation.getParent()?.navigate('Profile')}
       />
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
         <Text style={s.h1}>Generate Response</Text>
         <Text style={s.sub}>We're preparing your tender response. You can keep using the app while this runs in the background.</Text>
 
@@ -230,20 +230,20 @@ export default function GeneratingScreen({ route, navigation }) {
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  h1: { fontSize: 27, fontWeight: '800', color: c.navy, letterSpacing: -0.5, marginTop: 2 },
-  sub: { fontSize: 13.5, color: c.muted, marginTop: 6, lineHeight: 20 },
+  h1: { fontSize: 32, fontWeight: '800', color: c.navy, letterSpacing: -0.5, marginTop: 2 },
+  sub: { fontSize: 14.5, color: c.muted, marginTop: 6, lineHeight: 21 },
 
-  confirm: { backgroundColor: c.goodBg, borderRadius: 14, padding: 15, marginTop: 14 },
+  confirm: { backgroundColor: c.goodBg, borderRadius: 15, padding: 16, marginTop: 14 },
   confirmTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  confirmTitle: { fontSize: 14.5, fontWeight: '800', color: c.good },
+  confirmTitle: { fontSize: 15.5, fontWeight: '800', color: c.good },
   refPill: { backgroundColor: '#fff', borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   refText: { fontSize: 12, fontWeight: '800', color: c.good, letterSpacing: 0.5 },
-  confirmBody: { fontSize: 12.5, color: c.ink, marginTop: 6, lineHeight: 18 },
-  confirmReview: { fontSize: 12.5, color: c.good, fontWeight: '700', marginTop: 8, lineHeight: 18 },
+  confirmBody: { fontSize: 13.5, color: c.ink, marginTop: 6, lineHeight: 19 },
+  confirmReview: { fontSize: 13.5, color: c.good, fontWeight: '700', marginTop: 8, lineHeight: 19 },
 
   card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 16, marginTop: 14 },
-  cardTitle: { fontSize: 17, fontWeight: '800', color: c.navy },
-  cardSub: { fontSize: 13, color: c.muted, marginTop: 4, marginBottom: 6, lineHeight: 18 },
+  cardTitle: { fontSize: 19, fontWeight: '800', color: c.navy },
+  cardSub: { fontSize: 13.5, color: c.muted, marginTop: 4, marginBottom: 6, lineHeight: 19 },
 
   step: { flexDirection: 'row', gap: 13, marginTop: 12 },
   stepCol: { alignItems: 'center', width: 40 },
@@ -254,26 +254,26 @@ const s = StyleSheet.create({
   line: { width: 2, flex: 1, minHeight: 14, backgroundColor: c.line, marginTop: 4 },
   lineDone: { backgroundColor: c.teal },
   stepText: { flex: 1, paddingBottom: 6 },
-  stepTitle: { fontSize: 15, fontWeight: '800', color: c.navy },
+  stepTitle: { fontSize: 15.5, fontWeight: '800', color: c.navy },
   stepTitleMuted: { color: c.muted2 },
-  stepBody: { fontSize: 12.5, color: c.muted, marginTop: 3, lineHeight: 18 },
+  stepBody: { fontSize: 13.5, color: c.muted, marginTop: 3, lineHeight: 19 },
 
-  inbox: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#eaf4fb', borderRadius: 12, padding: 13, marginTop: 14 },
-  inboxText: { flex: 1, fontSize: 12.5, color: c.ink, lineHeight: 17 },
+  inbox: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: '#eaf4fb', borderRadius: 14, padding: 14, marginTop: 14 },
+  inboxText: { flex: 1, fontSize: 13, color: c.ink, lineHeight: 18 },
 
   recRow: { flexDirection: 'row', alignItems: 'center', gap: 13, marginTop: 14 },
-  recIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
-  recTitle: { fontSize: 14.5, fontWeight: '800', color: c.navy },
-  recBody: { fontSize: 12.5, color: c.muted, marginTop: 2, lineHeight: 17 },
+  recIcon: { width: 42, height: 42, borderRadius: 14, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
+  recTitle: { fontSize: 15.5, fontWeight: '800', color: c.navy },
+  recBody: { fontSize: 13, color: c.muted, marginTop: 2, lineHeight: 18 },
 
-  strap: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.tealBg, borderRadius: 14, padding: 15, marginTop: 14 },
-  strapTitle: { fontSize: 14, fontWeight: '800', color: c.navy },
-  strapBody: { fontSize: 12, color: c.muted, marginTop: 3, lineHeight: 16 },
+  strap: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.tealBg, borderRadius: 15, padding: 16, marginTop: 14 },
+  strapTitle: { fontSize: 15, fontWeight: '800', color: c.navy },
+  strapBody: { fontSize: 13, color: c.muted, marginTop: 3, lineHeight: 18 },
 
   errCircle: { width: 58, height: 58, borderRadius: 29, backgroundColor: '#fdeaea', alignItems: 'center', justifyContent: 'center' },
   errMark: { fontSize: 28, fontWeight: '800', color: '#b4232a' },
-  errTitle: { fontSize: 18, fontWeight: '800', color: c.navy, marginTop: 14 },
-  errText: { fontSize: 13, color: c.muted, textAlign: 'center', marginTop: 8, lineHeight: 19, paddingHorizontal: 10 },
-  retry: { backgroundColor: c.brand, borderRadius: 12, paddingVertical: 13, paddingHorizontal: 26, marginTop: 20 },
-  retryText: { fontSize: 14, fontWeight: '800', color: '#ffffff' },
+  errTitle: { fontSize: 20, fontWeight: '800', color: c.navy, marginTop: 14 },
+  errText: { fontSize: 14, color: c.muted, textAlign: 'center', marginTop: 8, lineHeight: 20, paddingHorizontal: 10 },
+  retry: { backgroundColor: c.brand, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 26, marginTop: 20 },
+  retryText: { fontSize: 16, fontWeight: '800', color: '#ffffff' },
 });

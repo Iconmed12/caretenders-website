@@ -75,7 +75,7 @@ export default function SatScreen() {
   return (
     <View style={s.wrap}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 28 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
           {!!data && (
             <View style={s.allowance}>
               <Text style={s.allowanceText}>{allowanceText}</Text>
@@ -167,26 +167,26 @@ export default function SatScreen() {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
-  allowance: { marginBottom: 14, backgroundColor: c.tealBg, borderRadius: 12, paddingHorizontal: 13, paddingVertical: 12 },
-  allowanceText: { fontSize: 13.5, fontWeight: '800', color: c.navy },
+  allowance: { marginBottom: 14, backgroundColor: c.tealBg, borderRadius: 14, paddingHorizontal: 15, paddingVertical: 13 },
+  allowanceText: { fontSize: 14.5, fontWeight: '800', color: c.navy },
   allowanceSub: { fontSize: 11.5, color: c.muted, marginTop: 2 },
-  card: { backgroundColor: c.white, borderRadius: 14, padding: 16, borderWidth: 1, borderColor: c.line },
-  cardTitle: { fontSize: 15.5, fontWeight: '800', color: c.navy },
-  cardBody: { fontSize: 12.5, color: c.muted, marginTop: 5, lineHeight: 18 },
-  label: { fontSize: 10, fontWeight: '700', letterSpacing: 0.6, color: c.muted2, marginTop: 16, marginBottom: 6 },
-  input: { borderWidth: 1, borderColor: c.line, borderRadius: 11, paddingHorizontal: 12, paddingVertical: 12, fontSize: 14, color: c.ink, backgroundColor: c.white },
-  multiline: { height: 76, textAlignVertical: 'top' },
-  send: { backgroundColor: c.brand, borderRadius: 12, paddingVertical: 15, alignItems: 'center', marginTop: 18 },
+  card: { backgroundColor: c.white, borderRadius: 15, padding: 16, borderWidth: 1, borderColor: c.line },
+  cardTitle: { fontSize: 16, fontWeight: '800', color: c.navy },
+  cardBody: { fontSize: 13.5, color: c.muted, marginTop: 5, lineHeight: 19 },
+  label: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6, color: c.muted2, marginTop: 16, marginBottom: 6 },
+  input: { borderWidth: 1, borderColor: c.line, borderRadius: 15, paddingHorizontal: 14, paddingVertical: 16, fontSize: 16, color: c.ink, backgroundColor: c.white },
+  multiline: { height: 82, textAlignVertical: 'top' },
+  send: { backgroundColor: c.brand, borderRadius: 15, paddingVertical: 16, alignItems: 'center', marginTop: 18 },
   sendOff: { backgroundColor: c.line, borderWidth: 1, borderColor: c.line },
-  sendText: { fontSize: 14.5, fontWeight: '800', color: '#ffffff' },
+  sendText: { fontSize: 17, fontWeight: '800', color: '#ffffff' },
   limitNote: { fontSize: 11.5, color: c.muted, textAlign: 'center', marginTop: 10, lineHeight: 17 },
-  secTitle: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.8, color: c.muted2, marginTop: 24, marginBottom: 10 },
-  empty: { backgroundColor: c.white, borderRadius: 14, borderWidth: 1, borderColor: c.line, padding: 18, alignItems: 'center' },
-  emptyText: { fontSize: 12.5, color: c.muted2 },
-  reqRow: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: c.white, borderRadius: 13, borderWidth: 1, borderColor: c.line, padding: 13, marginBottom: 10 },
-  reqIcon: { width: 32, height: 32, borderRadius: 9, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
+  secTitle: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, color: c.muted2, marginTop: 24, marginBottom: 10 },
+  empty: { backgroundColor: c.white, borderRadius: 15, borderWidth: 1, borderColor: c.line, padding: 18, alignItems: 'center' },
+  emptyText: { fontSize: 13.5, color: c.muted2 },
+  reqRow: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: c.white, borderRadius: 15, borderWidth: 1, borderColor: c.line, padding: 15, marginBottom: 10 },
+  reqIcon: { width: 40, height: 40, borderRadius: 11, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
   reqText: { flex: 1 },
-  reqLink: { fontSize: 13, fontWeight: '600', color: c.ink },
+  reqLink: { fontSize: 15, fontWeight: '600', color: c.ink },
   reqMeta: { fontSize: 11, color: c.muted2, marginTop: 2 },
   pill: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5 },
   pillWait: { backgroundColor: c.tealBg },

@@ -97,7 +97,7 @@ export default function PlanBillingScreen({ navigation }) {
   }
 
   return (
-    <ScrollView style={s.wrap} contentContainerStyle={{ padding: 16, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+    <ScrollView style={s.wrap} contentContainerStyle={{ padding: 18, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
       <Text style={s.h1}>My plan and billing</Text>
       <Text style={s.sub}>Your subscription, seats and renewal.</Text>
 
@@ -168,15 +168,15 @@ export default function PlanBillingScreen({ navigation }) {
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: c.bg },
-  h1: { fontSize: 24, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
-  sub: { fontSize: 13, color: c.muted, marginTop: 4 },
+  h1: { fontSize: 32, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
+  sub: { fontSize: 14, color: c.muted, marginTop: 4 },
 
   card: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 16, marginTop: 16 },
 
   planTop: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   planLeft: { flexDirection: 'row', alignItems: 'center', gap: 11 },
-  planIcon: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
-  planName: { fontSize: 16, fontWeight: '800', color: c.navy },
+  planIcon: { width: 42, height: 42, borderRadius: 12, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
+  planName: { fontSize: 16.5, fontWeight: '800', color: c.navy },
   planTerm: { fontSize: 11.5, color: c.muted, marginTop: 1 },
   status: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 4 },
   statusOn: { backgroundColor: c.goodBg }, statusOff: { backgroundColor: '#fdf3e2' },
@@ -186,23 +186,23 @@ const s = StyleSheet.create({
   details: { borderTopWidth: 1, borderTopColor: c.line2, marginTop: 14, paddingTop: 8 },
   detail: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 7 },
   detailLabel: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  detailLabelText: { fontSize: 12.5, color: c.muted },
-  detailValue: { fontSize: 12.5, fontWeight: '700', color: c.navy },
+  detailLabelText: { fontSize: 13.5, color: c.muted },
+  detailValue: { fontSize: 13.5, fontWeight: '700', color: c.navy },
 
-  section: { fontSize: 11, fontWeight: '800', letterSpacing: 0.5, color: c.muted2, marginTop: 20, marginBottom: 8 },
-  incRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10 },
+  section: { fontSize: 11.5, fontWeight: '800', letterSpacing: 0.5, color: c.muted2, marginTop: 20, marginBottom: 8 },
+  incRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 11 },
   incDivider: { borderBottomWidth: 1, borderBottomColor: c.line2 },
   dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: c.teal },
-  incText: { fontSize: 13, color: c.navy, fontWeight: '600' },
+  incText: { fontSize: 14, color: c.navy, fontWeight: '600' },
 
-  note: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: c.tealBg, borderRadius: 12, padding: 12, marginTop: 18 },
+  note: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, backgroundColor: c.tealBg, borderRadius: 14, padding: 13, marginTop: 18 },
   noteText: { flex: 1, fontSize: 11.5, color: c.muted, lineHeight: 17 },
 
-  cta: { flexDirection: 'row', gap: 6, backgroundColor: c.brand, borderRadius: 14, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', marginTop: 14 },
-  ctaText: { fontSize: 14.5, fontWeight: '800', color: '#ffffff' },
-  secondary: { flexDirection: 'row', gap: 6, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingVertical: 14, alignItems: 'center', justifyContent: 'center', marginTop: 10 },
-  secondaryText: { fontSize: 14, fontWeight: '700', color: c.navy },
+  cta: { flexDirection: 'row', gap: 6, backgroundColor: c.brand, borderRadius: 15, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 14 },
+  ctaText: { fontSize: 17, fontWeight: '800', color: '#ffffff' },
+  secondary: { flexDirection: 'row', gap: 6, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', marginTop: 10 },
+  secondaryText: { fontSize: 16, fontWeight: '700', color: c.navy },
 
-  noneTitle: { fontSize: 15.5, fontWeight: '800', color: c.navy },
-  noneBody: { fontSize: 12.5, color: c.muted, marginTop: 6, lineHeight: 18 },
+  noneTitle: { fontSize: 16, fontWeight: '800', color: c.navy },
+  noneBody: { fontSize: 13.5, color: c.muted, marginTop: 6, lineHeight: 19 },
 });

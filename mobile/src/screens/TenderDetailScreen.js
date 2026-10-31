@@ -74,7 +74,7 @@ export default function TenderDetailScreen({ route, navigation }) {
 
   return (
     <View style={s.wrap}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
         <Text style={s.title}>{tender.title}</Text>
         <Text style={s.org}>{[tender.org || tender.organisation, tender.region].filter(Boolean).join(' · ')}</Text>
 
@@ -197,36 +197,36 @@ export default function TenderDetailScreen({ route, navigation }) {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.white },
-  title: { fontSize: 25, fontWeight: '800', color: c.navy, lineHeight: 31, letterSpacing: -0.4 },
-  org: { fontSize: 13.5, color: c.muted, marginTop: 6 },
+  title: { fontSize: 28, fontWeight: '800', color: c.navy, lineHeight: 34, letterSpacing: -0.4 },
+  org: { fontSize: 14, color: c.muted, marginTop: 6 },
   metaGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginTop: 18 },
-  metaCell: { flexGrow: 1, flexBasis: '46%', backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 12, padding: 14, gap: 7 },
-  metaValue: { fontSize: 19, fontWeight: '800', color: c.navy },
+  metaCell: { flexGrow: 1, flexBasis: '46%', backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 15, gap: 7 },
+  metaValue: { fontSize: 20, fontWeight: '800', color: c.navy },
   metaLabel: { fontSize: 11.5, fontWeight: '600', color: c.muted2 },
-  secTitle: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.8, color: c.muted2, marginTop: 22, marginBottom: 8 },
+  secTitle: { fontSize: 11, fontWeight: '700', letterSpacing: 0.8, color: c.muted2, marginTop: 22, marginBottom: 8 },
   about: { ...t.body, color: c.muted, lineHeight: 21 },
-  qRow: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 11, borderBottomWidth: 1, borderBottomColor: c.line2 },
+  qRow: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: c.line2 },
   qNum: { width: 22, height: 22, borderRadius: 11, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' },
   qNumText: { fontSize: 11, fontWeight: '800', color: c.muted },
-  qText: { fontSize: 14, color: c.ink, flex: 1 },
+  qText: { fontSize: 15, color: c.ink, flex: 1 },
   footer: { padding: 16, borderTopWidth: 1, borderTopColor: c.line2, backgroundColor: c.white },
-  cta: { backgroundColor: c.brand, borderRadius: 13, paddingVertical: 16, alignItems: 'center' },
-  ctaText: { fontSize: 15, fontWeight: '700', color: '#ffffff' },
+  cta: { backgroundColor: c.brand, borderRadius: 15, paddingVertical: 16, alignItems: 'center' },
+  ctaText: { fontSize: 17, fontWeight: '700', color: '#ffffff' },
   ctaQuiet: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line },
   ctaQuietText: { color: c.navy },
   ctaNote: { fontSize: 11.5, color: c.muted2, textAlign: 'center', marginTop: 9 },
   btnRow: { flexDirection: 'row', gap: 10 },
   half: { flex: 1 },
   reviewBlock: { marginTop: 4 },
-  reviewIntro: { fontSize: 12.5, color: c.muted, marginTop: -2, marginBottom: 12, lineHeight: 18 },
-  revRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 11, borderWidth: 1, borderColor: c.line, borderRadius: 12, padding: 13, marginBottom: 10 },
+  reviewIntro: { fontSize: 13.5, color: c.muted, marginTop: -2, marginBottom: 12, lineHeight: 19 },
+  revRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 11, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 15, marginBottom: 10 },
   revRowOn: { borderColor: c.teal, backgroundColor: '#F5FDFE' },
   revRowOff: { opacity: 0.75 },
   radio: { width: 20, height: 20, borderRadius: 10, borderWidth: 2, borderColor: '#C9D2DA', marginTop: 1 },
   radioOn: { borderColor: c.teal, borderWidth: 6 },
   revHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 8 },
-  revTitle: { fontSize: 14, fontWeight: '700', color: c.navy, flexShrink: 1 },
-  revBody: { fontSize: 12, color: c.muted, marginTop: 3, lineHeight: 16 },
+  revTitle: { fontSize: 15.5, fontWeight: '700', color: c.navy, flexShrink: 1 },
+  revBody: { fontSize: 13, color: c.muted, marginTop: 3, lineHeight: 18 },
   revBadge: { backgroundColor: c.goodBg, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 },
   revBadgeText: { fontSize: 10, fontWeight: '800', color: c.good },
   revNote: { fontSize: 11, fontWeight: '700', color: c.teal },
@@ -235,8 +235,8 @@ const s = StyleSheet.create({
   sheetBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(7,26,47,0.5)' },
   sheet: { backgroundColor: c.white, borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 18, paddingTop: 8, paddingBottom: 28 },
   sheetHandle: { width: 40, height: 4, borderRadius: 2, backgroundColor: c.line, alignSelf: 'center', marginBottom: 14 },
-  sheetTitle: { fontSize: 19, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
-  sheetSub: { fontSize: 12.5, color: c.muted, marginTop: 4, marginBottom: 14, lineHeight: 18 },
+  sheetTitle: { fontSize: 20, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
+  sheetSub: { fontSize: 13.5, color: c.muted, marginTop: 4, marginBottom: 14, lineHeight: 19 },
   sheetCancel: { paddingVertical: 12, alignItems: 'center', marginTop: 4 },
   sheetCancelText: { fontSize: 14, fontWeight: '700', color: c.muted },
 });

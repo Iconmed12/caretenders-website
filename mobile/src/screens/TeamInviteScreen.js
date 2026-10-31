@@ -43,7 +43,7 @@ export default function TeamInviteScreen({ navigation }) {
 
   return (
     <KeyboardAvoidingView style={s.wrap} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 28 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 30 }} keyboardShouldPersistTaps="handled">
         <View style={s.head}>
           <View style={{ flex: 1 }}>
             <Text style={s.h1}>Invite a team member</Text>
@@ -101,24 +101,24 @@ export default function TeamInviteScreen({ navigation }) {
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.white },
   head: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, marginBottom: 8 },
-  h1: { fontSize: 24, fontWeight: '800', color: c.navy, letterSpacing: -0.5 },
-  sub: { fontSize: 13.5, color: c.muted, marginTop: 6, lineHeight: 19 },
+  h1: { fontSize: 32, fontWeight: '800', color: c.navy, letterSpacing: -0.5 },
+  sub: { fontSize: 14, color: c.muted, marginTop: 6, lineHeight: 20 },
   headIcon: { width: 46, height: 46, borderRadius: 14, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
   labelRow: { flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 22, marginBottom: 8 },
-  label: { fontSize: 14, fontWeight: '700', color: c.navy },
-  input: { borderWidth: 1, borderColor: c.line, borderRadius: 13, paddingHorizontal: 14, paddingVertical: 14, fontSize: 15, color: c.ink, backgroundColor: c.white },
+  label: { fontSize: 15, fontWeight: '700', color: c.navy },
+  input: { borderWidth: 1, borderColor: c.line, borderRadius: 15, paddingHorizontal: 14, paddingVertical: 16, fontSize: 16, color: c.ink, backgroundColor: c.white },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: c.white },
   chipOn: { backgroundColor: c.navy, borderColor: c.navy },
   chipText: { fontSize: 13, fontWeight: '600', color: c.muted },
   chipTextOn: { color: '#fff' },
-  canBox: { backgroundColor: c.tealBg, borderRadius: 14, padding: 16, marginTop: 22 },
-  canTitle: { fontSize: 13.5, fontWeight: '800', color: c.navy, marginBottom: 10 },
+  canBox: { backgroundColor: c.tealBg, borderRadius: 15, padding: 16, marginTop: 22 },
+  canTitle: { fontSize: 14, fontWeight: '800', color: c.navy, marginBottom: 10 },
   canRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 },
   tick: { width: 20, height: 20, borderRadius: 10, backgroundColor: c.good, alignItems: 'center', justifyContent: 'center' },
   tickText: { fontSize: 12, fontWeight: '800', color: '#fff' },
-  canText: { fontSize: 12.5, color: c.ink, flex: 1 },
-  send: { flexDirection: 'row', gap: 8, backgroundColor: c.brand, borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 24 },
+  canText: { fontSize: 13.5, color: c.ink, flex: 1 },
+  send: { flexDirection: 'row', gap: 8, backgroundColor: c.brand, borderRadius: 15, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 24 },
   off: { opacity: 0.6 },
-  sendText: { fontSize: 15.5, fontWeight: '800', color: '#ffffff' },
+  sendText: { fontSize: 17, fontWeight: '800', color: '#ffffff' },
 });

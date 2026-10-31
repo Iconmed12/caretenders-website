@@ -83,7 +83,7 @@ export default function EvidenceScreen() {
 
       <ScrollView
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 24 }}
+        contentContainerStyle={{ paddingBottom: 28 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={c.teal} />
         }
@@ -123,21 +123,21 @@ export default function EvidenceScreen() {
 }
 
 const s = StyleSheet.create({
-  wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16, paddingTop: 12 },
+  wrap: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 18, paddingTop: 14 },
   centre: { alignItems: 'center', justifyContent: 'center' },
   search: {
-    backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 12, fontSize: 14, color: c.ink, marginBottom: 12,
+    backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15,
+    paddingHorizontal: 14, paddingVertical: 16, fontSize: 16, color: c.ink, marginBottom: 12,
   },
   doc: {
     flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.white,
-    borderWidth: 1, borderColor: c.line, borderRadius: 13, padding: 13, marginBottom: 9,
+    borderWidth: 1, borderColor: c.line, borderRadius: 15, padding: 15, marginBottom: 9,
   },
   icon: {
-    width: 36, height: 36, borderRadius: 10, backgroundColor: c.tealBg,
+    width: 40, height: 40, borderRadius: 12, backgroundColor: c.tealBg,
     alignItems: 'center', justifyContent: 'center',
   },
-  docName: { fontSize: 14, fontWeight: '700', color: c.navy },
+  docName: { fontSize: 15.5, fontWeight: '700', color: c.navy },
   docMeta: { fontSize: 11.5, color: c.muted2, marginTop: 2 },
 
   chip: { borderRadius: 999, paddingHorizontal: 9, paddingVertical: 4 },
@@ -148,6 +148,6 @@ const s = StyleSheet.create({
   chip_none: { backgroundColor: c.line }, chipText_none: { color: c.muted },
 
   empty: { alignItems: 'center', paddingHorizontal: 24, paddingTop: 40 },
-  emptyTitle: { fontSize: 16, fontWeight: '700', color: c.navy },
-  emptyText: { fontSize: 13, color: c.muted, textAlign: 'center', marginTop: 7, lineHeight: 20 },
+  emptyTitle: { fontSize: 18, fontWeight: '700', color: c.navy },
+  emptyText: { fontSize: 14, color: c.muted, textAlign: 'center', marginTop: 7, lineHeight: 21 },
 });
