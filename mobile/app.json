@@ -8,17 +8,19 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "icon": "./assets/icon.png",
-    "runtimeVersion": { "policy": "appVersion" },
-    "updates": { "url": "https://u.expo.dev/95dfaf89-148b-49cd-881f-928c95f1077a" },
-    "splash": {
-      "image": "./assets/logo-white.png",
-      "backgroundColor": "#071A2F",
-      "resizeMode": "contain"
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/95dfaf89-148b-49cd-881f-928c95f1077a"
     },
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "co.uk.getcana.bids",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "package": "co.uk.getcana.bids",
@@ -43,6 +45,14 @@
         {
           "icon": "./assets/adaptive-icon.png",
           "color": "#00AFC1"
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#071A2F",
+          "image": "./assets/icon.png",
+          "imageWidth": 200
         }
       ]
     ]

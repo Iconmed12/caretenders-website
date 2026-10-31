@@ -6,6 +6,12 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as SplashScreen from 'expo-splash-screen';
+
+// Hold the branded splash (logo on navy) until we hide it, so it does not just
+// flash. Shown for a short beat after the app is ready, then the app appears.
+SplashScreen.preventAutoHideAsync().catch(() => {});
+SplashScreen.setOptions && SplashScreen.setOptions({ fade: true, duration: 400 });
 
 import HomeScreen from './src/screens/HomeScreen';
 import OpportunitiesScreen from './src/screens/OpportunitiesScreen';
@@ -261,6 +267,13 @@ function Root() {
 }
 
 export default function App() {
+  // Keep the splash up for a short, deliberate beat (about 2.5s) so the brand is
+  // clearly seen, then reveal the app.
+  useEffect(() => {
+    const t = setTimeout(() => { SplashScreen.hideAsync().catch(() => {}); }, 2500);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <SafeAreaProvider>
       <AuthProvider>
