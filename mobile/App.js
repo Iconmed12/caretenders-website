@@ -229,22 +229,10 @@ const tb = StyleSheet.create({
 // join flow reachable from sign in. First-run onboarding is remembered so it does
 // not nag on every launch.
 function SignedOutApp() {
-  const [initial, setInitial] = useState(null); // null while we read the flag
-
-  useEffect(() => {
-    let alive = true;
-    AsyncStorage.getItem('cana_seen_onboarding')
-      .then((v) => { if (alive) setInitial(v ? 'SignIn' : 'Onboarding'); })
-      .catch(() => { if (alive) setInitial('Onboarding'); });
-    return () => { alive = false; };
-  }, []);
-
-  if (!initial) return <View style={{ flex: 1, backgroundColor: c.white }} />;
-
+  // Front door goes straight to Sign in now (the onboarding intro is skipped).
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={initial} screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+      <Stack.Navigator initialRouteName="SignIn" screenOptions={{ headerShown: false }}>
         <Stack.Screen name="SignIn" component={SignInScreen} />
         <Stack.Screen name="Join" component={JoinScreen} />
       </Stack.Navigator>
