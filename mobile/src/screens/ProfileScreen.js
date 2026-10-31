@@ -140,8 +140,8 @@ const s = StyleSheet.create({
 
   feature: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 15, marginTop: 12 },
   featureIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
-  featureTitle: { fontSize: 15.5, fontWeight: '800', color: c.navy },
-  featureBody: { fontSize: 12.5, color: c.muted, marginTop: 3, lineHeight: 17 },
+  featureTitle: { fontSize: 16.5, fontWeight: '800', color: c.navy },
+  featureBody: { fontSize: 13.5, color: c.muted, marginTop: 3, lineHeight: 18 },
 
   reviewCards: { flexDirection: 'row', gap: 10, marginTop: 12 },
   reviewCard: { flex: 1, backgroundColor: c.bg, borderWidth: 1, borderColor: c.line, borderRadius: 13, padding: 13, gap: 6 },
@@ -152,7 +152,7 @@ const s = StyleSheet.create({
   group: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingHorizontal: 15, paddingVertical: 16 },
   rowIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' },
-  rowLabel: { fontSize: 14.5, fontWeight: '700', color: c.navy },
+  rowLabel: { fontSize: 15.5, fontWeight: '700', color: c.navy },
   rowSub: { fontSize: 11.5, color: c.teal, marginTop: 2, fontWeight: '600' },
   divider: { height: 1, backgroundColor: c.line2, marginLeft: 61 },
 });

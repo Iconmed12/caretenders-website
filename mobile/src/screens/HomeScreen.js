@@ -191,15 +191,15 @@ const s = StyleSheet.create({
   pad: { paddingHorizontal: 18 },
 
   search: { flexDirection: 'row', alignItems: 'center', gap: 11, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, paddingHorizontal: 15, paddingVertical: 15, marginHorizontal: 18, marginTop: 18 },
-  searchText: { flex: 1, fontSize: 14, color: c.muted2 },
+  searchText: { flex: 1, fontSize: 15, color: c.muted2 },
 
   sectorRow: { paddingHorizontal: 18, paddingVertical: 20, gap: 12 },
   sectorTile: { width: 96, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, paddingVertical: 15, paddingHorizontal: 8, alignItems: 'center', gap: 9 },
   sectorIcon: { width: 42, height: 42, borderRadius: 13, alignItems: 'center', justifyContent: 'center' },
-  sectorLabel: { fontSize: 11.5, fontWeight: '700', color: c.navy, textAlign: 'center', lineHeight: 15 },
+  sectorLabel: { fontSize: 12.5, fontWeight: '700', color: c.navy, textAlign: 'center', lineHeight: 16 },
 
   section: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 18, marginTop: 14, marginBottom: 14 },
-  sectionTitle: { fontSize: 19.5, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
+  sectionTitle: { fontSize: 21, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
   viewAll: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   viewAllText: { fontSize: 13, fontWeight: '700', color: c.navy },
 
@@ -211,14 +211,14 @@ const s = StyleSheet.create({
   tile: { flex: 1, borderRadius: 18, padding: 17, minHeight: 146, justifyContent: 'flex-start', backgroundColor: c.white, borderWidth: 1, borderColor: c.line },
   tileFind: { backgroundColor: c.teal, borderColor: c.teal },
   tileIconFind: { width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(255,255,255,0.2)', alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  tileTitleFind: { fontSize: 15, fontWeight: '800', color: '#fff' },
-  tileBodyFind: { fontSize: 12, color: 'rgba(255,255,255,0.9)', marginTop: 6, lineHeight: 17 },
+  tileTitleFind: { fontSize: 16, fontWeight: '800', color: '#fff' },
+  tileBodyFind: { fontSize: 13, color: 'rgba(255,255,255,0.9)', marginTop: 6, lineHeight: 18 },
   tileIconNavy: { width: 40, height: 40, borderRadius: 12, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center', marginBottom: 14 },
-  tileTitle: { fontSize: 15, fontWeight: '800', color: c.navy },
-  tileBody: { fontSize: 12, color: c.muted, marginTop: 6, lineHeight: 17 },
+  tileTitle: { fontSize: 16, fontWeight: '800', color: c.navy },
+  tileBody: { fontSize: 13, color: c.muted, marginTop: 6, lineHeight: 18 },
 
   actRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 14, marginBottom: 11 },
   actIcon: { width: 38, height: 38, borderRadius: 11, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
-  actTitle: { fontSize: 14, fontWeight: '700', color: c.navy },
+  actTitle: { fontSize: 15, fontWeight: '700', color: c.navy },
   actWhen: { fontSize: 12, color: c.muted, marginTop: 3, fontWeight: '600' },
 });

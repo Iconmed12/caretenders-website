@@ -201,16 +201,16 @@ const s = StyleSheet.create({
 
   stats: { flexDirection: 'row', gap: 10, marginTop: 12, marginBottom: 2 },
   statCell: { flex: 1, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, paddingVertical: 16, alignItems: 'center' },
-  statNum: { fontSize: 23, fontWeight: '800', color: c.navy, lineHeight: 26 },
-  statLabel: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.3, color: c.muted2, marginTop: 5 },
+  statNum: { fontSize: 26, fontWeight: '800', color: c.navy, lineHeight: 29 },
+  statLabel: { fontSize: 11.5, fontWeight: '700', letterSpacing: 0.3, color: c.muted2, marginTop: 5 },
 
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingHorizontal: 14, marginTop: 14 },
   searchInput: { flex: 1, paddingVertical: 14, fontSize: 14.5, color: c.ink },
 
   card: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, padding: 15, marginTop: 12 },
   cardIcon: { width: 46, height: 46, borderRadius: 13, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 15, fontWeight: '800', color: c.navy, lineHeight: 20 },
-  ref: { fontSize: 11, color: c.muted2, fontWeight: '600', letterSpacing: 0.2, marginTop: 3 },
+  title: { fontSize: 16, fontWeight: '800', color: c.navy, lineHeight: 21 },
+  ref: { fontSize: 12, color: c.muted2, fontWeight: '600', letterSpacing: 0.2, marginTop: 3 },
 
   bar: { height: 5, borderRadius: 3, backgroundColor: c.line, overflow: 'hidden', marginTop: 8 },
   // Indeterminate on purpose: the server records that a run is in progress but
@@ -226,7 +226,7 @@ const s = StyleSheet.create({
   chipFail: { backgroundColor: '#fdeaea' }, chipFailText: { color: '#b4232a' },
   when: { fontSize: 11, color: c.muted2 },
 
-  link: { fontSize: 12.5, fontWeight: '700', color: c.teal, marginTop: 8 },
+  link: { fontSize: 13.5, fontWeight: '700', color: c.teal, marginTop: 8 },
   failNote: { fontSize: 11.5, color: c.muted, lineHeight: 17, marginTop: 6 },
   noMatch: { fontSize: 12.5, color: c.muted2, textAlign: 'center', marginTop: 24 },
 
