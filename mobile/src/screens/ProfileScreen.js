@@ -62,7 +62,7 @@ export default function ProfileScreen({ navigation }) {
     <View style={s.wrap}>
       <TopBar brand initials={initialsOf(user.email, meta)} onBell={() => navigation.getParent()?.navigate('Ongoing')} />
 
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
         <Text style={s.h1}>More</Text>
         <Text style={s.sub}>Tools, settings and support to help you get the most out of Cana Bids.</Text>
 
@@ -135,8 +135,8 @@ export default function ProfileScreen({ navigation }) {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
-  h1: { fontSize: 30, fontWeight: '800', color: c.navy, letterSpacing: -0.6, marginTop: 2 },
-  sub: { fontSize: 14, color: c.muted, marginTop: 6, lineHeight: 20 },
+  h1: { fontSize: 33, fontWeight: '800', color: c.navy, letterSpacing: -0.7, marginTop: 4 },
+  sub: { fontSize: 14.5, color: c.muted, marginTop: 8, lineHeight: 21 },
 
   feature: { flexDirection: 'row', alignItems: 'center', gap: 14, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 16, padding: 15, marginTop: 12 },
   featureIcon: { width: 48, height: 48, borderRadius: 14, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
@@ -148,9 +148,9 @@ const s = StyleSheet.create({
   reviewCardTitle: { fontSize: 13, fontWeight: '800', color: c.navy, marginTop: 2 },
   reviewCardBody: { fontSize: 11, color: c.muted, lineHeight: 15 },
 
-  section: { fontSize: 16, fontWeight: '800', color: c.navy, marginTop: 24, marginBottom: 10 },
-  group: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, overflow: 'hidden' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingHorizontal: 14, paddingVertical: 14 },
+  section: { fontSize: 16.5, fontWeight: '800', color: c.navy, marginTop: 28, marginBottom: 12 },
+  group: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, overflow: 'hidden' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 13, paddingHorizontal: 15, paddingVertical: 16 },
   rowIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' },
   rowLabel: { fontSize: 14.5, fontWeight: '700', color: c.navy },
   rowSub: { fontSize: 11.5, color: c.teal, marginTop: 2, fontWeight: '600' },

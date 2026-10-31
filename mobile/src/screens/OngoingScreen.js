@@ -173,7 +173,7 @@ export default function OngoingScreen({ navigation }) {
         keyExtractor={(j) => String(j.id)}
         renderItem={renderItem}
         ListHeaderComponent={stats}
-        contentContainerStyle={{ padding: 13, paddingTop: 4, paddingBottom: 24, flexGrow: 1 }}
+        contentContainerStyle={{ padding: 16, paddingTop: 8, paddingBottom: 28, flexGrow: 1 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} tintColor={c.teal} />
@@ -199,17 +199,17 @@ const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
   centre: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
-  stats: { flexDirection: 'row', gap: 8, marginTop: 10, marginBottom: 2 },
-  statCell: { flex: 1, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 13, paddingVertical: 13, alignItems: 'center' },
-  statNum: { fontSize: 21, fontWeight: '800', color: c.navy, lineHeight: 24 },
-  statLabel: { fontSize: 10, fontWeight: '700', letterSpacing: 0.3, color: c.muted2, marginTop: 4 },
+  stats: { flexDirection: 'row', gap: 10, marginTop: 12, marginBottom: 2 },
+  statCell: { flex: 1, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, paddingVertical: 16, alignItems: 'center' },
+  statNum: { fontSize: 23, fontWeight: '800', color: c.navy, lineHeight: 26 },
+  statLabel: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.3, color: c.muted2, marginTop: 5 },
 
-  search: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 12, paddingHorizontal: 12, marginTop: 12 },
-  searchInput: { flex: 1, paddingVertical: 11, fontSize: 13.5, color: c.ink },
+  search: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingHorizontal: 14, marginTop: 14 },
+  searchInput: { flex: 1, paddingVertical: 14, fontSize: 14.5, color: c.ink },
 
-  card: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 13, marginTop: 10 },
-  cardIcon: { width: 44, height: 44, borderRadius: 12, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 14.5, fontWeight: '800', color: c.navy, lineHeight: 19 },
+  card: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, padding: 15, marginTop: 12 },
+  cardIcon: { width: 46, height: 46, borderRadius: 13, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 15, fontWeight: '800', color: c.navy, lineHeight: 20 },
   ref: { fontSize: 11, color: c.muted2, fontWeight: '600', letterSpacing: 0.2, marginTop: 3 },
 
   bar: { height: 5, borderRadius: 3, backgroundColor: c.line, overflow: 'hidden', marginTop: 8 },

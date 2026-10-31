@@ -129,7 +129,7 @@ export default function TeamScreen({ navigation }) {
   return (
     <View style={s.wrap}>
       {header}
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 28 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 30 }} showsVerticalScrollIndicator={false}>
         <View style={s.titleRow}>
           <View style={{ flex: 1 }}>
             <Text style={s.pageTitle}>{data.enterprise && data.enterprise.name ? data.enterprise.name : 'Your team'}</Text>
@@ -230,7 +230,7 @@ const s = StyleSheet.create({
   primaryText: { fontSize: 14.5, fontWeight: '800', color: '#ffffff' },
 
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
-  pageTitle: { fontSize: 22, fontWeight: '800', color: c.navy, letterSpacing: -0.4 },
+  pageTitle: { fontSize: 25, fontWeight: '800', color: c.navy, letterSpacing: -0.5 },
   pageSub: { fontSize: 12.5, color: c.muted, marginTop: 3 },
   inviteBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: c.brand, borderRadius: 11, paddingHorizontal: 13, paddingVertical: 10 },
   inviteBtnText: { fontSize: 13, fontWeight: '800', color: '#ffffff' },
@@ -250,7 +250,7 @@ const s = StyleSheet.create({
   search: { flexDirection: 'row', alignItems: 'center', gap: 9, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 12, paddingHorizontal: 12, marginTop: 14, marginBottom: 4 },
   searchInput: { flex: 1, paddingVertical: 11, fontSize: 13.5, color: c.ink },
 
-  memberRow: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, padding: 13, marginTop: 10 },
+  memberRow: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 15, padding: 15, marginTop: 11 },
   avatar: { width: 44, height: 44, borderRadius: 22, backgroundColor: c.tealBg, alignItems: 'center', justifyContent: 'center' },
   avatarText: { fontSize: 15, fontWeight: '800', color: c.navy },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 7 },

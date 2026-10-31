@@ -172,7 +172,7 @@ export default function OpportunitiesScreen({ navigation, route }) {
             <TenderCard tender={item} onPress={() => navigation.navigate('TenderDetail', { tender: item })} />
           )}
           ListHeaderComponent={header}
-          contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}
+          contentContainerStyle={{ paddingHorizontal: 18, paddingBottom: 28 }}
           showsVerticalScrollIndicator={false}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); load(); }} tintColor={c.teal} />}
           ListEmptyComponent={<View style={s.empty}><Text style={s.emptyText}>No tenders match that filter.</Text></View>}
@@ -185,16 +185,16 @@ export default function OpportunitiesScreen({ navigation, route }) {
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.bg },
   search: { flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingHorizontal: 14, paddingVertical: 4, marginTop: 16 },
-  searchInput: { flex: 1, paddingVertical: 11, fontSize: 13.5, color: c.ink },
-  chipsWrap: { paddingVertical: 12, backgroundColor: c.bg },
-  chip: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 15, paddingVertical: 9 },
+  searchInput: { flex: 1, paddingVertical: 13, fontSize: 14.5, color: c.ink },
+  chipsWrap: { paddingVertical: 14, backgroundColor: c.bg },
+  chip: { backgroundColor: c.white, borderWidth: 1, borderColor: c.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 10 },
   chipOn: { backgroundColor: c.teal, borderColor: c.teal },
-  chipText: { fontSize: 12.5, fontWeight: '700', color: c.muted },
+  chipText: { fontSize: 13, fontWeight: '700', color: c.muted },
   chipTextOn: { color: '#fff' },
   chipSector: { backgroundColor: c.navy, borderColor: c.navy, marginLeft: 8 },
   chipSectorText: { color: '#fff' },
-  listHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, marginTop: 2 },
-  count: { fontSize: 14, fontWeight: '800', color: c.navy },
+  listHead: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, marginTop: 4 },
+  count: { fontSize: 15, fontWeight: '800', color: c.navy },
   sort: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   sortText: { fontSize: 12.5, color: c.muted, fontWeight: '600' },
   empty: { padding: 30, alignItems: 'center' },
