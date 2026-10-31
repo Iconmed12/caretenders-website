@@ -53,7 +53,7 @@ export default function SignInScreen({ navigation }) {
   return (
     <KeyboardAvoidingView style={s.wrap} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView
-        contentContainerStyle={[s.scroll, { paddingTop: Math.max(insets.top, 20) + 14, paddingBottom: Math.max(insets.bottom, 20) + 10 }]}
+        contentContainerStyle={[s.scroll, { paddingTop: Math.max(insets.top, 20) + 48, paddingBottom: Math.max(insets.bottom, 20) + 16 }]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -61,15 +61,6 @@ export default function SignInScreen({ navigation }) {
 
         <Text style={s.h1}>Welcome back</Text>
         <Text style={s.sub}>Sign in to manage your opportunities and bids.</Text>
-
-        {/* Trust panel, matches the website's tone. */}
-        <View style={s.trust}>
-          <View style={s.trustIcon}><IconLock size={19} color={c.navy} /></View>
-          <View style={{ flex: 1 }}>
-            <Text style={s.trustTitle}>Secure access</Text>
-            <Text style={s.trustBody}>Your Cana account keeps your bids, opportunities and company information in one place.</Text>
-          </View>
-        </View>
 
         <Text style={s.label}>EMAIL ADDRESS</Text>
         <View style={s.field}>
@@ -149,26 +140,22 @@ export default function SignInScreen({ navigation }) {
 
 const s = StyleSheet.create({
   wrap: { flex: 1, backgroundColor: c.white },
-  scroll: { flexGrow: 1, paddingHorizontal: 24 },
-  h1: { fontSize: 30, fontWeight: '800', color: c.navy, marginTop: 26, letterSpacing: -0.6 },
-  sub: { fontSize: 14.5, color: c.muted, marginTop: 8, lineHeight: 21 },
-  trust: { flexDirection: 'row', alignItems: 'center', gap: 13, backgroundColor: c.bg, borderWidth: 1, borderColor: c.line2, borderRadius: 14, padding: 13, marginTop: 20 },
-  trustIcon: { width: 36, height: 36, borderRadius: 18, backgroundColor: '#EDF1F4', alignItems: 'center', justifyContent: 'center' },
-  trustTitle: { fontSize: 13, fontWeight: '800', color: c.navy, lineHeight: 17 },
-  trustBody: { fontSize: 11.5, color: c.muted, marginTop: 3, lineHeight: 16 },
-  label: { fontSize: 10.5, fontWeight: '700', letterSpacing: 0.6, color: c.muted2, marginTop: 22, marginBottom: 7 },
-  field: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 1, borderColor: c.line, borderRadius: 13, paddingHorizontal: 13, backgroundColor: c.white },
-  fieldInput: { flex: 1, paddingVertical: 14, fontSize: 15, color: c.ink },
-  forgotWrap: { alignSelf: 'flex-end', marginTop: 12 },
-  forgot: { fontSize: 13, fontWeight: '700', color: c.teal },
-  error: { fontSize: 13, color: '#b4232a', backgroundColor: '#fdeaea', borderRadius: 10, padding: 11, marginTop: 14, lineHeight: 18 },
-  cta: { flexDirection: 'row', gap: 8, backgroundColor: c.brand, borderRadius: 14, paddingVertical: 16, alignItems: 'center', justifyContent: 'center', marginTop: 18 },
+  scroll: { flexGrow: 1, paddingHorizontal: 26 },
+  h1: { fontSize: 34, fontWeight: '800', color: c.navy, marginTop: 44, letterSpacing: -0.8 },
+  sub: { fontSize: 15.5, color: c.muted, marginTop: 10, lineHeight: 22 },
+  label: { fontSize: 11, fontWeight: '700', letterSpacing: 0.6, color: c.muted2, marginTop: 30, marginBottom: 9 },
+  field: { flexDirection: 'row', alignItems: 'center', gap: 11, borderWidth: 1.5, borderColor: c.line, borderRadius: 15, paddingHorizontal: 15, backgroundColor: c.white },
+  fieldInput: { flex: 1, paddingVertical: 17, fontSize: 16, color: c.ink },
+  forgotWrap: { alignSelf: 'flex-end', marginTop: 16 },
+  forgot: { fontSize: 14, fontWeight: '700', color: c.teal },
+  error: { fontSize: 13.5, color: '#b4232a', backgroundColor: '#fdeaea', borderRadius: 12, padding: 13, marginTop: 16, lineHeight: 19 },
+  cta: { flexDirection: 'row', gap: 8, backgroundColor: c.brand, borderRadius: 16, paddingVertical: 18, alignItems: 'center', justifyContent: 'center', marginTop: 28 },
   ctaOff: { opacity: 0.45 },
-  ctaText: { fontSize: 15.5, fontWeight: '800', color: '#ffffff' },
-  orRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 22 },
+  ctaText: { fontSize: 16.5, fontWeight: '800', color: '#ffffff' },
+  orRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 30 },
   orLine: { flex: 1, height: 1, backgroundColor: c.line },
-  orText: { fontSize: 12.5, color: c.muted2, fontWeight: '600' },
-  invite: { flexDirection: 'row', gap: 10, borderWidth: 1, borderColor: c.line, borderRadius: 14, paddingVertical: 15, alignItems: 'center', justifyContent: 'center', marginTop: 22 },
-  inviteText: { fontSize: 14.5, fontWeight: '700', color: c.navy },
-  foot: { fontSize: 12.5, color: c.muted2, textAlign: 'center', marginTop: 20, lineHeight: 19 },
+  orText: { fontSize: 13, color: c.muted2, fontWeight: '600' },
+  invite: { flexDirection: 'row', gap: 10, borderWidth: 1.5, borderColor: c.line, borderRadius: 16, paddingVertical: 17, alignItems: 'center', justifyContent: 'center', marginTop: 30 },
+  inviteText: { fontSize: 15, fontWeight: '700', color: c.navy },
+  foot: { fontSize: 13, color: c.muted2, textAlign: 'center', marginTop: 28, lineHeight: 20 },
 });
