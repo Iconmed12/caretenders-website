@@ -118,6 +118,13 @@ async function fetchAdminRole() {
 // Owner sees everything. Manager: no Knowledge Base. Admin: no KB, no Staff tab.
 function applyRoleVisibility() {
   var role = window._adminRole;
+  // Writers only get the delivery desk: hide every other nav item and open it.
+  if (role === 'writer') {
+    document.querySelectorAll('.nav-item').forEach(function (n) { n.style.display = 'none'; });
+    var dlv = document.getElementById('navDelivery');
+    if (dlv) { dlv.style.display = ''; if (typeof showPage === 'function') showPage('delivery', dlv); }
+    return;
+  }
   var isOwner = role === 'owner';
   var isManagerUp = role === 'owner' || role === 'manager';
   var kb = document.getElementById('navKnowledge');
@@ -243,11 +250,14 @@ function showPage(page, btn) {
   if (page === 'orders' && typeof loadOrders === 'function') {
     setTimeout(loadOrders, 100);
   }
+  if (page === 'delivery' && typeof loadDelivery === 'function') {
+    setTimeout(loadDelivery, 100);
+  }
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   btn.classList.add('active');
-  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana', knowledge:'Knowledge Base', 'tenders-import':'Tender Import', requests:'F.A.T', orders:'Orders', staff:'Staff', users:'Users', settings:'Settings' };
+  const titles = { dashboard:'Dashboard', care:'Care tenders', commercial:'Commercial tenders', noncqc:'Non-CQC listings', cana:'Cana', knowledge:'Knowledge Base', 'tenders-import':'Tender Import', requests:'F.A.T', orders:'Orders', delivery:'Delivery', staff:'Staff', users:'Users', settings:'Settings' };
   document.getElementById('topbarTitle').textContent = titles[page] || page;
   ['aiUploadBtn','addTenderBtn','aiCommercialBtn','addCommercialBtn','aiNonCqcBtn','addNonCqcBtn'].forEach(function(id) {
     var el = document.getElementById(id); if(el) el.style.display = 'none';

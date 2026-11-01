@@ -58,7 +58,7 @@ exports.handler = async (event) => {
       var role = body.role;
       var pin = body.pin;
       if (!validUsername(username)) return bad(cors, 'Username must be 2 to 32 letters, numbers, dot, underscore or hyphen');
-      if (role !== 'manager' && role !== 'admin') return bad(cors, 'Role must be manager or admin');
+      if (role !== 'manager' && role !== 'admin' && role !== 'writer') return bad(cors, 'Role must be manager, admin or writer');
       if (!validPin(pin)) return bad(cors, 'PIN must be exactly 6 digits');
       var email = emailFor(username);
 
@@ -97,7 +97,7 @@ exports.handler = async (event) => {
 
     // ---- SET ROLE ----
     if (action === 'setRole') {
-      if (body.role !== 'manager' && body.role !== 'admin') return bad(cors, 'Role must be manager or admin');
+      if (body.role !== 'manager' && body.role !== 'admin' && body.role !== 'writer') return bad(cors, 'Role must be manager, admin or writer');
       var rRes = await fetch(SB_URL + '/rest/v1/admin_users?email=eq.' + encodeURIComponent(targetEmail), {
         method: 'PATCH', headers: svcHeaders({ Prefer: 'return=minimal' }), body: JSON.stringify({ role: body.role })
       });

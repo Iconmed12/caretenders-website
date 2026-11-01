@@ -61,7 +61,7 @@ async function checkAdmin(event) {
         if (row && row.active === false) {
           return { authenticated: false, email: email, role: null, reason: 'account deactivated' };
         }
-        if (row && (row.role === 'owner' || row.role === 'manager' || row.role === 'admin')) {
+        if (row && (row.role === 'owner' || row.role === 'manager' || row.role === 'admin' || row.role === 'writer')) {
           return { authenticated: true, email: email, role: row.role, reason: 'ok (' + row.role + ' via admin_users)' };
         }
       }
@@ -87,6 +87,27 @@ function logAdminCheck(fnName, result) {
 // Enforce: any admin (owner or staff). Returns null to proceed, or a 401 to
 // return. Stashes the caller identity on the event for logAudit to reuse.
 async function requireAdmin(event, fnName, corsHeaders) {
+  var result = await checkAdmin(event);
+  if (event) event._adminIdentity = result;
+  // Writers are authenticated but limited to the delivery desk, so they must not
+  // pass the general admin gate (tenders, orders, users, etc.).
+  if (result.authenticated && result.role !== 'writer') {
+    console.log('[admin-auth][enforce] ' + fnName + ': allow ' + result.role + ' ' + result.email);
+    return null;
+  }
+  var reason = result.authenticated ? 'writers cannot access this (role=writer)' : result.reason;
+  console.log('[admin-auth][enforce] ' + fnName + ': DENY reason=' + reason +
+    ' email=' + (result.email || 'none'));
+  return {
+    statusCode: result.authenticated ? 403 : 401,
+    headers: corsHeaders || { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ error: result.authenticated ? 'Not allowed for this role' : 'Admin authentication required' })
+  };
+}
+
+// Enforce: any admin (owner/manager/admin) OR a writer. Used for the delivery
+// desk, which writers can use even though the general admin gate excludes them.
+async function requireDelivery(event, fnName, corsHeaders) {
   var result = await checkAdmin(event);
   if (event) event._adminIdentity = result;
   if (result.authenticated) {
@@ -156,4 +177,4 @@ async function logAudit(event, action, details) {
   }
 }
 
-module.exports = { checkAdmin, logAdminCheck, requireAdmin, requireManager, requireOwner, logAudit };
+module.exports = { checkAdmin, logAdminCheck, requireAdmin, requireManager, requireOwner, requireDelivery, logAudit };
