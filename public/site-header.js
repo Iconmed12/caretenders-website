@@ -93,8 +93,85 @@
     f.appendChild(wrap);
   }
 
+  // Mobile menu: the nav links (Home, Opportunities, Pricing, Case Studies,
+  // Contact) are hidden under 860px, so without this there is no way to reach
+  // them on a phone. We add a hamburger that opens a dropdown built from the
+  // existing links and the account buttons. One file, every marketing page.
+  function injectMobileNavCss() {
+    if (document.getElementById('ch-mobile-css')) return;
+    var css = ''
+      + '.ch-burger{display:none;background:none;border:0;cursor:pointer;width:42px;height:42px;flex-direction:column;justify-content:center;align-items:center;gap:5px;justify-self:end;padding:0;margin:0}'
+      + '.ch-burger span{display:block;width:22px;height:2px;background:#0b1929;border-radius:2px;transition:transform .2s,opacity .2s}'
+      + 'body.ch-open .ch-burger span:nth-child(1){transform:translateY(7px) rotate(45deg)}'
+      + 'body.ch-open .ch-burger span:nth-child(2){opacity:0}'
+      + 'body.ch-open .ch-burger span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}'
+      + '#ch-mpanel{display:none;position:fixed;left:0;right:0;background:#fff;border-bottom:1px solid #eef1f5;box-shadow:0 12px 24px rgba(11,25,41,.10);z-index:299}'
+      + 'body.ch-open #ch-mpanel{display:block}'
+      + '#ch-mpanel a{display:block;padding:15px 22px;color:#0b1929;text-decoration:none;font-size:1.02rem;font-weight:600;font-family:Inter,system-ui,Arial,sans-serif;border-bottom:1px solid #f1f4f7}'
+      + '#ch-mpanel .ch-mauth{background:#f8fafb}'
+      + '#ch-mpanel .ch-mauth a:last-child{border-bottom:0}'
+      + '@media(min-width:861px){#ch-mpanel{display:none!important}}'
+      + '@media(max-width:860px){.ch-burger{display:flex}#cana-header .ch-auth{display:none}}';
+    var s = document.createElement('style');
+    s.id = 'ch-mobile-css';
+    s.textContent = css;
+    document.head.appendChild(s);
+  }
+
+  function fillMobilePanel() {
+    var panel = document.getElementById('ch-mpanel');
+    if (!panel) return;
+    var header = document.getElementById('cana-header');
+    if (header) panel.style.top = header.offsetHeight + 'px';
+    var links = document.querySelector('#cana-header .ch-links');
+    var auth = document.querySelector('#cana-header .ch-auth');
+    var html = '';
+    if (links) links.querySelectorAll('a').forEach(function (a) {
+      html += '<a href="' + a.getAttribute('href') + '">' + a.textContent + '</a>';
+    });
+    var authHtml = '';
+    if (auth) auth.querySelectorAll('a').forEach(function (a) {
+      var so = a.getAttribute('data-signout') !== null ? ' data-signout' : '';
+      authHtml += '<a href="' + (a.getAttribute('href') || '#') + '"' + so + '>' + a.textContent + '</a>';
+    });
+    panel.innerHTML = html + (authHtml ? '<div class="ch-mauth">' + authHtml + '</div>' : '');
+  }
+
+  function buildMobileNav() {
+    var nav = document.querySelector('#cana-header .ch-nav');
+    if (!nav) return;
+    injectMobileNavCss();
+    if (!document.getElementById('ch-mpanel')) {
+      var panel = document.createElement('div');
+      panel.id = 'ch-mpanel';
+      document.getElementById('cana-header').appendChild(panel);
+      panel.addEventListener('click', function (e) {
+        if (e.target.closest && e.target.closest('a')) document.body.classList.remove('ch-open');
+      });
+    }
+    if (!document.getElementById('ch-burger')) {
+      var burger = document.createElement('button');
+      burger.id = 'ch-burger';
+      burger.className = 'ch-burger';
+      burger.type = 'button';
+      burger.setAttribute('aria-label', 'Menu');
+      burger.setAttribute('aria-expanded', 'false');
+      burger.innerHTML = '<span></span><span></span><span></span>';
+      nav.appendChild(burger);
+      burger.addEventListener('click', function () {
+        var open = document.body.classList.toggle('ch-open');
+        burger.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (open) fillMobilePanel();
+      });
+    }
+    window.addEventListener('resize', function () {
+      if (window.innerWidth > 860) document.body.classList.remove('ch-open');
+    });
+  }
+
   removeOldNavs();
-  document.addEventListener('DOMContentLoaded', function () { removeOldNavs(); addStoreBadges(); });
+  buildMobileNav();
+  document.addEventListener('DOMContentLoaded', function () { removeOldNavs(); buildMobileNav(); addStoreBadges(); });
   addStoreBadges();
   verify();
 })();
