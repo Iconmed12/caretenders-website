@@ -130,6 +130,7 @@ async function loadUsers() {
     if (el('uCountTotal'))   el('uCountTotal').textContent   = c.total   != null ? c.total   : '-';
     if (el('uCountMembers')) el('uCountMembers').textContent = c.members != null ? c.members : '-';
     if (el('uCountStaff'))   el('uCountStaff').textContent   = c.staff   != null ? c.staff   : '-';
+    if (el('sbUsers'))       el('sbUsers').textContent       = c.total   != null ? c.total   : (ALL_USERS.length || 0);
     filterUsers();
   } catch (e) {
     if (tbody) tbody.innerHTML = '<tr><td colspan="5" style="color:#c53030;padding:16px">' + e.message + '</td></tr>';
