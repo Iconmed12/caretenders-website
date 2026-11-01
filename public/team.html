@@ -59,6 +59,12 @@
  .inv-row{display:grid;grid-template-columns:1.4fr 1fr auto;gap:10px;align-items:end}
  @media(max-width:640px){.inv-row{grid-template-columns:1fr}}
  .loading{padding:40px;color:var(--muted);font-size:14px}
+ .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+ @media(max-width:820px){
+  .shell{grid-template-columns:minmax(0,1fr)}
+  .main{padding:20px 16px;min-width:0}
+  .table-scroll table{min-width:520px}
+ }
 </style>
 </head>
 <body>
@@ -101,8 +107,8 @@
       <div class="panel" style="max-width:none;margin-bottom:18px"><h2 id="member-ent">—</h2><p id="member-note" style="margin-bottom:0">You are a member of this company circle. You can browse opportunities and generate bids for your team, delivered to your own email. The account owner manages the team.</p></div>
       <div class="card">
         <div class="card-h">Members</div>
-        <table><thead><tr><th>Member</th><th>Department</th><th>Status</th></tr></thead>
-        <tbody id="member-roster"></tbody></table>
+        <div class="table-scroll"><table><thead><tr><th>Member</th><th>Department</th><th>Status</th></tr></thead>
+        <tbody id="member-roster"></tbody></table></div>
       </div>
     </div>
 
@@ -140,8 +146,8 @@
 
       <div class="card">
         <div class="card-h">Members</div>
-        <table><thead><tr><th>Member</th><th>Department</th><th>Bids</th><th>Status</th><th></th></tr></thead>
-        <tbody id="members-body"></tbody></table>
+        <div class="table-scroll"><table><thead><tr><th>Member</th><th>Department</th><th>Bids</th><th>Status</th><th></th></tr></thead>
+        <tbody id="members-body"></tbody></table></div>
       </div>
     </div>
   </main>
