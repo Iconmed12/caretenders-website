@@ -24,47 +24,6 @@
   status = 301
   force = true
 
-# ─────────────────────────────────────────────────────────────────────────────
-# PRE-LAUNCH COMING-SOON GATE. Hides the public marketing/signup funnel behind
-# coming-soon.html so people cannot sign up before launch, while admin, login and
-# the app backend (/.netlify/*) keep working. TO GO LIVE: delete this whole block.
-# ─────────────────────────────────────────────────────────────────────────────
-[[redirects]]
-  from = "/"
-  to = "/coming-soon.html"
-  status = 200
-  force = true
-[[redirects]]
-  from = "/index.html"
-  to = "/coming-soon.html"
-  status = 200
-  force = true
-[[redirects]]
-  from = "/plans.html"
-  to = "/coming-soon.html"
-  status = 302
-  force = true
-[[redirects]]
-  from = "/register.html"
-  to = "/coming-soon.html"
-  status = 302
-  force = true
-[[redirects]]
-  from = "/case-studies.html"
-  to = "/coming-soon.html"
-  status = 302
-  force = true
-[[redirects]]
-  from = "/contact.html"
-  to = "/coming-soon.html"
-  status = 302
-  force = true
-[[redirects]]
-  from = "/tenders.html"
-  to = "/coming-soon.html"
-  status = 302
-  force = true
-
 # Security headers applied to every response. No Content-Security-Policy yet:
 # the site uses inline scripts and onclick handlers, so a strict CSP would break
 # it until those are refactored. These headers are all safe with the current site.
