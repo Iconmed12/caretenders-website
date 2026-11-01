@@ -111,7 +111,7 @@
       + '#ch-mpanel .ch-mauth{background:#f8fafb}'
       + '#ch-mpanel .ch-mauth a:last-child{border-bottom:0}'
       + '@media(min-width:861px){#ch-mpanel{display:none!important}}'
-      + '@media(max-width:860px){.ch-burger{display:flex}#cana-header .ch-auth{display:none}}';
+      + '@media(max-width:860px){.ch-burger{display:flex}#cana-header .ch-auth{display:none}html,body{overflow-x:hidden}}';
     var s = document.createElement('style');
     s.id = 'ch-mobile-css';
     s.textContent = css;

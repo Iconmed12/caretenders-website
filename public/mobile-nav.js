@@ -44,6 +44,7 @@
       '@media(max-width:' + BREAKPOINT + 'px){',
       '.mnav-hide{display:none!important}',
       '.mnav-btn{display:flex}',
+      'html,body{overflow-x:hidden}',
       '}',
       '@media(min-width:' + (BREAKPOINT + 1) + 'px){',
       '.mnav-panel,.mnav-scrim{display:none!important}',
