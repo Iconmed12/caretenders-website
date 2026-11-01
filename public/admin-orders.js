@@ -2,8 +2,75 @@
 // reference, customer, tender, date/time and status, plus simple volume metrics.
 
 var _ordAll = [];
+var _ordReviews = {};        // key "email|tender_id" -> latest review_charges row
+var _ordReviewsOnly = false; // "Reviews only" filter
 
 function ordEsc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+function ordReviewKey(email, tenderId) { return String(email || '').toLowerCase() + '|' + String(tenderId || ''); }
+
+// The review chip shown next to an order's status, when a paid review was
+// requested for that bid. No price is shown to members anywhere in the app; this
+// admin view is where the money and the retry live.
+function ordReviewChip(rv) {
+  var money = '£' + Math.round((rv.amount || 0) / 100);
+  var st = String(rv.status || '').toLowerCase();
+  var c;
+  if (st === 'paid') c = { t: 'Review ' + money + ' · Paid', bg: '#e1f7fa', fg: '#0891a3' };
+  else if (st === 'failed') c = { t: 'Review ' + money + ' · Payment failed', bg: '#fee2e2', fg: '#991b1b' };
+  else c = { t: 'Review ' + money + ' · Pending', bg: '#fef9c3', fg: '#854d0e' };
+  var chip = '<span style="background:' + c.bg + ';color:' + c.fg + ';font-size:0.72rem;font-weight:700;padding:3px 10px;border-radius:999px;white-space:nowrap;">' + ordEsc(c.t) + '</span>';
+  if (st === 'failed') {
+    chip += '<button onclick="retryReviewCharge(\'' + ordEsc(rv.id) + '\',this)" style="background:#0B1929;border:none;color:#fff;font-size:0.72rem;font-weight:700;padding:5px 11px;border-radius:8px;white-space:nowrap;cursor:pointer;"><i class="ti ti-refresh" style="font-size:12px;vertical-align:-2px;margin-right:2px;"></i>Retry</button>';
+  }
+  return chip;
+}
+
+async function ordLoadReviews() {
+  _ordReviews = {};
+  try {
+    var res = await fetch('/.netlify/functions/admin-review-charges', { headers: adminHeaders() });
+    if (!res.ok) return;
+    var d = await res.json();
+    (d && d.charges || []).forEach(function (r) {
+      var key = ordReviewKey(r.email, r.tender_id);
+      var prev = _ordReviews[key];
+      // Keep the most recent review per order; a paid one always wins over an
+      // older failed/pending so a settled bid does not show as outstanding.
+      if (!prev) { _ordReviews[key] = r; return; }
+      if (r.status === 'paid' && prev.status !== 'paid') { _ordReviews[key] = r; return; }
+      if (prev.status === 'paid') return;
+      if (new Date(r.created_at) > new Date(prev.created_at)) _ordReviews[key] = r;
+    });
+  } catch (e) { /* reviews are a nice-to-have; orders still render without them */ }
+}
+
+async function retryReviewCharge(id, btn) {
+  if (btn) { btn.disabled = true; btn.textContent = '...'; }
+  try {
+    var res = await fetch('/.netlify/functions/admin-retry-review-charge', {
+      method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ id: id })
+    });
+    var d = await res.json();
+    if (!res.ok) throw new Error(d && d.error || 'failed');
+    if (typeof showToast === 'function') showToast(d.message || (d.status === 'paid' ? 'Payment taken' : 'Could not take payment'), d.status === 'paid' ? 'success' : 'error');
+    else alert(d.message || '');
+    loadOrders();
+  } catch (e) {
+    if (typeof showToast === 'function') showToast('Error: ' + e.message, 'error'); else alert('Error: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Retry'; }
+  }
+}
+
+function ordSetReviewFilter(on) {
+  _ordReviewsOnly = !!on;
+  var a = document.getElementById('ord-filter-all');
+  var r = document.getElementById('ord-filter-rev');
+  if (a) a.className = 'ti-tab' + (on ? '' : ' active');
+  if (r) r.className = 'ti-tab' + (on ? ' active' : '');
+  renderOrders();
+}
 
 function ordFmt(d) {
   if (!d) return '';
@@ -98,6 +165,7 @@ async function loadOrders() {
     var data = await res.json();
     if (!res.ok) throw new Error((data && data.error) || 'Failed to load');
     _ordAll = (data && data.orders) || [];
+    await ordLoadReviews();
     ordUpdateStats();
     renderOrders();
   } catch (e) {
@@ -125,10 +193,14 @@ function renderOrders() {
   var rows = !q ? _ordAll : _ordAll.filter(function (o) {
     return (o.ref + ' ' + o.client_name + ' ' + o.client_email + ' ' + o.tender_title + ' ' + o.org).toLowerCase().indexOf(q) !== -1;
   });
+  if (_ordReviewsOnly) {
+    rows = rows.filter(function (o) { return !!_ordReviews[ordReviewKey(o.client_email, o.tender_id)]; });
+  }
   if (!rows.length) { list.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
   if (empty) empty.style.display = 'none';
 
   list.innerHTML = rows.map(function (o) {
+    var rv = _ordReviews[ordReviewKey(o.client_email, o.tender_id)];
     return '<div style="background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
       '<div style="min-width:0;">' +
         '<div style="font-size:0.9rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ordEsc(o.tender_title) + '</div>' +
@@ -137,7 +209,10 @@ function renderOrders() {
           ordEsc(o.client_name || o.client_email || 'Customer') + ' &middot; ' + ordFmt(o.created_at) +
         '</div>' +
       '</div>' +
-      ordStatusChip(o.status) +
+      '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0;">' +
+        (rv ? ordReviewChip(rv) : '') +
+        ordStatusChip(o.status) +
+      '</div>' +
     '</div>';
   }).join('');
 }

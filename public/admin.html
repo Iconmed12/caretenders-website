@@ -71,7 +71,7 @@
     <div class="sidebar-nav">
       <button class="nav-item" onclick="showPage('cana',this)"><i class="ti ti-sparkles"></i> Cana <span class="nav-badge" id="sbCana">0</span></button>
 <button class="nav-item" onclick="showPage('tenders-import',this)"><i class="ti ti-cloud-download"></i> Tender Import <span class="nav-badge" id="sbImport">0</span></button>
-<button class="nav-item" onclick="showPage('requests',this)"><i class="ti ti-inbox"></i> Requests <span class="nav-badge" id="sbRequests">0</span></button>
+<button class="nav-item" onclick="showPage('requests',this)"><i class="ti ti-inbox"></i> F.A.T <span class="nav-badge" id="sbRequests">0</span></button>
 <button class="nav-item" onclick="showPage('orders',this)"><i class="ti ti-receipt"></i> Orders <span class="nav-badge" id="sbOrders">0</span></button>
 <button class="nav-item" id="navKnowledge" onclick="showPage('knowledge',this)"><i class="ti ti-brain"></i> Knowledge Base</button>
       <button class="nav-item" id="navMargins" style="display:none" onclick="showPage('margins',this)"><i class="ti ti-calculator"></i> Margin model</button>
@@ -661,6 +661,10 @@
     <div style="background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:14px;"><div style="font-size:0.72rem;color:var(--text-muted);text-transform:uppercase;margin-bottom:6px;">Total</div><div style="font-size:1.6rem;font-weight:700;color:var(--text);" id="ord-total">0</div></div>
   </div>
   <input type="text" id="ord-search" placeholder="Search reference, customer or tender..." oninput="renderOrders()" style="width:100%;max-width:360px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:inherit;font-size:0.84rem;margin-bottom:1rem;box-sizing:border-box;">
+  <div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+    <button onclick="ordSetReviewFilter(false)" class="ti-tab active" id="ord-filter-all">All orders</button>
+    <button onclick="ordSetReviewFilter(true)" class="ti-tab" id="ord-filter-rev">Reviews only</button>
+  </div>
   <div id="ord-list" style="display:flex;flex-direction:column;gap:8px;"></div>
   <div id="ord-empty" style="display:none;text-align:center;padding:3rem;color:var(--text-muted);font-size:0.9rem;">No orders yet.</div>
 </div>

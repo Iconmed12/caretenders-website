@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Linking, Modal } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Modal } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { c, t } from '../theme';
-import { valueCompact, daysUntil, fetchOngoing, jobState, fetchReviewAllowance } from '../api';
+import { valueCompact, daysUntil, fetchOngoing, jobState, fetchReviewAllowance, requestReview } from '../api';
 import { useAuth } from '../auth';
 import { IconBars, IconClock, IconShield, IconPin } from '../icons';
 
@@ -60,8 +60,31 @@ export default function TenderDetailScreen({ route, navigation }) {
   function viewBid() { navigation.navigate('BidReady', { tender }); }
   // Tapping Generate opens the confirm sheet; nothing runs until "Generate now".
   function openGenerate() { setShowGen(true); }
-  function confirmGenerate() { setShowGen(false); navigation.navigate('Generating', { tender, includedReview: review }); }
-  function openPlans() { Linking.openURL('https://getcana.co.uk/plans.html').catch(() => {}); }
+  // Covered = this review is in the plan and still has allowance left this month,
+  // so it is free. Otherwise it is a paid request: we log it and charge the card
+  // on file in the background (no price or payment shown in the app, so Apple has
+  // nothing to flag), then generate the bid regardless so the member is never
+  // blocked. The price and the charge live on the website invoices page.
+  function reviewCovered(type) {
+    const box = type && allowance && allowance[type];
+    return !!(box && box.limit > 0 && box.remaining > 0);
+  }
+  function confirmGenerate() {
+    setShowGen(false);
+    const type = review;
+    const covered = reviewCovered(type);
+    const requested = !!type && !covered;
+    if (requested) {
+      // Fire and forget: the invoices page and the team email are the record of
+      // this, so we do not block generation on the charge.
+      requestReview(token, { review_type: type, tender_id: tender.id, tender_title: tender.title }).catch(() => {});
+    }
+    navigation.navigate('Generating', {
+      tender,
+      includedReview: covered ? type : null,
+      requestedReview: requested ? type : null,
+    });
+  }
 
   const days = daysUntil(tender.deadline);
   const closesValue = days == null ? '—' : days < 0 ? 'Closed' : days === 0 ? 'Today' : days + (days === 1 ? ' day' : ' days');
@@ -161,9 +184,9 @@ export default function TenderDetailScreen({ route, navigation }) {
                 return (
                   <TouchableOpacity
                     key={opt.key}
-                    style={[s.revRow, selected && s.revRowOn, !available && s.revRowOff]}
+                    style={[s.revRow, selected && s.revRowOn]}
                     activeOpacity={0.85}
-                    onPress={() => (available ? setReview(opt.key) : openPlans())}
+                    onPress={() => setReview(opt.key)}
                   >
                     <View style={[s.radio, selected && s.radioOn]} />
                     <View style={{ flex: 1 }}>
@@ -171,11 +194,11 @@ export default function TenderDetailScreen({ route, navigation }) {
                         <Text style={s.revTitle}>{opt.title}</Text>
                         {available
                           ? <View style={s.revBadge}><Text style={s.revBadgeText}>{remaining} left this month</Text></View>
-                          : included
-                            ? <Text style={s.revNote}>Used this month</Text>
-                            : <Text style={s.revNote}>Add on website</Text>}
+                          : <View style={s.revBadgeReq}><Text style={s.revBadgeReqText}>Request</Text></View>}
                       </View>
-                      <Text style={s.revBody}>{opt.body}</Text>
+                      <Text style={s.revBody}>
+                        {opt.body}{available ? '' : ' We will confirm the cost before we start.'}
+                      </Text>
                     </View>
                   </TouchableOpacity>
                 );
@@ -229,7 +252,8 @@ const s = StyleSheet.create({
   revBody: { fontSize: 13, color: c.muted, marginTop: 3, lineHeight: 18 },
   revBadge: { backgroundColor: c.goodBg, borderRadius: 999, paddingHorizontal: 8, paddingVertical: 3 },
   revBadgeText: { fontSize: 10, fontWeight: '800', color: c.good },
-  revNote: { fontSize: 11, fontWeight: '700', color: c.teal },
+  revBadgeReq: { backgroundColor: c.tealBg, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 3 },
+  revBadgeReqText: { fontSize: 10, fontWeight: '800', color: c.teal },
 
   sheetOverlay: { flex: 1, justifyContent: 'flex-end' },
   sheetBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(7,26,47,0.5)' },

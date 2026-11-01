@@ -7,6 +7,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Updates from 'expo-updates';
 
 // Hold the branded splash (logo on navy) until we hide it, so it does not just
 // flash. Shown for a short beat after the app is ready, then the app appears.
@@ -256,10 +257,27 @@ function Root() {
   );
 }
 
+// On a real (store/TestFlight) build, pull the newest over-the-air update while
+// the splash is still up and apply it straight away, instead of waiting for the
+// phone to fetch it in the background and only swap it in on a later launch.
+// checkForUpdateAsync returns isAvailable:false when already on the latest, so
+// this cannot loop. Any error (dev build, no network) is ignored silently.
+async function applyLatestUpdate() {
+  if (__DEV__ || !Updates.isEnabled) return;
+  try {
+    const res = await Updates.checkForUpdateAsync();
+    if (res && res.isAvailable) {
+      await Updates.fetchUpdateAsync();
+      await Updates.reloadAsync();
+    }
+  } catch (e) { /* offline or not an updatable build: carry on as-is */ }
+}
+
 export default function App() {
   // Keep the splash up for a short, deliberate beat (about 2.5s) so the brand is
   // clearly seen, then reveal the app.
   useEffect(() => {
+    applyLatestUpdate();
     const t = setTimeout(() => { SplashScreen.hideAsync().catch(() => {}); }, 2500);
     return () => clearTimeout(t);
   }, []);

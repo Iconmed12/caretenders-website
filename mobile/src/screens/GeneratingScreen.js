@@ -43,6 +43,8 @@ function activeStepFor(phase, status) {
 export default function GeneratingScreen({ route, navigation }) {
   const tender = (route.params && route.params.tender) || {};
   const includedReview = (route.params && route.params.includedReview) || null;
+  // A paid review requested on account (charged in the background, no price shown).
+  const requestedReview = (route.params && route.params.requestedReview) || null;
   const { session } = useAuth();
   const user = (session && session.user) || {};
   const token = (session && session.access_token) || '';
@@ -99,7 +101,7 @@ export default function GeneratingScreen({ route, navigation }) {
       if (!alive) return;
       setStatus(st);
       const state = jobState({ status: st });
-      if (state === 'ready') { navigation.replace('BidReady', { tender }); return; }
+      if (state === 'ready') { navigation.replace('BidReady', { tender, requestedReview }); return; }
       if (state === 'failed') {
         setPhase('failed');
         setErrorMsg('The bid could not be completed. Please try again, or contact us.');
@@ -155,6 +157,11 @@ export default function GeneratingScreen({ route, navigation }) {
             {!!includedReview && (
               <Text style={s.confirmReview}>
                 {includedReview === 'full' ? 'Full tender review' : 'Response review'} added. A Cana expert will check it before you submit.
+              </Text>
+            )}
+            {!!requestedReview && (
+              <Text style={s.confirmReview}>
+                {requestedReview === 'full' ? 'Full tender review' : 'Response review'} requested on your account. We will confirm the cost by email, then an expert gets started.
               </Text>
             )}
           </View>
