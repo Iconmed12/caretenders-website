@@ -363,7 +363,7 @@ function renderExpiredTable() {
       '<td>' + (t.organisation||t.org||'') + '</td>' +
       '<td style="color:var(--text-muted);font-size:12px">' + fmtDate(t.deadline) + '</td>' +
       '<td><div class="action-btns">' +
-        '<button class="action-btn" style="background:#e8f7ee;color:#1a7a3f;" onclick="restoreTender(\'' + t.id + '\')" title="Restore"><i class="ti ti-rotate"></i></button>' +
+        '<button class="action-btn edit" onclick="openDrawerById(\'' + t.id + '\',\'' + (isCare(t) ? 'care' : 'commercial') + '\')" title="Edit (set a new deadline to relist)"><i class="ti ti-edit"></i></button>' +
         '<button class="action-btn del" onclick="askDelete(\'' + t.id + '\')" title="Delete"><i class="ti ti-trash"></i></button>' +
       '</div></td>' +
     '</tr>';
@@ -371,10 +371,13 @@ function renderExpiredTable() {
 }
 
 async function restoreTender(id) {
-  if (!confirm('Restore this tender to pending_review?')) return;
-  var res = await adminPatchTender(id, { status: 'pending_review' });
-  if (res.ok) { showToast('Tender restored', 'success'); await loadTenders(); renderAll(); }
-  else showToast('Restore failed', 'error');
+  // Bring a tender back as a DRAFT so it stays visible on the Care/Commercial tab
+  // (editable + publishable). Never use pending_review here: that status only shows
+  // on the Tender Import feed, so a non-import tender would vanish from the admin.
+  if (!confirm('Bring this tender back as a draft so you can edit and publish it?')) return;
+  var res = await adminPatchTender(id, { status: 'draft' });
+  if (res.ok) { showToast('Tender brought back as a draft', 'success'); await loadTenders(); renderAll(); }
+  else showToast('Could not bring it back', 'error');
 }
 
 // AI MODAL
