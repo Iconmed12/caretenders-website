@@ -13,7 +13,7 @@
   .topbar-left a { color:var(--teal); text-decoration:none; font-weight:500; }
   .topbar-right { font-size:0.72rem; color:rgba(255,255,255,0.35); }
 
-  nav { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; position:sticky; top:0; z-index:100; border-bottom:1px solid rgba(255,255,255,0.06); }
+  nav:not(.ch-nav) { background:var(--navy); padding:0 2rem; display:flex; align-items:center; justify-content:space-between; height:62px; position:sticky; top:0; z-index:100; border-bottom:1px solid rgba(255,255,255,0.06); }
   .nav-logo { display:flex; align-items:center; gap:8px; text-decoration:none; }
   .nav-logo-img { height:34px; width:auto; display:block; }
   .nav-logo-main { font-size:1.15rem; font-weight:600; color:var(--white); letter-spacing:-0.02em; }
@@ -161,10 +161,11 @@
    the container and cards carry desktop padding, which together pushed the
    page wider than the screen. */
 @media (max-width: 680px) {
-  .steps-bar { padding: 0.85rem 1rem; gap: 0; overflow-x: auto; justify-content: flex-start; -webkit-overflow-scrolling: touch; }
-  .steps-bar::-webkit-scrollbar { display: none; }
-  .step { flex: none; font-size: 0.76rem; }
-  .step-divider { width: 18px; margin: 0 0.35rem; }
+  .steps-bar { padding: 0.85rem 0.75rem; gap: 0; justify-content: center; }
+  .step { flex: none; font-size: 0.78rem; }
+  .step-label { display: none; }
+  .step.active .step-label { display: inline; }
+  .step-divider { width: 14px; margin: 0 0.3rem; }
   .container { padding: 1.5rem 1rem 3.5rem; }
   .section { padding: 1.1rem; border-radius: 12px; }
   .tender-header { padding: 1.15rem; }
