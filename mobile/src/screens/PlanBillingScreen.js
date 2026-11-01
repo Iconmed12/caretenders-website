@@ -157,7 +157,7 @@ export default function PlanBillingScreen({ navigation }) {
         <Text style={s.ctaText}>{isMember ? 'Change or upgrade plan' : 'See plans'}</Text>
         <IconLink size={16} color="#ffffff" />
       </TouchableOpacity>
-      <TouchableOpacity style={s.secondary} activeOpacity={0.85} onPress={() => openWeb('')}>
+      <TouchableOpacity style={s.secondary} activeOpacity={0.85} onPress={() => openWeb('/invoices.html')}>
         <Text style={s.secondaryText}>View invoices</Text>
         <IconLink size={15} color={c.navy} />
       </TouchableOpacity>

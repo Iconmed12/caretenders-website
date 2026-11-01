@@ -110,6 +110,8 @@ export default function ProfileScreen({ navigation }) {
           <View style={s.divider} />
           <Row icon={IconCard} label="My plan & billing" onPress={() => navigation.navigate('PlanBilling')} />
           <View style={s.divider} />
+          <Row icon={IconReview} label="Reviews & account" sub="Request a review, charged on account" onPress={() => navigation.navigate('Reviews')} />
+          <View style={s.divider} />
           <Row icon={IconAlerts} label="Notifications" onPress={() => Alert.alert('Notifications', 'Notification settings are coming soon.')} />
           <View style={s.divider} />
           <Row icon={IconShield} label="Login & security" onPress={loginSecurity} />

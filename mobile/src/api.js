@@ -339,6 +339,33 @@ export async function fetchMembership(email) {
   } catch (e) { return null; }
 }
 
+// ── pay-on-account reviews ──
+// Members can request an extra review beyond their included allowance; the card
+// on file is charged server-side (no in-app purchase). These read the tally and
+// place a request.
+
+export async function fetchCharges(token) {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${API_BASE}/.netlify/functions/account-charges`, {
+      headers: { Authorization: 'Bearer ' + token },
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (e) { return null; }
+}
+
+export async function requestReview(token, payload) {
+  const res = await fetch(`${API_BASE}/.netlify/functions/request-review`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || 'Could not request the review.');
+  return data; // { status: 'paid'|'failed', message, amount }
+}
+
 // ── tender alerts (saved searches) ──
 // One backend for app and website. GET returns the pick-list options and the
 // member's saved row; POST saves it. Auth is the Bearer access token.
