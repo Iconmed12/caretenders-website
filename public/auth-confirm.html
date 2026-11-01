@@ -47,15 +47,19 @@
       var hash = window.location.hash;
       var params = new URLSearchParams(window.location.search);
 
-      // Handle token_hash flow (newer Supabase)
+      // Work out the link type from the query OR the hash. A password-recovery
+      // link must go to the set-a-new-password page, NOT straight to the dashboard
+      // (otherwise it just silently logs the person in with no way to reset).
+      var hashParams = new URLSearchParams((hash || '').replace(/^#/, ''));
       var tokenHash = params.get('token_hash');
-      var type = params.get('type');
+      var type = params.get('type') || hashParams.get('type');
+      var dest = (type === 'recovery') ? '/reset-password.html' : '/dashboard.html';
 
       if (tokenHash && type) {
         var { data, error } = await sb.auth.verifyOtp({ token_hash: tokenHash, type: type });
         if (error) throw error;
         if (data.session) {
-          window.location.href = '/dashboard.html';
+          window.location.href = dest;
           return;
         }
       }
@@ -65,14 +69,14 @@
         var { data, error } = await sb.auth.getSession();
         if (error) throw error;
         if (data.session) {
-          window.location.href = '/dashboard.html';
+          window.location.href = dest;
           return;
         }
       }
 
-      // If already logged in just go to dashboard
+      // If already logged in, go to the destination for this link type
       var { data: { session } } = await sb.auth.getSession();
-      if (session) { window.location.href = '/dashboard.html'; return; }
+      if (session) { window.location.href = dest; return; }
 
       // If nothing worked show error
       throw new Error('Verification link may have expired. Please try signing up again.');
