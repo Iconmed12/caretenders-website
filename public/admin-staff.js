@@ -31,11 +31,17 @@ function renderStaffTable(rows) {
   var tbody = document.getElementById('staffTable');
   if (!tbody) return;
   if (!rows.length) { tbody.innerHTML = '<tr><td colspan="4" style="color:var(--text-light)">No staff yet. Add one above.</td></tr>'; return; }
+  var ROLE_LABELS = { owner: 'Owner', manager: 'Manager', admin: 'Admin', writer: 'Writer' };
   tbody.innerHTML = rows.map(function (r) {
     var u = r.username || (r.email || '').split('@')[0];
     var active = r.active !== false;
-    var roleLabel = r.role === 'manager' ? 'Manager' : 'Admin';
-    var other = r.role === 'manager' ? 'admin' : 'manager';
+    var roleLabel = ROLE_LABELS[r.role] || r.role;
+    // Offer a "Make X" button for each role this person is not (owner rows can
+    // only be managed in the dashboard, so they get no role buttons here).
+    var roleBtns = r.role === 'owner' ? '' : ['admin', 'manager', 'writer']
+      .filter(function (x) { return x !== r.role; })
+      .map(function (x) { return '<button style="' + SBTN + '" onclick="setStaffRole(\'' + u + '\',\'' + x + '\')">Make ' + x + '</button>'; })
+      .join(' ');
     var statusHtml = active
       ? '<span style="color:#15803d;font-weight:600">Active</span>'
       : '<span style="color:#b91c1c;font-weight:600">Inactive</span>';
@@ -45,7 +51,7 @@ function renderStaffTable(rows) {
       '<td>' + statusHtml + '</td>' +
       '<td style="white-space:nowrap">' +
         '<button style="' + SBTN + '" onclick="resetStaffPin(\'' + u + '\')">Reset PIN</button> ' +
-        '<button style="' + SBTN + '" onclick="setStaffRole(\'' + u + '\',\'' + other + '\')">Make ' + other + '</button> ' +
+        roleBtns + ' ' +
         '<button style="' + SBTN + '" onclick="toggleStaffActive(\'' + u + '\',' + (active ? 'false' : 'true') + ')">' + (active ? 'Deactivate' : 'Activate') + '</button> ' +
         '<button style="' + SBTN + 'color:#b91c1c;border-color:#fca5a5" onclick="removeStaff(\'' + u + '\')">Remove</button>' +
       '</td>' +
