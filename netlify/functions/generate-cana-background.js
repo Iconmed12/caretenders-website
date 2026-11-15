@@ -911,6 +911,36 @@ exports.handler = async (event) => {
       });
     } catch(e) { console.log('Ops email failed:', e.message); }
 
+    // ── Delivery board: turn a website review into a job a writer can pick up ──
+    // App pay-on-account reviews already write their own review_charges row (via
+    // request-review); website reviews did not, so they never reached the board.
+    // This adds the row for any review attached to a web generation (paid add-on,
+    // review + docs, or a plan-included review). Fully guarded: it can never block
+    // the documents or the ops email. user_id is a sentinel because a web order
+    // has no signed-in user id here; the board shows the email, not the id.
+    if (orderTier === 'review' || orderTier === 'review_docs') {
+      try {
+        var rcType = (reviewScope === 'full' || orderTier === 'review_docs') ? 'full' : 'response';
+        var rcAmount = orderTier === 'review_docs' ? 100000 : (reviewSource === 'included' ? 0 : 30000);
+        await fetch(sbUrl + '/rest/v1/review_charges', {
+          method: 'POST',
+          headers: { apikey: sbKey, Authorization: 'Bearer ' + sbKey, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+          body: JSON.stringify({
+            user_id: '00000000-0000-0000-0000-000000000000',
+            email: clientEmail,
+            review_type: rcType,
+            tender_id: String(tenderId || ''),
+            tender_title: (tender.title || '') + (lotName ? ' - ' + lotName : ''),
+            amount: rcAmount,
+            status: 'paid',
+            paid_at: new Date().toISOString(),
+            stripe_payment_intent: orderRef
+          })
+        });
+        console.log('Delivery job created for review:', orderRef, rcType);
+      } catch (e) { console.log('Delivery job insert failed (non-fatal):', e.message); }
+    }
+
     // ── 7. Always mark complete ──
     // ── Log estimated AI cost for this job (cost monitoring) ──
     // Rough GBP rates in pence per 1M tokens (Sonnet-weighted, conservative):
