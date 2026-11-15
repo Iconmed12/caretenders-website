@@ -10,6 +10,35 @@ function dlvEsc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g,
 function dlvMoney(p) { return '£' + Math.round((p || 0) / 100); }
 function dlvReviewLabel(t) { return t === 'full' ? 'Full tender review' : 'Response review'; }
 function dlvShortRef(id) { return 'REV-' + String(id || '').replace(/[^a-z0-9]/gi, '').slice(-6).toUpperCase(); }
+// Prefer the order reference the writer sees in the ops email (CANA-xxxx, stored
+// on web reviews) so the board ref matches the email. Falls back to a short REV
+// code for app pay-on-account reviews that have no order ref.
+function dlvRef(j) {
+  var sp = (j && j.stripe_payment_intent) || '';
+  if (/^CANA-/i.test(sp)) return sp.toUpperCase();
+  return dlvShortRef(j && j.id);
+}
+
+// Sidebar Delivery badge: red with a count when new (unclaimed) jobs are waiting,
+// neutral 0 when none, so a new review is obvious from any admin screen.
+function dlvPaintBadge(n) {
+  var b = document.getElementById('sbDelivery');
+  if (!b) return;
+  b.textContent = n;
+  if (n > 0) { b.style.background = '#dc2626'; b.style.color = '#fff'; b.style.fontWeight = '700'; }
+  else { b.style.background = ''; b.style.color = ''; b.style.fontWeight = ''; }
+}
+
+// Populate the badge on admin load (without opening the Delivery page).
+async function dlvRefreshBadge() {
+  try {
+    var res = await fetch('/.netlify/functions/admin-delivery-list', { headers: adminHeaders() });
+    if (!res.ok) return;
+    var d = await res.json();
+    var todo = (d.jobs || []).filter(function (j) { return (j.delivery_status || 'todo') === 'todo'; }).length;
+    dlvPaintBadge(todo);
+  } catch (e) {}
+}
 function dlvFmt(d) {
   if (!d) return '';
   try { return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }); }
@@ -33,8 +62,8 @@ async function loadDelivery() {
     _dlvAll = (data && data.jobs) || [];
     _dlvMe = (data && data.me) || '';
     dlvRenderCapacity(data.counts || {}, data.byWriter || {});
-    var outstanding = _dlvAll.filter(function (j) { return j.delivery_status !== 'delivered'; }).length;
-    var badge = document.getElementById('sbDelivery'); if (badge) badge.textContent = outstanding;
+    var todo = _dlvAll.filter(function (j) { return (j.delivery_status || 'todo') === 'todo'; }).length;
+    dlvPaintBadge(todo);
     dlvRender();
   } catch (e) {
     if (list) list.innerHTML = '<div style="color:#dc2626;font-size:0.85rem;padding:1rem;">Could not load delivery: ' + dlvEsc(e.message) + '</div>';
@@ -115,7 +144,7 @@ function dlvRender() {
       '<div style="min-width:0;">' +
         '<div style="font-size:0.9rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + dlvEsc(j.tender_title || 'Tender') + '</div>' +
         '<div style="font-size:0.76rem;color:var(--text-muted);margin-top:3px;">' +
-          '<span style="font-family:monospace;color:#0ea5b7;">' + dlvShortRef(j.id) + '</span> · ' +
+          '<span style="font-family:monospace;color:#0ea5b7;">' + dlvRef(j) + '</span> · ' +
           dlvEsc(j.email || '') + ' · paid ' + dlvFmt(j.paid_at) + who +
         '</div>' +
         '<div style="margin-top:6px;"><span style="background:#e1f7fa;color:#0891a3;font-size:0.7rem;font-weight:700;padding:2px 9px;border-radius:999px;">' + dlvEsc(dlvReviewLabel(j.review_type)) + ' · ' + dlvMoney(j.amount) + '</span></div>' +

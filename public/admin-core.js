@@ -53,7 +53,12 @@ async function adminPatchTender(id, fields) {
 
 function showAdminApp() {
   document.getElementById('loginScreen').style.display = 'none';
-  document.getElementById('appScreen').style.display = 'block';
+  var app = document.getElementById('appScreen');
+  // Hold the app hidden until we know the role, so a writer never flashes the
+  // full admin before it collapses to just the delivery desk. fetchAdminRole
+  // reveals it once the correct view is applied.
+  app.classList.add('booting');
+  app.style.display = 'block';
   if (typeof loadTenders === 'function') loadTenders();
   fetchAdminRole();
 }
@@ -113,6 +118,15 @@ async function fetchAdminRole() {
     window._adminRole = (d && d.role) ? d.role : null;
   } catch (e) { window._adminRole = null; }
   applyRoleVisibility();
+  var app = document.getElementById('appScreen'); if (app) app.classList.remove('booting');
+  refreshSidebarBadges();
+}
+
+// Keep the sidebar counts (F.A.T, Delivery) current from any screen so new work
+// is noticed without opening those pages. Writers only see the delivery desk.
+function refreshSidebarBadges() {
+  if (typeof dlvRefreshBadge === 'function') dlvRefreshBadge();
+  if (window._adminRole !== 'writer' && typeof loadTenderRequests === 'function') loadTenderRequests();
 }
 
 // Owner sees everything. Manager: no Knowledge Base. Admin: no KB, no Staff tab.

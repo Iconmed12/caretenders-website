@@ -6,8 +6,8 @@
 const { requireDelivery } = require('./_admin-auth');
 
 const SB_URL = 'https://igpjfpncfuawikoyzfcd.supabase.co';
-const FULL_SELECT = 'id,email,review_type,tender_id,tender_title,amount,paid_at,created_at,delivery_status,assigned_to,assigned_at,delivered_at,delivered_by';
-const BASE_SELECT = 'id,email,review_type,tender_id,tender_title,amount,paid_at,created_at';
+const FULL_SELECT = 'id,email,review_type,tender_id,tender_title,amount,paid_at,created_at,stripe_payment_intent,delivery_status,assigned_to,assigned_at,delivered_at,delivered_by';
+const BASE_SELECT = 'id,email,review_type,tender_id,tender_title,amount,paid_at,created_at,stripe_payment_intent';
 
 exports.handler = async (event) => {
   const cors = {
