@@ -3,11 +3,20 @@
 
 var _ordAll = [];
 var _ordReviews = {};        // key "email|tender_id" -> latest review_charges row
+var _ordReviewsByRef = {};   // key order ref (CANA-xxxx) -> latest review_charges row
 var _ordReviewsOnly = false; // "Reviews only" filter
 
 function ordEsc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 
 function ordReviewKey(email, tenderId) { return String(email || '').toLowerCase() + '|' + String(tenderId || ''); }
+
+// Find the review for an order. Match on the order REFERENCE first (web reviews
+// store the order ref in stripe_payment_intent, so this is the reliable join and
+// matches what the team reads off the email), then fall back to email + tender.
+function ordReviewFor(o) {
+  var byRef = o && o.ref ? _ordReviewsByRef[String(o.ref).toUpperCase()] : null;
+  return byRef || _ordReviews[ordReviewKey(o.client_email, o.tender_id)];
+}
 
 // The review chip shown next to an order's status, when a paid review was
 // requested for that bid. No price is shown to members anywhere in the app; this
@@ -26,21 +35,27 @@ function ordReviewChip(rv) {
   return chip;
 }
 
+// Keep the most recent review per key; a paid one always wins over an older
+// failed/pending so a settled bid does not show as outstanding.
+function ordKeepReview(map, key, r) {
+  var prev = map[key];
+  if (!prev) { map[key] = r; return; }
+  if (r.status === 'paid' && prev.status !== 'paid') { map[key] = r; return; }
+  if (prev.status === 'paid') return;
+  if (new Date(r.created_at) > new Date(prev.created_at)) map[key] = r;
+}
+
 async function ordLoadReviews() {
   _ordReviews = {};
+  _ordReviewsByRef = {};
   try {
     var res = await fetch('/.netlify/functions/admin-review-charges', { headers: adminHeaders() });
     if (!res.ok) return;
     var d = await res.json();
     (d && d.charges || []).forEach(function (r) {
-      var key = ordReviewKey(r.email, r.tender_id);
-      var prev = _ordReviews[key];
-      // Keep the most recent review per order; a paid one always wins over an
-      // older failed/pending so a settled bid does not show as outstanding.
-      if (!prev) { _ordReviews[key] = r; return; }
-      if (r.status === 'paid' && prev.status !== 'paid') { _ordReviews[key] = r; return; }
-      if (prev.status === 'paid') return;
-      if (new Date(r.created_at) > new Date(prev.created_at)) _ordReviews[key] = r;
+      ordKeepReview(_ordReviews, ordReviewKey(r.email, r.tender_id), r);
+      var ref = String(r.stripe_payment_intent || '');
+      if (/^CANA-/i.test(ref)) ordKeepReview(_ordReviewsByRef, ref.toUpperCase(), r);
     });
   } catch (e) { /* reviews are a nice-to-have; orders still render without them */ }
 }
@@ -194,13 +209,13 @@ function renderOrders() {
     return (o.ref + ' ' + o.client_name + ' ' + o.client_email + ' ' + o.tender_title + ' ' + o.org).toLowerCase().indexOf(q) !== -1;
   });
   if (_ordReviewsOnly) {
-    rows = rows.filter(function (o) { return !!_ordReviews[ordReviewKey(o.client_email, o.tender_id)]; });
+    rows = rows.filter(function (o) { return !!ordReviewFor(o); });
   }
   if (!rows.length) { list.innerHTML = ''; if (empty) empty.style.display = 'block'; return; }
   if (empty) empty.style.display = 'none';
 
   list.innerHTML = rows.map(function (o) {
-    var rv = _ordReviews[ordReviewKey(o.client_email, o.tender_id)];
+    var rv = ordReviewFor(o);
     return '<div style="background:#fff;border-radius:10px;box-shadow:var(--card-shadow);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;">' +
       '<div style="min-width:0;">' +
         '<div style="font-size:0.9rem;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ordEsc(o.tender_title) + '</div>' +

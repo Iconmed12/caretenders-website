@@ -140,7 +140,7 @@ async function run(){
     setCard('<div class="badge">👤</div><h1>Wrong account</h1>'+
       '<p class="sub">This invitation is for <span class="ent">'+esc(info.email)+'</span>, but you are signed in as <span class="ent">'+esc(em)+'</span>. Sign out and continue with the invited email.</p>'+
       '<button class="btn" id="j-signout">Sign out and continue</button>');
-    document.getElementById('j-signout').addEventListener('click',async function(){ await sb.auth.signOut(); location.reload(); });
+    document.getElementById('j-signout').addEventListener('click',async function(){ try { await sb.auth.signOut({ scope: 'local' }); } catch (e) {} location.reload(); });
     return;
   }
 

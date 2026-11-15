@@ -20,7 +20,7 @@ exports.handler = async (event) => {
 
   try {
     const SB_KEY = process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_ANON_KEY;
-    const res = await fetch(SB_URL + '/rest/v1/review_charges?select=id,email,review_type,tender_id,tender_title,amount,status,created_at,paid_at,fail_reason&order=created_at.desc&limit=500', {
+    const res = await fetch(SB_URL + '/rest/v1/review_charges?select=id,email,review_type,tender_id,tender_title,amount,status,created_at,paid_at,fail_reason,stripe_payment_intent&order=created_at.desc&limit=500', {
       headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY }
     });
     let charges = await res.json();

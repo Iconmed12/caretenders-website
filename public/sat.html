@@ -115,7 +115,7 @@
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlncGpmcG5jZnVhd2lrb3l6ZmNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTE5NDEsImV4cCI6MjA5NjE2Nzk0MX0.7s3EEk5pJzwJm8jrY4c6XNN2hga2LB1AEWb_vsxNakA';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  async function handleSignOut() { await sb.auth.signOut(); window.location.href = '/'; }
+  async function handleSignOut() { try { await sb.auth.signOut({ scope: 'local' }); } catch (e) {} window.location.href = '/'; }
 
   (async function init() {
     var { data: { session } } = await sb.auth.getSession();

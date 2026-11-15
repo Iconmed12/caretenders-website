@@ -406,7 +406,7 @@
   });
 
   async function handleSignOut() {
-    await _sb.auth.signOut();
+    try { await _sb.auth.signOut({ scope: 'local' }); } catch (e) {}
     window.location.reload();
   }
 

@@ -203,10 +203,16 @@ async function initAdminAuth() {
 }
 document.addEventListener('DOMContentLoaded', initAdminAuth);
 
-async function doLogout() {
-  try { var sb = adminSb(); if (sb) await sb.auth.signOut(); } catch (e) {}
+function doLogout() {
+  // Show the login screen immediately so logout feels instant. The token revoke
+  // is a network call: fire it in the background and do NOT await it (awaiting it
+  // was making logout hang for ~10 seconds on a slow connection).
   window._adminToken = null;
   showAdminLogin();
+  try {
+    var sb = adminSb();
+    if (sb) { var p = sb.auth.signOut(); if (p && p.catch) p.catch(function () {}); }
+  } catch (e) {}
 }
 
 const CARE_CATS = ['care','domiciliary care','domiciliary','residential','nursing','supported living','supported','mental health','mental','hospital discharge','discharge'];

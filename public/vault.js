@@ -466,7 +466,7 @@
     }
   }
 
-  async function handleSignOut() { await sb.auth.signOut(); window.location.href = '/'; }
+  async function handleSignOut() { try { await sb.auth.signOut({ scope: 'local' }); } catch (e) {} window.location.href = '/'; }
 
   // ── INIT ──
   async function init() {
