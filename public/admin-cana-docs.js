@@ -346,9 +346,17 @@ async function loadTenders(){
   // ran before login finished), skip quietly; showAdminApp() calls this again
   // once the token is set.
   if (!window._adminToken) return;
+  // Writers only use the delivery desk and are not allowed to read the tenders
+  // list, so skip this for them (avoids a bogus "Could not load tenders" error).
+  if (window._adminRole === 'writer') return;
   try{
     const res=await fetch(API+'/get-tenders?scope=all',{ headers: (typeof adminHeaders==='function'?adminHeaders():{}) });
-    if(!res.ok) throw new Error('HTTP '+res.status);
+    if(!res.ok){
+      // 401/403 just means this role (e.g. a writer, before the role is known)
+      // is not allowed to load tenders. That is expected, so stay quiet.
+      if(res.status===401||res.status===403) return;
+      throw new Error('HTTP '+res.status);
+    }
     const data=await res.json();
     allTenders=Array.isArray(data)?data:[];
     // Sync nextId to avoid overwriting existing tenders
