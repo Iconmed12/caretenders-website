@@ -168,6 +168,48 @@ function tiSetFilter(filter) {
   tiRender();
 }
 
+// ── Claim / lock helpers ──
+// A claim stops a second staff member working the same pending tender. It auto
+// expires after 15 minutes so nothing ever gets stuck if someone forgets to
+// release it. Identity is the logged-in admin email (window._adminEmail).
+var TI_LOCK_TTL_MS = 15 * 60 * 1000;
+function tiEsc(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+function tiLockActive(t) { return !!(t.locked_by && t.locked_at && (Date.now() - new Date(t.locked_at).getTime()) < TI_LOCK_TTL_MS); }
+function tiLockedByMe(t) { return tiLockActive(t) && String(t.locked_by).toLowerCase() === String(window._adminEmail || '').toLowerCase(); }
+function tiLockName(email) { var n = String(email || '').split('@')[0]; return n ? n.charAt(0).toUpperCase() + n.slice(1) : 'A colleague'; }
+function tiAgo(ts) { var m = Math.max(0, Math.round((Date.now() - new Date(ts).getTime()) / 60000)); return m < 1 ? 'just now' : m === 1 ? '1 min ago' : m + ' min ago'; }
+
+async function tiLock(id, action) {
+  try {
+    var res = await fetch('/.netlify/functions/admin-tender-lock', {
+      method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ id: id, action: action })
+    });
+    var d = {}; try { d = await res.json(); } catch (e) {}
+    if (res.status === 409) {
+      showToast(tiLockName(d.locked_by) + ' is already on this one', 'error');
+    } else if (!res.ok) {
+      throw new Error(d.error || ('failed (' + res.status + ')'));
+    } else if (action === 'claim') {
+      showToast('Yours now, nobody else can take it', 'success');
+    } else if (action === 'takeover') {
+      showToast('You have taken this one over', 'success');
+    }
+    await loadImportedTenders();
+  } catch (e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// Best-effort: drop my claim once the tender is approved/rejected (it leaves the
+// pending list anyway, this just keeps the row tidy). Never blocks the action.
+function tiReleaseQuietly(id) {
+  try {
+    fetch('/.netlify/functions/admin-tender-lock', {
+      method: 'POST', headers: adminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ id: id, action: 'release' })
+    }).catch(function () {});
+  } catch (e) {}
+}
+
 function tiRender() {
   var search = (document.getElementById('ti-search') ? document.getElementById('ti-search').value : '').toLowerCase();
   var cat    = '';
@@ -204,17 +246,42 @@ function tiRender() {
   list.onclick = function(e) {
     var ab = e.target.closest('[data-approve]');
     var rb = e.target.closest('[data-reject]');
+    var cb = e.target.closest('[data-claim]');
+    var lb = e.target.closest('[data-release]');
+    var tb = e.target.closest('[data-takeover]');
     if (ab) tiApprove(ab.getAttribute('data-approve'));
-    if (rb) tiReject(rb.getAttribute('data-reject'));
+    else if (rb) tiReject(rb.getAttribute('data-reject'));
+    else if (cb) tiLock(cb.getAttribute('data-claim'), 'claim');
+    else if (lb) tiLock(lb.getAttribute('data-release'), 'release');
+    else if (tb) tiLock(tb.getAttribute('data-takeover'), 'takeover');
   };
   list.innerHTML = filtered.map(function(t) {
     var deadline    = t.deadline ? new Date(t.deadline).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : '-';
     var subKey      = tiSubcat(t);
     var subMeta     = TI_SUBCATS.filter(function(s){ return s.key === subKey; })[0] || { label:'Other', color:'#888780', icon:'ti-dots' };
+    // Lock state (pending tenders only): free, mine, or held by a colleague.
+    var isMine = tiLockedByMe(t);
+    var lockedByOther = t.status === 'pending_review' && tiLockActive(t) && !isMine;
+    var isOwnerMgr = window._adminRole === 'owner' || window._adminRole === 'manager';
+    var lockChip = '';
+    if (t.status === 'pending_review' && isMine) {
+      lockChip = '<span style="display:inline-flex;align-items:center;gap:4px;background:#E1F5EE;color:#0F6E56;font-size:0.7rem;font-weight:600;padding:2px 9px;border-radius:999px;"><i class="ti ti-lock" style="font-size:12px;"></i>You&rsquo;re on this</span>' +
+                 '<button data-release="' + t.id + '" style="background:none;border:none;color:var(--text-muted);font-size:0.72rem;cursor:pointer;padding:2px 4px;text-decoration:underline;">Release</button>';
+    } else if (lockedByOther) {
+      lockChip = '<span style="display:inline-flex;align-items:center;gap:4px;background:#F1EFE8;color:#444441;font-size:0.7rem;font-weight:600;padding:2px 9px;border-radius:999px;"><i class="ti ti-lock" style="font-size:12px;"></i>' + tiEsc(tiLockName(t.locked_by)) + ' is on this &middot; ' + tiAgo(t.locked_at) + '</span>';
+    }
+
     var actions;
     if (t.status === 'pending_review') {
-      actions = '<button data-approve="' + t.id + '" style="background:#166534;color:#fff;border:none;padding:6px 13px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;">Approve</button>' +
-                '<button data-reject="' + t.id + '" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:6px 13px;border-radius:7px;font-size:0.78rem;cursor:pointer;">Reject</button>';
+      if (isMine) {
+        actions = '<button data-approve="' + t.id + '" style="background:#166534;color:#fff;border:none;padding:6px 13px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;">Approve</button>' +
+                  '<button data-reject="' + t.id + '" style="background:#fff;color:#dc2626;border:1px solid #fca5a5;padding:6px 13px;border-radius:7px;font-size:0.78rem;cursor:pointer;">Reject</button>';
+      } else if (lockedByOther) {
+        actions = '<span style="color:var(--text-muted);font-size:0.74rem;font-style:italic;">Locked</span>' +
+                  (isOwnerMgr ? '<button data-takeover="' + t.id + '" style="background:none;border:1px solid var(--border);color:var(--text-muted);font-size:0.72rem;padding:5px 10px;border-radius:7px;cursor:pointer;">Take over</button>' : '');
+      } else {
+        actions = '<button data-claim="' + t.id + '" style="background:#0F6E56;color:#fff;border:none;padding:6px 14px;border-radius:7px;font-size:0.78rem;font-weight:600;cursor:pointer;"><i class="ti ti-hand-finger" style="font-size:13px;vertical-align:-2px;margin-right:2px;"></i>I&rsquo;ll do this one</button>';
+      }
     } else if (t.status === 'rejected') {
       actions = '<button data-approve="' + t.id + '" style="background:#e8f7ee;color:#166534;border:1px solid #9FE1CB;padding:6px 13px;border-radius:7px;font-size:0.78rem;cursor:pointer;">Re-approve</button>';
     } else {
@@ -225,7 +292,7 @@ function tiRender() {
                    : '<span style="background:#e8f7ee;color:#166534;font-size:0.7rem;font-weight:600;padding:3px 10px;border-radius:999px;">Live</span>';
     var link = t.source_url ? '<a href="' + t.source_url + '" target="_blank" style="background:#f3f4f6;color:#374151;font-size:0.7rem;font-weight:600;padding:2px 8px;border-radius:999px;text-decoration:none;">' + (t.source === 'find_a_tender' ? 'View on FAT ↗' : 'View on CF ↗') + '</a>' : '';
 
-    return '<div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:15px 17px;">' +
+    return '<div style="background:#fff;border:' + (isMine ? '2px solid #1D9E75' : '1px solid var(--border)') + ';border-radius:12px;padding:15px 17px;">' +
       '<div style="display:flex;align-items:flex-start;gap:12px;">' +
         '<div style="flex:1;min-width:0;">' +
           '<div style="font-weight:600;font-size:0.88rem;color:var(--navy);margin-bottom:3px;">' + (t.title||'') + '</div>' +
@@ -233,6 +300,7 @@ function tiRender() {
           '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">' +
             '<span style="display:inline-flex;align-items:center;gap:4px;background:#f4f6f9;color:' + subMeta.color + ';font-size:0.7rem;font-weight:600;padding:2px 9px;border-radius:999px;"><i class="ti ' + subMeta.icon + '" style="font-size:12px;"></i>' + subMeta.label + '</span>' +
             link +
+            lockChip +
           '</div>' +
         '</div>' +
         '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">' +
@@ -293,6 +361,7 @@ async function tiDoApprove(id) {
       var errTxt = await res.text();
       throw new Error('DB update failed (' + res.status + '): ' + errTxt.substring(0, 120));
     }
+    tiReleaseQuietly(id);
     tiAllTenders = tiAllTenders.map(function(t){ return t.id === id ? Object.assign({},t,{status:'needs_docs'}) : t; });
     tiUpdateStats(); tiRender();
     // Refresh the Cana panels so it appears in Needs Attention immediately
@@ -322,6 +391,7 @@ async function tiClearAllRejected() {
 async function tiReject(id) {
   try {
     var res = await adminPatchTender(id, { status: 'rejected', rejected_at: new Date().toISOString() });
+    tiReleaseQuietly(id);
     tiAllTenders = tiAllTenders.map(function(t){ return t.id === id ? Object.assign({},t,{status:'rejected'}) : t; });
     tiUpdateStats(); tiRender();
     showToast('Tender rejected', 'success');
@@ -423,6 +493,14 @@ async function addTenderByLink() {
   }
 }
 
+
+// Gently refresh the import list while it is on screen, so a colleague's claim
+// (or a released one) shows up within a few seconds without a manual reload. The
+// offsetParent guard means it only runs when the Imports page is actually visible.
+setInterval(function() {
+  var list = document.getElementById('ti-list');
+  if (list && list.offsetParent !== null) loadImportedTenders();
+}, 20000);
 
 // Update sidebar badge on admin load (not just when page opened)
 document.addEventListener('DOMContentLoaded', function() {
