@@ -16,11 +16,24 @@
   if (!tenderId) {
     document.getElementById('tender-title').textContent = 'No tender selected';
   } else if (paid === 'true' && sessionId) {
-    // Coming back from Stripe - verify payment then show responses
+    // Coming back from Stripe - verify payment then show responses. Show the
+    // processing state INSTANTLY (before loadTender runs) so the start form never
+    // flashes on the way back from payment. Purely visual: the real verification
+    // still happens in verifyAndUnlock. This is what kills the "starting again"
+    // flash the moment you return from Stripe.
+    setStep(5); showState('loading');
+    (function(){ var h=document.querySelector('.loading-state h3'); if(h)h.textContent='Verifying your payment...';
+      var p=document.querySelector('.loading-state p'); if(p)p.textContent='Please wait while we confirm your payment.';
+      var s=document.querySelector('.loading-state .loading-spinner'); if(s)s.style.display=''; })();
     loadTender().then(() => verifyAndUnlock(sessionId));
   } else if (reviewPaid === 'paid') {
     // Member returning from an add-on payment. Nothing was generated before
-    // payment, so we generate now that Stripe has taken the money.
+    // payment, so we generate now that Stripe has taken the money. Show the
+    // processing state instantly (before loadTender) so no form flash on return.
+    setStep(5); showState('loading');
+    (function(){ var h=document.querySelector('.loading-state h3'); if(h)h.textContent='Payment received';
+      var p=document.querySelector('.loading-state p'); if(p)p.textContent='Cana is now writing your bid.';
+      var s=document.querySelector('.loading-state .loading-spinner'); if(s)s.style.display=''; })();
     loadTender().then(() => resumeMemberAfterAddon());
   } else {
     // If a session token is present, the visitor is likely a signed-in member.
