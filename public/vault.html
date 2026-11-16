@@ -15,37 +15,57 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Cana">
+  <style>
+    /* Left sidebar (shared look with the dashboard). Scoped with .side so it
+       cannot clash with the old top-nav rules still in vault.css. */
+    .shell{display:grid;grid-template-columns:236px 1fr;min-height:100vh}
+    .side{background:var(--navy);color:#fff;padding:20px 16px;display:flex;flex-direction:column;gap:6px;position:sticky;top:0;height:100vh}
+    .side .logo{display:flex;align-items:center;gap:9px;padding:4px 8px 16px;text-decoration:none}
+    .side .nav{display:flex;flex-direction:column;gap:2px}
+    .side .nav a{display:flex;align-items:center;gap:11px;padding:11px 12px;border-radius:10px;color:rgba(255,255,255,.68);font-size:14px;font-weight:600;text-decoration:none}
+    .side .nav a.on{background:rgba(255,255,255,.08);color:#fff}
+    .side .nav a:hover{color:#fff}
+    .side-foot{margin-top:auto;display:flex;flex-direction:column;gap:10px}
+    .userchip{display:flex;align-items:center;gap:10px;padding:6px 4px}
+    .side .nav-avatar{width:34px;height:34px;background:var(--teal);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:800;color:var(--navy);flex-shrink:0}
+    .userchip .un{font-size:13px;font-weight:700;color:#fff;line-height:1.2;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .side .nav-signout{font-size:12px;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;font-family:inherit;text-align:left;padding:2px 4px}
+    .side .nav-signout:hover{color:#fff}
+    .main{min-width:0}
+    @media(max-width:820px){.shell{grid-template-columns:1fr}.side{position:static;height:auto;flex-direction:column;gap:8px;padding:14px 16px}}
+  </style>
 </head>
 <body>
 
 <div id="loading-screen"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
 
-<nav>
-  <a href="/" class="nav-logo">
-    <span style="display:inline-flex;align-items:center;gap:9px;line-height:1"><svg viewBox="0 0 64 64" style="height:42px;width:42px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-family:'Inter',sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:-0.02em;color:#fff">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></span>
-    
-  </a>
-  <ul class="nav-links">
-    <li><a href="/dashboard.html">Dashboard</a></li>
-    <li><a href="/tenders.html">Opportunities</a></li>
-    <li><a href="/alerts.html">Tender alerts</a></li>
-    <li><a href="/sat.html">S.A.T</a></li>
-    <li><a href="/profile.html">Company profile</a></li>
-    <li><a href="/vault.html" class="active">Documents</a></li>
-    <li><a href="/invoices.html">Invoices</a></li>
-    <li><a href="/team.html">Team</a></li>
-    <li><a href="/plans.html">Pricing</a></li>
-  </ul>
-  <div class="nav-right">
-    <div class="nav-user">
-      <div class="nav-avatar" id="nav-avatar">?</div>
-      <span id="nav-name"></span>
+<div class="shell">
+  <aside class="side">
+    <a href="/" class="logo"><svg viewBox="0 0 64 64" style="height:40px;width:40px;flex:none" aria-hidden="true"><path d="M46 17 A22 22 0 1 0 46 47" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/><path d="M24 33 l6 6 L44 22" fill="none" stroke="#00C9E0" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/></svg><span style="font-family:'Inter',sans-serif;font-weight:700;font-size:1.5rem;letter-spacing:-0.02em;color:#fff">Cana<span style="color:#00C9E0;margin-left:0.3em">Bids</span></span></a>
+    <div class="nav">
+      <a href="/dashboard.html">Dashboard</a>
+      <a href="/tenders.html">Opportunities</a>
+      <a href="/alerts.html">Tender alerts</a>
+      <a href="/sat.html">S.A.T</a>
+      <a href="/profile.html">Company profile</a>
+      <a href="/vault.html" class="on">Documents</a>
+      <a href="/invoices.html">Invoices</a>
+      <a href="/team.html">Team</a>
+      <a href="/plans.html">Pricing</a>
     </div>
-    <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
-  </div>
-</nav>
+    <div class="side-foot">
+      <div class="userchip">
+        <div class="nav-avatar" id="nav-avatar">?</div>
+        <div style="min-width:0">
+          <div class="un" id="nav-name"></div>
+          <button class="nav-signout" onclick="handleSignOut()">Sign out</button>
+        </div>
+      </div>
+    </div>
+  </aside>
 
+  <main class="main">
 <div class="page" id="main-page" style="display:none;">
 
   <div class="page-header">
@@ -102,6 +122,8 @@
     </div>
   </div>
 
+</div>
+  </main>
 </div>
 
 <!-- UPLOAD MODAL -->
@@ -225,6 +247,6 @@
       navigator.serviceWorker.register('/sw.js').then(function(r){ console.log('SW registered'); }).catch(function(){});
     }
   </script>
-<script src="/mobile-nav.js" defer></script>
+<script src="/dash-nav.js" defer></script>
 </body>
 </html>
