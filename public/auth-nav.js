@@ -101,7 +101,8 @@
     e.preventDefault();
     try { localStorage.removeItem('cana_nav'); } catch (e2) {}
     if (window._canaSb) {
-      window._canaSb.auth.signOut().then(function () { location.href = '/'; }).catch(function () { location.href = '/'; });
+      // Local scope clears the session with no network wait, so sign out is instant.
+      window._canaSb.auth.signOut({ scope: 'local' }).then(function () { location.href = '/'; }).catch(function () { location.href = '/'; });
     } else {
       location.href = '/';
     }

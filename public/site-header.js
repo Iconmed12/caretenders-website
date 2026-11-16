@@ -66,7 +66,9 @@
     if (!link) return;
     e.preventDefault();
     try { localStorage.removeItem('cana_nav'); } catch (e2) {}
-    if (window._canaSb) { window._canaSb.auth.signOut().then(function () { location.href = '/'; }).catch(function () { location.href = '/'; }); }
+    // Local scope clears the session without a network round-trip, so sign out is
+    // instant instead of waiting on Supabase before redirecting.
+    if (window._canaSb) { window._canaSb.auth.signOut({ scope: 'local' }).then(function () { location.href = '/'; }).catch(function () { location.href = '/'; }); }
     else { location.href = '/'; }
   });
 
