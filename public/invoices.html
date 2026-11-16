@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Invoices | Cana Bids</title>
+<title>Accounts | Cana Bids</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -50,6 +50,28 @@
   .fail{background:rgba(214,69,69,.12);color:var(--red)}
   .empty{padding:2rem 1.4rem;text-align:center;color:var(--muted);font-size:.9rem}
   .note{font-size:.8rem;color:var(--muted);margin-top:1.2rem;line-height:1.6}
+  /* Plan banner + reviews */
+  .plan-banner{background:var(--navy);border-radius:16px;padding:1.3rem 1.5rem;margin-top:1.6rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .plan-left{display:flex;align-items:center;gap:14px}
+  .plan-coin{width:46px;height:46px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.2)}
+  .plan-name{color:#fff;font-size:1.05rem;font-weight:800}
+  .plan-sub{color:#9fb4c2;font-size:.82rem;margin-top:2px}
+  .plan-upgrade{background:var(--teal);color:#04303a;font-weight:700;font-size:.88rem;padding:11px 20px;border-radius:10px;text-decoration:none;white-space:nowrap}
+  .sec-label{font-size:.76rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:1.6rem 0 .8rem}
+  .rev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .rev-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.1rem 1.3rem}
+  .rev-top{display:flex;align-items:center;justify-content:space-between}
+  .rev-title{font-size:.9rem;font-weight:700}
+  .rev-badge{background:rgba(0,201,224,.12);color:var(--teal-dk);font-size:.68rem;font-weight:700;padding:3px 9px;border-radius:999px}
+  .rev-badge.out{background:rgba(183,121,31,.14);color:var(--amber)}
+  .rev-num{display:flex;align-items:baseline;gap:7px;margin-top:10px}
+  .rev-num b{font-size:2.1rem;font-weight:800;color:var(--teal-dk);line-height:1}
+  .rev-num.out b{color:var(--amber)}
+  .rev-num span{font-size:.9rem;color:var(--muted)}
+  .rev-track{height:7px;background:#eef2f5;border-radius:7px;margin-top:11px;overflow:hidden}
+  .rev-fill{height:100%;background:var(--teal);border-radius:7px}
+  .rev-fill.out{background:var(--amber)}
+  .rev-meta{font-size:.76rem;color:var(--muted);margin-top:8px}
 </style>
 <meta name="theme-color" content="#0B1929">
 </head>
@@ -65,7 +87,7 @@
       <a href="/sat.html">S.A.T</a>
       <a href="/profile.html">Company profile</a>
       <a href="/vault.html">Documents</a>
-      <a href="/invoices.html" class="on">Invoices</a>
+      <a href="/invoices.html" class="on">Accounts</a>
       <a href="/team.html">Team</a>
       <a href="/plans.html">Pricing</a>
     </nav>
@@ -82,8 +104,25 @@
 
   <main class="main">
     <div class="page">
-  <h1>Invoices &amp; account</h1>
-  <p class="lead">Review charges on your account. Anything outstanding is charged automatically to the card on file.</p>
+  <h1>Accounts</h1>
+  <p class="lead">Your plan, your included reviews, and any charges on your account.</p>
+
+  <div class="plan-banner" id="plan-banner" style="display:none">
+    <div class="plan-left">
+      <span class="plan-coin" id="plan-coin">M</span>
+      <div>
+        <div class="plan-name" id="plan-name">Membership</div>
+        <div class="plan-sub" id="plan-sub"></div>
+      </div>
+    </div>
+    <a class="plan-upgrade" href="/plans.html">Upgrade plan</a>
+  </div>
+
+  <div id="reviews-wrap" style="display:none">
+    <div class="sec-label">Your reviews this month</div>
+    <div class="rev-grid" id="rev-grid"></div>
+    <p class="note" id="rev-note"></p>
+  </div>
 
   <div class="bal">
     <div class="t">OUTSTANDING BALANCE</div>
@@ -112,6 +151,46 @@
   function fmtDate(d){ try{ return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}); }catch(e){ return ''; } }
   function pill(st){ if(st==='paid')return '<span class="pill paid">Paid</span>'; if(st==='failed')return '<span class="pill fail">Payment issue</span>'; return '<span class="pill pend">Pending</span>'; }
   function label(t){ return t==='full'?'Full Tender Review':'Response Review'; }
+  function cap(s){ s=String(s||''); return s?s.charAt(0).toUpperCase()+s.slice(1):''; }
+  function planStyle(plan){ if(plan==='gold')return {grad:'radial-gradient(circle at 34% 28%,#f8ebb4,#d8b038)',fg:'#5f4c0e'}; return {grad:'radial-gradient(circle at 34% 28%,#d6f3f8,#00c9e0)',fg:'#04303a'}; }
+  function fmtRenew(d){ try{ return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'}); }catch(e){ return ''; } }
+  function nextReset(){ var n=new Date(); return new Date(n.getFullYear(),n.getMonth()+1,1).toLocaleDateString('en-GB',{day:'numeric',month:'short'}); }
+
+  function renderPlan(mem){
+    if(!(mem&&mem.member&&mem.plan)) return;
+    var st=planStyle(mem.plan), coin=document.getElementById('plan-coin');
+    coin.style.background=st.grad; coin.style.color=st.fg; coin.textContent=mem.plan.charAt(0).toUpperCase();
+    document.getElementById('plan-name').textContent=cap(mem.plan)+' membership';
+    document.getElementById('plan-sub').textContent=mem.current_period_end?('Renews '+fmtRenew(mem.current_period_end)):'';
+    document.getElementById('plan-banner').style.display='flex';
+  }
+
+  function revCard(title, box){
+    var out=box.remaining===0;
+    var pct=box.limit?Math.round((box.remaining/box.limit)*100):0;
+    return '<div class="rev-card">'+
+      '<div class="rev-top"><div class="rev-title">'+title+'</div><span class="rev-badge'+(out?' out':'')+'">'+(out?'None left':'Included')+'</span></div>'+
+      '<div class="rev-num'+(out?' out':'')+'"><b>'+box.remaining+'</b><span>of '+box.limit+' left</span></div>'+
+      '<div class="rev-track"><div class="rev-fill'+(out?' out':'')+'" style="width:'+pct+'%"></div></div>'+
+      '<div class="rev-meta">'+box.used+' used &middot; resets '+nextReset()+'</div></div>';
+  }
+
+  function renderReviews(al){
+    if(!al) return;
+    var cards=[];
+    if(al.response&&al.response.limit>0) cards.push(revCard('Response reviews', al.response));
+    if(al.full&&al.full.limit>0) cards.push(revCard('Full tender reviews', al.full));
+    var note=document.getElementById('rev-note');
+    if(cards.length){
+      document.getElementById('rev-grid').innerHTML=cards.join('');
+      note.innerHTML='Included with your <strong>'+cap(al.plan||'')+'</strong> plan'+(al.shared?' and shared across your team':'')+'. Need more? Extra reviews are charged to your card and appear below.';
+    } else {
+      document.getElementById('rev-grid').innerHTML='';
+      note.innerHTML='Your plan does not include reviews. Extra reviews are charged to your card and appear below. <a href="/plans.html" style="color:var(--teal-dk);font-weight:700;text-decoration:none;">See plans</a>';
+    }
+    document.getElementById('reviews-wrap').style.display='block';
+  }
+
   window.signOut=function(){ try{ sb.auth.signOut({scope:'local'}); }catch(e){} location.href='/login.html'; };
 
   (async function(){
@@ -119,10 +198,16 @@
     var session=res.data.session;
     if(!session){ location.href='/login.html?redirect=/invoices.html'; return; }
     var em=(session.user&&session.user.email)||'';
+    var token=session.access_token;
     var nn=document.getElementById('nav-name'); if(nn) nn.textContent=em||'Member';
     var av=document.getElementById('nav-avatar'); if(av) av.textContent=(em.charAt(0)||'?').toUpperCase();
+
+    // Plan + reviews (independent of charges, so a failure in one does not hide the others).
+    fetch('/.netlify/functions/check-membership?email='+encodeURIComponent(em)).then(function(r){return r.json();}).then(renderPlan).catch(function(){});
+    fetch('/.netlify/functions/review-allowance',{ headers:{ Authorization:'Bearer '+token } }).then(function(r){return r.ok?r.json():null;}).then(renderReviews).catch(function(){});
+
     try{
-      var r=await fetch('/.netlify/functions/account-charges',{ headers:{ Authorization:'Bearer '+session.access_token } });
+      var r=await fetch('/.netlify/functions/account-charges',{ headers:{ Authorization:'Bearer '+token } });
       var data=await r.json();
       document.getElementById('bal').innerHTML=money(data.outstanding);
       var rows=(data.charges||[]);
